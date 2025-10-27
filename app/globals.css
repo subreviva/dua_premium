@@ -598,3 +598,12 @@
   filter: blur(80px);
   animation: animate-aurora-2 25s ease-in-out infinite alternate-reverse;
 }
+
+/* Smooth transitions between sections */
+section {
+  position: relative;
+}
+
+html {
+  scroll-behavior: smooth;
+}

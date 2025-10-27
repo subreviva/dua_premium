@@ -8,16 +8,19 @@ import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, User
 import { useRouter } from "next/navigation"
 import { useRef } from "react"
 import { FeatureSteps } from "@/components/ui/feature-steps"
+import { Gallery6 } from "@/components/ui/gallery6"
+import { Bento3Section } from "@/components/ui/bento-monochrome-1"
 
 export default function HomePage() {
   const router = useRouter()
-  const heroRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
+    target: containerRef,
+    offset: ["start start", "end end"],
   })
 
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 1.05])
+  const heroY = useTransform(scrollYProgress, [0, 0.15], [0, -50])
 
   const dockItems = [
     {
@@ -58,347 +61,121 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div ref={containerRef} className="min-h-screen bg-[#0a0a0a]">
       <Navbar />
 
-      <motion.section
-        ref={heroRef}
-        style={{ opacity: heroOpacity }}
-        className="relative min-h-screen w-full overflow-hidden pt-16 flex items-center justify-center"
-      >
-        <div className="absolute inset-0">
-          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-40">
+      {/* HERO SECTION */}
+      <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
+        <motion.div 
+          style={{ scale: heroScale, y: heroY }}
+          className="absolute inset-0 z-0"
+        >
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
             <source
               src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
               type="video/mp4"
             />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/60 via-[#0a0a0a]/40 to-[#0a0a0a]" />
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+        </motion.div>
 
         <div className="relative z-10 container mx-auto px-6 py-32">
           <div className="flex flex-col gap-16 items-center justify-center max-w-7xl w-full mx-auto text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-              className="text-[10rem] sm:text-[14rem] md:text-[18rem] lg:text-[24rem] font-bold leading-[0.8] tracking-[-0.06em] text-white/95"
-              style={{ fontFamily: "var(--font-sans)" }}
+            <h1
+              className="text-[10rem] sm:text-[14rem] md:text-[18rem] lg:text-[24rem] font-light leading-[0.8] tracking-[-0.06em] text-white"
+              style={{ fontFamily: "var(--font-sans)", fontWeight: 200 }}
             >
               DUA
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
-              className="text-xl sm:text-2xl md:text-3xl text-white/70 font-light max-w-3xl leading-relaxed tracking-wide"
-            >
-              Onde a próxima onda de criatividade lusófona acontece
-            </motion.p>
+            <p className="text-xl sm:text-2xl md:text-3xl text-white/80 font-light max-w-3xl leading-relaxed tracking-wide">
+              Onde a próxima onda de criatividade<br className="hidden sm:block" /> lusófona acontece
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 1 }}
+            <Button
+              size="lg"
+              className="rounded-full px-12 py-7 bg-white hover:bg-white/95 text-black font-medium text-lg transition-all duration-500 hover:scale-105 shadow-2xl"
+              onClick={() => router.push("/registo")}
             >
-              <Button
-                size="lg"
-                className="rounded-full px-10 py-6 bg-white hover:bg-white/90 text-black font-medium text-base shadow-xl transition-all duration-300 hover:scale-[1.02] border border-white/20"
-                onClick={() => router.push("/registo")}
-              >
-                Começar com DUA
-              </Button>
-            </motion.div>
+              Começar com DUA
+            </Button>
           </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.4 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2"
-        >
-          <div className="w-6 h-10 rounded-full border border-white/30 flex items-start justify-center p-1.5">
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-              className="w-1.5 h-3 rounded-full bg-white/50"
+        {/* Gradient de transição inferior */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-80 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.5) 40%, rgba(10,10,10,0.9) 80%, rgba(10,10,10,1) 100%)'
+          }}
+        />
+      </section>
+
+      {/* SEÇÃO 2: STUDIOS CAROUSEL */}
+      <section className="relative py-40 px-6 bg-[#0a0a0a] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
+            <source
+              src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+              type="video/mp4"
             />
-          </div>
-        </motion.div>
-      </motion.section>
-
-      <section className="relative py-24 px-6 bg-[#0a0a0a] border-t border-white/5 overflow-hidden">
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-10 blur-sm"
-          >
-            <source src="https://6yep4uifnoow71ty.public.blob.vercel-storage.comhttps://hebbkx1anhila5yf.public.blob.vercel-storage.com/jnjkn-32feaq56yGzOHRYywJLYjc5fy4gwy4.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-3xl" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/88 backdrop-blur-[28px]" />
         </div>
-        <div className="max-w-6xl mx-auto relative z-10">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-3xl sm:text-4xl md:text-5xl text-white/90 text-center font-light leading-relaxed tracking-wide"
-          >
-            Cinco estúdios especializados. Uma plataforma integrada.{" "}
-            <span className="text-white/60">Infinitas possibilidades para criadores lusófonos.</span>
-          </motion.p>
+        
+        {/* Gradient de transição superior */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(10,10,10,0.8) 40%, rgba(10,10,10,0) 100%)'
+          }}
+        />
+        
+        <div className="relative z-10">
+          <Gallery6 heading="Estúdios Criativos" />
         </div>
+
+        {/* Gradient de transição inferior */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 60%, rgba(10,10,10,1) 100%)'
+          }}
+        />
       </section>
 
-      <section className="relative py-32 px-6 bg-[#0a0a0a] overflow-hidden">
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-10 blur-sm"
-          >
-            <source src="https://6yep4uifnoow71ty.public.blob.vercel-storage.comhttps://hebbkx1anhila5yf.public.blob.vercel-storage.com/jnjkn-32feaq56yGzOHRYywJLYjc5fy4gwy4.mp4" type="video/mp4" />
+      {/* SEÇÃO 3: IDENTIDADE */}
+      <section className="relative py-40 px-6 bg-[#0a0a0a] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
+            <source
+              src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+              type="video/mp4"
+            />
           </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-3xl" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/88 backdrop-blur-[28px]" />
         </div>
-        <div className="max-w-7xl mx-auto space-y-6 relative z-10">
-          {/* DUA Chat */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="group relative bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-sm rounded-2xl p-10 md:p-12 border border-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex flex-col lg:flex-row items-start justify-between gap-8">
-              <div className="space-y-5 flex-1">
-                <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <MessageSquare className="w-7 h-7 text-white/80" />
-                </div>
-                <div className="space-y-3">
-                  <h3 className="text-4xl md:text-5xl font-semibold text-white/95 tracking-tight">DUA Chat</h3>
-                  <p className="text-lg text-white/50 font-light">O Centro de Comando Criativo</p>
-                </div>
-                <p className="text-base text-white/60 leading-relaxed max-w-2xl font-light">
-                  Assistente multimodal que processa texto, imagem, áudio e vídeo em tempo real. É o teu ponto de
-                  partida para qualquer projeto criativo.
-                </p>
-              </div>
-              <Button
-                size="lg"
-                className="rounded-full px-8 py-5 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
-                onClick={() => router.push("/chat")}
-              >
-                Experimentar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* DUA Cinema */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="group relative bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-sm rounded-2xl p-10 md:p-12 border border-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex flex-col lg:flex-row items-start justify-between gap-8">
-              <div className="space-y-5 flex-1">
-                <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <Video className="w-7 h-7 text-white/80" />
-                </div>
-                <div className="space-y-3">
-                  <h3 className="text-4xl md:text-5xl font-semibold text-white/95 tracking-tight">DUA Cinema</h3>
-                  <p className="text-lg text-white/50 font-light">Estúdio Audiovisual Inteligente</p>
-                </div>
-                <p className="text-base text-white/60 leading-relaxed max-w-2xl font-light">
-                  Criação e edição de vídeo com as últimas tecnologias. Produz vídeos cinematográficos e transforma
-                  ideias em visual de alta qualidade.
-                </p>
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  {["Geração de vídeo", "Edição profissional", "Análise técnica", "Produção cinematográfica"].map(
-                    (feature, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <div className="w-1 h-1 rounded-full bg-white/40" />
-                        <span className="text-white/50 text-sm font-light">{feature}</span>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-              <Button
-                size="lg"
-                className="rounded-full px-8 py-5 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
-                onClick={() => router.push("/videostudio")}
-              >
-                Experimentar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* DUA Design */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="group relative bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-sm rounded-2xl p-10 md:p-12 border border-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex flex-col lg:flex-row items-start justify-between gap-8">
-              <div className="space-y-5 flex-1">
-                <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <Palette className="w-7 h-7 text-white/80" />
-                </div>
-                <div className="space-y-3">
-                  <h3 className="text-4xl md:text-5xl font-semibold text-white/95 tracking-tight">DUA Design</h3>
-                  <p className="text-lg text-white/50 font-light">Criação Visual Sem Limites</p>
-                </div>
-                <p className="text-base text-white/60 leading-relaxed max-w-2xl font-light">
-                  Geração, edição e criação de identidade visual completa. Da conceção ao resultado final.
-                </p>
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  {["Logotipos", "Capas de álbum", "Geração de imagens", "Adaptação de formatos"].map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-white/40" />
-                      <span className="text-white/50 text-sm font-light">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Button
-                size="lg"
-                className="rounded-full px-8 py-5 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
-                onClick={() => router.push("/designstudio")}
-              >
-                Experimentar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* DUA Music */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="group relative bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-sm rounded-2xl p-10 md:p-12 border border-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex flex-col lg:flex-row items-start justify-between gap-8">
-              <div className="space-y-5 flex-1">
-                <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <Music className="w-7 h-7 text-white/80" />
-                </div>
-                <div className="space-y-3">
-                  <h3 className="text-4xl md:text-5xl font-semibold text-white/95 tracking-tight">DUA Music</h3>
-                  <p className="text-lg text-white/50 font-light">O Teu Estúdio Musical na Nuvem</p>
-                </div>
-                <p className="text-base text-white/60 leading-relaxed max-w-2xl font-light">
-                  Mais de 27 ferramentas musicais profissionais num só lugar. Tudo o que precisas para criar, produzir e
-                  finalizar a tua música.
-                </p>
-                <div className="grid grid-cols-3 gap-3 pt-2">
-                  {["Criação", "Produção", "Vocal", "Edição", "Masterização", "Análise"].map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-white/40" />
-                      <span className="text-white/50 text-sm font-light">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Button
-                size="lg"
-                className="rounded-full px-8 py-5 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
-                onClick={() => router.push("/musicstudio")}
-              >
-                Experimentar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* DUA Imagem */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="group relative bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-sm rounded-2xl p-10 md:p-12 border border-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex flex-col lg:flex-row items-start justify-between gap-8">
-              <div className="space-y-5 flex-1">
-                <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <ImageIcon className="w-7 h-7 text-white/80" />
-                </div>
-                <div className="space-y-3">
-                  <h3 className="text-4xl md:text-5xl font-semibold text-white/95 tracking-tight">DUA Imagem</h3>
-                  <p className="text-lg text-white/50 font-light">Processamento Fotográfico Profissional</p>
-                </div>
-                <p className="text-base text-white/60 leading-relaxed max-w-2xl font-light">
-                  Análise, transformação e criação de conteúdo visual de alta qualidade. Ferramentas de edição avançada.
-                </p>
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  {["Geração fotorrealista", "Edição avançada", "Análise técnica", "Otimização"].map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-white/40" />
-                      <span className="text-white/50 text-sm font-light">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Button
-                size="lg"
-                className="rounded-full px-8 py-5 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
-                onClick={() => router.push("/imagestudio")}
-              >
-                Experimentar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="relative py-32 px-6 bg-[#0a0a0a] border-t border-white/5 overflow-hidden">
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-10 blur-sm"
-          >
-            <source src="https://6yep4uifnoow71ty.public.blob.vercel-storage.comhttps://hebbkx1anhila5yf.public.blob.vercel-storage.com/jnjkn-32feaq56yGzOHRYywJLYjc5fy4gwy4.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-3xl" />
-        </div>
+        
+        {/* Gradient de transição superior */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(10,10,10,0.8) 40%, rgba(10,10,10,0) 100%)'
+          }}
+        />
+        
         <div className="max-w-7xl mx-auto space-y-24 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center space-y-6"
+            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, amount: 0.2 }}
+            className="text-center space-y-8"
           >
-            <h2 className="text-6xl sm:text-7xl md:text-8xl font-semibold text-white/95 tracking-tight leading-[0.9]">
+            <h2 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-light text-white tracking-tight leading-[0.95]">
               A DUA Tem Identidade
             </h2>
-            <p className="text-xl sm:text-2xl text-white/50 max-w-3xl mx-auto font-light">
+            <p className="text-2xl sm:text-3xl text-white/50 max-w-3xl mx-auto font-light leading-relaxed">
               Não é só código. É uma presença.
             </p>
           </motion.div>
@@ -430,50 +207,184 @@ export default function HomePage() {
             className="bg-transparent"
           />
         </div>
+
+        {/* Gradient de transição inferior */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 70%, rgba(10,10,10,1) 100%)'
+          }}
+        />
       </section>
 
-      <section className="relative py-40 px-6 bg-[#0a0a0a] border-t border-white/5 overflow-hidden">
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-10 blur-sm"
-          >
-            <source src="https://6yep4uifnoow71ty.public.blob.vercel-storage.comhttps://hebbkx1anhila5yf.public.blob.vercel-storage.com/jnjkn-32feaq56yGzOHRYywJLYjc5fy4gwy4.mp4" type="video/mp4" />
+      {/* SEÇÃO 4: QUEM CRIOU A DUA */}
+      <section className="relative py-48 px-6 bg-[#0a0a0a] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
+            <source
+              src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+              type="video/mp4"
+            />
           </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-3xl" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/88 backdrop-blur-[28px]" />
         </div>
-        <div className="max-w-6xl mx-auto text-center space-y-12 relative z-10">
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
+        
+        {/* Gradient de transição superior */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(10,10,10,0.8) 40%, rgba(10,10,10,0) 100%)'
+          }}
+        />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-white/95 tracking-tight leading-[0.95] max-w-4xl mx-auto"
+            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, amount: 0.2 }}
+            className="space-y-12"
+          >
+            {/* Título Principal */}
+            <div className="text-center space-y-6">
+              <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white tracking-tight leading-[1.1]">
+                Quem Criou a DUA
+              </h2>
+              <p className="text-2xl sm:text-3xl md:text-4xl text-white/60 font-light max-w-4xl mx-auto leading-relaxed">
+                Construída por um criador que viveu todos os lados.
+              </p>
+            </div>
+
+            {/* Conteúdo Principal */}
+            <div className="space-y-8 max-w-5xl mx-auto pt-8">
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="text-xl sm:text-2xl md:text-3xl text-white/70 font-light leading-relaxed text-center"
+              >
+                A DUA nasceu das mãos de alguém que conhece tanto palcos de festivais quanto bairros periféricos. 
+                Alguém que viveu a exploração da indústria musical, a falta de acesso a ferramentas profissionais 
+                e a solidão de tentar construir algo do zero.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="pt-8 space-y-6"
+              >
+                <p className="text-xl sm:text-2xl text-white font-light leading-relaxed text-center">
+                  A DUA é prova de que é possível reescrever as regras quando o sistema não te deixa jogar. 
+                  Foi construída por quem precisava dela para sobreviver e decidiu partilhá-la com toda a 
+                  comunidade lusófona.
+                </p>
+                
+                <p className="text-lg sm:text-xl md:text-2xl text-white/50 font-light leading-relaxed text-center italic pt-4">
+                  Sem equipa inicial. Sem investimento externo.
+                  <span className="block mt-2">Apenas uma visão clara e uma teimosia inabalável.</span>
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Gradient de transição inferior */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 70%, rgba(10,10,10,1) 100%)'
+          }}
+        />
+      </section>
+
+      {/* SEÇÃO 5: O ECOSSISTEMA 2 LADOS */}
+      <section className="relative py-24 bg-[#0a0a0a] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
+            <source
+              src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+              type="video/mp4"
+            />
+          </video>
+          <div className="absolute inset-0 bg-[#0a0a0a]/92 backdrop-blur-[28px]" />
+        </div>
+
+        {/* Gradient de transição superior */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(10,10,10,0.8) 40%, rgba(10,10,10,0) 100%)'
+          }}
+        />
+
+        <div className="relative z-10">
+          <Bento3Section />
+        </div>
+
+        {/* Gradient de transição inferior */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 70%, rgba(10,10,10,1) 100%)'
+          }}
+        />
+      </section>
+
+      {/* SEÇÃO 6: CALL TO ACTION */}
+      <section className="relative py-48 px-6 bg-[#0a0a0a] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
+            <source
+              src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+              type="video/mp4"
+            />
+          </video>
+          <div className="absolute inset-0 bg-[#0a0a0a]/90 backdrop-blur-[30px]" />
+        </div>
+        
+        {/* Gradient de transição superior */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-64 pointer-events-none z-20"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(10,10,10,0.8) 40%, rgba(10,10,10,0) 100%)'
+          }}
+        />
+        
+        <div className="max-w-6xl mx-auto text-center space-y-16 relative z-10">
+          <motion.h2
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-light text-white tracking-tight leading-[0.95] max-w-5xl mx-auto"
           >
             A DUA não é só uma ferramenta
           </motion.h2>
+          
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-2xl sm:text-3xl md:text-4xl text-white/60 font-light max-w-3xl mx-auto leading-relaxed"
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-3xl sm:text-4xl text-white/50 font-light max-w-4xl mx-auto leading-relaxed"
           >
-            É a resposta de quem decidiu que já chega de esperar. Junta-te à revolução criativa lusófona.
+            É a resposta de quem decidiu que já chega de esperar.{" "}
+            <span className="block mt-4">Junta-te à revolução criativa lusófona.</span>
           </motion.p>
+          
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8"
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+            viewport={{ once: true, amount: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4"
           >
             <Button
               size="lg"
-              className="rounded-full px-12 py-7 bg-white hover:bg-white/90 text-black font-medium text-lg transition-all duration-300 hover:scale-[1.02]"
+              className="rounded-full px-14 py-8 bg-white hover:bg-white/95 text-black font-medium text-lg transition-all duration-500 hover:scale-105 shadow-2xl"
               onClick={() => router.push("/registo")}
             >
               Começar Agora
@@ -482,7 +393,7 @@ export default function HomePage() {
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full px-12 py-7 border border-white/20 text-white hover:bg-white/5 font-medium text-lg transition-all duration-300 hover:scale-[1.02] bg-transparent"
+              className="rounded-full px-14 py-8 border border-white/30 text-white hover:bg-white/10 font-medium text-lg transition-all duration-500 hover:scale-105 bg-transparent backdrop-blur-sm"
               onClick={() => router.push("/chat")}
             >
               Explorar o Ecossistema

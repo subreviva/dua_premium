@@ -148,12 +148,20 @@ export default function ChatPage() {
 
   if (isMobile) {
     return (
-      <div className="relative w-full h-screen flex flex-col overflow-hidden bg-black">
-        <div className="fixed inset-0 z-0 w-full h-full">
-          <AuroraWaves speed={0.5} glow={20} theme="dark" resolutionScale={0.8} />
+      <div className="relative w-full h-screen flex flex-col overflow-hidden bg-[#0a0a0a]">
+        {/* Video Background com parallax */}
+        <div className="fixed inset-0 z-0">
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
+            <source
+              src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+              type="video/mp4"
+            />
+          </video>
+          <div className="absolute inset-0 bg-[#0a0a0a]/92 backdrop-blur-[32px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
         </div>
 
-        <div className="fixed top-0 left-0 right-0 h-[45vh] bg-gradient-to-b from-black/95 via-black/70 to-transparent z-10 pointer-events-none" />
+        <div className="fixed top-0 left-0 right-0 h-[45vh] bg-gradient-to-b from-[#0a0a0a]/95 via-[#0a0a0a]/70 to-transparent z-10 pointer-events-none" />
 
         <PremiumNavbar
           className="relative z-50 pt-safe"
@@ -293,12 +301,20 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden">
-      <div className="fixed inset-0 z-0 overflow-hidden">
-        <AuroraWaves speed={0.5} glow={20} theme="dark" resolutionScale={0.8} />
+    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-[#0a0a0a]">
+      {/* Video Background ultra-premium */}
+      <div className="fixed inset-0 z-0">
+        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
+          <source
+            src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+            type="video/mp4"
+          />
+        </video>
+        <div className="absolute inset-0 bg-[#0a0a0a]/92 backdrop-blur-[32px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
       </div>
 
-      <div className="fixed top-0 left-0 right-0 h-[45vh] z-10 bg-gradient-to-b from-[#0a0a0a] via-black/85 to-transparent pointer-events-none" />
+      <div className="fixed top-0 left-0 right-0 h-[45vh] z-10 bg-gradient-to-b from-[#0a0a0a]/95 via-[#0a0a0a]/85 to-transparent pointer-events-none" />
 
       <PremiumNavbar className="relative z-50" credits={250} variant="transparent" />
 
