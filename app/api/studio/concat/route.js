@@ -1,16 +1,16 @@
 /**
- * POST /api/studio/separate-vocals
- * Separa faixas de áudio e música (stem tracks)
- * Usa /api/generate_stems da Suno API
+ * POST /api/studio/concat
+ * Concatena clips de áudio para gerar música completa
+ * Usa /api/concat da Suno API
  */
 export async function POST(req) {
   try {
     const body = await req.json()
-    const { audio_id } = body
+    const { clip_id } = body
 
-    if (!audio_id) {
+    if (!clip_id) {
       return Response.json(
-        { error: "audio_id é obrigatório" },
+        { error: "clip_id é obrigatório" },
         { status: 400 }
       )
     }
@@ -24,31 +24,31 @@ export async function POST(req) {
       )
     }
 
-    console.log("[Suno API - Generate Stems] Enviando pedido:", { audio_id })
+    console.log("[Suno API - Concat] Concatenando clip:", clip_id)
 
-    const response = await fetch(`${apiUrl}/api/generate_stems`, {
+    const response = await fetch(`${apiUrl}/api/concat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ audio_id }),
+      body: JSON.stringify({ clip_id }),
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error("[Suno API - Generate Stems] Erro:", response.status, errorText)
+      console.error("[Suno API - Concat] Erro:", response.status, errorText)
       return Response.json(
-        { error: errorText || "Erro ao separar stems" },
+        { error: errorText || "Erro ao concatenar clips" },
         { status: response.status }
       )
     }
 
     const data = await response.json()
-    console.log("[Suno API - Generate Stems] Resposta recebida:", data)
+    console.log("[Suno API - Concat] Resposta recebida:", data)
 
     return Response.json(data)
   } catch (error) {
-    console.error("[Suno API - Generate Stems] Erro:", error)
+    console.error("[Suno API - Concat] Erro:", error)
     return Response.json(
       { error: error.message || "Erro interno do servidor" },
       { status: 500 }

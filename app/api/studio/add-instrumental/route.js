@@ -13,10 +13,14 @@ export async function POST(req) {
         { error: "audioId é obrigatório" },
         { status: 400 }
       )
-    }
+    }const apiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || "https://suno-gold.vercel.app"
 
-    const apiKey = process.env.SUNOAPI_KEY
-    const baseUrl = process.env.SUNOAPI_BASE_URL || "https://api.sunoapi.org"
+    if (!apiUrl) {
+      return Response.json(
+        { error: "NEXT_PUBLIC_SUNO_API_URL não configurado" },
+        { status: 500 }
+      )
+    }
 
     console.log("[Suno API - Add Instrumental] Enviando pedido:", {
       audioId,
@@ -24,17 +28,15 @@ export async function POST(req) {
       prompt,
     })
 
-    const response = await fetch(`${baseUrl}/api/add_instrumental`, {
+    const response = await fetch(`${apiUrl}/api/add_instrumental`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         audio_id: audioId,
         style: style || "auto",
         prompt: prompt || "Create instrumental accompaniment",
-        model: "chirp-v3-5",
       }),
     })
 

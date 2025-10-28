@@ -13,10 +13,14 @@ export async function POST(req) {
         { error: "audioUrl é obrigatório" },
         { status: 400 }
       )
-    }
+    }const apiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || "https://suno-gold.vercel.app"
 
-    const apiKey = process.env.SUNOAPI_KEY
-    const baseUrl = process.env.SUNOAPI_BASE_URL || "https://api.sunoapi.org"
+    if (!apiUrl) {
+      return Response.json(
+        { error: "NEXT_PUBLIC_SUNO_API_URL não configurado" },
+        { status: 500 }
+      )
+    }
 
     console.log("[Suno API - Upload Extend] Enviando pedido:", {
       audioUrl,
@@ -25,11 +29,10 @@ export async function POST(req) {
       title,
     })
 
-    const response = await fetch(`${baseUrl}/api/custom_generate`, {
+    const response = await fetch(`${apiUrl}/api/custom_generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         prompt: prompt || "Continue this melody",
@@ -38,7 +41,6 @@ export async function POST(req) {
         make_instrumental,
         continue_at: 0,
         continue_clip_id: audioUrl,
-        model: "chirp-v3-5",
       }),
     })
 

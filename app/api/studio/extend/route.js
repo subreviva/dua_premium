@@ -1,60 +1,72 @@
 /**
  * POST /api/studio/extend
  * Prolonga músicas existentes
- * Custo: 12 créditos
+ * Usa /api/extend_audio da Suno API
  */
 export async function POST(req) {
   try {
     const body = await req.json()
-    const { audioId, continueAt, prompt } = body
+    const { 
+      audio_id, 
+      prompt = "", 
+      continue_at = "0", 
+      title = "",
+      tags = "",
+      negative_tags = "",
+      model = "chirp-v3-5"
+    } = body
 
-    if (!audioId) {
+    if (!audio_id) {
       return Response.json(
-        { error: "audioId é obrigatório" },
+        { error: "audio_id é obrigatório" },
         { status: 400 }
       )
     }
 
-    const apiKey = process.env.SUNOAPI_KEY
-    const baseUrl = process.env.SUNOAPI_BASE_URL || "https://api.sunoapi.org"
+    const apiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL
+
+    if (!apiUrl) {
+      return Response.json(
+        { error: "NEXT_PUBLIC_SUNO_API_URL não configurado" },
+        { status: 500 }
+      )
+    }
 
     console.log("[Suno API - Extend] Enviando pedido:", {
-      audioId,
-      continueAt,
+      audio_id,
+      continue_at,
       prompt,
     })
 
-    const response = await fetch(`${baseUrl}/api/extend`, {
+    const response = await fetch(`${apiUrl}/api/extend_audio`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        audio_id: audioId,
-        continue_at: continueAt || 0,
-        prompt: prompt || "",
-        model: "chirp-v3-5",
+        audio_id,
+        prompt,
+        continue_at: String(continue_at),
+        title,
+        tags,
+        negative_tags,
+        model,
       }),
     })
 
-    const data = await response.json()
-
-    console.log("[Suno API - Extend] Resposta recebida:", data)
-
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error("[Suno API - Extend] Erro:", response.status, errorText)
       return Response.json(
-        { error: data.error || "Erro ao estender música" },
+        { error: errorText || "Erro ao estender música" },
         { status: response.status }
       )
     }
 
-    return Response.json({
-      success: true,
-      clipIds: data.clip_ids || data.clipIds || data.ids || [],
-      taskId: data.task_id || data.taskId || data.id,
-      message: "Música em extensão",
-    })
+    const data = await response.json()
+    console.log("[Suno API - Extend] Resposta recebida:", data)
+
+    return Response.json(data)
   } catch (error) {
     console.error("[Suno API - Extend] Erro:", error)
     return Response.json(

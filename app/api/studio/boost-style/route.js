@@ -13,21 +13,24 @@ export async function POST(req) {
         { error: "audioId e style são obrigatórios" },
         { status: 400 }
       )
-    }
+    }const apiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || "https://suno-gold.vercel.app"
 
-    const apiKey = process.env.SUNOAPI_KEY
-    const baseUrl = process.env.SUNOAPI_BASE_URL || "https://api.sunoapi.org"
+    if (!apiUrl) {
+      return Response.json(
+        { error: "NEXT_PUBLIC_SUNO_API_URL não configurado" },
+        { status: 500 }
+      )
+    }
 
     console.log("[Suno API - Boost Style] Enviando pedido:", {
       audioId,
       style,
     })
 
-    const response = await fetch(`${baseUrl}/api/boost_style`, {
+    const response = await fetch(`${apiUrl}/api/boost_style`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         audio_id: audioId,

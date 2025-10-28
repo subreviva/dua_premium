@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const SUNOAPI_KEY = process.env.SUNOAPI_KEY;
-const SUNOAPI_BASE_URL = process.env.SUNOAPI_BASE_URL || 'https://api.sunoapi.org';
+const SUNOAPI_BASE_URL = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-gold.vercel.app';
 
 export async function POST(request) {
   try {
@@ -50,7 +49,6 @@ export async function POST(request) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SUNOAPI_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
@@ -127,7 +125,6 @@ export async function GET(request) {
       {
         method: 'GET',
         headers: { 
-          'Authorization': `Bearer ${SUNOAPI_KEY}`
         }
       }
     );

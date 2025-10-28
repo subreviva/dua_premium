@@ -1,63 +1,50 @@
 /**
  * GET /api/studio/get-status?ids=xxx,yyy
  * Consulta status de músicas em geração
- * Custo: 0 créditos (FREE)
+ * Usa /api/get da Suno API
  */
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
-    const ids = searchParams.get("ids")
+    const ids = searchParams.get("ids") || searchParams.get("clip_id")
+    const page = searchParams.get("page") || ""
 
-    if (!ids) {
+    const apiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL
+
+    if (!apiUrl) {
       return Response.json(
-        { error: "ids é obrigatório" },
-        { status: 400 }
+        { error: "NEXT_PUBLIC_SUNO_API_URL não configurado" },
+        { status: 500 }
       )
     }
 
-    const apiKey = process.env.SUNOAPI_KEY
-    const baseUrl = process.env.SUNOAPI_BASE_URL || "https://api.sunoapi.org"
-
     console.log("[Suno API - Get Status] Consultando IDs:", ids)
 
-    const response = await fetch(`${baseUrl}/api/get?ids=${ids}`, {
+    let url = `${apiUrl}/api/get`
+    if (ids) url += `?ids=${ids}`
+    if (page) url += ids ? `&page=${page}` : `?page=${page}`
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
     })
 
-    const data = await response.json()
-
-    console.log("[Suno API - Get Status] Resposta recebida:", data)
-
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error("[Suno API - Get Status] Erro:", response.status, errorText)
       return Response.json(
-        { error: data.error || "Erro ao consultar status" },
+        { error: errorText || "Erro ao consultar status" },
         { status: response.status }
       )
     }
 
-    // Normalizar resposta
-    const songs = Array.isArray(data) ? data : data.data || []
+    const data = await response.json()
+    console.log("[Suno API - Get Status] Resposta recebida:", data)
 
-    const normalizedSongs = songs.map((song) => ({
-      id: song.id,
-      title: song.title,
-      status: song.status,
-      audioUrl: song.audio_url || song.audioUrl,
-      videoUrl: song.video_url || song.videoUrl,
-      imageUrl: song.image_url || song.imageUrl || song.image_large_url,
-      duration: song.duration,
-      tags: song.tags,
-      prompt: song.prompt,
-      createdAt: song.created_at || song.createdAt,
-    }))
-
-    return Response.json({
-      success: true,
-      songs: normalizedSongs,
-    })
+    // Retorna array de audio info conforme API docs
+    return Response.json(data)
   } catch (error) {
     console.error("[Suno API - Get Status] Erro:", error)
     return Response.json(

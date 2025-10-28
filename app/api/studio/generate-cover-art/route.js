@@ -13,21 +13,24 @@ export async function POST(req) {
         { error: "audioId é obrigatório" },
         { status: 400 }
       )
-    }
+    }const apiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || "https://suno-gold.vercel.app"
 
-    const apiKey = process.env.SUNOAPI_KEY
-    const baseUrl = process.env.SUNOAPI_BASE_URL || "https://api.sunoapi.org"
+    if (!apiUrl) {
+      return Response.json(
+        { error: "NEXT_PUBLIC_SUNO_API_URL não configurado" },
+        { status: 500 }
+      )
+    }
 
     console.log("[Suno API - Generate Cover Art] Enviando pedido:", {
       audioId,
       prompt,
     })
 
-    const response = await fetch(`${baseUrl}/api/generate_cover_art`, {
+    const response = await fetch(`${apiUrl}/api/generate_cover_art`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         audio_id: audioId,

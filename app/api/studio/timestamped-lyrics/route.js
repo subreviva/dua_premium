@@ -1,50 +1,53 @@
 /**
- * GET /api/studio/timestamped-lyrics?audioId=xxx
- * Devolve letras com timestamp palavra-por-palavra
- * Custo: 0.5 créditos
+ * GET /api/studio/timestamped-lyrics?song_id=xxx
+ * Obtém letras com timestamps (karaoke)
+ * Usa /api/get_aligned_lyrics da Suno API
  */
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
-    const audioId = searchParams.get("audioId")
+    const song_id = searchParams.get("song_id") || searchParams.get("audioId")
 
-    if (!audioId) {
+    if (!song_id) {
       return Response.json(
-        { error: "audioId é obrigatório" },
+        { error: "song_id é obrigatório" },
         { status: 400 }
       )
     }
 
-    const apiKey = process.env.SUNOAPI_KEY
-    const baseUrl = process.env.SUNOAPI_BASE_URL || "https://api.sunoapi.org"
+    const apiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || "https://suno-gold.vercel.app"
 
-    console.log("[Suno API - Timestamped Lyrics] Consultando:", audioId)
+    if (!apiUrl) {
+      return Response.json(
+        { error: "NEXT_PUBLIC_SUNO_API_URL não configurado" },
+        { status: 500 }
+      )
+    }
 
-    const response = await fetch(`${baseUrl}/api/get_lyrics?audio_id=${audioId}`, {
+    console.log("[Suno API - Aligned Lyrics] Consultando:", { song_id })
+
+    const response = await fetch(`${apiUrl}/api/get_aligned_lyrics?song_id=${song_id}`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
     })
 
-    const data = await response.json()
-
-    console.log("[Suno API - Timestamped Lyrics] Resposta recebida:", data)
-
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error("[Suno API - Aligned Lyrics] Erro:", response.status, errorText)
       return Response.json(
-        { error: data.error || "Erro ao obter letras sincronizadas" },
+        { error: errorText || "Erro ao obter letras sincronizadas" },
         { status: response.status }
       )
     }
 
-    return Response.json({
-      success: true,
-      lyrics: data.lyrics || [],
-      text: data.text || "",
-    })
+    const data = await response.json()
+    console.log("[Suno API - Aligned Lyrics] Resposta recebida:", data)
+
+    return Response.json(data)
   } catch (error) {
-    console.error("[Suno API - Timestamped Lyrics] Erro:", error)
+    console.error("[Suno API - Aligned Lyrics] Erro:", error)
     return Response.json(
       { error: error.message || "Erro interno do servidor" },
       { status: 500 }
