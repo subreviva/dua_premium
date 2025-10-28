@@ -12,9 +12,9 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const { scrollY } = useScroll()
 
-  const navBackground = useTransform(scrollY, [0, 100], ["rgba(10, 22, 40, 0)", "rgba(10, 22, 40, 0.8)"])
+  const navBackground = useTransform(scrollY, [0, 100], ["rgba(26, 26, 26, 0)", "rgba(26, 26, 26, 0.7)"])
 
-  const navBorder = useTransform(scrollY, [0, 100], ["rgba(245, 212, 200, 0)", "rgba(245, 212, 200, 0.1)"])
+  const navBorder = useTransform(scrollY, [0, 100], ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.1)"])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,7 +40,7 @@ export default function Navbar() {
           backgroundColor: navBackground,
           borderColor: navBorder,
         }}
-        className="fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-xl transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-2xl transition-all duration-300"
       >
         <div className="max-w-7xl mx-auto px-6 sm:px-12">
           <div className="flex items-center justify-between h-20">
@@ -50,7 +50,7 @@ export default function Navbar() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
               onClick={() => router.push("/")}
-              className="text-3xl font-bold text-[#f5f0eb] tracking-[-0.05em] hover:text-[#d4a574] transition-colors duration-300"
+              className="text-3xl font-extralight text-white tracking-tight hover:text-white/80 transition-colors duration-300"
             >
               DUA
             </motion.button>
@@ -66,7 +66,7 @@ export default function Navbar() {
                 <button
                   key={link.href}
                   onClick={() => router.push(link.href)}
-                  className="text-[#f5d4c8]/70 hover:text-[#f5d4c8] font-medium transition-colors duration-300 text-sm"
+                  className="text-white/70 hover:text-white font-light transition-colors duration-300 text-sm"
                 >
                   {link.label}
                 </button>

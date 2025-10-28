@@ -149,16 +149,16 @@ export default function ChatPage() {
   if (isMobile) {
     return (
       <div className="relative w-full h-screen flex flex-col overflow-hidden bg-[#0a0a0a]">
-        {/* Video Background com parallax */}
+        {/* Image Background - Super Elegant & Blurred */}
         <div className="fixed inset-0 z-0">
-          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
-            <source
-              src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
-              type="video/mp4"
-            />
-          </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/92 backdrop-blur-[32px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+          <div 
+            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-80"
+            style={{
+              backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
+            }}
+          />
+          <div className="absolute inset-0 bg-[#0a0a0a]/50 backdrop-blur-[40px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
         </div>
 
         <div className="fixed top-0 left-0 right-0 h-[45vh] bg-gradient-to-b from-[#0a0a0a]/95 via-[#0a0a0a]/70 to-transparent z-10 pointer-events-none" />
@@ -302,16 +302,16 @@ export default function ChatPage() {
 
   return (
     <div className="relative w-full h-screen flex flex-col overflow-hidden bg-[#0a0a0a]">
-      {/* Video Background ultra-premium */}
+      {/* Image Background - Super Elegant & Blurred */}
       <div className="fixed inset-0 z-0">
-        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-100">
-          <source
-            src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
-            type="video/mp4"
-          />
-        </video>
-        <div className="absolute inset-0 bg-[#0a0a0a]/92 backdrop-blur-[32px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center opacity-80"
+          style={{
+            backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
+          }}
+        />
+        <div className="absolute inset-0 bg-[#0a0a0a]/50 backdrop-blur-[40px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </div>
 
       <div className="fixed top-0 left-0 right-0 h-[45vh] z-10 bg-gradient-to-b from-[#0a0a0a]/95 via-[#0a0a0a]/85 to-transparent pointer-events-none" />

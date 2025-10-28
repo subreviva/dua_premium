@@ -126,6 +126,8 @@
   --animation-third: moveInCircle 40s linear infinite;
   --animation-fourth: moveHorizontal 40s ease infinite;
   --animation-fifth: moveInCircle 20s ease infinite;
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 
 @layer base {
@@ -331,6 +333,24 @@
     }
     to {
       transform: translate(-10%, -10%) scale(0.8);
+    }
+  }
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
     }
   }
 }
