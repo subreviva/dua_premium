@@ -4,7 +4,10 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Play, Pause, Sparkles, Music2, Scissors, Plus, Download, Share2, Heart, MoreHorizontal, RefreshCw, Loader2, ChevronRight, Volume2, SkipBack, SkipForward, Shuffle, Repeat } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Switch } from "@/components/ui/switch"
+import { Play, Pause, Sparkles, Music2, Scissors, Plus, Download, Share2, MoreHorizontal, RefreshCw, Loader2, ChevronRight, Volume2, Calendar, User, SkipForward, SkipBack, Shuffle, Repeat, Music, PauseIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface Track {
@@ -23,10 +26,15 @@ interface Track {
 }
 
 const tools = [
-  { id: "generate", icon: Sparkles, name: "Criar Música", desc: "Crie músicas com IA", credits: 10 },
-  { id: "custom", icon: Music2, name: "Personalizada", desc: "Controle total", credits: 10 },
+  { id: "generate", icon: Sparkles, name: "Criar Música", desc: "Gere músicas com IA", credits: 10 },
+  { id: "custom", icon: Music2, name: "Modo Custom", desc: "Controle total da criação", credits: 10 },
   { id: "extend", icon: Plus, name: "Estender", desc: "Prolongue suas músicas", credits: 5 },
-  { id: "stems", icon: Scissors, name: "Separar Stems", desc: "Isole vocais e instrumental", credits: 10 },
+  { id: "stems", icon: Scissors, name: "Separar Stems", desc: "Isole vocais/instrumental", credits: 10 },
+]
+
+const models = [
+  { id: "chirp-v3-5", name: "v3.5", desc: "Mais recente" },
+  { id: "chirp-v3", name: "v3", desc: "Estável" },
 ]
 
 export default function MusicStudioPage() {
@@ -37,6 +45,7 @@ export default function MusicStudioPage() {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null)
   const [playing, setPlaying] = useState<string | null>(null)
   const [credits, setCredits] = useState(2500)
+  const [selectedModel, setSelectedModel] = useState("chirp-v3-5")
   const audioRef = useRef<HTMLAudioElement>(null)
   
   // Form states
@@ -136,7 +145,8 @@ export default function MusicStudioPage() {
       const endpoint = mode === "simple" ? "/api/studio/generate" : "/api/studio/custom-generate"
       const body: any = {
         prompt,
-        wait_audio: false
+        wait_audio: false,
+        model: selectedModel
       }
       
       if (mode === "custom") {
@@ -174,7 +184,8 @@ export default function MusicStudioPage() {
     try {
       const body: any = {
         audio_id: audioId,
-        prompt
+        prompt,
+        model: selectedModel
       }
       
       if (continueAt) body.continue_at = continueAt
@@ -241,67 +252,64 @@ export default function MusicStudioPage() {
       case "generate":
       case "custom":
         return (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div>
-              <label className="text-[13px] font-medium text-white/80 mb-2 block">Descrição da Música</label>
+              <label className="text-[13px] font-medium text-white/70 mb-2 block">Descrição da Música</label>
               <Textarea 
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Ex: Uma música pop animada sobre verão..."
-                className="min-h-[100px] bg-white/5 border-white/10 text-white placeholder:text-white/30 resize-none text-[14px] focus:border-[#FF1493]/50 transition-colors"
+                className="min-h-[100px] bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 resize-none text-[14px] focus:border-[#D4A574]/50 focus:ring-1 focus:ring-[#D4A574]/30 transition-all"
               />
             </div>
             
             {selectedTool === "custom" && (
               <>
                 <div>
-                  <label className="text-[13px] font-medium text-white/80 mb-2 block">Título (opcional)</label>
+                  <label className="text-[13px] font-medium text-white/70 mb-2 block">Título (opcional)</label>
                   <Input 
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Título da música"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 text-[14px]"
+                    className="bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 text-[14px] focus:border-[#D4A574]/50 focus:ring-1 focus:ring-[#D4A574]/30"
                   />
                 </div>
                 
                 <div>
-                  <label className="text-[13px] font-medium text-white/80 mb-2 block">Tags de Estilo</label>
+                  <label className="text-[13px] font-medium text-white/70 mb-2 block">Tags de Estilo</label>
                   <Input 
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="pop, electronic, upbeat"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 text-[14px]"
+                    className="bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 text-[14px] focus:border-[#D4A574]/50"
                   />
                 </div>
                 
                 <div>
-                  <label className="text-[13px] font-medium text-white/80 mb-2 block">Letras (opcional)</label>
+                  <label className="text-[13px] font-medium text-white/70 mb-2 block">Letras (opcional)</label>
                   <Textarea 
                     value={lyrics}
                     onChange={(e) => setLyrics(e.target.value)}
                     placeholder="Escreva suas próprias letras..."
-                    className="min-h-[80px] bg-white/5 border-white/10 text-white placeholder:text-white/30 resize-none text-[14px]"
+                    className="min-h-[80px] bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 resize-none text-[14px]"
                   />
                 </div>
                 
-                <button
-                  onClick={() => setInstrumental(!instrumental)}
-                  className={cn(
-                    "px-4 py-2 rounded-full text-[13px] font-medium transition-all",
-                    instrumental 
-                      ? "bg-gradient-to-r from-[#FF1493] to-[#9B30FF] text-white shadow-lg shadow-[#FF1493]/20" 
-                      : "bg-white/5 text-white/60 hover:bg-white/10"
-                  )}
-                >
-                  {instrumental ? "✓ Instrumental" : "Instrumental"}
-                </button>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/[0.08]">
+                  <label className="text-[13px] font-medium text-white/80">Instrumental</label>
+                  <Switch
+                    checked={instrumental}
+                    onCheckedChange={setInstrumental}
+                    className="data-[state=checked]:bg-[#D4A574]"
+                  />
+                </div>
               </>
             )}
             
             <Button 
               onClick={handleGenerate}
               disabled={loading || !prompt.trim()}
-              className="w-full h-11 bg-gradient-to-r from-[#FF1493] to-[#9B30FF] hover:opacity-90 text-white font-medium text-[14px] shadow-lg shadow-[#FF1493]/20 disabled:opacity-50"
+              className="w-full h-11 bg-[#D4A574] hover:bg-[#C99964] text-black font-medium text-[14px] shadow-lg shadow-[#D4A574]/20 disabled:opacity-50 transition-all duration-200"
             >
               {loading ? (
                 <>
@@ -320,42 +328,42 @@ export default function MusicStudioPage() {
       
       case "extend":
         return (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div>
-              <label className="text-[13px] font-medium text-white/80 mb-2 block">ID da Música</label>
+              <label className="text-[13px] font-medium text-white/70 mb-2 block">ID da Música</label>
               <Input 
                 value={audioId}
                 onChange={(e) => setAudioId(e.target.value)}
                 placeholder="Cole o ID da música aqui"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 text-[14px]"
+                className="bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 text-[14px]"
               />
             </div>
             
             <div>
-              <label className="text-[13px] font-medium text-white/80 mb-2 block">Prompt de Continuação</label>
+              <label className="text-[13px] font-medium text-white/70 mb-2 block">Prompt de Continuação</label>
               <Textarea 
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Como deseja continuar a música..."
-                className="min-h-[100px] bg-white/5 border-white/10 text-white placeholder:text-white/30 resize-none text-[14px]"
+                className="min-h-[100px] bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 resize-none text-[14px]"
               />
             </div>
             
             <div>
-              <label className="text-[13px] font-medium text-white/80 mb-2 block">Continuar em (segundos, opcional)</label>
+              <label className="text-[13px] font-medium text-white/70 mb-2 block">Continuar em (segundos, opcional)</label>
               <Input 
                 value={continueAt}
                 onChange={(e) => setContinueAt(e.target.value)}
                 placeholder="Ex: 120"
                 type="number"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 text-[14px]"
+                className="bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 text-[14px]"
               />
             </div>
             
             <Button 
               onClick={handleExtend}
               disabled={loading || !audioId.trim() || !prompt.trim()}
-              className="w-full h-11 bg-gradient-to-r from-[#FF1493] to-[#9B30FF] hover:opacity-90 text-white font-medium text-[14px] shadow-lg shadow-[#FF1493]/20 disabled:opacity-50"
+              className="w-full h-11 bg-[#D4A574] hover:bg-[#C99964] text-black font-medium text-[14px] shadow-lg shadow-[#D4A574]/20 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -374,19 +382,19 @@ export default function MusicStudioPage() {
       
       case "stems":
         return (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div>
-              <label className="text-[13px] font-medium text-white/80 mb-2 block">ID da Música</label>
+              <label className="text-[13px] font-medium text-white/70 mb-2 block">ID da Música</label>
               <Input 
                 value={audioId}
                 onChange={(e) => setAudioId(e.target.value)}
                 placeholder="Cole o ID da música aqui"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 text-[14px]"
+                className="bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 text-[14px]"
               />
             </div>
             
-            <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-              <p className="text-[13px] text-white/60">
+            <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.08]">
+              <p className="text-[13px] text-white/60 leading-relaxed">
                 A separação de stems criará duas faixas: uma com vocais isolados e outra instrumental.
               </p>
             </div>
@@ -394,7 +402,7 @@ export default function MusicStudioPage() {
             <Button 
               onClick={handleSeparateStems}
               disabled={loading || !audioId.trim()}
-              className="w-full h-11 bg-gradient-to-r from-[#FF1493] to-[#9B30FF] hover:opacity-90 text-white font-medium text-[14px] shadow-lg shadow-[#FF1493]/20 disabled:opacity-50"
+              className="w-full h-11 bg-[#D4A574] hover:bg-[#C99964] text-black font-medium text-[14px] shadow-lg shadow-[#D4A574]/20 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -417,30 +425,30 @@ export default function MusicStudioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-2xl border-b border-white/5">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/[0.08]">
         <div className="h-16 px-6 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <h1 className="text-[24px] font-bold bg-gradient-to-r from-[#FF1493] to-[#9B30FF] bg-clip-text text-transparent">
-              DUA Studio
+            <h1 className="text-[22px] font-semibold text-white/90">
+              DUA Music Studio
             </h1>
             <div className="flex items-center gap-6 text-[14px]">
-              <a href="/" className="text-white/60 hover:text-white transition-colors">Home</a>
-              <a href="/chat" className="text-white/60 hover:text-white transition-colors">Chat</a>
-              <a href="/musicstudio" className="text-white font-medium">Studio</a>
+              <a href="/" className="text-white/50 hover:text-white/90 transition-colors">Home</a>
+              <a href="/chat" className="text-white/50 hover:text-white/90 transition-colors">Chat</a>
+              <a href="/musicstudio" className="text-white/90 font-medium">Studio</a>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <button 
               onClick={fetchCredits}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors group"
+              className="px-4 py-2 bg-white/[0.05] hover:bg-white/[0.08] rounded-lg border border-white/[0.08] transition-all group"
             >
-              <span className="text-[14px] font-semibold text-transparent bg-gradient-to-r from-[#FF1493] to-[#9B30FF] bg-clip-text">
+              <span className="text-[14px] font-semibold text-[#D4A574]">
                 {credits.toLocaleString()}
               </span>
               <span className="text-[12px] text-white/40 ml-2">créditos</span>
-              <RefreshCw className="w-3 h-3 ml-2 inline text-white/40 group-hover:text-white/60 transition-colors" />
+              <RefreshCw className="w-3 h-3 ml-2 inline text-white/30 group-hover:text-white/50 transition-colors" />
             </button>
           </div>
         </div>
@@ -448,9 +456,9 @@ export default function MusicStudioPage() {
 
       <div className="pt-16 flex h-screen">
         {/* Tools Sidebar */}
-        <div className="w-[320px] border-r border-white/5 flex flex-col bg-black">
-          <div className="p-6 border-b border-white/5">
-            <h2 className="text-[16px] font-semibold mb-1">Ferramentas</h2>
+        <div className="w-[300px] border-r border-white/[0.08] flex flex-col bg-[#0a0a0a]">
+          <div className="p-5 border-b border-white/[0.08]">
+            <h2 className="text-[15px] font-semibold text-white/90 mb-1">Ferramentas</h2>
             <p className="text-[12px] text-white/40">Crie música com IA</p>
           </div>
           
@@ -464,27 +472,27 @@ export default function MusicStudioPage() {
                   key={tool.id}
                   onClick={() => setSelectedTool(tool.id)}
                   className={cn(
-                    "w-full p-4 rounded-xl text-left transition-all group",
+                    "w-full p-3 rounded-lg text-left transition-all",
                     isSelected 
-                      ? "bg-white/10 border border-white/20 shadow-lg" 
-                      : "hover:bg-white/5 border border-transparent"
+                      ? "bg-white/[0.08] border border-white/[0.15]" 
+                      : "hover:bg-white/[0.04] border border-transparent"
                   )}
                 >
                   <div className="flex items-start gap-3">
                     <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center transition-all",
+                      "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
                       isSelected 
-                        ? "bg-gradient-to-r from-[#FF1493] to-[#9B30FF] shadow-lg shadow-[#FF1493]/30" 
-                        : "bg-white/5 group-hover:bg-white/10"
+                        ? "bg-[#D4A574] text-black" 
+                        : "bg-white/[0.05] text-white/70"
                     )}>
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-[18px] h-[18px]" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[14px] font-medium">{tool.name}</span>
-                        <span className="text-[11px] text-white/40">{tool.credits} cr</span>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[13px] font-medium text-white/90">{tool.name}</span>
+                        <span className="text-[11px] text-white/30">{tool.credits}</span>
                       </div>
-                      <p className="text-[12px] text-white/50">{tool.desc}</p>
+                      <p className="text-[11px] text-white/40">{tool.desc}</p>
                     </div>
                   </div>
                 </button>
@@ -494,8 +502,8 @@ export default function MusicStudioPage() {
         </div>
 
         {/* Creation Panel */}
-        <div className="w-[440px] border-r border-white/5 flex flex-col bg-black">
-          <div className="p-6 border-b border-white/5">
+        <div className="w-[420px] border-r border-white/[0.08] flex flex-col bg-[#0a0a0a]">
+          <div className="p-5 border-b border-white/[0.08]">
             <div className="flex gap-2">
               <button
                 onClick={() => setMode("simple")}
@@ -503,7 +511,7 @@ export default function MusicStudioPage() {
                   "flex-1 h-9 rounded-lg text-[13px] font-medium transition-all",
                   mode === "simple" 
                     ? "bg-white text-black" 
-                    : "bg-white/5 text-white/60 hover:bg-white/10"
+                    : "bg-white/[0.05] text-white/50 hover:bg-white/[0.08]"
                 )}
               >
                 Simples
@@ -514,65 +522,81 @@ export default function MusicStudioPage() {
                   "flex-1 h-9 rounded-lg text-[13px] font-medium transition-all",
                   mode === "custom" 
                     ? "bg-white text-black" 
-                    : "bg-white/5 text-white/60 hover:bg-white/10"
+                    : "bg-white/[0.05] text-white/50 hover:bg-white/[0.08]"
                 )}
               >
                 Personalizado
               </button>
             </div>
+
+            <div className="mt-4">
+              <label className="text-[12px] font-medium text-white/50 mb-2 block">Modelo</label>
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-full h-9 bg-white/[0.03] border-white/[0.08] text-white text-[13px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-white/[0.08]">
+                  {models.map((model) => (
+                    <SelectItem key={model.id} value={model.id} className="text-white text-[13px] focus:bg-white/[0.08]">
+                      {model.name} - {model.desc}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-5">
             {renderForm()}
           </div>
         </div>
 
         {/* Library */}
-        <div className="flex-1 flex flex-col bg-black">
-          <div className="p-6 border-b border-white/5">
-            <div className="flex items-center justify-between mb-4">
+        <div className="flex-1 flex flex-col bg-[#0a0a0a]">
+          <div className="p-5 border-b border-white/[0.08]">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] font-semibold mb-1">Sua Biblioteca</h2>
-                <p className="text-[13px] text-white/40">{tracks.length} músicas criadas</p>
+                <h2 className="text-[16px] font-semibold text-white/90 mb-0.5">Sua Biblioteca</h2>
+                <p className="text-[12px] text-white/40">{tracks.length} músicas criadas</p>
               </div>
               <button
                 onClick={loadTracks}
-                className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/[0.05] rounded-lg transition-colors"
               >
-                <RefreshCw className="w-4 h-4 text-white/60" />
+                <RefreshCw className="w-4 h-4 text-white/50" />
               </button>
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-5">
             {loading && tracks.length === 0 && (
               <div className="flex flex-col items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-[#FF1493] mb-4" />
-                <p className="text-[14px] text-white/60">Criando sua música...</p>
+                <Loader2 className="w-8 h-8 animate-spin text-[#D4A574] mb-4" />
+                <p className="text-[14px] text-white/50">Criando sua música...</p>
               </div>
             )}
             
             {tracks.length === 0 && !loading && (
               <div className="flex flex-col items-center justify-center h-64 text-center">
-                <Music2 className="w-12 h-12 text-white/20 mb-4" />
-                <p className="text-[14px] text-white/60 mb-2">Nenhuma música ainda</p>
-                <p className="text-[12px] text-white/40">Crie sua primeira música para começar</p>
+                <Music2 className="w-12 h-12 text-white/10 mb-4" />
+                <p className="text-[14px] text-white/50 mb-1">Nenhuma música ainda</p>
+                <p className="text-[12px] text-white/30">Crie sua primeira música para começar</p>
               </div>
             )}
             
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               {tracks.map((track) => (
                 <div
                   key={track.id}
                   className="group cursor-pointer"
                   onClick={() => setSelectedTrack(track)}
                 >
-                  <div className="relative aspect-square rounded-lg overflow-hidden mb-3 bg-gradient-to-br from-[#FF1493]/20 to-[#9B30FF]/20">
+                  <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-white/[0.03]">
                     {track.image_url ? (
                       <img src={track.image_url} alt={track.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Music2 className="w-12 h-12 text-white/20" />
+                        <Music2 className="w-10 h-10 text-white/10" />
                       </div>
                     )}
                     
@@ -582,12 +606,12 @@ export default function MusicStudioPage() {
                           e.stopPropagation()
                           togglePlay(track)
                         }}
-                        className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all hover:bg-white/20"
+                        className="w-12 h-12 rounded-full bg-[#D4A574] flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all hover:bg-[#C99964]"
                       >
                         {playing === track.id ? (
-                          <Pause className="w-6 h-6 text-white" fill="white" />
+                          <Pause className="w-5 h-5 text-black" fill="black" />
                         ) : (
-                          <Play className="w-6 h-6 text-white ml-1" fill="white" />
+                          <Play className="w-5 h-5 text-black ml-0.5" fill="black" />
                         )}
                       </button>
                     </div>
@@ -600,7 +624,7 @@ export default function MusicStudioPage() {
                     )}
                   </div>
                   
-                  <h3 className="text-[13px] font-medium mb-1 truncate">
+                  <h3 className="text-[13px] font-medium text-white/90 mb-0.5 truncate">
                     {track.title || "Sem Título"}
                   </h3>
                   <p className="text-[11px] text-white/40 truncate">
@@ -614,40 +638,40 @@ export default function MusicStudioPage() {
 
         {/* Track Details Panel */}
         {selectedTrack && (
-          <div className="w-[400px] border-l border-white/5 bg-black overflow-y-auto animate-in slide-in-from-right">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-[16px] font-semibold">Detalhes</h3>
+          <div className="w-[380px] border-l border-white/[0.08] bg-[#0a0a0a] overflow-y-auto animate-in slide-in-from-right">
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-[15px] font-semibold text-white/90">Detalhes</h3>
                 <button
                   onClick={() => setSelectedTrack(null)}
-                  className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition-colors"
+                  className="w-8 h-8 rounded-lg hover:bg-white/[0.05] flex items-center justify-center transition-colors"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 text-white/50" />
                 </button>
               </div>
               
-              <div className="aspect-square rounded-xl overflow-hidden mb-6 bg-gradient-to-br from-[#FF1493]/20 to-[#9B30FF]/20">
+              <div className="aspect-square rounded-xl overflow-hidden mb-5 bg-white/[0.03]">
                 {selectedTrack.image_url ? (
                   <img src={selectedTrack.image_url} alt={selectedTrack.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Music2 className="w-20 h-20 text-white/20" />
+                    <Music2 className="w-16 h-16 text-white/10" />
                   </div>
                 )}
               </div>
               
-              <h2 className="text-[20px] font-semibold mb-2">
+              <h2 className="text-[18px] font-semibold text-white/90 mb-1">
                 {selectedTrack.title || "Sem Título"}
               </h2>
               
               {selectedTrack.tags && (
-                <p className="text-[13px] text-white/60 mb-4">{selectedTrack.tags}</p>
+                <p className="text-[13px] text-white/50 mb-4">{selectedTrack.tags}</p>
               )}
               
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-2 mb-5">
                 <button
                   onClick={() => togglePlay(selectedTrack)}
-                  className="flex-1 h-10 bg-gradient-to-r from-[#FF1493] to-[#9B30FF] hover:opacity-90 rounded-lg font-medium text-[13px] transition-all flex items-center justify-center gap-2"
+                  className="flex-1 h-10 bg-[#D4A574] hover:bg-[#C99964] rounded-lg font-medium text-[13px] transition-all flex items-center justify-center gap-2 text-black"
                 >
                   {playing === selectedTrack.id ? (
                     <>
@@ -662,35 +686,52 @@ export default function MusicStudioPage() {
                   )}
                 </button>
                 
-                {selectedTrack.audio_url && (
-                  <a
-                    href={selectedTrack.audio_url}
-                    download
-                    className="h-10 px-4 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                  </a>
-                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-10 px-4 bg-white/[0.05] hover:bg-white/[0.08] rounded-lg flex items-center justify-center transition-colors">
+                      <MoreHorizontal className="w-4 h-4 text-white/70" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-[#1a1a1a] border-white/[0.08] text-white">
+                    {selectedTrack.audio_url && (
+                      <DropdownMenuItem asChild>
+                        <a href={selectedTrack.audio_url} download className="flex items-center gap-2 text-[13px]">
+                          <Download className="w-4 h-4" />
+                          Download
+                        </a>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem className="flex items-center gap-2 text-[13px]">
+                      <Share2 className="w-4 h-4" />
+                      Compartilhar
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/[0.08]" />
+                    <DropdownMenuItem className="flex items-center gap-2 text-[13px] text-red-400">
+                      <Music className="w-4 h-4" />
+                      Excluir
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               
               {selectedTrack.id && (
-                <div className="p-4 bg-white/5 rounded-lg border border-white/10 mb-4">
-                  <p className="text-[11px] text-white/40 mb-1">ID da Música</p>
-                  <p className="text-[12px] font-mono text-white/80 break-all">{selectedTrack.id}</p>
+                <div className="p-3 bg-white/[0.03] rounded-lg border border-white/[0.08] mb-3">
+                  <p className="text-[11px] text-white/30 mb-1">ID da Música</p>
+                  <p className="text-[11px] font-mono text-white/70 break-all">{selectedTrack.id}</p>
                 </div>
               )}
               
               {selectedTrack.prompt && (
-                <div className="p-4 bg-white/5 rounded-lg border border-white/10 mb-4">
-                  <p className="text-[11px] text-white/40 mb-2">Prompt Original</p>
-                  <p className="text-[12px] text-white/70 leading-relaxed">{selectedTrack.prompt}</p>
+                <div className="p-3 bg-white/[0.03] rounded-lg border border-white/[0.08] mb-3">
+                  <p className="text-[11px] text-white/30 mb-2">Prompt Original</p>
+                  <p className="text-[12px] text-white/60 leading-relaxed">{selectedTrack.prompt}</p>
                 </div>
               )}
               
               {selectedTrack.lyric && (
-                <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                  <p className="text-[11px] text-white/40 mb-2">Letras</p>
-                  <p className="text-[12px] text-white/70 leading-relaxed whitespace-pre-wrap">{selectedTrack.lyric}</p>
+                <div className="p-3 bg-white/[0.03] rounded-lg border border-white/[0.08]">
+                  <p className="text-[11px] text-white/30 mb-2">Letras</p>
+                  <p className="text-[12px] text-white/60 leading-relaxed whitespace-pre-wrap">{selectedTrack.lyric}</p>
                 </div>
               )}
             </div>
