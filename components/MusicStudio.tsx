@@ -162,17 +162,39 @@ export default function MusicStudio() {
       }
 
       try {
-        const response = await fetch(`/api/music/status?ids=${pollingIds.join(',')}`)
-        const data = await response.json()
+        // ⚡ Polling também DIRETO no Railway!
+        const RAILWAY_API = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
+        const response = await fetch(`${RAILWAY_API}/api/get?ids=${pollingIds.join(',')}`)
+        
+        if (!response.ok) {
+          throw new Error(`Railway polling error: ${response.status}`)
+        }
 
-        if (data.success && Array.isArray(data.songs)) {
+        const songs = await response.json()
+
+        if (Array.isArray(songs)) {
           setSongs(prev => {
             const updated = [...prev]
-            data.songs.forEach((newSong: SunoSong) => {
+            songs.forEach((newSong: any) => {
               const idx = updated.findIndex(s => s.id === newSong.id)
               if (idx >= 0) {
                 const oldStatus = updated[idx].status
-                updated[idx] = newSong
+                updated[idx] = {
+                  id: newSong.id,
+                  status: newSong.status || 'submitted',
+                  title: newSong.title || '',
+                  created_at: newSong.created_at,
+                  model_name: newSong.model_name,
+                  image_url: newSong.image_url || '',
+                  audio_url: newSong.audio_url || '',
+                  lyric: newSong.lyric || '',
+                  tags: newSong.tags || '',
+                  prompt: newSong.prompt || '',
+                  gpt_description_prompt: newSong.gpt_description_prompt || '',
+                  type: newSong.type || '',
+                  video_url: newSong.video_url || '',
+                  duration: newSong.duration || 0
+                }
                 // Notify on completion
                 if (oldStatus !== 'complete' && newSong.status === 'complete') {
                   success(`🎉 ${newSong.title || 'Song'} is ready!`)
@@ -184,7 +206,7 @@ export default function MusicStudio() {
           })
 
           // Stop polling se todos completos ou com erro
-          const allDone = data.songs.every((s: SunoSong) => 
+          const allDone = songs.every((s: any) => 
             s.status === 'complete' || s.status === 'error'
           )
           
@@ -240,33 +262,53 @@ export default function MusicStudio() {
     try {
       success('✅ Creating music...')
       
-      const response = await fetch('/api/music/generate', {
+      // ⚡ BYPASSA Vercel - chama Railway DIRETO!
+      const RAILWAY_API = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
+      const response = await fetch(`${RAILWAY_API}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: prompt.trim(),
-          instrumental,
-          model: selectedModel,
-          is_custom: false
+          make_instrumental: instrumental,
+          model_version: selectedModel,
+          wait_audio: false // SEMPRE false!
         })
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(`Railway API error: ${response.status}`)
+      }
 
-      if (data.success && Array.isArray(data.songs)) {
-        const newSongs = data.songs.map((song: SunoSong) => ({
-          ...song,
-          status: song.status || 'submitted'
+      const songs = await response.json()
+      
+      console.log('✅ IDs recebidos direto do Railway:', songs.map((s: any) => s.id))
+
+      if (Array.isArray(songs)) {
+        const newSongs = songs.map((song: any) => ({
+          id: song.id,
+          status: song.status || 'submitted',
+          title: song.title || '',
+          created_at: song.created_at,
+          model_name: song.model_name,
+          image_url: song.image_url || '',
+          audio_url: song.audio_url || '',
+          lyric: song.lyric || '',
+          tags: song.tags || '',
+          prompt: song.prompt || '',
+          gpt_description_prompt: song.gpt_description_prompt || '',
+          type: song.type || '',
+          video_url: song.video_url || '',
+          duration: song.duration || 0
         }))
         
         setSongs(prev => [...newSongs, ...prev])
         setPollingIds(newSongs.map((s: SunoSong) => s.id))
         setPrompt('')
       } else {
-        error(`❌ Generation failed: ${data.error || 'Unknown error'}`)
+        error('❌ Invalid response format')
       }
-    } catch (err) {
-      error('❌ Failed to create music')
+    } catch (err: any) {
+      error(`❌ Failed to create music: ${err.message}`)
       console.error('Generation error:', err)
     } finally {
       setLoading(false)
@@ -289,25 +331,46 @@ export default function MusicStudio() {
     try {
       success('✅ Creating custom music...')
       
-      const response = await fetch('/api/music/custom', {
+      // ⚡ BYPASSA Vercel - chama Railway DIRETO!
+      const RAILWAY_API = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
+      const response = await fetch(`${RAILWAY_API}/api/custom_generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          lyrics: lyrics.trim(),
+          prompt: lyrics.trim(),
           title: title.trim(),
           tags: tags.trim(),
           negative_tags: negativeTags.trim() || undefined,
-          instrumental,
-          model: selectedModel
+          make_instrumental: instrumental,
+          model_version: selectedModel,
+          wait_audio: false
         })
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(`Railway API error: ${response.status}`)
+      }
 
-      if (data.success && Array.isArray(data.songs)) {
-        const newSongs = data.songs.map((song: SunoSong) => ({
-          ...song,
-          status: song.status || 'submitted'
+      const songs = await response.json()
+      
+      console.log('✅ Custom IDs:', songs.map((s: any) => s.id))
+
+      if (Array.isArray(songs)) {
+        const newSongs = songs.map((song: any) => ({
+          id: song.id,
+          status: song.status || 'submitted',
+          title: song.title || '',
+          created_at: song.created_at,
+          model_name: song.model_name,
+          image_url: song.image_url || '',
+          audio_url: song.audio_url || '',
+          lyric: song.lyric || '',
+          tags: song.tags || '',
+          prompt: song.prompt || '',
+          gpt_description_prompt: song.gpt_description_prompt || '',
+          type: song.type || '',
+          video_url: song.video_url || '',
+          duration: song.duration || 0
         }))
         
         setSongs(prev => [...newSongs, ...prev])
@@ -319,10 +382,10 @@ export default function MusicStudio() {
         setTags('')
         setNegativeTags('')
       } else {
-        error(`❌ Custom generation failed: ${data.error || 'Unknown error'}`)
+        error('❌ Invalid response format')
       }
-    } catch (err) {
-      error('❌ Failed to create custom music')
+    } catch (err: any) {
+      error(`❌ Failed: ${err.message}`)
       console.error('Custom generation error:', err)
     } finally {
       setLoading(false)
