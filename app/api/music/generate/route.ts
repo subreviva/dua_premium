@@ -8,7 +8,7 @@ export const maxDuration = 10
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { prompt, instrumental = false, model = 'chirp-crow' } = body
+    const { prompt, instrumental = false, model = 'chirp-v3-5', tags, title } = body
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json(
@@ -17,20 +17,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[Music Generate] Creating music:', { prompt, instrumental, model })
+    console.log('[Music Generate] Creating music:', { prompt, instrumental, model, tags, title })
 
     // 🔥 CRUCIAL: wait_audio=false para retornar IDs IMEDIATAMENTE
+    const requestBody: any = {
+      prompt,
+      make_instrumental: instrumental,
+      model_version: model, // Usar model_version em vez de model
+      wait_audio: false // ⚡ KEY: Não espera processar!
+    }
+
+    // Adicionar campos opcionais se fornecidos
+    if (tags) requestBody.tags = tags
+    if (title) requestBody.title = title
+
     const response = await fetch(`${SUNO_API_URL}/api/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        prompt,
-        make_instrumental: instrumental,
-        model,
-        wait_audio: false // ⚡ KEY: Não espera processar!
-      }),
+      body: JSON.stringify(requestBody),
       signal: AbortSignal.timeout(8000) // 8s timeout (segurança)
     })
 

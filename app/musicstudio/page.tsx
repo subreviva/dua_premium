@@ -18,15 +18,14 @@ const tools = [
 ]
 
 const MODELS = [
-  { id: "chirp-v3-5", name: "v3.5", badge: "Fast", desc: "Rápido" },
-  { id: "chirp-v4", name: "v4", badge: "Balanced", desc: "Equilibrado" },
-  { id: "chirp-bluejay", name: "v4.5", badge: "Pro", desc: "Profissional" },
-  { id: "chirp-crow", name: "v5", badge: "Ultra", desc: "Máxima qualidade", featured: true },
+  { id: "chirp-v3-5", name: "v3.5", badge: "Fast", desc: "Rápido - 4 min" },
+  { id: "chirp-v3-0", name: "v3", badge: "Balanced", desc: "Equilibrado - 2 min" },
+  { id: "chirp-v2-0", name: "v2", badge: "Vintage", desc: "Clássico - 1.3 min" },
 ]
 
 export default function MusicStudioPage() {
   const [selectedTool, setSelectedTool] = useState("generate")
-  const [selectedModel, setSelectedModel] = useState("chirp-crow")
+  const [selectedModel, setSelectedModel] = useState("chirp-v3-5")
   const [loading, setLoading] = useState(false)
   const [tracks, setTracks] = useState<SunoSong[]>([])
   const [selectedTrack, setSelectedTrack] = useState<SunoSong | null>(null)
@@ -283,7 +282,7 @@ export default function MusicStudioPage() {
                     <span className="text-[13px] font-semibold text-white">{model.name}</span>
                     <span className={cn(
                       "px-2 py-0.5 text-[9px] font-medium rounded-full",
-                      model.featured 
+                      model.id === "chirp-v3-5"
                         ? "bg-gradient-to-r from-orange-500 to-red-500 text-white"
                         : "bg-white/10 text-white/70"
                     )}>
