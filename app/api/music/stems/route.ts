@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'edge'
-export const maxDuration = 10
+export const maxDuration = 50
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const body = await req.json()
     const { audio_id } = body
@@ -21,9 +21,11 @@ export async function POST(req: NextRequest) {
 
     const response = await fetch(`${sunoApiUrl}/api/generate_stems`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audio_id }),
-      signal: AbortSignal.timeout(8000),
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ audio_id })
     })
 
     if (!response.ok) {

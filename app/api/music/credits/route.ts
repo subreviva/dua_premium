@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'edge'
-export const maxDuration = 10
+export const maxDuration = 50
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
     const sunoApiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
     
@@ -11,7 +11,9 @@ export async function GET(req: NextRequest) {
 
     const response = await fetch(`${sunoApiUrl}/api/get_credits`, {
       method: 'GET',
-      signal: AbortSignal.timeout(8000),
+      headers: {
+        'Accept': 'application/json'
+      }
     })
 
     if (!response.ok) {
