@@ -11,19 +11,20 @@ export async function GET(request: NextRequest) {
 
     if (!ids) {
       return NextResponse.json(
-        { success: false, error: 'IDs são obrigatórios' },
+        { success: false, error: 'IDs are required' },
         { status: 400 }
       )
     }
 
-    console.log('[Music Status] Checking status for:', ids)
+    const idArray = ids.split(',')
+    console.log('🔍 [Status] Polling IDs:', idArray)
 
     // Chama a API Suno no Railway
     const response = await fetch(`${SUNO_API_URL}/api/get?ids=${ids}`)
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('[Music Status] API Error:', response.status, errorText)
+      console.error('❌ [Status] API Error:', response.status, errorText)
       
       return NextResponse.json(
         { 
@@ -36,7 +37,13 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     
-    console.log('[Music Status] Response:', data)
+    // Log status de cada song
+    if (Array.isArray(data)) {
+      data.forEach(song => {
+        const hasAudio = song.audio_url ? '🎵 audio ready' : '⏳ processing'
+        console.log(`[Status] ${song.id}: ${song.status} ${hasAudio}`)
+      })
+    }
 
     // API retorna array de songs
     if (Array.isArray(data)) {
@@ -52,7 +59,7 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
 
   } catch (error) {
-    console.error('[Music Status] Error:', error)
+    console.error('❌ [Status] Error:', error)
     
     return NextResponse.json(
       { 
