@@ -133,14 +133,27 @@ export default function MusicStudioPage() {
     
     setLoading(true)
     try {
+      // Determinar se é modo custom (com letras e tags personalizadas)
+      const isCustomMode = selectedTool === "custom"
+      
+      const requestBody: any = {
+        prompt,
+        instrumental,
+        model: selectedModel,
+        is_custom: isCustomMode
+      }
+      
+      // Adicionar campos do modo custom
+      if (isCustomMode) {
+        if (lyrics.trim()) requestBody.lyrics = lyrics
+        if (tags.trim()) requestBody.tags = tags
+        if (title.trim()) requestBody.title = title
+      }
+      
       const response = await fetch('/api/music/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          instrumental,
-          model: selectedModel // Adiciona modelo selecionado
-        })
+        body: JSON.stringify(requestBody)
       })
       
       const data = await response.json()
@@ -155,6 +168,11 @@ export default function MusicStudioPage() {
         
         // Limpar form
         setPrompt("")
+        if (isCustomMode) {
+          setLyrics("")
+          setTags("")
+          setTitle("")
+        }
       } else {
         console.error('Generation failed:', data.error)
         setLoading(false)

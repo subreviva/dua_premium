@@ -8,7 +8,15 @@ export const maxDuration = 10
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { prompt, instrumental = false, model = 'chirp-v3-5', tags, title } = body
+    const { 
+      prompt, 
+      instrumental = false, 
+      model = 'chirp-v3-5', 
+      tags, 
+      title,
+      is_custom = false, // Novo: para letras customizadas
+      lyrics // Novo: para modo custom
+    } = body
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json(
@@ -17,13 +25,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[Music Generate] Creating music:', { prompt, instrumental, model, tags, title })
+    console.log('[Music Generate] Creating music:', { 
+      prompt: prompt.substring(0, 100) + '...', 
+      instrumental, 
+      model, 
+      tags, 
+      title,
+      is_custom 
+    })
 
     // 🔥 CRUCIAL: wait_audio=false para retornar IDs IMEDIATAMENTE
     const requestBody: any = {
-      prompt,
+      prompt: is_custom ? (lyrics || prompt) : prompt, // Se custom, usa lyrics
+      is_custom, // True = letras customizadas, False = descrição
       make_instrumental: instrumental,
-      model_version: model, // Usar model_version em vez de model
+      model_version: model,
       wait_audio: false // ⚡ KEY: Não espera processar!
     }
 
