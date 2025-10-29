@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { Play, Pause, Download, Music2, Loader2, Volume2, Share2, FileText, RefreshCw } from "lucide-react"
+import { Play, Pause, Download, Music2, Loader2, Volume2, Share2, FileText, RefreshCw, History, Coins, ChevronDown, ChevronUp, Copy, Check, Repeat2, Scissors, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { SunoSong, ModelVersion } from "@/lib/types"
+import type { SunoSong, ModelVersion, CreditsInfo } from "@/lib/types"
 import { MODELS, DEFAULT_MODEL } from "@/lib/types"
+import { useToast, ToastContainer } from "@/components/ui/toast"
 
 const EXAMPLE_LYRICS = `[Verse 1]
 Walking down the empty street tonight
@@ -44,9 +45,14 @@ As long as you are near
 Take me home...`
 
 export default function MusicStudio() {
+  // Toast system
+  const { toasts, success, error, warning, closeToast } = useToast()
+  
   // Tool & Model State
   const [isCustomMode, setIsCustomMode] = useState(false)
   const [selectedModel, setSelectedModel] = useState<ModelVersion>(DEFAULT_MODEL)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   
   // Form State - Simple Mode
   const [prompt, setPrompt] = useState("")
@@ -58,10 +64,22 @@ export default function MusicStudio() {
   const [tags, setTags] = useState("")
   const [negativeTags, setNegativeTags] = useState("")
   
+  // Advanced Features State
+  const [extendAudioId, setExtendAudioId] = useState("")
+  const [extendPrompt, setExtendPrompt] = useState("")
+  const [stemsAudioId, setStemsAudioId] = useState("")
+  const [lyricsPrompt, setLyricsPrompt] = useState("")
+  const [generatedLyrics, setGeneratedLyrics] = useState("")
+  
   // Generation State
   const [songs, setSongs] = useState<SunoSong[]>([])
   const [loading, setLoading] = useState(false)
   const [pollingIds, setPollingIds] = useState<string[]>([])
+  const [selectedSongs, setSelectedSongs] = useState<string[]>([])
+  
+  // Credits State
+  const [credits, setCredits] = useState<CreditsInfo | null>(null)
+  const [loadingCredits, setLoadingCredits] = useState(false)
   
   // Audio State
   const [playing, setPlaying] = useState<string | null>(null)
@@ -70,9 +88,57 @@ export default function MusicStudio() {
   const [volume, setVolume] = useState(0.7)
   const audioRef = useRef<HTMLAudioElement>(null)
   
+  // Share State
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  
   // Polling timeout
   const pollingInterval = useRef<NodeJS.Timeout | null>(null)
   const pollingStartTime = useRef<number>(0)
+
+  // Load credits on mount
+  useEffect(() => {
+    loadCredits()
+  }, [])
+
+  // Load history from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('dua-music-history')
+    if (saved) {
+      try {
+        const history = JSON.parse(saved)
+        setSongs(history.slice(0, 10))
+      } catch (e) {
+        console.error('Failed to load history:', e)
+      }
+    }
+  }, [])
+
+  // Save to history
+  useEffect(() => {
+    if (songs.length > 0) {
+      const completed = songs.filter(s => s.status === 'complete')
+      localStorage.setItem('dua-music-history', JSON.stringify(completed.slice(0, 10)))
+    }
+  }, [songs])
+
+  // Load credits
+  const loadCredits = async () => {
+    setLoadingCredits(true)
+    try {
+      const response = await fetch('/api/music/credits')
+      const data = await response.json()
+      if (data.success) {
+        setCredits(data.credits)
+        if (data.credits.credits_left < 10) {
+          warning(`Only ${data.credits.credits_left} credits remaining!`)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load credits:', err)
+    } finally {
+      setLoadingCredits(false)
+    }
+  }
 
   // Auto-polling effect
   useEffect(() => {
@@ -90,6 +156,7 @@ export default function MusicStudio() {
       // Timeout após 120 segundos
       if (Date.now() - pollingStartTime.current > 120000) {
         console.log('⏱️ [Polling] Timeout - stopping')
+        warning('⏱️ Polling timeout. Check history later.')
         setPollingIds([])
         return
       }
@@ -104,7 +171,13 @@ export default function MusicStudio() {
             data.songs.forEach((newSong: SunoSong) => {
               const idx = updated.findIndex(s => s.id === newSong.id)
               if (idx >= 0) {
+                const oldStatus = updated[idx].status
                 updated[idx] = newSong
+                // Notify on completion
+                if (oldStatus !== 'complete' && newSong.status === 'complete') {
+                  success(`🎉 ${newSong.title || 'Song'} is ready!`)
+                  loadCredits() // Refresh credits
+                }
               }
             })
             return updated
@@ -120,8 +193,8 @@ export default function MusicStudio() {
             setPollingIds([])
           }
         }
-      } catch (error) {
-        console.error('❌ [Polling] Error:', error)
+      } catch (err) {
+        console.error('❌ [Polling] Error:', err)
       }
     }
 
@@ -158,10 +231,15 @@ export default function MusicStudio() {
 
   // Generate simple mode
   const handleGenerate = async () => {
-    if (!prompt.trim()) return
+    if (!prompt.trim() || prompt.trim().length < 10) {
+      error('Prompt must be at least 10 characters')
+      return
+    }
 
     setLoading(true)
     try {
+      success('✅ Creating music...')
+      
       const response = await fetch('/api/music/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,10 +263,11 @@ export default function MusicStudio() {
         setPollingIds(newSongs.map((s: SunoSong) => s.id))
         setPrompt('')
       } else {
-        console.error('Generation failed:', data.error)
+        error(`❌ Generation failed: ${data.error || 'Unknown error'}`)
       }
-    } catch (error) {
-      console.error('Generation error:', error)
+    } catch (err) {
+      error('❌ Failed to create music')
+      console.error('Generation error:', err)
     } finally {
       setLoading(false)
     }
@@ -197,12 +276,19 @@ export default function MusicStudio() {
   // Generate custom mode
   const handleCustomGenerate = async () => {
     if (!lyrics.trim() || !title.trim() || !tags.trim()) {
-      alert('Por favor, preencha letras, título e tags')
+      error('Please fill lyrics, title and tags')
+      return
+    }
+
+    if (lyrics.trim().length < 10) {
+      error('Lyrics must be at least 10 characters')
       return
     }
 
     setLoading(true)
     try {
+      success('✅ Creating custom music...')
+      
       const response = await fetch('/api/music/custom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -233,10 +319,11 @@ export default function MusicStudio() {
         setTags('')
         setNegativeTags('')
       } else {
-        console.error('Custom generation failed:', data.error)
+        error(`❌ Custom generation failed: ${data.error || 'Unknown error'}`)
       }
-    } catch (error) {
-      console.error('Custom generation error:', error)
+    } catch (err) {
+      error('❌ Failed to create custom music')
+      console.error('Custom generation error:', err)
     } finally {
       setLoading(false)
     }
@@ -296,9 +383,167 @@ export default function MusicStudio() {
     }
   }
 
+  // Remix functionality
+  const handleRemix = (song: SunoSong) => {
+    if (song.lyric && song.title && song.tags) {
+      setIsCustomMode(true)
+      setLyrics(song.lyric)
+      setTitle(song.title)
+      setTags(song.tags)
+      success('✨ Loaded song data for remix!')
+    } else if (song.prompt || song.gpt_description_prompt) {
+      setIsCustomMode(false)
+      setPrompt(song.prompt || song.gpt_description_prompt || '')
+      success('✨ Loaded prompt for remix!')
+    }
+  }
+
+  // Copy share link
+  const handleCopyLink = async (song: SunoSong) => {
+    if (!song.audio_url) return
+    try {
+      await navigator.clipboard.writeText(song.audio_url)
+      setCopiedId(song.id)
+      success('📋 Link copied!')
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch (err) {
+      error('Failed to copy link')
+    }
+  }
+
+  // Batch download
+  const handleBatchDownload = () => {
+    const selected = songs.filter(s => selectedSongs.includes(s.id))
+    if (selected.length === 0) {
+      warning('No songs selected')
+      return
+    }
+
+    selected.forEach(song => {
+      if (song.audio_url) {
+        const a = document.createElement('a')
+        a.href = song.audio_url
+        a.download = `${song.title || 'song'}.mp3`
+        a.click()
+      }
+    })
+
+    success(`Downloaded ${selected.length} songs`)
+    setSelectedSongs([])
+  }
+
+  // Toggle song selection
+  const toggleSongSelection = (id: string) => {
+    setSelectedSongs(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
+  }
+
+  // Advanced: Extend audio
+  const handleExtend = async () => {
+    if (!extendAudioId || !extendPrompt) {
+      error('Audio ID and prompt required')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/music/extend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audio_id: extendAudioId,
+          prompt: extendPrompt,
+          model: selectedModel
+        })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        success('✅ Extending audio...')
+        const newSongs = data.songs.map((song: SunoSong) => ({
+          ...song,
+          status: song.status || 'submitted'
+        }))
+        setSongs(prev => [...newSongs, ...prev])
+        setPollingIds(newSongs.map((s: SunoSong) => s.id))
+        setExtendAudioId('')
+        setExtendPrompt('')
+      } else {
+        error(`Failed to extend: ${data.error}`)
+      }
+    } catch (err) {
+      error('Failed to extend audio')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Advanced: Generate stems
+  const handleGenerateStems = async () => {
+    if (!stemsAudioId) {
+      error('Audio ID required')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/music/stems', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audio_id: stemsAudioId })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        success('✅ Generating stems...')
+        setStemsAudioId('')
+      } else {
+        error(`Failed to generate stems: ${data.error}`)
+      }
+    } catch (err) {
+      error('Failed to generate stems')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Advanced: Generate lyrics first
+  const handleGenerateLyrics = async () => {
+    if (!lyricsPrompt || lyricsPrompt.length < 10) {
+      error('Lyrics prompt must be at least 10 characters')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/music/lyrics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: lyricsPrompt })
+      })
+
+      const data = await response.json()
+      if (data.success && data.data) {
+        setGeneratedLyrics(data.data.text || '')
+        setTitle(data.data.title || '')
+        success('✅ Lyrics generated!')
+        setIsCustomMode(true)
+        setLyrics(data.data.text || '')
+      } else {
+        error(`Failed to generate lyrics: ${data.error}`)
+      }
+    } catch (err) {
+      error('Failed to generate lyrics')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
       <audio ref={audioRef} />
+      <ToastContainer toasts={toasts} onClose={closeToast} />
       
       {/* Header */}
       <header className="border-b border-[#2a2a2a] bg-[#1a1a1a]/80 backdrop-blur-xl sticky top-0 z-50">
@@ -311,17 +556,49 @@ export default function MusicStudio() {
               <p className="text-sm text-gray-400 mt-1">Create music with AI-powered Suno models</p>
             </div>
             
-            <Button
-              onClick={() => setIsCustomMode(!isCustomMode)}
-              variant={isCustomMode ? "default" : "outline"}
-              className={cn(
-                "transition-all duration-200",
-                isCustomMode && "bg-gradient-to-r from-[#8B5CF6] to-[#EC4899]"
+            <div className="flex items-center gap-4">
+              {/* Credits Display */}
+              {credits && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg">
+                  <Coins className={cn(
+                    "w-4 h-4",
+                    credits.credits_left < 10 ? "text-red-400" : "text-[#F59E0B]"
+                  )} />
+                  <div className="text-sm">
+                    <span className={cn(
+                      "font-semibold",
+                      credits.credits_left < 10 ? "text-red-400" : "text-white"
+                    )}>
+                      {credits.credits_left}
+                    </span>
+                    <span className="text-gray-400"> credits</span>
+                  </div>
+                </div>
               )}
-            >
-              <Music2 className="w-4 h-4 mr-2" />
-              {isCustomMode ? 'Custom Mode' : 'Simple Mode'}
-            </Button>
+
+              {/* History Toggle */}
+              <Button
+                onClick={() => setShowHistory(!showHistory)}
+                variant="outline"
+                size="sm"
+              >
+                <History className="w-4 h-4 mr-2" />
+                History
+              </Button>
+
+              {/* Mode Toggle */}
+              <Button
+                onClick={() => setIsCustomMode(!isCustomMode)}
+                variant={isCustomMode ? "default" : "outline"}
+                className={cn(
+                  "transition-all duration-200",
+                  isCustomMode && "bg-gradient-to-r from-[#8B5CF6] to-[#EC4899]"
+                )}
+              >
+                <Music2 className="w-4 h-4 mr-2" />
+                {isCustomMode ? 'Custom Mode' : 'Simple Mode'}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -475,10 +752,114 @@ export default function MusicStudio() {
                 )}
               </Button>
             </div>
+
+            {/* Advanced Options */}
+            <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl overflow-hidden">
+              <button
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="w-full p-4 flex items-center justify-between hover:bg-[#2a2a2a]/30 transition-colors"
+              >
+                <span className="text-sm font-semibold">Advanced Options</span>
+                {showAdvanced ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
+
+              {showAdvanced && (
+                <div className="p-6 pt-0 space-y-4 border-t border-[#2a2a2a]">
+                  {/* Generate Lyrics First */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-gray-300">Generate Lyrics First</h3>
+                    <Input
+                      value={lyricsPrompt}
+                      onChange={(e) => setLyricsPrompt(e.target.value)}
+                      placeholder="A song about summer love..."
+                      className="bg-[#0f0f0f] border-[#2a2a2a] text-sm"
+                    />
+                    <Button
+                      onClick={handleGenerateLyrics}
+                      disabled={loading || !lyricsPrompt.trim()}
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <FileText className="w-3 h-3 mr-2" />
+                      Generate Lyrics
+                    </Button>
+                  </div>
+
+                  {/* Extend Audio */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-gray-300">Extend Audio</h3>
+                    <Input
+                      value={extendAudioId}
+                      onChange={(e) => setExtendAudioId(e.target.value)}
+                      placeholder="Audio ID to extend"
+                      className="bg-[#0f0f0f] border-[#2a2a2a] text-sm"
+                    />
+                    <Input
+                      value={extendPrompt}
+                      onChange={(e) => setExtendPrompt(e.target.value)}
+                      placeholder="Extension prompt"
+                      className="bg-[#0f0f0f] border-[#2a2a2a] text-sm"
+                    />
+                    <Button
+                      onClick={handleExtend}
+                      disabled={loading || !extendAudioId.trim() || !extendPrompt.trim()}
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Plus className="w-3 h-3 mr-2" />
+                      Extend Audio
+                    </Button>
+                  </div>
+
+                  {/* Generate Stems */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-gray-300">Separate Stems</h3>
+                    <Input
+                      value={stemsAudioId}
+                      onChange={(e) => setStemsAudioId(e.target.value)}
+                      placeholder="Audio ID for stems"
+                      className="bg-[#0f0f0f] border-[#2a2a2a] text-sm"
+                    />
+                    <Button
+                      onClick={handleGenerateStems}
+                      disabled={loading || !stemsAudioId.trim()}
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Scissors className="w-3 h-3 mr-2" />
+                      Generate Stems
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Panel - Songs Grid */}
           <div>
+            {/* Batch Actions */}
+            {selectedSongs.length > 0 && (
+              <div className="mb-4 p-4 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl flex items-center justify-between">
+                <span className="text-sm text-gray-400">
+                  {selectedSongs.length} song{selectedSongs.length > 1 ? 's' : ''} selected
+                </span>
+                <Button
+                  onClick={handleBatchDownload}
+                  size="sm"
+                  className="bg-gradient-to-r from-[#8B5CF6] to-[#EC4899]"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Selected
+                </Button>
+              </div>
+            )}
             {songs.length === 0 ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
@@ -493,8 +874,13 @@ export default function MusicStudio() {
                     key={song.id}
                     song={song}
                     playing={playing === song.id}
+                    selected={selectedSongs.includes(song.id)}
                     onTogglePlay={() => togglePlay(song)}
                     onRetry={() => handleRetry(song)}
+                    onRemix={() => handleRemix(song)}
+                    onCopyLink={() => handleCopyLink(song)}
+                    onToggleSelect={() => toggleSongSelection(song.id)}
+                    copied={copiedId === song.id}
                     currentTime={playing === song.id ? currentTime : 0}
                     duration={playing === song.id ? duration : song.duration || 0}
                     onSeek={handleSeek}
@@ -515,8 +901,13 @@ export default function MusicStudio() {
 interface SongCardProps {
   song: SunoSong
   playing: boolean
+  selected: boolean
+  copied: boolean
   onTogglePlay: () => void
   onRetry: () => void
+  onRemix: () => void
+  onCopyLink: () => void
+  onToggleSelect: () => void
   currentTime: number
   duration: number
   onSeek: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -524,7 +915,7 @@ interface SongCardProps {
   onVolumeChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-function SongCard({ song, playing, onTogglePlay, onRetry, currentTime, duration, onSeek, volume, onVolumeChange }: SongCardProps) {
+function SongCard({ song, playing, selected, copied, onTogglePlay, onRetry, onRemix, onCopyLink, onToggleSelect, currentTime, duration, onSeek, volume, onVolumeChange }: SongCardProps) {
   const formatTime = (time: number) => {
     const mins = Math.floor(time / 60)
     const secs = Math.floor(time % 60)
@@ -534,7 +925,17 @@ function SongCard({ song, playing, onTogglePlay, onRetry, currentTime, duration,
   // Status: submitted
   if (song.status === 'submitted') {
     return (
-      <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 animate-pulse">
+      <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 animate-pulse relative">
+        {/* Checkbox */}
+        <div className="absolute top-4 right-4 z-10">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            className="w-4 h-4 rounded border-2 border-[#2a2a2a] bg-[#0f0f0f] cursor-pointer"
+          />
+        </div>
+        
         <div className="aspect-square bg-[#2a2a2a] rounded-lg mb-4 shimmer" />
         <div className="h-4 bg-[#2a2a2a] rounded w-3/4 mb-2" />
         <div className="h-3 bg-[#2a2a2a] rounded w-1/2" />
@@ -546,7 +947,17 @@ function SongCard({ song, playing, onTogglePlay, onRetry, currentTime, duration,
   // Status: streaming
   if (song.status === 'streaming') {
     return (
-      <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6">
+      <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 relative">
+        {/* Checkbox */}
+        <div className="absolute top-4 right-4 z-10">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            className="w-4 h-4 rounded border-2 border-[#2a2a2a] bg-[#0f0f0f] cursor-pointer"
+          />
+        </div>
+        
         <div className="aspect-square bg-[#2a2a2a] rounded-lg mb-4 flex items-center justify-center">
           <Loader2 className="w-12 h-12 text-[#8B5CF6] animate-spin" />
         </div>
@@ -559,28 +970,59 @@ function SongCard({ song, playing, onTogglePlay, onRetry, currentTime, duration,
   // Status: error
   if (song.status === 'error') {
     return (
-      <div className="bg-[#1a1a1a] border border-red-900/50 rounded-xl p-6">
+      <div className="bg-[#1a1a1a] border border-red-900/50 rounded-xl p-6 relative">
+        {/* Checkbox */}
+        <div className="absolute top-4 right-4 z-10">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            className="w-4 h-4 rounded border-2 border-[#2a2a2a] bg-[#0f0f0f] cursor-pointer"
+          />
+        </div>
+        
         <div className="aspect-square bg-red-950/20 rounded-lg mb-4 flex items-center justify-center">
           <span className="text-4xl">⚠️</span>
         </div>
         <h3 className="font-semibold truncate text-red-400">{song.title || 'Generation Failed'}</h3>
         <p className="text-sm text-gray-400 mb-4">Failed to generate music</p>
-        <Button
-          onClick={onRetry}
-          variant="outline"
-          size="sm"
-          className="w-full"
-        >
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Try Again
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={onRetry}
+            variant="outline"
+            size="sm"
+            className="flex-1"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
+          <Button
+            onClick={onRemix}
+            variant="outline"
+            size="sm"
+            className="flex-1"
+          >
+            <Repeat2 className="w-4 h-4 mr-2" />
+            Remix
+          </Button>
+        </div>
       </div>
     )
   }
 
   // Status: complete
   return (
-    <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 hover:scale-[1.02] transition-transform duration-200">
+    <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 hover:scale-[1.02] transition-transform duration-200 relative">
+      {/* Checkbox */}
+      <div className="absolute top-4 right-4 z-10">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          className="w-4 h-4 rounded border-2 border-[#2a2a2a] bg-[#0f0f0f] checked:bg-[#8B5CF6] checked:border-[#8B5CF6] cursor-pointer"
+        />
+      </div>
+      
       {/* Artwork */}
       <div className="aspect-square bg-[#2a2a2a] rounded-lg mb-4 overflow-hidden relative group">
         {song.image_url ? (
@@ -678,12 +1120,12 @@ function SongCard({ song, playing, onTogglePlay, onRetry, currentTime, duration,
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {song.lyric && (
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 text-xs"
+              className="text-xs"
               onClick={() => alert(song.lyric)}
             >
               <FileText className="w-3 h-3 mr-1" />
@@ -693,11 +1135,29 @@ function SongCard({ song, playing, onTogglePlay, onRetry, currentTime, duration,
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 text-xs"
-            onClick={() => navigator.share?.({ url: song.audio_url, title: song.title })}
+            className="text-xs"
+            onClick={onCopyLink}
           >
-            <Share2 className="w-3 h-3 mr-1" />
-            Share
+            {copied ? (
+              <>
+                <Check className="w-3 h-3 mr-1" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3 mr-1" />
+                Copy
+              </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={onRemix}
+          >
+            <Repeat2 className="w-3 h-3 mr-1" />
+            Remix
           </Button>
         </div>
       </div>
