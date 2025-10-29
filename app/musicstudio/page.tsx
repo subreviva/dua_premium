@@ -18,9 +18,11 @@ const tools = [
 ]
 
 const MODELS = [
-  { id: "chirp-v3-5", name: "v3.5", badge: "Fast", desc: "Rápido - 4 min" },
-  { id: "chirp-v3-0", name: "v3", badge: "Balanced", desc: "Equilibrado - 2 min" },
-  { id: "chirp-v2-0", name: "v2", badge: "Vintage", desc: "Clássico - 1.3 min" },
+  { id: "chirp-v3-5", name: "v3.5", badge: "Standard", desc: "Better structure - 4 min" },
+  { id: "chirp-v3-0", name: "v3.0", badge: "Legacy", desc: "Broad, versatile - 2 min" },
+  { id: "chirp-auk", name: "v4.5", badge: "Pro", desc: "Professional quality - 4 min" },
+  { id: "chirp-bluejay", name: "v4.5+", badge: "Pro+", desc: "Enhanced quality - 4 min" },
+  { id: "chirp-crow", name: "v5", badge: "Latest", desc: "Newest model - 4 min" },
 ]
 
 export default function MusicStudioPage() {
