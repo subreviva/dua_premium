@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const SUNO_API_URL = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
 
+// Vercel Free tier limit
+export const maxDuration = 10
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { prompt, instrumental = false } = body
+    const { prompt, instrumental = false, model = 'chirp-crow' } = body
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json(
@@ -14,9 +17,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[Music Generate] Creating music:', { prompt, instrumental })
+    console.log('[Music Generate] Creating music:', { prompt, instrumental, model })
 
-    // Chama a API Suno no Railway
+    // 🔥 CRUCIAL: wait_audio=false para retornar IDs IMEDIATAMENTE
     const response = await fetch(`${SUNO_API_URL}/api/generate`, {
       method: 'POST',
       headers: {
@@ -25,8 +28,10 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         prompt,
         make_instrumental: instrumental,
-        wait_audio: false // Modo assíncrono para polling
-      })
+        model,
+        wait_audio: false // ⚡ KEY: Não espera processar!
+      }),
+      signal: AbortSignal.timeout(8000) // 8s timeout (segurança)
     })
 
     if (!response.ok) {
@@ -36,21 +41,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          error: `API Error: ${response.status} - ${errorText}` 
+          error: `API Error: ${response.status}` 
         },
         { status: response.status }
       )
     }
 
-    const data = await response.json()
+    const songs = await response.json()
     
-    console.log('[Music Generate] Success:', data)
+    console.log('[Music Generate] IDs returned:', songs.map((s: any) => s.id))
 
-    // API retorna array de songs diretamente
-    if (Array.isArray(data)) {
+    // Retorna IDs + status IMEDIATAMENTE (não espera audio_url)
+    if (Array.isArray(songs)) {
       return NextResponse.json({
         success: true,
-        songs: data
+        songs: songs.map((s: any) => ({
+          id: s.id,
+          status: s.status || 'submitted',
+          title: s.title,
+          created_at: s.created_at,
+          model_name: s.model_name
+        }))
       })
     }
 

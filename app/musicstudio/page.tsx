@@ -139,14 +139,15 @@ export default function MusicStudioPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt,
-          instrumental
+          instrumental,
+          model: selectedModel // Adiciona modelo selecionado
         })
       })
       
       const data = await response.json()
       
       if (data.success && Array.isArray(data.songs)) {
-        // Adicionar novas músicas à lista
+        // Adicionar novas músicas à lista com status "submitted"
         setTracks(prev => [...data.songs, ...prev])
         
         // Iniciar polling para estas músicas
