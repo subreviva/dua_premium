@@ -394,6 +394,41 @@ export class SunoAPIClient {
 
   // Music Generation APIs
   async generateMusic(params: GenerateMusicParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.customMode && !params.prompt && !params.gpt_description_prompt) {
+      throw new SunoAPIError("Either prompt or gpt_description_prompt is required when customMode is false", 400)
+    }
+
+    if (params.customMode && !params.prompt) {
+      throw new SunoAPIError("prompt is required when customMode is true", 400)
+    }
+
+    // Validate optional range parameters
+    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
+      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    }
+
+    if (
+      params.weirdnessConstraint !== undefined &&
+      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+    ) {
+      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
+    }
+
+    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
+      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+    }
+
+    // Validate prompt length (max 3000 characters for custom mode)
+    if (params.customMode && params.prompt && params.prompt.length > 3000) {
+      throw new SunoAPIError("Prompt exceeds maximum character limit of 3000 characters", 413)
+    }
+
+    // Validate gpt_description_prompt length (max 200 characters for simple mode)
+    if (!params.customMode && params.gpt_description_prompt && params.gpt_description_prompt.length > 200) {
+      throw new SunoAPIError("Description prompt exceeds maximum character limit of 200 characters", 413)
+    }
+
     return this.request("/generate", {
       method: "POST",
       body: JSON.stringify(params),
@@ -401,6 +436,32 @@ export class SunoAPIClient {
   }
 
   async extendMusic(params: ExtendMusicParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.audioId) {
+      throw new SunoAPIError("audioId is required", 400)
+    }
+
+    // Validate optional range parameters
+    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
+      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    }
+
+    if (
+      params.weirdnessConstraint !== undefined &&
+      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+    ) {
+      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
+    }
+
+    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
+      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+    }
+
+    // Validate continueAt parameter (must be positive if provided)
+    if (params.continueAt !== undefined && params.continueAt < 0) {
+      throw new SunoAPIError("continueAt must be non-negative", 400)
+    }
+
     return this.request("/generate/extend", {
       method: "POST",
       body: JSON.stringify(params),
@@ -408,6 +469,18 @@ export class SunoAPIClient {
   }
 
   async coverMusic(params: CoverMusicParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.uploadUrl) {
+      throw new SunoAPIError("uploadUrl is required", 400)
+    }
+
+    // Validate URL format
+    try {
+      new URL(params.uploadUrl)
+    } catch {
+      throw new SunoAPIError("uploadUrl must be a valid URL", 400)
+    }
+
     return this.request("/cover", {
       method: "POST",
       body: JSON.stringify(params),
@@ -477,6 +550,16 @@ export class SunoAPIClient {
   }
 
   async boostMusicStyle(params: BoostMusicStyleParams): Promise<ApiResponse<BoostStyleResponse>> {
+    // Validate required parameters
+    if (!params.content) {
+      throw new SunoAPIError("content is required", 400)
+    }
+
+    // Validate content length (reasonable limit)
+    if (params.content.length > 1000) {
+      throw new SunoAPIError("Content exceeds maximum character limit of 1000 characters", 413)
+    }
+
     return this.request("/style/generate", {
       method: "POST",
       body: JSON.stringify(params),
@@ -620,6 +703,21 @@ export class SunoAPIClient {
 
   // File Upload APIs
   async uploadFileBase64(params: Base64UploadParams): Promise<ApiResponse<FileUploadResult>> {
+    // Validate required parameters
+    if (!params.base64Data) {
+      throw new SunoAPIError("base64Data is required", 400)
+    }
+
+    if (!params.uploadPath) {
+      throw new SunoAPIError("uploadPath is required", 400)
+    }
+
+    // Validate base64 format
+    const base64Pattern = /^(?:data:[a-zA-Z0-9\/+\-]+;base64,)?[A-Za-z0-9+/]+=*$/
+    if (!base64Pattern.test(params.base64Data.replace(/\s/g, ""))) {
+      throw new SunoAPIError("Invalid base64Data format", 400)
+    }
+
     return this.request("/file-base64-upload", {
       method: "POST",
       body: JSON.stringify(params),
@@ -627,6 +725,15 @@ export class SunoAPIClient {
   }
 
   async uploadFileStream(params: StreamUploadParams): Promise<ApiResponse<FileUploadResult>> {
+    // Validate required parameters
+    if (!params.file) {
+      throw new SunoAPIError("file is required", 400)
+    }
+
+    if (!params.uploadPath) {
+      throw new SunoAPIError("uploadPath is required", 400)
+    }
+
     const formData = new FormData()
     formData.append("file", params.file)
     formData.append("uploadPath", params.uploadPath)
@@ -641,6 +748,22 @@ export class SunoAPIClient {
   }
 
   async uploadFileUrl(params: UrlUploadParams): Promise<ApiResponse<FileUploadResult>> {
+    // Validate required parameters
+    if (!params.fileUrl) {
+      throw new SunoAPIError("fileUrl is required", 400)
+    }
+
+    if (!params.uploadPath) {
+      throw new SunoAPIError("uploadPath is required", 400)
+    }
+
+    // Validate URL format
+    try {
+      new URL(params.fileUrl)
+    } catch {
+      throw new SunoAPIError("fileUrl must be a valid URL", 400)
+    }
+
     return this.request("/file-url-upload", {
       method: "POST",
       body: JSON.stringify(params),
@@ -749,6 +872,34 @@ export class SunoAPIClient {
   }
 
   async uploadAndCover(params: UploadAndCoverParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.uploadUrl) {
+      throw new SunoAPIError("uploadUrl is required", 400)
+    }
+
+    // Validate URL format
+    try {
+      new URL(params.uploadUrl)
+    } catch {
+      throw new SunoAPIError("uploadUrl must be a valid URL", 400)
+    }
+
+    // Validate optional range parameters
+    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
+      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    }
+
+    if (
+      params.weirdnessConstraint !== undefined &&
+      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+    ) {
+      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
+    }
+
+    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
+      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+    }
+
     return this.request("/upload/cover", {
       method: "POST",
       body: JSON.stringify(params),
@@ -756,6 +907,43 @@ export class SunoAPIClient {
   }
 
   async uploadAndExtend(params: UploadAndExtendParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.uploadUrl) {
+      throw new SunoAPIError("uploadUrl is required", 400)
+    }
+
+    if (params.defaultParamFlag === undefined) {
+      throw new SunoAPIError("defaultParamFlag is required", 400)
+    }
+
+    // Validate URL format
+    try {
+      new URL(params.uploadUrl)
+    } catch {
+      throw new SunoAPIError("uploadUrl must be a valid URL", 400)
+    }
+
+    // Validate optional range parameters
+    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
+      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    }
+
+    if (
+      params.weirdnessConstraint !== undefined &&
+      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+    ) {
+      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
+    }
+
+    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
+      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+    }
+
+    // Validate continueAt parameter (must be positive if provided)
+    if (params.continueAt !== undefined && params.continueAt < 0) {
+      throw new SunoAPIError("continueAt must be non-negative", 400)
+    }
+
     return this.request("/upload/extend", {
       method: "POST",
       body: JSON.stringify(params),
