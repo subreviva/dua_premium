@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -18,6 +18,8 @@ import {
   Upload,
   Mic,
   Library,
+  Undo2,
+  Redo2,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PersonasModal } from "@/components/personas-modal"
@@ -48,6 +50,35 @@ export function CreatePanel() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [lyricsPlaceholder] = useState("Enter your own lyrics or let AI create them for you")
   const [descriptionPlaceholder] = useState("a cozy indie song about sunshine")
+  
+  // Undo/Redo para lyrics
+  const [lyricsHistory, setLyricsHistory] = useState<string[]>([])
+  const [lyricsHistoryIndex, setLyricsHistoryIndex] = useState(-1)
+
+  const handleLyricsChange = useCallback((newLyrics: string) => {
+    setLyrics(newLyrics)
+    // Adiciona ao histórico
+    const newHistory = lyricsHistory.slice(0, lyricsHistoryIndex + 1)
+    newHistory.push(newLyrics)
+    setLyricsHistory(newHistory)
+    setLyricsHistoryIndex(newHistory.length - 1)
+  }, [lyricsHistory, lyricsHistoryIndex])
+
+  const handleLyricsUndo = useCallback(() => {
+    if (lyricsHistoryIndex > 0) {
+      const newIndex = lyricsHistoryIndex - 1
+      setLyricsHistoryIndex(newIndex)
+      setLyrics(lyricsHistory[newIndex])
+    }
+  }, [lyricsHistory, lyricsHistoryIndex])
+
+  const handleLyricsRedo = useCallback(() => {
+    if (lyricsHistoryIndex < lyricsHistory.length - 1) {
+      const newIndex = lyricsHistoryIndex + 1
+      setLyricsHistoryIndex(newIndex)
+      setLyrics(lyricsHistory[newIndex])
+    }
+  }, [lyricsHistory, lyricsHistoryIndex])
 
   const inspirationTags = [
     "aggro",
@@ -341,6 +372,36 @@ export function CreatePanel() {
                 >
                   <span className="font-semibold text-lg">Lyrics</span>
                   <div className="flex items-center gap-2">
+                    {lyricsExpanded && lyrics && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleLyricsUndo()
+                          }}
+                          disabled={lyricsHistoryIndex <= 0}
+                          className="h-7 w-7 p-0 hover:bg-white/10 disabled:opacity-30"
+                          title="Undo"
+                        >
+                          <Undo2 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleLyricsRedo()
+                          }}
+                          disabled={lyricsHistoryIndex >= lyricsHistory.length - 1}
+                          className="h-7 w-7 p-0 hover:bg-white/10 disabled:opacity-30"
+                          title="Redo"
+                        >
+                          <Redo2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
                     <Shuffle className="h-4 w-4 text-neutral-400 group-hover:text-purple-400 transition-colors" />
                     {lyricsExpanded ? (
                       <ChevronUp className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
@@ -354,7 +415,7 @@ export function CreatePanel() {
                   <Textarea
                     placeholder={lyricsPlaceholder}
                     value={lyrics}
-                    onChange={(e) => setLyrics(e.target.value)}
+                    onChange={(e) => handleLyricsChange(e.target.value)}
                     className="min-h-[120px] premium-input resize-none font-medium"
                   />
                 )}
@@ -600,8 +661,29 @@ export function CreatePanel() {
             disabled={isGenerating}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-sm lg:text-base h-11 lg:h-12 rounded-xl glow-effect premium-button shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Music className="mr-2 h-4 lg:h-5 w-4 lg:w-5" />
-            {isGenerating ? "Creating..." : "Create"}
+            {isGenerating ? (
+              <>
+                <svg
+                  className="animate-spin h-4 lg:h-5 w-4 lg:w-5 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Creating...
+              </>
+            ) : (
+              <>
+                <Music className="mr-2 h-4 lg:h-5 w-4 lg:w-5" />
+                Create
+              </>
+            )}
           </Button>
         </div>
       </div>
