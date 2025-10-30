@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Play, Pause, Music2, Scissors, Plus, Download, RefreshCw, Loader2, ChevronRight, Music, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { SunoSong } from "@/lib/suno-api"
+import type { SunoSong as LegacySunoSong } from "@/lib/types"
 
 const tools = [
   { id: "generate", icon: Sparkles, name: "Criar Música", desc: "Gere músicas com IA", credits: 10 },

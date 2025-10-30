@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { extendMusic } from '@/lib/suno-api'
 
 export const runtime = 'edge'
 export const maxDuration = 50
@@ -30,50 +31,61 @@ export async function POST(req: Request) {
       }, { status: 400 })
     }
 
-    const sunoApiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
-    
-    const requestBody = {
-      audio_id,
-      prompt,
-      model_version: model,
-      ...(continue_at && { continue_at }),
-      ...(title && { title }),
-      ...(tags && { tags }),
-      ...(negative_tags && { negative_tags })
+    // Map legacy model names to official API models
+    const mapModel = (m: string): string => {
+      switch (m) {
+        case 'chirp-v3-5':
+        case 'chirp-v3-0':
+          return 'V3_5'
+        case 'chirp-auk':
+          return 'V4_5'
+        case 'chirp-bluejay':
+          return 'V4_5PLUS'
+        case 'chirp-crow':
+          return 'V5'
+        default:
+          return 'V5'
+      }
     }
 
-    console.log('🎵 [Extend] Request:', { 
-      audio_id, 
-      model,
-      hasContinueAt: !!continue_at,
-      hasTags: !!tags
+    console.log('🎵 [Extend] Request (Suno API):', { audio_id, model })
+
+    const callBackUrl = `${new URL(req.url).origin}/api/music/callback`
+
+    const res = await extendMusic({
+      audioId: audio_id,
+      prompt: prompt || undefined,
+      title: title || undefined,
+      style: tags || undefined,
+      continueAt: typeof continue_at === 'number' ? continue_at : undefined,
+      defaultParamFlag: true,
+      model: mapModel(model),
+      callBackUrl, // REQUIRED by Suno API
+      // negative_tags is not directly supported; ignored here
     })
 
-    const response = await fetch(`${sunoApiUrl}/api/extend_audio`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [Extend] Suno API error:', response.status, errorText)
-      return NextResponse.json({ 
-        success: false, 
-        error: `API error: ${response.status}` 
-      }, { status: response.status })
+    if (res.code !== 200 || !res.data?.taskId) {
+      console.error('❌ [Extend] Suno API error:', res)
+      return NextResponse.json({ success: false, error: res.msg || 'Suno API error' }, { status: 500 })
     }
 
-    const data = await response.json()
-    
-    console.log('✅ [Extend] Success:', data.length, 'songs IDs returned')
-    
-    return NextResponse.json({ 
-      success: true, 
-      songs: data 
+    const taskId = res.data.taskId
+    console.log('✅ [Extend] Task created:', taskId)
+
+    return NextResponse.json({
+      success: true,
+      songs: [
+        {
+          id: taskId,
+          status: 'submitted',
+          title: title || '',
+          created_at: new Date().toISOString(),
+          model_name: mapModel(model),
+          image_url: '',
+          audio_url: '',
+          lyric: '',
+        },
+      ],
     })
 
   } catch (error: unknown) {

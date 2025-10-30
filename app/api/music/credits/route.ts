@@ -1,38 +1,32 @@
 import { NextResponse } from 'next/server'
+import { getCredits } from '@/lib/suno-api'
 
 export const runtime = 'edge'
 export const maxDuration = 50
 
 export async function GET(req: Request) {
   try {
-    const sunoApiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
-    
-    console.log('💳 [Credits] Request')
+    console.log('💳 [Credits] Request (Suno API)')
 
-    const response = await fetch(`${sunoApiUrl}/api/get_credits`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [Credits] Suno API error:', response.status, errorText)
-      return NextResponse.json({ 
-        success: false, 
-        error: `API error: ${response.status}` 
-      }, { status: response.status })
+    const res = await getCredits()
+    if (res.code !== 200) {
+      console.error('❌ [Credits] Suno API error:', res)
+      return NextResponse.json({ success: false, error: res.msg || 'Suno API error' }, { status: 500 })
     }
 
-    const data = await response.json()
-    
-    console.log('✅ [Credits] Success:', data)
-    
-    return NextResponse.json({ 
-      success: true, 
-      credits: data 
-    })
+    const creditsLeft = typeof res.data === 'number' ? res.data : 0
+
+    // Wrap into legacy shape expected by UI
+    const legacy = {
+      credits_left: creditsLeft,
+      period: 'n/a',
+      monthly_limit: 0,
+      monthly_usage: 0,
+    }
+
+    console.log('✅ [Credits] Success:', legacy)
+
+    return NextResponse.json({ success: true, credits: legacy })
 
   } catch (error: unknown) {
     console.error('❌ [Credits] Error:', error)

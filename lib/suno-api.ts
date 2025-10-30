@@ -1,225 +1,159 @@
 /**
- * Suno API Client
- * Integração com API Suno hospedada no Railway
+ * Suno API Client (Official)
+ * Base: https://api.sunoapi.org/api/v1
+ * Auth: Bearer token in Authorization header
  */
 
-const SUNO_API_URL = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
+const SUNO_API_URL = 'https://api.sunoapi.org/api/v1'
+// Use server-only env var (do NOT expose publicly)
+const SUNO_API_KEY = process.env.SUNO_API_KEY
 
+export interface SunoTaskResponse {
+  code: number
+  msg: string
+  data: {
+    taskId: string
+  } | null
+}
+
+export type SunoRecordStatus =
+  | 'PENDING'
+  | 'TEXT_SUCCESS'
+  | 'FIRST_SUCCESS'
+  | 'SUCCESS'
+  | 'CREATE_TASK_FAILED'
+  | 'GENERATE_AUDIO_FAILED'
+  | 'CALLBACK_EXCEPTION'
+  | 'SENSITIVE_WORD_ERROR'
+
+export interface SunoRecordItem {
+  id: string
+  audioUrl?: string
+  streamAudioUrl?: string
+  imageUrl?: string
+  prompt?: string
+  modelName?: string
+  title?: string
+  tags?: string
+  lyric?: string
+  duration?: number
+  createTime?: string
+}
+
+export interface SunoRecordInfoData {
+  status: SunoRecordStatus
+  sunoData: SunoRecordItem[]
+}
+
+export interface SunoRecordInfoResponse {
+  code: number
+  msg: string
+  data: SunoRecordInfoData | null
+}
+
+export interface SunoCreditResponse {
+  code: number
+  msg: string
+  data: number
+}
+
+// Legacy UI compatibility type (matches UI expectations)
 export interface SunoSong {
   id: string
   title: string
-  audio_url: string
-  video_url?: string
   image_url: string
   lyric: string
+  audio_url: string
+  video_url: string
+  created_at: string
+  model_name: string
   status: 'submitted' | 'streaming' | 'complete' | 'error'
-  created_at?: string
-  model_name?: string
-  gpt_description_prompt?: string
-  prompt?: string
-  type?: string
-  tags?: string
-  duration?: number
-}
-
-export interface CreateMusicParams {
+  gpt_description_prompt: string
   prompt: string
+  type: string
+  tags: string
+  duration: number
+}
+
+async function postSunoAPI<T>(endpoint: string, body: object): Promise<T> {
+  if (!SUNO_API_KEY) {
+    throw new Error('Missing SUNO_API_KEY environment variable')
+  }
+  const response = await fetch(`${SUNO_API_URL}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SUNO_API_KEY}`,
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`)
+  }
+
+  return response.json()
+}
+
+async function getSunoAPI<T>(endpoint: string): Promise<T> {
+  if (!SUNO_API_KEY) {
+    throw new Error('Missing SUNO_API_KEY environment variable')
+  }
+  const response = await fetch(`${SUNO_API_URL}${endpoint}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${SUNO_API_KEY}`,
+    },
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`)
+  }
+
+  return response.json()
+}
+
+export async function generateMusic(params: {
+  prompt: string
+  style?: string
+  title?: string
+  customMode?: boolean
   instrumental?: boolean
-  make_instrumental?: boolean
-  wait_audio?: boolean
+  model?: string
+  callBackUrl: string // REQUIRED by Suno API
+  negativeTags?: string
+}): Promise<SunoTaskResponse> {
+  return postSunoAPI<SunoTaskResponse>('/generate', params)
 }
 
-export interface CreateMusicResponse {
-  success: boolean
-  songs?: SunoSong[]
-  error?: string
+export async function extendMusic(params: {
+  audioId: string
+  prompt?: string
+  style?: string
+  title?: string
+  continueAt?: number
+  defaultParamFlag: boolean
+  model: string
+  callBackUrl: string // REQUIRED by Suno API
+}): Promise<SunoTaskResponse> {
+  return postSunoAPI<SunoTaskResponse>('/generate/extend', params)
 }
 
-/**
- * Cria uma nova música usando a API Suno
- */
-export async function createMusic(
-  prompt: string, 
-  instrumental: boolean = false
-): Promise<CreateMusicResponse> {
-  try {
-    const response = await fetch(`${SUNO_API_URL}/api/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt,
-        make_instrumental: instrumental,
-        wait_audio: false
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    
-    // API retorna array de songs diretamente
-    if (Array.isArray(data)) {
-      return {
-        success: true,
-        songs: data
-      }
-    }
-
-    return {
-      success: false,
-      error: 'Invalid response format'
-    }
-  } catch (error) {
-    console.error('createMusic error:', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }
-  }
+export async function generateLyrics(params: {
+  prompt: string
+  callBackUrl?: string
+}): Promise<SunoTaskResponse> {
+  return postSunoAPI<SunoTaskResponse>('/lyrics', params)
 }
 
-/**
- * Obtém o status de múltiplas músicas
- */
-export async function getSongStatus(ids: string[]): Promise<SunoSong[]> {
-  try {
-    const idsParam = ids.join(',')
-    const response = await fetch(`${SUNO_API_URL}/api/get?ids=${idsParam}`)
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    
-    if (Array.isArray(data)) {
-      return data
-    }
-
-    return []
-  } catch (error) {
-    console.error('getSongStatus error:', error)
-    return []
-  }
+export async function getTaskStatus(taskId: string): Promise<SunoRecordInfoResponse> {
+  // Official docs: GET /generate/record-info?taskId=...
+  const params = new URLSearchParams({ taskId })
+  return getSunoAPI<SunoRecordInfoResponse>(`/generate/record-info?${params.toString()}`)
 }
 
-/**
- * Obtém informações de uma música específica por ID
- */
-export async function getSongById(id: string): Promise<SunoSong | null> {
-  try {
-    const songs = await getSongStatus([id])
-    return songs.length > 0 ? songs[0] : null
-  } catch (error) {
-    console.error('getSongById error:', error)
-    return null
-  }
-}
-
-/**
- * Estende uma música existente
- */
-export async function extendMusic(
-  audioId: string,
-  prompt: string,
-  continueAt?: string
-): Promise<CreateMusicResponse> {
-  try {
-    const response = await fetch(`${SUNO_API_URL}/api/extend_audio`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        audio_id: audioId,
-        prompt,
-        continue_at: continueAt
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    
-    if (Array.isArray(data)) {
-      return {
-        success: true,
-        songs: data
-      }
-    }
-
-    return {
-      success: false,
-      error: 'Invalid response format'
-    }
-  } catch (error) {
-    console.error('extendMusic error:', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }
-  }
-}
-
-/**
- * Gera letras para uma música
- */
-export async function generateLyrics(prompt: string): Promise<{ text: string; title: string } | null> {
-  try {
-    const response = await fetch(`${SUNO_API_URL}/api/generate_lyrics`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt })
-    })
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('generateLyrics error:', error)
-    return null
-  }
-}
-
-/**
- * Separa vocais e instrumental de uma música
- */
-export async function separateStems(audioId: string): Promise<CreateMusicResponse> {
-  try {
-    const response = await fetch(`${SUNO_API_URL}/api/generate_stems`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ audio_id: audioId })
-    })
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    
-    return {
-      success: true,
-      songs: [data]
-    }
-  } catch (error) {
-    console.error('separateStems error:', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }
-  }
+export async function getCredits(): Promise<SunoCreditResponse> {
+  return getSunoAPI<SunoCreditResponse>('/generate/credit')
 }

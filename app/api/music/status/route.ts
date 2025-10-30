@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTaskStatus, type SunoRecordInfoResponse } from '@/lib/suno-api'
 
 export const runtime = 'edge'
-
-const SUNO_API_URL = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,47 +15,90 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const idArray = ids.split(',')
-    console.log('🔍 [Status] Polling IDs:', idArray)
+    const idArray = ids.split(',').map((s) => s.trim()).filter(Boolean)
+    console.log('🔍 [Status] Polling Task IDs:', idArray)
 
-    // Chama a API Suno no Railway
-    const response = await fetch(`${SUNO_API_URL}/api/get?ids=${ids}`)
+    // For each taskId, fetch record info and map to legacy SunoSong shape expected by UI
+    const results = await Promise.all(
+      idArray.map(async (taskId) => {
+        try {
+          const info: SunoRecordInfoResponse = await getTaskStatus(taskId)
+          const data = info.data
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [Status] API Error:', response.status, errorText)
-      
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: `API Error: ${response.status}` 
-        },
-        { status: response.status }
-      )
-    }
+          // Default legacy shape
+          const legacy = {
+            id: taskId, // Keep as taskId for consistent polling
+            status: 'submitted',
+            title: '',
+            created_at: new Date().toISOString(),
+            model_name: '',
+            image_url: '',
+            audio_url: '',
+            lyric: '',
+            tags: '',
+            prompt: '',
+            gpt_description_prompt: '',
+            type: '',
+            video_url: '',
+            duration: 0,
+          }
 
-    const data = await response.json()
-    
-    // Log status de cada song
-    if (Array.isArray(data)) {
-      data.forEach(song => {
-        const hasAudio = song.audio_url ? '🎵 audio ready' : '⏳ processing'
-        console.log(`[Status] ${song.id}: ${song.status} ${hasAudio}`)
+          if (!data || !Array.isArray(data.sunoData) || data.sunoData.length === 0) {
+            return legacy
+          }
+
+          const item = data.sunoData[0]
+          const status = data.status
+
+          const mappedStatus =
+            status === 'SUCCESS' || status === 'FIRST_SUCCESS' || status === 'TEXT_SUCCESS'
+              ? 'complete'
+              : status?.endsWith('FAILED')
+              ? 'error'
+              : 'submitted'
+
+          return {
+            ...legacy,
+            status: mappedStatus as 'submitted' | 'complete' | 'error',
+            title: item.title || '',
+            model_name: item.modelName || '',
+            image_url: item.imageUrl || '',
+            audio_url: item.audioUrl || '',
+            lyric: item.lyric || '',
+            tags: item.tags || '',
+            prompt: item.prompt || '',
+            video_url: '',
+            duration: item.duration || 0,
+          }
+        } catch (e) {
+          console.error('❌ [Status] Error for task', taskId, e)
+          return {
+            id: taskId,
+            status: 'submitted',
+            title: '',
+            created_at: new Date().toISOString(),
+            model_name: '',
+            image_url: '',
+            audio_url: '',
+            lyric: '',
+            tags: '',
+            prompt: '',
+            gpt_description_prompt: '',
+            type: '',
+            video_url: '',
+            duration: 0,
+          }
+        }
       })
-    }
+    )
 
-    // API retorna array de songs
-    if (Array.isArray(data)) {
-      return NextResponse.json({
-        success: true,
-        songs: data
-      })
-    }
+    // Log quick summary
+    results.forEach((song) => {
+      const hasAudio = song.audio_url ? '🎵 audio ready' : '⏳ processing'
+      console.log(`[Status] ${song.id}: ${song.status} ${hasAudio}`)
+    })
 
-    return NextResponse.json({
-      success: false,
-      error: 'Invalid response format from Suno API'
-    }, { status: 500 })
+    return NextResponse.json({ success: true, songs: results })
 
   } catch (error) {
     console.error('❌ [Status] Error:', error)

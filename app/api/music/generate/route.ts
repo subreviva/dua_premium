@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { generateMusic } from '@/lib/suno-api'
 
 // CRITICAL: Edge Runtime (sem isso = timeout 10s)
 export const runtime = 'edge'
@@ -6,19 +7,18 @@ export const runtime = 'edge'
 // CRITICAL: Timeout maior para Edge (default é 25s, aumentamos para 50s)
 export const maxDuration = 50
 
-const SUNO_API = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
-
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { 
-      prompt, 
-      instrumental = false, 
+    const {
+      prompt,
+      instrumental = false,
       model = 'chirp-v3-5',
       tags,
       title,
       is_custom = false,
-      lyrics
+      lyrics,
+      negative_tags
     } = body
 
     if (!prompt && !lyrics) {
@@ -28,63 +28,72 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('[Music Generate] Creating music:', { 
-      prompt: (prompt || lyrics)?.substring(0, 50) + '...', 
-      instrumental, 
+    console.log('[Music Generate] Creating music via Suno API:', {
+      promptPreview: (prompt || lyrics)?.substring(0, 50) + '...',
+      instrumental,
       model,
       is_custom
     })
 
-    // Build request body
-    const requestBody: any = {
-      prompt: is_custom ? (lyrics || prompt) : prompt,
-      is_custom,
-      make_instrumental: instrumental,
-      model_version: model,
-      wait_audio: false // SEMPRE false!
+    // Map legacy model names to official API models
+    const mapModel = (m: string): string => {
+      switch (m) {
+        case 'chirp-v3-5':
+        case 'chirp-v3-0':
+          return 'V3_5'
+        case 'chirp-auk':
+          return 'V4_5'
+        case 'chirp-bluejay':
+          return 'V4_5PLUS'
+        case 'chirp-crow':
+          return 'V5'
+        default:
+          return 'V5'
+      }
     }
 
-    // Add optional fields
-    if (tags) requestBody.tags = tags
-    if (title) requestBody.title = title
+    // Build official request body with required callBackUrl
+    const callBackUrl = `${new URL(request.url).origin}/api/music/callback`
+    
+    const payload = {
+      prompt: is_custom ? (lyrics || prompt) : prompt,
+      style: tags || undefined,
+      title: title || undefined,
+      customMode: !!is_custom,
+      instrumental: !!instrumental,
+      model: mapModel(model),
+      negativeTags: negative_tags || undefined,
+      callBackUrl, // REQUIRED by Suno API
+    }
 
-    // SEM AbortSignal.timeout! Deixa Edge Runtime gerir
-    const response = await fetch(`${SUNO_API}/api/generate`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-      // ❌ REMOVE: signal: AbortSignal.timeout(...)
-    })
+    const result = await generateMusic(payload)
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('[Music Generate] API Error:', response.status, errorText)
-      
+    if (result.code !== 200 || !result.data?.taskId) {
+      console.error('[Music Generate] Suno API error:', result)
       return NextResponse.json(
-        { error: `Railway API error: ${response.status}` },
-        { status: response.status }
+        { error: result.msg || 'Suno API error' },
+        { status: 500 }
       )
     }
 
-    const songs = await response.json()
-    
-    console.log('[Music Generate] ✅ Success! IDs:', songs.map((s: any) => s.id))
+    const taskId = result.data.taskId
+    console.log('[Music Generate] ✅ Task created:', taskId)
 
+    // Keep backward-compatible response shape for UI
     return NextResponse.json({
       success: true,
-      songs: songs.map((s: any) => ({
-        id: s.id,
-        status: s.status || 'submitted',
-        title: s.title || '',
-        created_at: s.created_at,
-        model_name: s.model_name,
-        image_url: s.image_url || '',
-        audio_url: s.audio_url || '',
-        lyric: s.lyric || ''
-      }))
+      songs: [
+        {
+          id: taskId,
+          status: 'submitted',
+          title: title || '',
+          created_at: new Date().toISOString(),
+          model_name: mapModel(model),
+          image_url: '',
+          audio_url: '',
+          lyric: '',
+        },
+      ],
     })
 
   } catch (error: any) {
@@ -94,7 +103,7 @@ export async function POST(request: Request) {
     if (error.name === 'TimeoutError' || error.code === 23) {
       return NextResponse.json(
         { 
-          error: 'Railway API demorou muito. Aguarda e verifica histórico.',
+          error: 'Suno API demorou muito. Aguarda e verifica histórico.',
           code: 'TIMEOUT',
           retryable: true
         },
