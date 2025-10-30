@@ -84,9 +84,9 @@ export function CreatePanel() {
 
   const fetchCredits = async () => {
     try {
-      const response = await fetch("/api/suno/credits")
+      const response = await fetch("/api/music/credits")
       const result = await response.json()
-      if (result.code === 200 && result.data?.credits !== undefined) {
+      if (result.success && result.data?.credits !== undefined) {
         setCredits(result.data.credits)
       }
     } catch (error) {
@@ -252,15 +252,14 @@ export function CreatePanel() {
       if (uploadedAudioUrl) {
         setGenerationStatus("Uploading audio...")
         const uploadParams = {
-          uploadUrl: uploadedAudioUrl,
+          url: uploadedAudioUrl,
           prompt: lyrics || songDescription,
           style: styles,
           title: songTitle,
           model: modelMap[selectedVersion] as "V4_5PLUS" | "V5",
         }
 
-        const endpoint = mode === "custom" ? "/api/suno/upload/cover" : "/api/suno/upload/extend"
-        const response = await fetch(endpoint, {
+        const response = await fetch("/api/music/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(uploadParams),
@@ -273,14 +272,14 @@ export function CreatePanel() {
         const result = await response.json()
         console.log("[v0] Upload operation started:", result)
 
-        if (result.code === 200 && result.data?.taskId) {
-          pollForResults(result.data.taskId)
+        if (result.success && result.data?.task_id) {
+          pollForResults(result.data.task_id)
         } else {
-          throw new Error(result.msg || "No taskId received")
+          throw new Error(result.error || "No task_id received")
         }
       } else {
         setGenerationStatus("Creating music...")
-        const response = await fetch("/api/suno/generate", {
+        const response = await fetch("/api/music/custom", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(params),
@@ -293,10 +292,10 @@ export function CreatePanel() {
         const result = await response.json()
         console.log("[v0] Music generation started:", result)
 
-        if (result.code === 200 && result.data?.taskId) {
-          pollForResults(result.data.taskId)
+        if (result.success && result.data?.task_id) {
+          pollForResults(result.data.task_id)
         } else {
-          throw new Error(result.msg || "No taskId received")
+          throw new Error(result.error || "No task_id received")
         }
       }
     } catch (error) {
@@ -319,7 +318,7 @@ export function CreatePanel() {
       setGenerationStatus(`Processing... (${progress}%)`)
 
       try {
-        const response = await fetch(`/api/suno/details/${taskId}`)
+        const response = await fetch(`/api/music/task/${taskId}`)
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -327,42 +326,45 @@ export function CreatePanel() {
 
         const result = await response.json()
 
-        console.log("[v0] Polling attempt", attempts, "status:", result.data?.status)
+        console.log("[v0] Polling attempt", attempts, "result:", result)
 
-        if (result.code === 200 && result.data?.status === "SUCCESS") {
+        // Check if all tracks are in succeeded state
+        const allSucceeded = result.success && 
+          Array.isArray(result.data) && 
+          result.data.every((track: any) => track.state === "succeeded")
+
+        if (allSucceeded) {
           clearInterval(poll)
           setGenerationStatus("Complete! ✓")
-          console.log("[v0] Music generation complete:", result.data.response?.data)
+          console.log("[v0] Music generation complete:", result.data)
           
           // Save generated songs to localStorage
-          const generatedSongs = result.data.response?.data || []
+          const generatedSongs = result.data || []
           console.log(`[v0] Saving ${generatedSongs.length} songs to localStorage`)
           
           generatedSongs.forEach((song: any, index: number) => {
             console.log(`[v0] Processing song ${index + 1}:`, {
-              id: song.id,
+              id: song.clip_id,
               title: song.title,
-              audio_url: song.audio_url,
-              prompt: song.prompt
+              audio_url: song.audio_url
             })
             
             const songData = {
-              id: song.id || song.audio_id || Math.random().toString(36).substr(2, 9),
+              id: song.clip_id || Math.random().toString(36).substr(2, 9),
               title: song.title || "Untitled",
-              version: song.model_name || selectedVersion,
-              genre: song.tags || song.style || styles || "Unknown",
+              version: song.mv || selectedVersion,
+              genre: song.tags || styles || "Unknown",
               duration: song.duration ? `${Math.floor(song.duration / 60)}:${String(song.duration % 60).padStart(2, '0')}` : "0:00",
-              thumbnail: song.image_url || song.image_large_url || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
+              thumbnail: song.image_url || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
               gradient: "from-purple-600 to-pink-600",
               audioUrl: song.audio_url,
-              streamAudioUrl: song.stream_audio_url,
               videoUrl: song.video_url,
               imageUrl: song.image_url,
-              prompt: song.prompt || lyrics || songDescription,
-              lyrics: song.lyric,
+              prompt: song.gpt_description_prompt || lyrics || songDescription,
+              lyrics: song.lyrics,
               tags: song.tags,
-              modelName: song.model_name,
-              createdAt: new Date().toISOString(),
+              modelName: song.mv,
+              createdAt: song.created_at || new Date().toISOString(),
             }
             
             console.log('[v0] Saving song data:', songData)
@@ -370,13 +372,10 @@ export function CreatePanel() {
           })
           
           console.log('[v0] All songs saved. Triggering storage event.')
-          // Trigger storage event for other tabs/components
           window.dispatchEvent(new Event('storage'))
           
-          // Atualizar créditos
           fetchCredits()
           
-          // Resetar form após 2 segundos
           setTimeout(() => {
             setIsGenerating(false)
             setGenerationStatus("")
@@ -385,9 +384,9 @@ export function CreatePanel() {
             setSongTitle("")
             setUploadedAudioUrl("")
           }, 2000)
-        } else if (result.data?.status === "FAILED" || result.code !== 200) {
+        } else if (!result.success) {
           clearInterval(poll)
-          const errorMsg = result.data?.errorMessage || result.msg || "Generation failed"
+          const errorMsg = result.error || "Generation failed"
           setErrorMessage(errorMsg)
           console.error("[v0] Music generation failed:", errorMsg)
           setIsGenerating(false)
