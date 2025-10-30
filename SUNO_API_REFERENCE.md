@@ -425,6 +425,156 @@ Poll every 30 seconds until successFlag becomes `SUCCESS` or a failure state.
 
 ---
 
+### 21. Create Music Video
+**POST** `/api/music/create-video`
+
+Generate MP4 music videos with animated visualizations, album artwork, and customizable branding.
+
+#### Required Fields
+- `taskId` (string - unique task identifier)
+- `audioId` (string - ID of audio track to create video for)
+
+#### Optional Fields
+- `callBackUrl` (string - URL for completion notifications)
+- `author` (string - max 50 chars, displayed prominently in video)
+- `domainName` (string - max 50 chars, subtle bottom watermark)
+
+#### Video Format
+- **Format**: MP4 (H.264 codec)
+- **Resolution**: 1920x1080 (Full HD)
+- **Features**: Animated waveforms, album artwork, metadata display
+- **Processing**: 2-5 minutes depending on track length
+- **Availability**: S3 download URL valid for 7 days
+
+#### Branding Options
+- `author`: Displayed prominently at video start and end
+- `domainName`: Subtle watermark at bottom throughout video
+- Use cases: Content creators, record labels, music platforms
+
+#### Response
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "taskId": "vid_abc123"
+  }
+}
+```
+
+---
+
+### 22. Get Music Video Details
+**GET** `/api/music/video-details?taskId={taskId}`
+
+Poll video generation status and retrieve download URL.
+
+#### Query Parameters
+- `taskId` (string, required) - Task ID from create-video response
+
+#### Status Values (successFlag)
+- `PENDING` - Video generation in progress (2-5 minutes typical)
+- `SUCCESS` - Video ready, videoUrl available for download
+- `CREATE_TASK_FAILED` - Failed to initialize generation task
+- `GENERATE_MP4_FAILED` - Failed during video rendering
+- `CALLBACK_EXCEPTION` - Callback notification failed (video may still be available)
+
+#### Response Format
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "taskId": "vid_abc123",
+    "musicId": "audio_xyz789",
+    "callbackUrl": "https://your-domain.com/webhook",
+    "musicIndex": 0,
+    "completeTime": "2025-01-30T12:34:56Z",
+    "response": {
+      "videoUrl": "https://example.com/s/video_abc123.mp4"
+    },
+    "successFlag": "SUCCESS",
+    "createTime": "2025-01-30T12:30:00Z"
+  }
+}
+```
+
+#### Video Details
+- File size: Typically 20-100 MB depending on duration
+- URL expires after 7 days from completion
+- No authentication required for download
+- Save video to your storage for permanent access
+
+#### Polling Recommendation
+Poll every 30 seconds until successFlag becomes `SUCCESS` or a failure state.
+
+---
+
+### 23. Get Remaining Credits
+**GET** `/api/music/credits`
+
+Retrieve current credit balance for your Suno API account.
+
+#### No Parameters Required
+
+#### Response
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "credits": 1500,
+    "usedCredits": 2500,
+    "totalCredits": 4000
+  }
+}
+```
+
+#### Credit Consumption
+
+**Music Generation:**
+- Generate music (custom mode): 10 credits
+- Generate music (description mode): 5 credits
+- Extend audio: 10 credits
+- Upload audio: 1 credit
+
+**Audio Processing:**
+- Convert to WAV: 5 credits
+- Vocal separation (separate_vocal): 5 credits
+- Stem separation (split_stem): 10 credits
+- Style enhancement: 5 credits
+- Cover creation: 10 credits
+
+**Content Creation:**
+- Generate lyrics: 2 credits
+- Create music video: 5 credits
+- Replace music section: 10 credits
+
+**Persona Management:**
+- Generate persona: 1 credit
+- Delete persona: 0 credits (free)
+
+**Information Retrieval:**
+- Get any details/status: 0 credits (free)
+
+#### Usage Monitoring
+- Call before expensive operations to check balance
+- Implement credit threshold alerts (e.g., notify when < 50 credits)
+- Track consumption patterns for billing
+- Cache response for 1-5 minutes to avoid excessive API calls
+
+#### Best Practices
+- Check credits before batch operations
+- Implement graceful degradation when credits low
+- Set up automated top-up when balance is low
+- Log credit consumption for analytics
+
+---
+
+## 🔄 Callbacks
+
+---
+
 ### 19. Separate Vocals & Instruments
 **POST** `/api/music/separate-vocals`
 
@@ -633,11 +783,14 @@ All endpoints: **100% Complete**
 - Get WAV Details ✅
 - Separate Vocals/Stems ✅
 - Get Separation Details ✅
+- Create Music Video ✅
+- Get Video Details ✅
+- Get Remaining Credits ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
 
-**Total**: 21 API features (20 endpoints + callbacks)
+**Total**: 24 API features (23 endpoints + callbacks)
 
 ---
 
