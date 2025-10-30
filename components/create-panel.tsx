@@ -27,13 +27,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 export function CreatePanel() {
   const [mode, setMode] = useState<"simple" | "custom">("simple")
-  const [lyricsExpanded, setLyricsExpanded] = useState(true)
-  const [stylesExpanded, setStylesExpanded] = useState(true)
+  const [lyricsExpanded, setLyricsExpanded] = useState(false)
+  const [stylesExpanded, setStylesExpanded] = useState(false)
   const [advancedExpanded, setAdvancedExpanded] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState("v4.5-all")
-  const [songDescription, setSongDescription] = useState("Hip-hop, R&B, upbeat")
+  const [songDescription, setSongDescription] = useState("")
   const [lyrics, setLyrics] = useState("")
-  const [styles, setStyles] = useState("indie, electronic, synths, i20bpm, distorted")
+  const [styles, setStyles] = useState("")
   const [isInstrumental, setIsInstrumental] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState("")
@@ -46,6 +46,8 @@ export function CreatePanel() {
   const [showPersonasModal, setShowPersonasModal] = useState(false)
   const [showLyricsGenerator, setShowLyricsGenerator] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [lyricsPlaceholder] = useState("Enter your own lyrics or let AI create them for you")
+  const [descriptionPlaceholder] = useState("a cozy indie song about sunshine")
 
   const inspirationTags = [
     "aggro",
@@ -350,7 +352,7 @@ export function CreatePanel() {
 
                 {lyricsExpanded && (
                   <Textarea
-                    placeholder="Write some lyrics — or leave blank for instrumental"
+                    placeholder={lyricsPlaceholder}
                     value={lyrics}
                     onChange={(e) => setLyrics(e.target.value)}
                     className="min-h-[120px] premium-input resize-none font-medium"
@@ -554,6 +556,7 @@ export function CreatePanel() {
                   </Button>
                 </div>
                 <Textarea
+                  placeholder={descriptionPlaceholder}
                   value={songDescription}
                   onChange={(e) => setSongDescription(e.target.value)}
                   className="min-h-[80px] premium-input resize-none font-medium"

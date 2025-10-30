@@ -1,0 +1,136 @@
+{
+  "pageInfo": {
+    "title": "My account | Suno",
+    "url": "https://accounts.suno.com/sign-in?redirect_url=https%3A%2F%2Fsuno.com%2Fcreate"
+  },
+  "buttons": [
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+      "dataAttributes": {
+        "data-variant": "outline",
+        "data-color": "neutral"
+      }
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+      "dataAttributes": {
+        "data-variant": "outline",
+        "data-color": "neutral"
+      }
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+      "dataAttributes": {
+        "data-variant": "outline",
+        "data-color": "neutral"
+      }
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+      "dataAttributes": {
+        "data-variant": "outline",
+        "data-color": "neutral"
+      }
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+      "dataAttributes": {
+        "data-variant": "outline",
+        "data-color": "neutral"
+      }
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "",
+      "dataAttributes": {}
+    },
+    {
+      "tag": "BUTTON",
+      "text": "gb",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+      "dataAttributes": {
+        "data-variant": "ghost",
+        "data-color": "primary"
+      }
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Continue",
+      "ariaLabel": null,
+      "type": "submit",
+      "disabled": false,
+      "id": "",
+      "className": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+      "dataAttributes": {
+        "data-localization-key": "formButtonPrimary",
+        "data-variant": "solid",
+        "data-color": "primary"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "type": "tel",
+      "name": "identifier",
+      "placeholder": "Enter your phone number",
+      "value": "",
+      "id": "identifier-field",
+      "className": "cl-formFieldInput cl-input cl-formFieldInput__identifier cl-input__identifier cl-required 🔒️ cl-internal-1kia0mp",
+      "ariaLabel": null,
+      "disabled": false,
+      "required": true
+    }
+  ],
+  "textareas": [],
+  "selects": [],
+  "tabs": [],
+  "chips": [],
+  "sliders": [],
+  "checkboxes": [],
+  "labels": [
+    {
+      "text": "Phone number",
+      "for": "identifier-field",
+      "className": "cl-formFieldLabel cl-formFieldLabel__identifier-field cl-required 🔒️ cl-internal-ekz7ju"
+    }
+  ]
+}

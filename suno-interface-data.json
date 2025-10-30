@@ -1,0 +1,34 @@
+{
+  "pageInfo": {
+    "title": "Just a moment...",
+    "url": "https://accounts.suno.com/sign-in?redirect_url=https%3A%2F%2Fsuno.com%2Fcreate"
+  },
+  "buttons": [],
+  "inputs": [
+    {
+      "type": "hidden",
+      "placeholder": "",
+      "ariaLabel": null,
+      "name": "cf-turnstile-response",
+      "id": "cf-chl-widget-01joa_response",
+      "min": "",
+      "max": "",
+      "step": "",
+      "value": "",
+      "className": ""
+    }
+  ],
+  "textareas": [],
+  "selects": [],
+  "tabs": [],
+  "chips": [],
+  "sliders": [],
+  "labels": [],
+  "checkboxes": [],
+  "headers": [
+    {
+      "level": "H1",
+      "text": "accounts.suno.com"
+    }
+  ]
+}

@@ -1,0 +1,1265 @@
+{
+  "metadata": {
+    "timestamp": "2025-10-30T14:15:18.343Z",
+    "totalPagesExplored": 6,
+    "totalButtonsClicked": 0,
+    "totalDropdownsOpened": 2
+  },
+  "pages": {
+    "home": {
+      "url": "https://suno.com/home",
+      "timestamp": "2025-10-30T14:15:29.445Z",
+      "buttons": [
+        {
+          "index": 0,
+          "text": "Sign In",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-4 py-2 text-[15px] leading-[24px] rounded-full text-foreground-primary bg-transparent before:border-border-primary enabled:hover:before:bg-overlay-on-primary disabled:after:bg-background-primary disabled:after:opacity-50",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-4 py-2 text-[15px] leading-[24px] rounded-full text-foreground-primary bg-transparent before:border-border-primary enabled:hover:before:bg-overlay-on-primary disabled:after:bg-background-primary disabled:after:opacity-50"
+          },
+          "visible": true
+        },
+        {
+          "index": 1,
+          "text": "Sign Up",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-4 py-2 text-[15px] leading-[24px] rounded-full text-background-primary bg-foreground-primary enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-4 py-2 text-[15px] leading-[24px] rounded-full text-background-primary bg-foreground-primary enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50"
+          },
+          "visible": true
+        },
+        {
+          "index": 2,
+          "text": "Create",
+          "ariaLabel": null,
+          "className": "font-sans text-[16px] font-medium text-white buttonAnimate shadow-lg transition duration-300 ease-in-out hover:opacity-90 items-center justify-center rounded-[100px] w-[103px] md:w-auto md:mr-0 p-3",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "font-sans text-[16px] font-medium text-white buttonAnimate shadow-lg transition duration-300 ease-in-out hover:opacity-90 items-center justify-center rounded-[100px] w-[103px] md:w-auto md:mr-0 p-3"
+          },
+          "visible": true
+        },
+        {
+          "index": 3,
+          "text": "I'm a musician",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-4 py-2 text-[15px] leading-[24px] rounded-full text-foreground-primary bg-transparent before:border-border-primary enabled:hover:before:bg-overlay-on-primary disabled:after:bg-background-primary disabled:after:opacity-50",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-4 py-2 text-[15px] leading-[24px] rounded-full text-foreground-primary bg-transparent before:border-border-primary enabled:hover:before:bg-overlay-on-primary disabled:after:bg-background-primary disabled:after:opacity-50"
+          },
+          "visible": true
+        },
+        {
+          "index": 4,
+          "text": "686",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 5,
+          "text": "734",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 6,
+          "text": "761",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 7,
+          "text": "1.8K",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 8,
+          "text": "827",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 9,
+          "text": "995",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 10,
+          "text": "1.4K",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 11,
+          "text": "720",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 12,
+          "text": "1.2K",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 13,
+          "text": "933",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 14,
+          "text": "489",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 15,
+          "text": "845",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 16,
+          "text": "154",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 17,
+          "text": "3.1K",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 18,
+          "text": "1.3K",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 19,
+          "text": "471",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 20,
+          "text": "931",
+          "ariaLabel": "Like button with like count",
+          "className": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "flex-row items-center gap-1 rounded-md px-2 py-1 font-sans bg-clip-padding border border-border-primary text-foreground-primary-on-dark w-auto hover:text-foreground-primary-on-light hover:bg-background-fog-dense hidden h-[30px] bg-dumbo-50/25 text-[12.68px] leading-[15.216px] font-medium uppercase backdrop-blur-[15.22px] md:flex",
+            "aria-label": "Like button with like count"
+          },
+          "visible": true
+        },
+        {
+          "index": 21,
+          "text": "Monthly",
+          "ariaLabel": null,
+          "className": "group flex cursor-pointer items-center gap-2 outline-none",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "role": "radio",
+            "aria-checked": "false",
+            "data-state": "unchecked",
+            "value": "month",
+            "class": "group flex cursor-pointer items-center gap-2 outline-none",
+            "tabindex": "-1",
+            "data-radix-collection-item": ""
+          },
+          "visible": true
+        },
+        {
+          "index": 22,
+          "text": "Yearlysave 20%",
+          "ariaLabel": null,
+          "className": "group flex cursor-pointer items-center gap-2 outline-none",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "role": "radio",
+            "aria-checked": "true",
+            "data-state": "checked",
+            "value": "year",
+            "class": "group flex cursor-pointer items-center gap-2 outline-none",
+            "tabindex": "-1",
+            "data-radix-collection-item": ""
+          },
+          "visible": true
+        },
+        {
+          "index": 26,
+          "text": "Sign Up",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 py-4 text-[17px] leading-[24px] rounded-full text-foreground-primary-on-dark bg-white/10 backdrop-blur-lg enabled:hover:bg-white/20 disabled:opacity-30 w-full",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 py-4 text-[17px] leading-[24px] rounded-full text-foreground-primary-on-dark bg-white/10 backdrop-blur-lg enabled:hover:bg-white/20 disabled:opacity-30 w-full"
+          },
+          "visible": true
+        },
+        {
+          "index": 27,
+          "text": "Subscribe",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 py-4 text-[17px] leading-[24px] rounded-full text-background-primary bg-foreground-primary enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50 w-full",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 py-4 text-[17px] leading-[24px] rounded-full text-background-primary bg-foreground-primary enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50 w-full"
+          },
+          "visible": true
+        },
+        {
+          "index": 28,
+          "text": "Subscribe",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 py-4 text-[17px] leading-[24px] rounded-full text-gray-950 bg-gray-50/30 backdrop-blur-lg enabled:hover:bg-gray-50/60 disabled:opacity-30 w-full",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 py-4 text-[17px] leading-[24px] rounded-full text-gray-950 bg-gray-50/30 backdrop-blur-lg enabled:hover:bg-gray-50/60 disabled:opacity-30 w-full"
+          },
+          "visible": true
+        },
+        {
+          "index": 29,
+          "text": "Download on iPhone",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 text-[17px] leading-[24px] rounded-full enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50 w-full border-0 bg-white py-3 text-black hover:bg-white/90",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 text-[17px] leading-[24px] rounded-full enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50 w-full border-0 bg-white py-3 text-black hover:bg-white/90"
+          },
+          "visible": true
+        },
+        {
+          "index": 30,
+          "text": "Download on Android",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 text-[17px] leading-[24px] rounded-full enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50 w-full border-0 bg-white py-3 text-black hover:bg-white/90",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer px-8 text-[17px] leading-[24px] rounded-full enabled:hover:before:bg-overlay-on-light disabled:after:bg-background-primary disabled:after:opacity-50 w-full border-0 bg-white py-3 text-black hover:bg-white/90"
+          },
+          "visible": true
+        },
+        {
+          "index": 43,
+          "text": "Sign up for free",
+          "ariaLabel": null,
+          "className": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer py-4 text-[17px] leading-[24px] rounded-full text-white bg-black bg-cover bg-center bg-(image:--button-background-image) before:bg-cover before:bg-center before:opacity-50 before:bg-(image:--button-background-image-overlay) enabled:hover:before:bg-black/25 enabled:hover:before:opacity-45 animate-aura-background animate-stop hover:animate-play animate-duration-(--button-background-hover-speed) disabled:after:bg-background-primary disabled:after:opacity-50 px-[78px]",
+          "id": "",
+          "disabled": false,
+          "type": "button",
+          "dataAttributes": {
+            "type": "button",
+            "class": "relative inline-block font-sans font-medium text-center before:absolute before:inset-0 before:pointer-events-none before:rounded-[inherit] before:border before:border-transparent before:bg-transparent after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:bg-transparent after:opacity-0 enabled:hover:after:opacity-100 transition duration-75 before:transition before:duration-75 after:transition after:duration-75 select-none cursor-pointer py-4 text-[17px] leading-[24px] rounded-full text-white bg-black bg-cover bg-center bg-(image:--button-background-image) before:bg-cover before:bg-center before:opacity-50 before:bg-(image:--button-background-image-overlay) enabled:hover:before:bg-black/25 enabled:hover:before:opacity-45 animate-aura-background animate-stop hover:animate-play animate-duration-(--button-background-hover-speed) disabled:after:bg-background-primary disabled:after:opacity-50 px-[78px]"
+          },
+          "visible": true
+        }
+      ],
+      "inputs": [
+        {
+          "type": "text",
+          "name": "",
+          "placeholder": "Type any idea you have",
+          "value": "",
+          "min": "",
+          "max": "",
+          "step": "",
+          "className": "jsx-bcbfb8bf8f3589d5 flex min-w-0 flex-1 truncate bg-transparent pr-[10px] pl-[47px] font-sans text-base shadow-none outline-none md:text-lg",
+          "ariaLabel": null,
+          "visible": true
+        }
+      ],
+      "textareas": [
+        {
+          "name": "g-recaptcha-response",
+          "placeholder": "",
+          "rows": 2,
+          "maxLength": -1,
+          "className": "",
+          "ariaLabel": null
+        },
+        {
+          "name": "h-captcha-response",
+          "placeholder": "",
+          "rows": 2,
+          "maxLength": -1,
+          "className": "",
+          "ariaLabel": null
+        }
+      ],
+      "selects": [],
+      "tabs": [],
+      "chips": [],
+      "sliders": [],
+      "dropdowns": [],
+      "checkboxes": [],
+      "stats": {
+        "totalButtons": 55,
+        "totalInputs": 1,
+        "totalTextareas": 2,
+        "totalTabs": 0,
+        "totalChips": 0
+      }
+    },
+    "create": {
+      "url": "https://accounts.suno.com/sign-in?redirect_url=https%3A%2F%2Fsuno.com%2Fcreate",
+      "timestamp": "2025-10-30T14:15:36.562Z",
+      "buttons": [
+        {
+          "index": 0,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 1,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 2,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 3,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 4,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 5,
+          "text": "",
+          "ariaLabel": null,
+          "className": "",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "type": "submit",
+            "aria-hidden": "true",
+            "style": "visibility: hidden; position: absolute;"
+          },
+          "visible": true
+        },
+        {
+          "index": 6,
+          "text": "gb",
+          "ariaLabel": null,
+          "className": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+            "data-variant": "ghost",
+            "data-color": "primary"
+          },
+          "visible": true
+        },
+        {
+          "index": 7,
+          "text": "Continue",
+          "ariaLabel": null,
+          "className": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+            "data-localization-key": "formButtonPrimary",
+            "data-variant": "solid",
+            "data-color": "primary"
+          },
+          "visible": true
+        }
+      ],
+      "inputs": [
+        {
+          "type": "tel",
+          "name": "identifier",
+          "placeholder": "Enter your phone number",
+          "value": "",
+          "min": "",
+          "max": "",
+          "step": "",
+          "className": "cl-formFieldInput cl-input cl-formFieldInput__identifier cl-input__identifier cl-required 🔒️ cl-internal-1kia0mp",
+          "ariaLabel": null,
+          "visible": true
+        }
+      ],
+      "textareas": [],
+      "selects": [],
+      "tabs": [],
+      "chips": [],
+      "sliders": [],
+      "dropdowns": [],
+      "checkboxes": [],
+      "stats": {
+        "totalButtons": 8,
+        "totalInputs": 1,
+        "totalTextareas": 0,
+        "totalTabs": 0,
+        "totalChips": 0
+      },
+      "tabs_explored": [],
+      "dropdowns_explored": [
+        {
+          "trigger": "gb",
+          "options": []
+        },
+        {
+          "trigger": null,
+          "options": []
+        }
+      ],
+      "buttons_explored": []
+    },
+    "library": {
+      "url": "https://accounts.suno.com/sign-in?redirect_url=https%3A%2F%2Fsuno.com%2Flibrary",
+      "timestamp": "2025-10-30T14:15:47.527Z",
+      "buttons": [
+        {
+          "index": 0,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 1,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 2,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 3,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 4,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 5,
+          "text": "",
+          "ariaLabel": null,
+          "className": "",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "type": "submit",
+            "aria-hidden": "true",
+            "style": "visibility: hidden; position: absolute;"
+          },
+          "visible": true
+        },
+        {
+          "index": 6,
+          "text": "gb",
+          "ariaLabel": null,
+          "className": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+            "data-variant": "ghost",
+            "data-color": "primary"
+          },
+          "visible": true
+        },
+        {
+          "index": 7,
+          "text": "Continue",
+          "ariaLabel": null,
+          "className": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+            "data-localization-key": "formButtonPrimary",
+            "data-variant": "solid",
+            "data-color": "primary"
+          },
+          "visible": true
+        }
+      ],
+      "inputs": [
+        {
+          "type": "tel",
+          "name": "identifier",
+          "placeholder": "Enter your phone number",
+          "value": "",
+          "min": "",
+          "max": "",
+          "step": "",
+          "className": "cl-formFieldInput cl-input cl-formFieldInput__identifier cl-input__identifier cl-required 🔒️ cl-internal-1kia0mp",
+          "ariaLabel": null,
+          "visible": true
+        }
+      ],
+      "textareas": [],
+      "selects": [],
+      "tabs": [],
+      "chips": [],
+      "sliders": [],
+      "dropdowns": [],
+      "checkboxes": [],
+      "stats": {
+        "totalButtons": 8,
+        "totalInputs": 1,
+        "totalTextareas": 0,
+        "totalTabs": 0,
+        "totalChips": 0
+      }
+    },
+    "feed": {
+      "url": "https://accounts.suno.com/sign-in?redirect_url=https%3A%2F%2Fsuno.com%2Ffeed",
+      "timestamp": "2025-10-30T14:15:53.883Z",
+      "buttons": [
+        {
+          "index": 0,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 1,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 2,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 3,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 4,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 5,
+          "text": "",
+          "ariaLabel": null,
+          "className": "",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "type": "submit",
+            "aria-hidden": "true",
+            "style": "visibility: hidden; position: absolute;"
+          },
+          "visible": true
+        },
+        {
+          "index": 6,
+          "text": "gb",
+          "ariaLabel": null,
+          "className": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+            "data-variant": "ghost",
+            "data-color": "primary"
+          },
+          "visible": true
+        },
+        {
+          "index": 7,
+          "text": "Continue",
+          "ariaLabel": null,
+          "className": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+            "data-localization-key": "formButtonPrimary",
+            "data-variant": "solid",
+            "data-color": "primary"
+          },
+          "visible": true
+        }
+      ],
+      "inputs": [
+        {
+          "type": "tel",
+          "name": "identifier",
+          "placeholder": "Enter your phone number",
+          "value": "",
+          "min": "",
+          "max": "",
+          "step": "",
+          "className": "cl-formFieldInput cl-input cl-formFieldInput__identifier cl-input__identifier cl-required 🔒️ cl-internal-1kia0mp",
+          "ariaLabel": null,
+          "visible": true
+        }
+      ],
+      "textareas": [],
+      "selects": [],
+      "tabs": [],
+      "chips": [],
+      "sliders": [],
+      "dropdowns": [],
+      "checkboxes": [],
+      "stats": {
+        "totalButtons": 8,
+        "totalInputs": 1,
+        "totalTextareas": 0,
+        "totalTabs": 0,
+        "totalChips": 0
+      }
+    },
+    "settings": {
+      "url": "https://accounts.suno.com/sign-in?redirect_url=https%3A%2F%2Fsuno.com%2Fsettings",
+      "timestamp": "2025-10-30T14:15:58.337Z",
+      "buttons": [
+        {
+          "index": 0,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 1,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 2,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 3,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 4,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 5,
+          "text": "",
+          "ariaLabel": null,
+          "className": "",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "type": "submit",
+            "aria-hidden": "true",
+            "style": "visibility: hidden; position: absolute;"
+          },
+          "visible": true
+        },
+        {
+          "index": 6,
+          "text": "gb",
+          "ariaLabel": null,
+          "className": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+            "data-variant": "ghost",
+            "data-color": "primary"
+          },
+          "visible": true
+        },
+        {
+          "index": 7,
+          "text": "Continue",
+          "ariaLabel": null,
+          "className": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+            "data-localization-key": "formButtonPrimary",
+            "data-variant": "solid",
+            "data-color": "primary"
+          },
+          "visible": true
+        }
+      ],
+      "inputs": [
+        {
+          "type": "tel",
+          "name": "identifier",
+          "placeholder": "Enter your phone number",
+          "value": "",
+          "min": "",
+          "max": "",
+          "step": "",
+          "className": "cl-formFieldInput cl-input cl-formFieldInput__identifier cl-input__identifier cl-required 🔒️ cl-internal-1kia0mp",
+          "ariaLabel": null,
+          "visible": true
+        }
+      ],
+      "textareas": [],
+      "selects": [],
+      "tabs": [],
+      "chips": [],
+      "sliders": [],
+      "dropdowns": [],
+      "checkboxes": [],
+      "stats": {
+        "totalButtons": 8,
+        "totalInputs": 1,
+        "totalTextareas": 0,
+        "totalTabs": 0,
+        "totalChips": 0
+      }
+    },
+    "profile": {
+      "url": "https://accounts.suno.com/sign-in?redirect_url=https%3A%2F%2Fsuno.com%2Fprofile",
+      "timestamp": "2025-10-30T14:16:02.607Z",
+      "buttons": [
+        {
+          "index": 0,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__apple cl-button__apple 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 1,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__discord cl-button__discord 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 2,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__facebook cl-button__facebook 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 3,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__google cl-button__google 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 4,
+          "text": "",
+          "ariaLabel": null,
+          "className": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-socialButtonsIconButton cl-button cl-socialButtonsIconButton__microsoft cl-button__microsoft 🔒️ cl-internal-qu1n7j",
+            "data-variant": "outline",
+            "data-color": "neutral"
+          },
+          "visible": true
+        },
+        {
+          "index": 5,
+          "text": "",
+          "ariaLabel": null,
+          "className": "",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "type": "submit",
+            "aria-hidden": "true",
+            "style": "visibility: hidden; position: absolute;"
+          },
+          "visible": true
+        },
+        {
+          "index": 6,
+          "text": "gb",
+          "ariaLabel": null,
+          "className": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-selectButton cl-button cl-selectButton__countryCode cl-button__countryCode 🔒️ cl-internal-v1u5np",
+            "data-variant": "ghost",
+            "data-color": "primary"
+          },
+          "visible": true
+        },
+        {
+          "index": 7,
+          "text": "Continue",
+          "ariaLabel": null,
+          "className": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+          "id": "",
+          "disabled": false,
+          "type": "submit",
+          "dataAttributes": {
+            "class": "cl-formButtonPrimary cl-button 🔒️ cl-internal-entl0j",
+            "data-localization-key": "formButtonPrimary",
+            "data-variant": "solid",
+            "data-color": "primary"
+          },
+          "visible": true
+        }
+      ],
+      "inputs": [
+        {
+          "type": "tel",
+          "name": "identifier",
+          "placeholder": "Enter your phone number",
+          "value": "",
+          "min": "",
+          "max": "",
+          "step": "",
+          "className": "cl-formFieldInput cl-input cl-formFieldInput__identifier cl-input__identifier cl-required 🔒️ cl-internal-1kia0mp",
+          "ariaLabel": null,
+          "visible": true
+        }
+      ],
+      "textareas": [],
+      "selects": [],
+      "tabs": [],
+      "chips": [],
+      "sliders": [],
+      "dropdowns": [],
+      "checkboxes": [],
+      "stats": {
+        "totalButtons": 8,
+        "totalInputs": 1,
+        "totalTextareas": 0,
+        "totalTabs": 0,
+        "totalChips": 0
+      }
+    }
+  }
+}

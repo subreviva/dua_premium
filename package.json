@@ -33,6 +33,9 @@
     "lucide-react": "^0.454.0",
     "next": "^16.0.0",
     "ogl": "latest",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-adblocker": "^2.13.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-intersection-observer": "^9.16.0",
@@ -46,6 +49,7 @@
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.2",
     "postcss": "^8.5",
+    "puppeteer": "^24.27.0",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "^1.0.1",
     "typescript": "^5"
