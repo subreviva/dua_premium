@@ -425,6 +425,127 @@ Poll every 30 seconds until successFlag becomes `SUCCESS` or a failure state.
 
 ---
 
+### 19. Separate Vocals & Instruments
+**POST** `/api/music/separate-vocals`
+
+AI-powered stem separation for vocals and instruments using state-of-the-art source separation.
+
+#### Required Fields
+- `taskId` (string - music generation task ID)
+- `audioId` (string - specific track ID to separate)
+- `callBackUrl` (string - URL to receive results)
+
+#### Optional Fields
+- `type` (string - separation type)
+  - `separate_vocal` (default): Basic vocal/instrumental separation (2 stems)
+  - `split_stem`: Advanced multi-instrument separation (12+ stems)
+
+#### Separation Types
+
+**separate_vocal** (default):
+- Vocal track (isolated vocals only)
+- Instrumental track (accompaniment without vocals)
+- Faster processing (~1-2 minutes)
+
+**split_stem** (advanced):
+- Vocals, Backing Vocals, Drums, Bass, Guitar
+- Keyboard, Percussion, Strings, Synthesizer
+- Effects, Brass, Woodwinds
+- Longer processing (~3-5 minutes)
+
+#### Response
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "taskId": "3e63b4cc88d52611159371f6af5571e7"
+  }
+}
+```
+
+#### Callback Format (separate_vocal)
+```json
+{
+  "code": 200,
+  "msg": "vocal Removal generated successfully.",
+  "data": {
+    "task_id": "3e63b4cc88d52611159371f6af5571e7",
+    "vocal_removal_info": {
+      "instrumental_url": "https://file.aiquickdraw.com/s/xxx_Instrumental.mp3",
+      "vocal_url": "https://file.aiquickdraw.com/s/xxx_Vocals.mp3",
+      "origin_url": ""
+    }
+  }
+}
+```
+
+#### Notes
+- State-of-the-art AI source separation
+- Best results with high-quality source audio
+- split_stem produces 12+ separate files
+- Not all stems may be present in every track
+
+---
+
+### 20. Get Vocal Separation Details
+**GET** `/api/music/vocal-separation-details?taskId={taskId}`
+
+Retrieve detailed information about a vocal/stem separation task.
+
+#### Query Parameters
+- `taskId` (string, required) - Task ID from Separate Vocals
+
+#### Status Values
+- `PENDING` - Separation in progress
+- `SUCCESS` - Separation completed successfully
+- `CREATE_TASK_FAILED` - Failed to create task
+- `GENERATE_AUDIO_FAILED` - Separation failed
+- `CALLBACK_EXCEPTION` - Callback error
+
+#### Response Format (separate_vocal)
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "taskId": "3e63b4cc88d52611159371f6af5571e7",
+    "musicId": "376c687e-d439-42c1-b1e4-bcb43b095ec2",
+    "response": {
+      "instrumentalUrl": "https://...Instrumental.mp3",
+      "vocalUrl": "https://...Vocals.mp3"
+    },
+    "successFlag": "SUCCESS",
+    "completeTime": "1753782937000"
+  }
+}
+```
+
+#### Response Format (split_stem)
+```json
+{
+  "response": {
+    "vocalUrl": "https://...Vocals.mp3",
+    "backingVocalsUrl": "https://...Backing_Vocals.mp3",
+    "drumsUrl": "https://...Drums.mp3",
+    "bassUrl": "https://...Bass.mp3",
+    "guitarUrl": "https://...Guitar.mp3",
+    "keyboardUrl": "https://...Keyboard.mp3",
+    "percussionUrl": "https://...Percussion.mp3",
+    "stringsUrl": "https://...Strings.mp3",
+    "synthUrl": "https://...Synth.mp3",
+    "fxUrl": "https://...FX.mp3",
+    "brassUrl": "https://...Brass.mp3",
+    "woodwindsUrl": "https://...Woodwinds.mp3"
+  }
+}
+```
+
+#### Polling Recommendation
+Poll every 30 seconds. separate_vocal: 1-2 min, split_stem: 3-5 min.
+
+---
+
 ## 🔔 Callbacks
 
 Format:
@@ -510,11 +631,13 @@ All endpoints: **100% Complete**
 - Get Lyrics Details ✅
 - Convert to WAV ✅
 - Get WAV Details ✅
+- Separate Vocals/Stems ✅
+- Get Separation Details ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
 
-**Total**: 19 API features (18 endpoints + callbacks)
+**Total**: 21 API features (20 endpoints + callbacks)
 
 ---
 
