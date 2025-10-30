@@ -17,6 +17,7 @@ interface Song {
   featured?: boolean
   taskId?: string
   musicIndex?: number
+  audioUrl?: string
 }
 
 interface SongCardProps {
@@ -29,98 +30,6 @@ interface SongCardProps {
 export function SongCard({ song, onSelect, isSelected, onEdit }: SongCardProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showContextMenu, setShowContextMenu] = useState(false)
-
-  const handleGetStems = async () => {
-    try {
-      const response = await fetch("/api/suno/vocals/separate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioId: song.id }),
-      })
-      const result = await response.json()
-      console.log("[v0] Stems separation started:", result)
-    } catch (error) {
-      console.error("[v0] Error getting stems:", error)
-    }
-  }
-
-  const handleConvertToWav = async () => {
-    try {
-      const response = await fetch("/api/suno/wav/convert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioId: song.id }),
-      })
-      const result = await response.json()
-      console.log("[v0] WAV conversion started:", result)
-    } catch (error) {
-      console.error("[v0] Error converting to WAV:", error)
-    }
-  }
-
-  const handleCreateVideo = async () => {
-    try {
-      const response = await fetch("/api/suno/video/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioId: song.id }),
-      })
-      const result = await response.json()
-      console.log("[v0] Video creation started:", result)
-    } catch (error) {
-      console.error("[v0] Error creating video:", error)
-    }
-  }
-
-  const handleMakePersona = async () => {
-    try {
-      if (!song.taskId) {
-        console.error("[v0] Cannot create persona: taskId is missing")
-        alert("Cannot create persona: This song doesn't have task information")
-        return
-      }
-
-      const response = await fetch("/api/suno/persona/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          taskId: song.taskId,
-          musicIndex: song.musicIndex ?? 0,
-          name: song.title || "Untitled Persona",
-          description: song.genre || "A unique musical persona with distinctive style",
-        }),
-      })
-      const result = await response.json()
-
-      if (result.code === 200) {
-        console.log("[v0] Persona generation successful:", result.data)
-        alert(`Persona "${result.data.name}" created successfully!`)
-      } else if (result.code === 409) {
-        console.log("[v0] Persona already exists for this music")
-        alert("A persona already exists for this music")
-      } else {
-        console.error("[v0] Error making persona:", result.msg)
-        alert(`Error creating persona: ${result.msg}`)
-      }
-    } catch (error) {
-      console.error("[v0] Error making persona:", error)
-      alert("Failed to create persona. Please try again.")
-    }
-  }
-
-  const handleBoostStyle = async () => {
-    try {
-      const response = await fetch("/api/suno/boost", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: song.genre || song.title }),
-      })
-      const result = await response.json()
-      console.log("[v0] Style boost started:", result)
-    } catch (error) {
-      console.error("[v0] Error boosting style:", error)
-    }
-  }
 
   return (
     <div
