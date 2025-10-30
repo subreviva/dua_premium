@@ -661,6 +661,20 @@ export interface AddInstrumentalParams {
   callBackUrl?: string
 }
 
+export interface AddVocalsParams {
+  uploadUrl: string
+  prompt: string
+  title: string
+  negativeTags: string
+  style: string
+  vocalGender?: "m" | "f"
+  styleWeight?: number // 0-1
+  weirdnessConstraint?: number // 0-1
+  audioWeight?: number // 0-1
+  model?: "V4_5PLUS" | "V5"
+  callBackUrl?: string
+}
+
 export class SunoAPIError extends Error {
   constructor(
     message: string,
@@ -723,6 +737,11 @@ export async function uploadAndExtend(params: UploadAndExtendParams): Promise<Ap
 export async function addInstrumental(params: AddInstrumentalParams): Promise<ApiResponse<TaskResponse>> {
   const client = getSunoClient()
   return client.addInstrumental(params)
+}
+
+export async function addVocals(params: AddVocalsParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.addVocals(params)
 }
 
 export const SunoAPI = SunoAPIClient
