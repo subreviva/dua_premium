@@ -68,14 +68,14 @@ export interface AddVocalsParams {
 export interface AddInstrumentalParams {
   uploadUrl: string
   title: string
-  tags: string
   negativeTags: string
+  tags: string
+  callBackUrl: string
   vocalGender?: "m" | "f"
   styleWeight?: number
   weirdnessConstraint?: number
   audioWeight?: number
   model?: "V4_5PLUS" | "V5"
-  callBackUrl?: string
 }
 
 // Cover Music
@@ -672,12 +672,44 @@ export class SunoAPIClient {
   }
 
   async addInstrumental(params: AddInstrumentalParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
-    if (!params.uploadUrl || !params.title || !params.tags || !params.negativeTags) {
-      throw new SunoAPIError("Missing required parameters for Add Instrumental", 400)
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // Validate all required parameters
+    if (!params.uploadUrl) {
+      throw new SunoAPIError("uploadUrl is required", 400)
     }
 
-    // Validate optional parameters
+    if (!params.title) {
+      throw new SunoAPIError("title is required", 400)
+    }
+
+    if (!params.negativeTags) {
+      throw new SunoAPIError("negativeTags is required", 400)
+    }
+
+    if (!params.tags) {
+      throw new SunoAPIError("tags is required", 400)
+    }
+
+    if (!params.callBackUrl) {
+      throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    // Validate URL format for uploadUrl
+    try {
+      new URL(params.uploadUrl)
+    } catch {
+      throw new SunoAPIError("uploadUrl must be a valid URL", 400)
+    }
+
+    // Validate URL format for callBackUrl
+    try {
+      new URL(params.callBackUrl)
+    } catch {
+      throw new SunoAPIError("callBackUrl must be a valid URL", 400)
+    }
+
+    // Validate optional range parameters (0-1)
     if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
       throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
     }
@@ -1185,19 +1217,6 @@ export interface UploadAndExtendParams {
   styleWeight?: number
   weirdnessConstraint?: number
   audioWeight?: number
-}
-
-export interface AddInstrumentalParams {
-  uploadUrl: string
-  title: string
-  tags: string
-  negativeTags: string
-  vocalGender?: "m" | "f"
-  styleWeight?: number // 0-1
-  weirdnessConstraint?: number // 0-1
-  audioWeight?: number // 0-1
-  model?: "V4_5PLUS" | "V5"
-  callBackUrl?: string
 }
 
 export interface AddVocalsParams {
