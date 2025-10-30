@@ -256,6 +256,90 @@ Use personaId in Generate, Extend, Upload-Cover, or Upload-Extend endpoints.
 
 ---
 
+### 15. Generate Lyrics
+**POST** `/api/music/generate-lyrics`
+
+Generate AI-powered lyrics without generating audio tracks.
+
+#### Required Fields
+- `prompt` (string - detailed lyrics description, max 200 words)
+- `callBackUrl` (string - URL to receive results)
+
+#### Features
+- Usually generates 2 different lyrics variants
+- Includes structure markers ([Verse], [Chorus], [Bridge], etc.)
+- Callback notification when complete
+
+#### Response
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "taskId": "5c79****be8e"
+  }
+}
+```
+
+#### Callback Types
+- `complete` - Lyrics generation completed
+- `error` - Task failed
+
+#### Notes
+- Unlike music generation, lyrics have only one callback stage: 'complete'
+- Lyrics content may contain special characters and line breaks
+- Ensure proper UTF-8 encoding when handling lyrics
+
+---
+
+### 16. Get Lyrics Details
+**GET** `/api/music/lyrics-details?taskId={taskId}`
+
+Retrieve detailed information about a lyrics generation task.
+
+#### Query Parameters
+- `taskId` (string, required) - Task ID from Generate Lyrics
+
+#### Status Values
+- `PENDING` - Task is queued or processing
+- `SUCCESS` - Lyrics generation completed successfully
+- `CREATE_TASK_FAILED` - Failed to create task
+- `GENERATE_LYRICS_FAILED` - Generation process failed
+- `CALLBACK_EXCEPTION` - Callback error occurred
+- `SENSITIVE_WORD_ERROR` - Content policy violation
+
+#### Response Format
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "taskId": "11dc****8b0f",
+    "param": "{\"prompt\":\"A song about night\"}",
+    "response": {
+      "taskId": "11dc****8b0f",
+      "data": [
+        {
+          "text": "[Verse]\nLyrics content here...",
+          "title": "Song Title",
+          "status": "complete",
+          "errorMessage": ""
+        }
+      ]
+    },
+    "status": "SUCCESS",
+    "type": "LYRICS",
+    "errorCode": null,
+    "errorMessage": null
+  }
+}
+```
+
+#### Polling Recommendation
+Poll every 30 seconds until status becomes `SUCCESS` or a failure state.
+
+---
+
 ## 🔔 Callbacks
 
 Format:
@@ -337,9 +421,13 @@ All endpoints: **100% Complete**
 - Replace Section ✅
 - Cover Details ✅
 - Generate Persona ✅
+- Generate Lyrics ✅
+- Get Lyrics Details ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
+
+**Total**: 17 API features (16 endpoints + callbacks)
 
 ---
 
