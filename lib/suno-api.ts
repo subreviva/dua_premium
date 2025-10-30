@@ -443,6 +443,67 @@ export interface PersonaMusicParams {
   tags?: string
 }
 
+/**
+ * Upload Music Parameters
+ * 
+ * Upload local songs and get clip_id for subsequent operations (extend/cover uploaded music).
+ * 
+ * API Endpoint: POST /api/v1/suno/upload
+ * 
+ * Required Fields:
+ * - url: Online music URL (copyright-free, 6-60 seconds)
+ * 
+ * @see https://docs.sunoapi.com
+ */
+export interface UploadMusicParams {
+  /** 
+   * Online music URL to upload (REQUIRED)
+   * Must be copyright-free music
+   * Duration: 6-60 seconds
+   * Returns clip_id for use with extend_upload_music or cover_upload_music
+   */
+  url: string
+}
+
+/**
+ * Get WAV URL Parameters
+ * 
+ * Get high-quality WAV format URL for a generated song.
+ * 
+ * API Endpoint: POST /api/v1/suno/wav
+ * 
+ * Required Fields:
+ * - clip_id: Song ID to get WAV URL for
+ * 
+ * @see https://docs.sunoapi.com
+ */
+export interface GetWavParams {
+  /** Song ID to get WAV URL for (REQUIRED) */
+  clip_id: string
+}
+
+/**
+ * Get MIDI Data Parameters
+ * 
+ * Get MIDI JSON data and online MIDI file URL for a song.
+ * Works with complete songs or individual instrumental tracks (after stems separation).
+ * This is a synchronous endpoint - requires polling.
+ * 
+ * API Endpoint: POST /api/v1/suno/midi
+ * 
+ * Required Fields:
+ * - clip_id: Song ID (complete song or single instrumental track after stems)
+ * 
+ * @see https://docs.sunoapi.com
+ */
+export interface GetMidiParams {
+  /** 
+   * Song ID to get MIDI data for (REQUIRED)
+   * Can be complete song or single instrumental track after stems separation
+   */
+  clip_id: string
+}
+
 // Generate Persona (Legacy - kept for backward compatibility)
 export interface GeneratePersonaParams {
   taskId: string
@@ -708,6 +769,77 @@ export interface PersonaResponse {
   personaId: string
   name: string
   description: string
+}
+
+// UploadMusicResponse interface
+export interface UploadMusicResponse {
+  code: number
+  clip_id: string
+  message: string
+}
+
+// WavUrlResponse interface
+export interface WavUrlResponse {
+  message: string
+  data: {
+    wav_url: string
+  }
+}
+
+// MidiNote interface
+export interface MidiNote {
+  /** End time in seconds */
+  end: number
+  /** MIDI note number (0-127) */
+  pitch: number
+  /** Start time in seconds */
+  start: number
+  /** Note intensity (0-1) */
+  velocity: number
+}
+
+// MidiInstrument interface
+export interface MidiInstrument {
+  /** Instrument name */
+  name: string
+  /** Array of MIDI notes */
+  notes: MidiNote[]
+}
+
+// MidiDataResponse interface
+export interface MidiDataResponse {
+  code: number
+  data: {
+    /** Online URL in MIDI format (for audition/reference) */
+    midi_url: string
+    /** Array of detected instruments with MIDI notes */
+    instruments: MidiInstrument[]
+  }
+  message: string
+}
+
+// TaskMusicData interface for polling
+export interface TaskMusicData {
+  clip_id: string
+  /** pending | running | succeeded */
+  state: "pending" | "running" | "succeeded"
+  title: string
+  tags: string
+  lyrics: string
+  image_url: string
+  audio_url: string
+  video_url: string
+  created_at: string
+  mv: string
+  gpt_description_prompt: string | null
+  duration: number
+}
+
+// TaskStatusResponse interface
+export interface TaskStatusResponse {
+  code: number
+  data: TaskMusicData[]
+  message: string
 }
 
 export interface BoostStyleResponse {
@@ -1130,6 +1262,166 @@ export class SunoAPIClient {
         title: params.title,
         tags: params.tags,
       }),
+    })
+  }
+
+  /**
+   * Upload Music
+   * 
+   * Upload local songs and get clip_id for subsequent operations (extend/cover uploaded music).
+   * 
+   * API Endpoint: POST /api/v1/suno/upload
+   * 
+   * @param params - Upload music parameters
+   * @param params.url - Online music URL (copyright-free, 6-60 seconds)
+   * @returns Promise with clip_id for use with extend_upload_music or cover_upload_music
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.uploadMusic({
+   *   url: "https://audio.jukehost.co.uk/Ij5SXdAJKLg4tggS8T1xIH1Z0DuOWq5e.mp3"
+   * });
+   * console.log(result.data.clip_id); // Use this with extend_upload_music or cover_upload_music
+   * ```
+   * 
+   * @see https://docs.sunoapi.com
+   */
+  async uploadMusic(params: UploadMusicParams): Promise<ApiResponse<UploadMusicResponse>> {
+    // Validate required fields
+    if (!params.url) {
+      throw new SunoAPIError("url is required", 400)
+    }
+
+    // Validate URL format
+    try {
+      new URL(params.url)
+    } catch {
+      throw new SunoAPIError("Invalid URL format", 400)
+    }
+
+    return this.request("/suno/upload", {
+      method: "POST",
+      body: JSON.stringify({
+        url: params.url,
+      }),
+    })
+  }
+
+  /**
+   * Get WAV URL
+   * 
+   * Get high-quality WAV format URL for a generated song.
+   * 
+   * API Endpoint: POST /api/v1/suno/wav
+   * 
+   * @param params - Get WAV parameters
+   * @param params.clip_id - Song ID to get WAV URL for
+   * @returns Promise with WAV URL
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.getWav({
+   *   clip_id: "8ce9770b-ec3b-4029-a3e3-4b8db20da7d1"
+   * });
+   * console.log(result.data.data.wav_url); // WAV download URL
+   * ```
+   * 
+   * @see https://docs.sunoapi.com
+   */
+  async getWav(params: GetWavParams): Promise<ApiResponse<WavUrlResponse>> {
+    // Validate required fields
+    if (!params.clip_id) {
+      throw new SunoAPIError("clip_id is required", 400)
+    }
+
+    return this.request("/suno/wav", {
+      method: "POST",
+      body: JSON.stringify({
+        clip_id: params.clip_id,
+      }),
+    })
+  }
+
+  /**
+   * Get MIDI Data
+   * 
+   * Get MIDI JSON data and online MIDI file URL for a song.
+   * Works with complete songs or individual instrumental tracks (after stems separation).
+   * This is a synchronous endpoint - requires polling.
+   * 
+   * API Endpoint: POST /api/v1/suno/midi
+   * 
+   * @param params - Get MIDI parameters
+   * @param params.clip_id - Song ID (complete song or single instrumental track after stems)
+   * @returns Promise with MIDI data including instruments and notes
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.getMidi({
+   *   clip_id: "29fc9d9e-a550-47d9-bfd2-6640a4025acc"
+   * });
+   * console.log(result.data.data.midi_url); // MIDI file URL
+   * console.log(result.data.data.instruments); // Array of instruments with notes
+   * ```
+   * 
+   * @see https://docs.sunoapi.com
+   */
+  async getMidi(params: GetMidiParams): Promise<ApiResponse<MidiDataResponse>> {
+    // Validate required fields
+    if (!params.clip_id) {
+      throw new SunoAPIError("clip_id is required", 400)
+    }
+
+    return this.request("/suno/midi", {
+      method: "POST",
+      body: JSON.stringify({
+        clip_id: params.clip_id,
+      }),
+    })
+  }
+
+  /**
+   * Get Music (Task Polling)
+   * 
+   * Poll for song generation status and data using task_id.
+   * Recommended polling interval: 15-25 seconds.
+   * 
+   * API Endpoint: GET /api/v1/suno/task/{task_id}
+   * 
+   * @param taskId - Task ID returned from create/extend/concat/cover/persona endpoints
+   * @returns Promise with array of music data including state (pending/running/succeeded)
+   * 
+   * @example
+   * ```typescript
+   * // After creating music, poll for completion
+   * const createResult = await client.generateMusic({...});
+   * const taskId = createResult.data.taskId;
+   * 
+   * // Poll every 20 seconds
+   * const pollInterval = setInterval(async () => {
+   *   const status = await client.getMusic(taskId);
+   *   const songs = status.data.data;
+   *   
+   *   if (songs.every(song => song.state === "succeeded")) {
+   *     clearInterval(pollInterval);
+   *     console.log("All songs completed!");
+   *     songs.forEach(song => {
+   *       console.log(`${song.title}: ${song.audio_url}`);
+   *     });
+   *   }
+   * }, 20000);
+   * ```
+   * 
+   * @see https://docs.sunoapi.com
+   */
+  async getMusic(taskId: string): Promise<ApiResponse<TaskStatusResponse>> {
+    // Validate required parameter
+    if (!taskId) {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request(`/suno/task/${taskId}`, {
+      method: "GET",
     })
   }
 

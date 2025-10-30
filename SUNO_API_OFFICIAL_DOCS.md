@@ -489,3 +489,210 @@
 **Last Updated:** October 30, 2025  
 **API Version:** v1  
 **Status:** ✅ Production Ready
+
+---
+
+## 1️⃣2️⃣ **Upload Music**
+
+Upload local songs and get the clip_id for subsequent operations (extend/cover uploaded music).
+
+### Request Body
+
+```json
+{
+  "url": "https://audio.jukehost.co.uk/Ij5SXdAJKLg4tggS8T1xIH1Z0DuOWq5e.mp3"
+}
+```
+
+### Field Descriptions
+- **url** (required): Online music URL you want to upload
+  - Must be copyright-free music
+  - Duration: 6-60 seconds
+  - Returns clip_id for use with extend_upload_music or cover_upload_music
+
+### Response
+```json
+{
+  "code": 200,
+  "clip_id": "cfbc3d3c-2add-4265-bcdf-924092096e3d",
+  "message": "success"
+}
+```
+
+### Example (curl)
+```bash
+curl -X POST https://api.sunoapi.com/api/v1/suno/upload \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://audio.jukehost.co.uk/Ij5SXdAJKLg4tggS8T1xIH1Z0DuOWq5e.mp3"}'
+```
+
+---
+
+## 1️⃣3️⃣ **Get WAV URL**
+
+Get high-quality WAV format URL for a generated song.
+
+### Request Body
+
+```json
+{
+  "clip_id": "8ce9770b-ec3b-4029-a3e3-4b8db20da7d1"
+}
+```
+
+### Field Descriptions
+- **clip_id** (required): The song ID you want to get WAV URL for
+
+### Response
+```json
+{
+  "message": "success",
+  "data": {
+    "wav_url": "https://cdn1.suno.ai/8ce9770b-ec3b-4029-a3e3-4b8db20da7d1.wav"
+  }
+}
+```
+
+### Example (curl)
+```bash
+curl -X POST https://api.sunoapi.com/api/v1/suno/wav \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"clip_id":"8ce9770b-ec3b-4029-a3e3-4b8db20da7d1"}'
+```
+
+---
+
+## 1️⃣4️⃣ **Get MIDI Data**
+
+Get MIDI JSON data and online MIDI file URL for a song. Works with complete songs or individual instrumental tracks (after stems separation). **This is a synchronous endpoint - requires polling.**
+
+### Request Body
+
+```json
+{
+  "clip_id": "29fc9d9e-a550-47d9-bfd2-6640a4025acc"
+}
+```
+
+### Field Descriptions
+- **clip_id** (required): Song ID (complete song or single instrumental track after stems)
+
+### Response
+```json
+{
+  "code": 200,
+  "data": {
+    "midi_url": "https://cdn.sunoapi.com/storage/v1/object/public/midi/suno/4538ed06-ccdd-452d-b90f-c35d29150050.mid",
+    "instruments": [
+      {
+        "name": "Synth Voice",
+        "notes": [
+          {
+            "end": 2.1614583333333335,
+            "pitch": 64,
+            "start": 1.34375,
+            "velocity": 0.49606299212598426
+          }
+        ]
+      }
+    ]
+  },
+  "message": "success"
+}
+```
+
+### MIDI Data Structure
+- **midi_url**: Online URL in MIDI format (for audition/reference)
+- **instruments**: Array of detected instruments with MIDI notes
+  - **name**: Instrument name
+  - **notes**: Array of MIDI notes
+    - **pitch**: MIDI note number (0-127)
+    - **start**: Start time in seconds
+    - **end**: End time in seconds
+    - **velocity**: Note intensity (0-1)
+
+### Example (curl)
+```bash
+curl -X POST https://api.sunoapi.com/api/v1/suno/midi \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"clip_id":"29fc9d9e-a550-47d9-bfd2-6640a4025acc"}'
+```
+
+---
+
+## 1️⃣5️⃣ **Get Music (Task Polling)**
+
+Poll for song generation status and data using task_id. **Recommended polling interval: 15-25 seconds.**
+
+### Request
+
+```
+GET /api/v1/suno/task/{task_id}
+```
+
+### Path Parameters
+- **task_id** (required): Task ID returned from create/extend/concat/cover/persona endpoints
+
+### Response
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "clip_id": "26c9c592-0566-46cf-bb71-91ac1deaa7b5",
+      "state": "succeeded",
+      "title": "Starts",
+      "tags": "pop",
+      "lyrics": "[Verse]\nStars they shine above me...",
+      "image_url": "https://cdn2.suno.ai/image_26c9c592-0566-46cf-bb71-91ac1deaa7b5.jpeg",
+      "audio_url": "https://cdn1.suno.ai/26c9c592-0566-46cf-bb71-91ac1deaa7b5.mp3",
+      "video_url": "https://cdn1.suno.ai/26c9c592-0566-46cf-bb71-91ac1deaa7b5.mp4",
+      "created_at": "2024-11-27T10:26:46.552Z",
+      "mv": "chirp-v3-5",
+      "gpt_description_prompt": null,
+      "duration": 179
+    }
+  ],
+  "message": "success"
+}
+```
+
+### State Values
+- **pending**: Task queued, waiting to start
+- **running**: Generation in progress
+- **succeeded**: Completed successfully (audio_url/video_url available)
+
+### Example (curl)
+```bash
+curl -X GET https://api.sunoapi.com/api/v1/suno/task/abc123-task-id \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## 📋 Quick Reference Guide
+
+| Task Type | Required Fields | Optional Fields |
+|-----------|----------------|-----------------|
+| create_music | custom_mode, prompt, mv | title, tags |
+| extend_music | custom_mode, prompt, mv, continue_clip_id | title, tags |
+| concat_music | clip_id | - |
+| cover_music | custom_mode, prompt, mv, continue_clip_id | title, tags |
+| persona_music | custom_mode, prompt, mv, persona_id | title, tags |
+
+**Character Limits:**
+- Prompt: 3000 (v4 and below), 5000 (v4.5+)
+- Tags: 200 (v4 and below), 1000 (v4.5+)
+- Title: 120 characters
+
+**Model Versions:** chirp-v3-5, chirp-v4, chirp-v4-5, chirp-v4-5-plus, chirp-v5
+
+**Additional Operations:**
+- Upload Music: Get clip_id from online URL (6-60s, copyright-free)
+- Get WAV: Convert song to high-quality WAV format
+- Get MIDI: Extract MIDI data and instrument notes (synchronous, requires polling)
+- Get Music: Poll task status (15-25s intervals recommended)
+
