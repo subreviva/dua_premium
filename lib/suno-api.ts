@@ -225,21 +225,23 @@ export interface ConcatMusicParams {
  * 
  * Cover the specified song (must be generated on the platform)
  * 
- * REQUIRED FIELDS:
- * - task_type: "cover_music"
- * - custom_mode: true
- * - continue_clip_id: Clip ID of original song you want to cover
- * - prompt: Song lyrics
- * - mv: Model version
+ * REQUIRED FIELDS (per OpenAPI spec):
+ * - task_type: "cover_music" (auto-added by client)
+ * - custom_mode: true (REQUIRED)
+ * - continue_clip_id: Clip ID of original song (REQUIRED)
+ * - prompt: Song lyrics (REQUIRED)
+ * - mv: Model version (REQUIRED)
  * 
  * @see https://docs.sunoapi.com/create-suno-music
  */
-export interface CoverMusicParams {
-  /** Clip ID of the original song you want to cover (REQUIRED) */
-  continue_clip_id: string
+export interface CoverMusicParams extends WebhookConfig {
+  // ============= REQUIRED FIELDS =============
   
   /** Custom mode flag (REQUIRED - must be true) */
   custom_mode: boolean
+  
+  /** Clip ID of the original song you want to cover (REQUIRED) */
+  continue_clip_id: string
   
   /** 
    * Song lyrics (REQUIRED)
@@ -255,6 +257,8 @@ export interface CoverMusicParams {
    */
   mv: "chirp-v3-5" | "chirp-v4" | "chirp-v4-5" | "chirp-v4-5-plus" | "chirp-v5"
   
+  // ============= OPTIONAL FIELDS =============
+  
   /** 
    * Song title (Optional)
    * Max length: 120 characters
@@ -269,31 +273,20 @@ export interface CoverMusicParams {
    */
   tags?: string
   
-  // Legacy fields for backward compatibility
-  /** @deprecated Use continue_clip_id instead */
-  uploadUrl?: string
-  /** @deprecated Use custom_mode instead */
-  customMode?: boolean
-  /** @deprecated Use make_instrumental instead */
-  instrumental?: boolean
-  /** @deprecated Use mv instead */
-  model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
-  /** @deprecated Use tags instead */
-  style?: string
-  /** @deprecated */
-  personaId?: string
-  /** @deprecated Use negative_tags instead */
-  negativeTags?: string
-  /** @deprecated Use vocal_gender instead */
-  vocalGender?: "male" | "female" | "mixed"
-  /** @deprecated Use style_weight instead */
-  styleWeight?: number
-  /** @deprecated Use weirdness_constraint instead */
-  weirdnessConstraint?: number
-  /** @deprecated */
-  audioWeight?: number
-  /** @deprecated Use webhook_url instead */
-  callBackUrl?: string
+  /** Elements to avoid in your songs */
+  negative_tags?: string
+  
+  /** Weight of the tags field (style). Range: 0-1 */
+  style_weight?: number
+  
+  /** Randomness or weirdness of the song. Range: 0-1 */
+  weirdness_constraint?: number
+  
+  /** 
+   * Control vocal gender: "f" (Female) or "m" (Male)
+   * Support: chirp-v4-5, chirp-v4-5-plus, chirp-v5
+   */
+  vocal_gender?: "f" | "m"
 }
 
 // Generate Lyrics
@@ -1045,99 +1038,66 @@ export class SunoAPIClient {
   }
 
   async coverMusic(params: CoverMusicParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate based on official documentation at https://docs.sunoapi.org/
+    // Validate based on official OpenAPI specification
     
-    // uploadUrl is ALWAYS required (audio file URL, max 2 minutes)
-    if (!params.uploadUrl) {
-      throw new SunoAPIError("uploadUrl is required", 400)
+    // ============= REQUIRED FIELDS VALIDATION =============
+    
+    if (!params.custom_mode) {
+      throw new SunoAPIError("custom_mode is required and must be true for cover music", 400)
     }
-
-    // Validate URL format
-    try {
-      new URL(params.uploadUrl)
-    } catch {
-      throw new SunoAPIError("uploadUrl must be a valid URL", 400)
+    
+    if (!params.continue_clip_id || params.continue_clip_id.trim() === "") {
+      throw new SunoAPIError("continue_clip_id is required for cover music", 400)
     }
-
-    // Validate based on customMode (same logic as generateMusic)
-    if (params.customMode) {
-      // CUSTOM MODE validation
-      if (!params.instrumental) {
-        // Custom Mode + NOT instrumental: requires style, title, AND prompt (as exact lyrics)
-        if (!params.style) {
-          throw new SunoAPIError("style is required in Custom Mode", 400)
-        }
-        if (!params.title) {
-          throw new SunoAPIError("title is required in Custom Mode", 400)
-        }
-        if (!params.prompt) {
-          throw new SunoAPIError("prompt (lyrics) is required in Custom Mode when instrumental is false", 400)
-        }
-      } else {
-        // Custom Mode + instrumental: requires only style and title
-        if (!params.style) {
-          throw new SunoAPIError("style is required in Custom Mode", 400)
-        }
-        if (!params.title) {
-          throw new SunoAPIError("title is required in Custom Mode", 400)
-        }
-      }
-    } else {
-      // NON-CUSTOM MODE validation
-      // Always requires prompt (used as idea, lyrics auto-generated)
-      if (!params.prompt) {
-        throw new SunoAPIError("prompt is required in Non-custom Mode", 400)
-      }
-      // Validate max 500 characters for non-custom mode
-      if (params.prompt.length > 500) {
-        throw new SunoAPIError("Prompt in Non-custom Mode exceeds maximum of 500 characters", 413)
-      }
+    
+    if (!params.prompt || params.prompt.trim() === "") {
+      throw new SunoAPIError("prompt is required for cover music", 400)
     }
-
-    // Validate prompt length for Custom Mode (model-specific limits)
-    if (params.customMode && params.prompt) {
-      const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
-      const maxLength = isV3OrV4 ? 3000 : 5000
-      if (params.prompt.length > maxLength) {
+    
+    if (!params.mv) {
+      throw new SunoAPIError("mv (model version) is required for cover music", 400)
+    }
+    
+    // ============= CHARACTER LIMITS VALIDATION =============
+    
+    // Validate prompt length (model-specific limits)
+    const isV3OrV4 = params.mv === "chirp-v3-5" || params.mv === "chirp-v4"
+    const maxPromptLength = isV3OrV4 ? 3000 : 5000
+    if (params.prompt.length > maxPromptLength) {
+      throw new SunoAPIError(
+        `prompt exceeds maximum character limit of ${maxPromptLength} for ${params.mv}`,
+        413
+      )
+    }
+    
+    // Validate tags length (model-specific limits)
+    if (params.tags) {
+      const maxTagsLength = isV3OrV4 ? 200 : 1000
+      if (params.tags.length > maxTagsLength) {
         throw new SunoAPIError(
-          `Prompt exceeds maximum character limit of ${maxLength} for ${params.model}`,
-          413,
+          `tags exceeds maximum character limit of ${maxTagsLength} for ${params.mv}`,
+          413
         )
       }
     }
-
-    // Validate style length (model-specific limits)
-    if (params.style) {
-      const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
-      const maxLength = isV3OrV4 ? 200 : 1000
-      if (params.style.length > maxLength) {
-        throw new SunoAPIError(`Style exceeds maximum character limit of ${maxLength} for ${params.model}`, 413)
-      }
+    
+    // Validate title length (max 120 characters)
+    if (params.title && params.title.length > 120) {
+      throw new SunoAPIError("title exceeds maximum character limit of 120 characters", 413)
     }
-
-    // Validate title length (model-specific limits)
-    if (params.title) {
-      const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
-      const maxLength = isV3OrV4 ? 80 : 100
-      if (params.title.length > maxLength) {
-        throw new SunoAPIError(`Title exceeds maximum character limit of ${maxLength} for ${params.model}`, 413)
-      }
-    }
-
+    
+    // ============= RANGE PARAMETERS VALIDATION =============
+    
     // Validate optional range parameters (0-1)
-    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
-      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    if (params.style_weight !== undefined && (params.style_weight < 0 || params.style_weight > 1)) {
+      throw new SunoAPIError("style_weight must be between 0 and 1", 400)
     }
 
     if (
-      params.weirdnessConstraint !== undefined &&
-      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+      params.weirdness_constraint !== undefined &&
+      (params.weirdness_constraint < 0 || params.weirdness_constraint > 1)
     ) {
-      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
-    }
-
-    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
-      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+      throw new SunoAPIError("weirdness_constraint must be between 0 and 1", 400)
     }
 
     return this.request("/suno/create", {
