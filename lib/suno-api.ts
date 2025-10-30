@@ -419,6 +419,22 @@ export class SunoAPIClient {
     })
   }
 
+  async generateCover(params: GenerateCoverParams): Promise<ApiResponse<CoverResponse>> {
+    // Validate required parameters
+    if (!params.taskId) {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    if (!params.callBackUrl) {
+      throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    return this.request("/suno/cover/generate", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
   async getMusicDetails(taskId: string): Promise<ApiResponse<MusicGenerationDetailsResponse>> {
     return this.request(`/generate/record-info?taskId=${taskId}`, {
       method: "GET",
@@ -675,6 +691,31 @@ export interface AddVocalsParams {
   callBackUrl?: string
 }
 
+export interface BoostMusicStyleParams {
+  content: string // Style description
+}
+
+export interface BoostStyleResponse {
+  taskId: string
+  param: string
+  result: string
+  creditsConsumed: number
+  creditsRemaining: number
+  successFlag: string
+  errorCode?: number
+  errorMessage?: string
+  createTime: string
+}
+
+export interface GenerateCoverParams {
+  taskId: string
+  callBackUrl: string
+}
+
+export interface CoverResponse {
+  taskId: string
+}
+
 export class SunoAPIError extends Error {
   constructor(
     message: string,
@@ -742,6 +783,23 @@ export async function addInstrumental(params: AddInstrumentalParams): Promise<Ap
 export async function addVocals(params: AddVocalsParams): Promise<ApiResponse<TaskResponse>> {
   const client = getSunoClient()
   return client.addVocals(params)
+}
+
+export async function getTimestampedLyrics(
+  params: GetTimestampedLyricsParams,
+): Promise<ApiResponse<LyricsResult>> {
+  const client = getSunoClient()
+  return client.getTimestampedLyrics(params)
+}
+
+export async function boostMusicStyle(params: BoostMusicStyleParams): Promise<ApiResponse<BoostStyleResponse>> {
+  const client = getSunoClient()
+  return client.boostMusicStyle(params)
+}
+
+export async function generateCover(params: GenerateCoverParams): Promise<ApiResponse<CoverResponse>> {
+  const client = getSunoClient()
+  return client.generateCover(params)
 }
 
 export const SunoAPI = SunoAPIClient
