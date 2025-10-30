@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "AI Music API": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "apidog-mcp-server@latest",
+        "--site-id=754564"
+      ]
+    }
+  }
+}

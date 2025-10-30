@@ -2,6 +2,12 @@
 
 A premium AI-powered music creation platform built with Next.js 16 and the Suno API.
 
+## 📚 Quick Links
+
+- **[Gooey.AI Integration](./GOOEY_INTEGRATION.md)** - Alternative Suno API via Gooey.AI (v5, v4.5, v3.5)
+- **[MCP AI Music API](./MCP_AI_MUSIC_API.md)** - Model Context Protocol server for API docs
+- **[MCP Quick Start](./MCP_QUICK_START.md)** - 2-minute setup guide for MCP
+
 ## Features
 
 - **Music Generation**: Create AI-generated music from text prompts
