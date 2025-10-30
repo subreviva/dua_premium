@@ -1067,16 +1067,21 @@ export class SunoAPIClient {
 
   // File Upload APIs
   async uploadFileBase64(params: Base64UploadParams): Promise<ApiResponse<FileUploadResult>> {
-    // Validate required parameters
-    if (!params.base64Data) {
+    // Validate required parameters individually
+    if (!params.base64Data || params.base64Data.trim() === "") {
       throw new SunoAPIError("base64Data is required", 400)
     }
 
-    if (!params.uploadPath) {
+    if (!params.uploadPath || params.uploadPath.trim() === "") {
       throw new SunoAPIError("uploadPath is required", 400)
     }
 
-    // Validate base64 format
+    // Validate uploadPath format (no leading/trailing slashes)
+    if (params.uploadPath.startsWith("/") || params.uploadPath.endsWith("/")) {
+      throw new SunoAPIError("uploadPath must not have leading or trailing slashes", 400)
+    }
+
+    // Validate base64 format (supports data URL or pure base64)
     const base64Pattern = /^(?:data:[a-zA-Z0-9\/+\-]+;base64,)?[A-Za-z0-9+/]+=*$/
     if (!base64Pattern.test(params.base64Data.replace(/\s/g, ""))) {
       throw new SunoAPIError("Invalid base64Data format", 400)
