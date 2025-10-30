@@ -419,6 +419,35 @@ export class SunoAPIClient {
     })
   }
 
+  async replaceMusicSection(params: ReplaceMusicSectionParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (
+      !params.taskId ||
+      params.musicIndex === undefined ||
+      !params.prompt ||
+      !params.tags ||
+      !params.title ||
+      params.infillStartS === undefined ||
+      params.infillEndS === undefined
+    ) {
+      throw new SunoAPIError("Missing required parameters for Replace Music Section", 400)
+    }
+
+    // Validate time range
+    if (params.infillStartS < 0 || params.infillEndS < 0) {
+      throw new SunoAPIError("infillStartS and infillEndS must be non-negative", 400)
+    }
+
+    if (params.infillStartS >= params.infillEndS) {
+      throw new SunoAPIError("infillStartS must be less than infillEndS", 400)
+    }
+
+    return this.request("/generate/replace-section", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
   async generateCover(params: GenerateCoverParams): Promise<ApiResponse<CoverResponse>> {
     // Validate required parameters
     if (!params.taskId) {
@@ -800,6 +829,23 @@ export async function boostMusicStyle(params: BoostMusicStyleParams): Promise<Ap
 export async function generateCover(params: GenerateCoverParams): Promise<ApiResponse<CoverResponse>> {
   const client = getSunoClient()
   return client.generateCover(params)
+}
+
+export async function replaceMusicSection(
+  params: ReplaceMusicSectionParams,
+): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.replaceMusicSection(params)
+}
+
+export async function getCoverDetails(taskId: string): Promise<ApiResponse<CoverDetailsResponse>> {
+  const client = getSunoClient()
+  return client.getCoverDetails(taskId)
+}
+
+export async function generatePersona(params: GeneratePersonaParams): Promise<ApiResponse<PersonaResponse>> {
+  const client = getSunoClient()
+  return client.generatePersona(params)
 }
 
 export const SunoAPI = SunoAPIClient
