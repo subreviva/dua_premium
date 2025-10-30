@@ -5,11 +5,21 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Sparkles, Copy, Check } from "lucide-react"
 
-export function LyricsGenerator() {
+interface LyricsGeneratorProps {
+  onGenerate?: (lyrics: string) => void
+}
+
+export function LyricsGenerator({ onGenerate }: LyricsGeneratorProps) {
   const [prompt, setPrompt] = useState("")
   const [generatedLyrics, setGeneratedLyrics] = useState<string[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+
+  const handleUseLyrics = (lyrics: string) => {
+    if (onGenerate) {
+      onGenerate(lyrics)
+    }
+  }
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
@@ -97,14 +107,26 @@ export function LyricsGenerator() {
             <div key={index} className="premium-card p-4 rounded-lg space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-purple-400">Variation {index + 1}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCopy(lyrics, index)}
-                  className="h-8 hover:bg-white/10"
-                >
-                  {copiedIndex === index ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-                </Button>
+                <div className="flex gap-2">
+                  {onGenerate && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleUseLyrics(lyrics)}
+                      className="h-8 px-3 hover:bg-purple-500/10 text-purple-400 hover:text-purple-300 font-medium"
+                    >
+                      Use
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCopy(lyrics, index)}
+                    className="h-8 hover:bg-white/10"
+                  >
+                    {copiedIndex === index ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <pre className="text-sm whitespace-pre-wrap font-mono text-neutral-300">{lyrics}</pre>
             </div>

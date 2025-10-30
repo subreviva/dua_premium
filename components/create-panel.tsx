@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,9 @@ import {
   Library,
   Undo2,
   Redo2,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PersonasModal } from "@/components/personas-modal"
@@ -48,12 +51,63 @@ export function CreatePanel() {
   const [showPersonasModal, setShowPersonasModal] = useState(false)
   const [showLyricsGenerator, setShowLyricsGenerator] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [credits, setCredits] = useState<number | null>(null)
+  const [generationStatus, setGenerationStatus] = useState<string>("")
+  const [errorMessage, setErrorMessage] = useState<string>("")
   const [lyricsPlaceholder] = useState("Enter your own lyrics or let AI create them for you")
   const [descriptionPlaceholder] = useState("a cozy indie song about sunshine")
   
   // Undo/Redo para lyrics
   const [lyricsHistory, setLyricsHistory] = useState<string[]>([])
   const [lyricsHistoryIndex, setLyricsHistoryIndex] = useState(-1)
+
+  // Carregar créditos ao montar
+  useEffect(() => {
+    fetchCredits()
+  }, [])
+
+  const fetchCredits = async () => {
+    try {
+      const response = await fetch("/api/suno/credits")
+      const result = await response.json()
+      if (result.code === 200 && result.data?.credits !== undefined) {
+        setCredits(result.data.credits)
+      }
+    } catch (error) {
+      console.error("[v0] Error fetching credits:", error)
+    }
+  }
+
+  const addStyleTag = (tag: string) => {
+    const currentStyles = styles.split(",").map(s => s.trim()).filter(Boolean)
+    if (!currentStyles.includes(tag)) {
+      setStyles(currentStyles.length > 0 ? `${styles}, ${tag}` : tag)
+    }
+  }
+
+  const shuffleDescription = () => {
+    const descriptions = [
+      "a cozy indie song about sunshine",
+      "an energetic rock anthem about freedom",
+      "a melancholic ballad about lost love",
+      "an upbeat pop song about summer vibes",
+      "a mysterious ambient track about the ocean",
+      "a powerful orchestral piece about adventure",
+    ]
+    const random = descriptions[Math.floor(Math.random() * descriptions.length)]
+    setSongDescription(random)
+  }
+
+  const shuffleLyrics = async () => {
+    setGenerationStatus("Generating lyrics...")
+    try {
+      // Implementar chamada à API de geração de lyrics
+      setShowLyricsGenerator(true)
+    } catch (error) {
+      console.error("[v0] Error shuffling lyrics:", error)
+      setGenerationStatus("")
+    }
+  }
 
   const handleLyricsChange = useCallback((newLyrics: string) => {
     setLyrics(newLyrics)
@@ -111,7 +165,20 @@ export function CreatePanel() {
   ]
 
   const handleCreate = async () => {
+    // Validação
+    if (!songDescription && !lyrics && mode === "simple") {
+      setErrorMessage("Please enter a song description or lyrics")
+      return
+    }
+    if (!songDescription && mode === "custom") {
+      setErrorMessage("Please enter a song description")
+      return
+    }
+
     setIsGenerating(true)
+    setErrorMessage("")
+    setGenerationStatus("Initializing...")
+    
     try {
       const modelMap: Record<string, string> = {
         "v5-pro-beta": "V5",
@@ -138,6 +205,7 @@ export function CreatePanel() {
       }
 
       if (uploadedAudioUrl) {
+        setGenerationStatus("Uploading audio...")
         const uploadParams = {
           uploadUrl: uploadedAudioUrl,
           prompt: lyrics || songDescription,
@@ -153,35 +221,44 @@ export function CreatePanel() {
           body: JSON.stringify(uploadParams),
         })
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
         const result = await response.json()
         console.log("[v0] Upload operation started:", result)
 
-        if (result.data?.taskId) {
+        if (result.code === 200 && result.data?.taskId) {
           pollForResults(result.data.taskId)
         } else {
-          console.error("[v0] No taskId received:", result)
-          setIsGenerating(false)
+          throw new Error(result.msg || "No taskId received")
         }
       } else {
+        setGenerationStatus("Creating music...")
         const response = await fetch("/api/suno/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(params),
         })
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
         const result = await response.json()
         console.log("[v0] Music generation started:", result)
 
-        if (result.data?.taskId) {
+        if (result.code === 200 && result.data?.taskId) {
           pollForResults(result.data.taskId)
         } else {
-          console.error("[v0] No taskId received:", result)
-          setIsGenerating(false)
+          throw new Error(result.msg || "No taskId received")
         }
       }
     } catch (error) {
       console.error("[v0] Error generating music:", error)
+      setErrorMessage(error instanceof Error ? error.message : "Failed to generate music")
       setIsGenerating(false)
+      setGenerationStatus("")
     }
   }
 
@@ -189,31 +266,61 @@ export function CreatePanel() {
     const maxAttempts = 60
     let attempts = 0
 
+    setGenerationStatus("Processing... (0%)")
+
     const poll = setInterval(async () => {
       attempts++
+      const progress = Math.min(Math.round((attempts / maxAttempts) * 100), 95)
+      setGenerationStatus(`Processing... (${progress}%)`)
+
       try {
         const response = await fetch(`/api/suno/details/${taskId}`)
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
         const result = await response.json()
 
         console.log("[v0] Polling attempt", attempts, "status:", result.data?.status)
 
-        if (result.data?.status === "SUCCESS") {
+        if (result.code === 200 && result.data?.status === "SUCCESS") {
           clearInterval(poll)
+          setGenerationStatus("Complete! ✓")
           console.log("[v0] Music generation complete:", result.data.response?.data)
-          setIsGenerating(false)
-        } else if (result.data?.status === "FAILED") {
+          
+          // Atualizar créditos
+          fetchCredits()
+          
+          // Resetar form após 2 segundos
+          setTimeout(() => {
+            setIsGenerating(false)
+            setGenerationStatus("")
+            setSongDescription("")
+            setLyrics("")
+            setSongTitle("")
+            setUploadedAudioUrl("")
+          }, 2000)
+        } else if (result.data?.status === "FAILED" || result.code !== 200) {
           clearInterval(poll)
-          console.error("[v0] Music generation failed:", result.data?.errorMessage)
+          const errorMsg = result.data?.errorMessage || result.msg || "Generation failed"
+          setErrorMessage(errorMsg)
+          console.error("[v0] Music generation failed:", errorMsg)
           setIsGenerating(false)
+          setGenerationStatus("")
         } else if (attempts >= maxAttempts) {
           clearInterval(poll)
+          setErrorMessage("Generation timeout - please try again")
           console.log("[v0] Polling timeout")
           setIsGenerating(false)
+          setGenerationStatus("")
         }
       } catch (error) {
         console.error("[v0] Error polling results:", error)
         clearInterval(poll)
+        setErrorMessage(error instanceof Error ? error.message : "Failed to check generation status")
         setIsGenerating(false)
+        setGenerationStatus("")
       }
     }, 5000)
   }
@@ -234,7 +341,9 @@ export function CreatePanel() {
             </button>
             <div className="flex items-center gap-2 px-2 lg:px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
               <Music className="h-3 lg:h-4 w-3 lg:w-4 text-purple-400" />
-              <span className="text-xs lg:text-sm font-semibold gradient-text">50</span>
+              <span className="text-xs lg:text-sm font-semibold gradient-text">
+                {credits !== null ? credits : <Loader2 className="h-3 w-3 animate-spin" />}
+              </span>
             </div>
           </div>
 
@@ -402,7 +511,18 @@ export function CreatePanel() {
                         </Button>
                       </>
                     )}
-                    <Shuffle className="h-4 w-4 text-neutral-400 group-hover:text-purple-400 transition-colors" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        shuffleLyrics()
+                      }}
+                      className="h-7 w-7 p-0 hover:bg-white/10"
+                      title="Generate AI Lyrics"
+                    >
+                      <Shuffle className="h-4 w-4 text-purple-400" />
+                    </Button>
                     {lyricsExpanded ? (
                       <ChevronUp className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
                     ) : (
@@ -412,12 +532,23 @@ export function CreatePanel() {
                 </button>
 
                 {lyricsExpanded && (
-                  <Textarea
-                    placeholder={lyricsPlaceholder}
-                    value={lyrics}
-                    onChange={(e) => handleLyricsChange(e.target.value)}
-                    className="min-h-[120px] premium-input resize-none font-medium"
-                  />
+                  <>
+                    <Textarea
+                      placeholder={lyricsPlaceholder}
+                      value={lyrics}
+                      onChange={(e) => handleLyricsChange(e.target.value)}
+                      className="min-h-[120px] premium-input resize-none font-medium"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowLyricsGenerator(true)}
+                      className="premium-button border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 font-medium bg-transparent w-full"
+                    >
+                      <Sparkles className="mr-2 h-4 w-4 text-purple-400" />
+                      Generate AI Lyrics
+                    </Button>
+                  </>
                 )}
               </div>
 
@@ -450,7 +581,9 @@ export function CreatePanel() {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => setStyles("")}
                           className="premium-button h-8 w-8 p-0 border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 bg-transparent"
+                          title="Clear styles"
                         >
                           <Music className="h-3 w-3 text-purple-400" />
                         </Button>
@@ -459,6 +592,7 @@ export function CreatePanel() {
                             key={tag}
                             variant="outline"
                             size="sm"
+                            onClick={() => addStyleTag(tag)}
                             className="premium-button border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-xs font-medium bg-transparent"
                           >
                             <Plus className="mr-1 h-3 w-3" />
@@ -612,7 +746,13 @@ export function CreatePanel() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-lg">Song Description</span>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-white/10">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={shuffleDescription}
+                    className="h-8 w-8 p-0 hover:bg-white/10"
+                    title="Random description"
+                  >
                     <Shuffle className="h-4 w-4 text-purple-400" />
                   </Button>
                 </div>
@@ -643,6 +783,7 @@ export function CreatePanel() {
                       key={tag}
                       variant="outline"
                       size="sm"
+                      onClick={() => addStyleTag(tag)}
                       className="premium-button border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-xs font-medium bg-transparent"
                     >
                       <Plus className="mr-1 h-3 w-3" />
@@ -655,7 +796,22 @@ export function CreatePanel() {
           )}
         </div>
 
-        <div className="p-4 lg:p-6 border-t border-white/10 backdrop-blur-xl">
+        <div className="p-4 lg:p-6 border-t border-white/10 backdrop-blur-xl space-y-3">
+          {/* Status/Error Messages */}
+          {errorMessage && (
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-red-300">{errorMessage}</p>
+            </div>
+          )}
+          
+          {generationStatus && !errorMessage && (
+            <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center gap-2">
+              <Loader2 className="h-4 w-4 text-purple-400 animate-spin flex-shrink-0" />
+              <p className="text-sm text-purple-300">{generationStatus}</p>
+            </div>
+          )}
+
           <Button
             onClick={handleCreate}
             disabled={isGenerating}
@@ -663,19 +819,7 @@ export function CreatePanel() {
           >
             {isGenerating ? (
               <>
-                <svg
-                  className="animate-spin h-4 lg:h-5 w-4 lg:w-5 mr-2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
+                <Loader2 className="h-4 lg:h-5 w-4 lg:w-5 mr-2 animate-spin" />
                 Creating...
               </>
             ) : (
@@ -704,7 +848,12 @@ export function CreatePanel() {
             <DialogTitle>Generate Lyrics</DialogTitle>
             <DialogDescription>Create AI-generated lyrics for your song</DialogDescription>
           </DialogHeader>
-          <LyricsGenerator />
+          <LyricsGenerator 
+            onGenerate={(generatedLyrics) => {
+              handleLyricsChange(generatedLyrics)
+              setShowLyricsGenerator(false)
+            }}
+          />
         </DialogContent>
       </Dialog>
 
