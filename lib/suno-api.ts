@@ -985,9 +985,24 @@ export class SunoAPIClient {
 
   // Audio Processing APIs
   async convertToWav(params: ConvertToWavParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
-    if (!params.taskId || !params.audioId || !params.callBackUrl) {
-      throw new SunoAPIError("Missing required parameters for Convert to WAV", 400)
+    // Validate required parameters individually
+    if (!params.taskId || params.taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    if (!params.audioId || params.audioId.trim() === "") {
+      throw new SunoAPIError("audioId is required", 400)
+    }
+
+    if (!params.callBackUrl || params.callBackUrl.trim() === "") {
+      throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    // Validate callBackUrl format
+    try {
+      new URL(params.callBackUrl)
+    } catch {
+      throw new SunoAPIError("callBackUrl must be a valid URL", 400)
     }
 
     return this.request("/wav/generate", {
