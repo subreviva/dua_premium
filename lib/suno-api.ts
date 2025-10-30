@@ -881,8 +881,16 @@ export class SunoAPIClient {
   }
 
   async getTimestampedLyrics(params: GetTimestampedLyricsParams): Promise<ApiResponse<LyricsResult>> {
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // taskId is REQUIRED
     if (!params.taskId) {
       throw new SunoAPIError("taskId is required", 400)
+    }
+
+    // Either audioId OR musicIndex should be provided to identify the exact track
+    if (!params.audioId && params.musicIndex === undefined) {
+      throw new SunoAPIError("Either audioId or musicIndex should be provided", 400)
     }
 
     return this.request("/generate/get-timestamped-lyrics", {
