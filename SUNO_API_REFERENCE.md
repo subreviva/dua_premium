@@ -99,14 +99,34 @@ Generate musical accompaniment for vocals/melody.
 
 ---
 
-### 6. Check Status
+### 6. Add Vocals
+**POST** `/api/music/add-vocals`
+
+Layer AI-generated vocals on top of an existing instrumental.
+
+#### Required Fields
+- `uploadUrl` (string, instrumental audio)
+- `prompt` (string - vocal description)
+- `title` (string)
+- `negativeTags` (string - vocal traits to exclude)
+- `style` (string - music/vocal style)
+- `callBackUrl` (string)
+
+#### Optional Fields
+- `vocalGender` (m|f)
+- `styleWeight`, `weirdnessConstraint`, `audioWeight` (0-1)
+- `model` (V4_5PLUS|V5, default: V4_5PLUS)
+
+---
+
+### 7. Check Status
 **GET** `/api/music/status?ids=task1,task2`
 
 Poll task status with comma-separated IDs.
 
 ---
 
-### 7. Get Credits
+### 8. Get Credits
 **GET** `/api/music/credits`
 
 Check remaining API credits.
@@ -187,6 +207,7 @@ All endpoints: **100% Complete**
 - Upload & Cover ✅
 - Upload & Extend ✅
 - Add Instrumental ✅
+- Add Vocals ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
