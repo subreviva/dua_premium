@@ -845,7 +845,14 @@ export class SunoAPIClient {
   }
 
   async getMusicDetails(taskId: string): Promise<ApiResponse<MusicGenerationDetailsResponse>> {
-    return this.request(`/generate/record-info?taskId=${taskId}`, {
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // taskId is REQUIRED
+    if (!taskId || taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request(`/generate/record-info?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
@@ -885,7 +892,12 @@ export class SunoAPIClient {
   }
 
   async getLyricsDetails(taskId: string): Promise<ApiResponse<LyricsDetailsResponse>> {
-    return this.request(`/lyrics/record-info?taskId=${taskId}`, {
+    // Validate taskId
+    if (!taskId || taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request(`/lyrics/record-info?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
@@ -904,7 +916,12 @@ export class SunoAPIClient {
   }
 
   async getWavDetails(taskId: string): Promise<ApiResponse<WavDetailsResponse>> {
-    return this.request(`/wav/record-info?taskId=${taskId}`, {
+    // Validate taskId
+    if (!taskId || taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request(`/wav/record-info?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
@@ -917,7 +934,12 @@ export class SunoAPIClient {
   }
 
   async getVocalSeparationDetails(taskId: string): Promise<ApiResponse<VocalSeparationDetailsResponse>> {
-    return this.request(`/vocal-removal/record-info?taskId=${taskId}`, {
+    // Validate taskId
+    if (!taskId || taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request(`/vocal-removal/record-info?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
@@ -1000,13 +1022,23 @@ export class SunoAPIClient {
   }
 
   async getMusicVideoDetails(taskId: string): Promise<ApiResponse<MusicVideoDetailsResponse>> {
-    return this.request(`/mp4/record-info?taskId=${taskId}`, {
+    // Validate taskId
+    if (!taskId || taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request(`/mp4/record-info?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
 
   async getCoverDetails(taskId: string): Promise<ApiResponse<CoverDetailsResponse>> {
-    return this.request(`/suno/cover/record-info?taskId=${taskId}`, {
+    // Validate taskId
+    if (!taskId || taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request(`/suno/cover/record-info?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
