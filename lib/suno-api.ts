@@ -803,17 +803,45 @@ export class SunoAPIClient {
   }
 
   async replaceMusicSection(params: ReplaceMusicSectionParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
-    if (
-      !params.taskId ||
-      params.musicIndex === undefined ||
-      !params.prompt ||
-      !params.tags ||
-      !params.title ||
-      params.infillStartS === undefined ||
-      params.infillEndS === undefined
-    ) {
-      throw new SunoAPIError("Missing required parameters for Replace Music Section", 400)
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // taskId is REQUIRED - Original task ID (parent task)
+    if (!params.taskId || params.taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    // musicIndex is REQUIRED - Specifies which song to replace (starting from 0)
+    if (params.musicIndex === undefined || params.musicIndex === null) {
+      throw new SunoAPIError("musicIndex is required", 400)
+    }
+
+    if (params.musicIndex < 0) {
+      throw new SunoAPIError("musicIndex must be non-negative (0 or greater)", 400)
+    }
+
+    // prompt is REQUIRED - Text describing the audio content
+    if (!params.prompt || params.prompt.trim() === "") {
+      throw new SunoAPIError("prompt is required", 400)
+    }
+
+    // tags is REQUIRED - Music style tags
+    if (!params.tags || params.tags.trim() === "") {
+      throw new SunoAPIError("tags is required", 400)
+    }
+
+    // title is REQUIRED - Music title
+    if (!params.title || params.title.trim() === "") {
+      throw new SunoAPIError("title is required", 400)
+    }
+
+    // infillStartS is REQUIRED - Start time point (seconds, 2 decimal places)
+    if (params.infillStartS === undefined || params.infillStartS === null) {
+      throw new SunoAPIError("infillStartS is required", 400)
+    }
+
+    // infillEndS is REQUIRED - End time point (seconds, 2 decimal places)
+    if (params.infillEndS === undefined || params.infillEndS === null) {
+      throw new SunoAPIError("infillEndS is required", 400)
     }
 
     // Validate time range
@@ -823,6 +851,15 @@ export class SunoAPIClient {
 
     if (params.infillStartS >= params.infillEndS) {
       throw new SunoAPIError("infillStartS must be less than infillEndS", 400)
+    }
+
+    // Validate callBackUrl format if provided
+    if (params.callBackUrl) {
+      try {
+        new URL(params.callBackUrl)
+      } catch {
+        throw new SunoAPIError("callBackUrl must be a valid URL", 400)
+      }
     }
 
     return this.request("/generate/replace-section", {
@@ -1113,18 +1150,62 @@ export class SunoAPIClient {
   }
 
   async replaceSection(params: ReplaceMusicSectionParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
-    if (!params.taskId || !params.prompt || !params.tags || !params.title) {
-      throw new SunoAPIError("Missing required parameters for Replace Section", 400)
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // taskId is REQUIRED
+    if (!params.taskId || params.taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    // musicIndex is REQUIRED
+    if (params.musicIndex === undefined || params.musicIndex === null) {
+      throw new SunoAPIError("musicIndex is required", 400)
+    }
+
+    if (params.musicIndex < 0) {
+      throw new SunoAPIError("musicIndex must be non-negative", 400)
+    }
+
+    // prompt is REQUIRED
+    if (!params.prompt || params.prompt.trim() === "") {
+      throw new SunoAPIError("prompt is required", 400)
+    }
+
+    // tags is REQUIRED
+    if (!params.tags || params.tags.trim() === "") {
+      throw new SunoAPIError("tags is required", 400)
+    }
+
+    // title is REQUIRED
+    if (!params.title || params.title.trim() === "") {
+      throw new SunoAPIError("title is required", 400)
+    }
+
+    // infillStartS and infillEndS are REQUIRED
+    if (params.infillStartS === undefined || params.infillStartS === null) {
+      throw new SunoAPIError("infillStartS is required", 400)
+    }
+
+    if (params.infillEndS === undefined || params.infillEndS === null) {
+      throw new SunoAPIError("infillEndS is required", 400)
     }
 
     // Validate time range
     if (params.infillStartS < 0 || params.infillEndS < 0) {
-      throw new SunoAPIError("Time values must be non-negative", 400)
+      throw new SunoAPIError("infillStartS and infillEndS must be non-negative", 400)
     }
 
     if (params.infillStartS >= params.infillEndS) {
       throw new SunoAPIError("infillStartS must be less than infillEndS", 400)
+    }
+
+    // Validate callBackUrl if provided
+    if (params.callBackUrl) {
+      try {
+        new URL(params.callBackUrl)
+      } catch {
+        throw new SunoAPIError("callBackUrl must be a valid URL", 400)
+      }
     }
 
     return this.request("/generate/replace-section", {
