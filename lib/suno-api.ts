@@ -771,12 +771,15 @@ export class SunoAPIClient {
   }
 
   async boostMusicStyle(params: BoostMusicStyleParams): Promise<ApiResponse<BoostStyleResponse>> {
-    // Validate required parameters
-    if (!params.content) {
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // content is REQUIRED - Style description in concise and clear language
+    // Example: 'Pop, Mysterious'
+    if (!params.content || params.content.trim() === "") {
       throw new SunoAPIError("content is required", 400)
     }
 
-    // Validate content length (reasonable limit)
+    // Validate content length (reasonable limit for style descriptions)
     if (params.content.length > 1000) {
       throw new SunoAPIError("Content exceeds maximum character limit of 1000 characters", 413)
     }
@@ -1293,10 +1296,6 @@ export interface UploadAndExtendParams {
   styleWeight?: number
   weirdnessConstraint?: number
   audioWeight?: number
-}
-
-export interface BoostMusicStyleParams {
-  content: string // Style description
 }
 
 export interface BoostStyleResponse {
