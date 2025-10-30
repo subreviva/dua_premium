@@ -190,12 +190,14 @@
 
 **Endpoint:** `POST /api/v1/suno/create`
 
+**Description:** Use the clip id of the song generated on the platform to extend the song
+
 ```json
 {
   "task_type": "extend_music",
   "custom_mode": true,
-  "prompt": "[Verse]\nNew verse lyrics here...",
-  "title": "Extended Song",
+  "prompt": "[Verse]\nStars they shine above me\nMoonlight softly glows\n\n[Chorus]\nStarry night starry night\nLet your light ignite",
+  "title": "Starry Night Extended",
   "tags": "pop",
   "continue_clip_id": "a533515b-56c9-4eb2-8cb8-7f3dfa165eb8",
   "continue_at": 30,
@@ -203,15 +205,33 @@
 }
 ```
 
-**Fields:**
-- `continue_clip_id` (string) **REQUIRED** - Clip ID of song to extend
-- `continue_at` (integer) **REQUIRED** - Starting number of seconds to extend
+**Required Fields:**
+- `task_type`: "extend_music" ✅
+- `custom_mode`: true ✅
+- `prompt`: Song lyrics ✅
+- `continue_clip_id`: Clip ID of song to extend ✅
+- `continue_at`: Starting number of seconds to extend ✅
+- `mv`: Model version ✅
+
+**Optional Fields:**
+- `title`: Song title (max 120 characters)
+- `tags`: Song style/genre
+
+**Response:**
+```json
+{
+  "message": "success",
+  "task_id": "468d0e42-f7a6-40ce-9a4c-37db56b13b99"
+}
+```
 
 ---
 
 ### 6️⃣ Concat Music
 
 **Endpoint:** `POST /api/v1/suno/create`
+
+**Description:** Get the complete song corresponding to the extend operation
 
 ```json
 {
@@ -220,7 +240,17 @@
 }
 ```
 
-**Description:** Get the complete song corresponding to the extend operation
+**Required Fields:**
+- `task_type`: "concat_music" ✅
+- `continue_clip_id`: The clip id you get after extend ✅
+
+**Response:**
+```json
+{
+  "message": "success",
+  "task_id": "51bc6dd0-508a-414d-9ef3-71f7bad81cf7"
+}
+```
 
 ---
 
@@ -228,19 +258,38 @@
 
 **Endpoint:** `POST /api/v1/suno/create`
 
+**Description:** Cover the specified song (must be generated on the platform)
+
 ```json
 {
   "task_type": "cover_music",
   "custom_mode": true,
   "continue_clip_id": "a2632456-62b0-405c-9de8-2ba509cf24fe",
-  "prompt": "[Verse]\nCover lyrics...\n[Chorus]\nCover chorus...",
-  "title": "Cover Song",
-  "tags": "rock",
+  "prompt": "[Verse]\nStars they shine above me\nMoonlight softly glows\n\n[Chorus]\nStarry night starry night",
+  "title": "Starry Night Cover",
+  "tags": "pop",
   "mv": "chirp-v5"
 }
 ```
 
-**Description:** Cover the specified song (must be generated on the platform)
+**Required Fields:**
+- `task_type`: "cover_music" ✅
+- `custom_mode`: true ✅
+- `continue_clip_id`: Clip ID of original song you want to cover ✅
+- `prompt`: Song lyrics ✅
+- `mv`: Model version ✅
+
+**Optional Fields:**
+- `title`: Song title (max 120 characters)
+- `tags`: Song style/genre
+
+**Response:**
+```json
+{
+  "message": "success",
+  "task_id": "81ed9f60-56ae-48c1-9c46-33a8220dfca7"
+}
+```
 
 ---
 

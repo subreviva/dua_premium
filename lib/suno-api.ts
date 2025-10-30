@@ -206,6 +206,98 @@ export interface ExtendMusicParams {
   callBackUrl?: string
 }
 
+/**
+ * Concat Music Parameters (Official API Specification)
+ * 
+ * Get the complete song corresponding to the extend operation
+ * 
+ * REQUIRED FIELDS:
+ * - task_type: "concat_music"
+ * - continue_clip_id: The clip id you get after extend
+ * 
+ * @see https://docs.sunoapi.com/create-suno-music
+ */
+export interface ConcatMusicParams {
+  /** The clip id you get after extend (REQUIRED) */
+  continue_clip_id: string
+}
+
+/**
+ * Cover Music Parameters (Official API Specification)
+ * 
+ * Cover the specified song (must be generated on the platform)
+ * 
+ * REQUIRED FIELDS:
+ * - task_type: "cover_music"
+ * - custom_mode: true
+ * - continue_clip_id: Clip ID of original song you want to cover
+ * - prompt: Song lyrics
+ * - mv: Model version
+ * 
+ * @see https://docs.sunoapi.com/create-suno-music
+ */
+export interface CoverMusicParams {
+  /** Clip ID of the original song you want to cover (REQUIRED) */
+  continue_clip_id: string
+  
+  /** Custom mode flag (REQUIRED - must be true) */
+  custom_mode: boolean
+  
+  /** 
+   * Song lyrics (REQUIRED)
+   * Max length: 
+   * - v4 and below: 3000 characters
+   * - v4.5+: 5000 characters
+   */
+  prompt: string
+  
+  /** 
+   * Model version (REQUIRED)
+   * Values: chirp-v3-5, chirp-v4, chirp-v4-5, chirp-v4-5-plus, chirp-v5
+   */
+  mv: "chirp-v3-5" | "chirp-v4" | "chirp-v4-5" | "chirp-v4-5-plus" | "chirp-v5"
+  
+  /** 
+   * Song title (Optional)
+   * Max length: 120 characters
+   */
+  title?: string
+  
+  /** 
+   * Song's style or genre (Optional)
+   * Max length:
+   * - v4 and below: 200 characters
+   * - v4.5+: 1000 characters
+   */
+  tags?: string
+  
+  // Legacy fields for backward compatibility
+  /** @deprecated Use continue_clip_id instead */
+  uploadUrl?: string
+  /** @deprecated Use custom_mode instead */
+  customMode?: boolean
+  /** @deprecated Use make_instrumental instead */
+  instrumental?: boolean
+  /** @deprecated Use mv instead */
+  model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  /** @deprecated Use tags instead */
+  style?: string
+  /** @deprecated */
+  personaId?: string
+  /** @deprecated Use negative_tags instead */
+  negativeTags?: string
+  /** @deprecated Use vocal_gender instead */
+  vocalGender?: "male" | "female" | "mixed"
+  /** @deprecated Use style_weight instead */
+  styleWeight?: number
+  /** @deprecated Use weirdness_constraint instead */
+  weirdnessConstraint?: number
+  /** @deprecated */
+  audioWeight?: number
+  /** @deprecated Use webhook_url instead */
+  callBackUrl?: string
+}
+
 // Generate Lyrics
 export interface GenerateLyricsParams {
   prompt: string
@@ -239,24 +331,6 @@ export interface AddInstrumentalParams {
   weirdnessConstraint?: number
   audioWeight?: number
   model?: "V4_5PLUS" | "V5"
-}
-
-// Cover Music
-export interface CoverMusicParams {
-  uploadUrl: string
-  customMode: boolean
-  instrumental: boolean
-  model: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
-  callBackUrl: string
-  prompt?: string
-  style?: string
-  title?: string
-  personaId?: string
-  negativeTags?: string
-  vocalGender?: "male" | "female" | "mixed"
-  styleWeight?: number
-  weirdnessConstraint?: number
-  audioWeight?: number
 }
 
 // Boost Music Style
@@ -809,6 +883,25 @@ export class SunoAPIClient {
     return this.request("/cover", {
       method: "POST",
       body: JSON.stringify(params),
+    })
+  }
+
+  /**
+   * Concat Music - Get the complete song corresponding to the extend operation
+   * @see https://docs.sunoapi.com/create-suno-music
+   */
+  async concatMusic(params: ConcatMusicParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required field
+    if (!params.continue_clip_id) {
+      throw new SunoAPIError("continue_clip_id is required", 400)
+    }
+
+    return this.request("/suno/create", {
+      method: "POST",
+      body: JSON.stringify({
+        task_type: "concat_music",
+        continue_clip_id: params.continue_clip_id,
+      }),
     })
   }
 
