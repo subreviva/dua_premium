@@ -128,9 +128,9 @@ export interface SeparateVocalsParams {
 export interface CreateMusicVideoParams {
   taskId: string
   audioId: string
-  callBackUrl?: string
-  author?: string
-  domainName?: string
+  callBackUrl: string // Required per official documentation
+  author?: string // Optional, max 50 chars
+  domainName?: string // Optional, max 50 chars
 }
 
 // Get Timestamped Lyrics
@@ -1136,6 +1136,35 @@ export class SunoAPIClient {
 
   // Video APIs
   async createMusicVideo(params: CreateMusicVideoParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters individually
+    if (!params.taskId || params.taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    if (!params.audioId || params.audioId.trim() === "") {
+      throw new SunoAPIError("audioId is required", 400)
+    }
+
+    if (!params.callBackUrl || params.callBackUrl.trim() === "") {
+      throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    // Validate callBackUrl format
+    try {
+      new URL(params.callBackUrl)
+    } catch {
+      throw new SunoAPIError("callBackUrl must be a valid URL", 400)
+    }
+
+    // Validate optional parameters if provided
+    if (params.author && params.author.length > 50) {
+      throw new SunoAPIError("author must not exceed 50 characters", 400)
+    }
+
+    if (params.domainName && params.domainName.length > 50) {
+      throw new SunoAPIError("domainName must not exceed 50 characters", 400)
+    }
+
     return this.request("/mp4/generate", {
       method: "POST",
       body: JSON.stringify(params),
