@@ -22,13 +22,12 @@ export async function GET(request: NextRequest) {
     const results = await Promise.all(
       idArray.map(async (taskId) => {
         try {
-          const info: SunoRecordInfoResponse = await getTaskStatus(taskId)
-          const data = info.data
-
+          const apiResponse = await getTaskStatus(taskId)
+          
           // Default legacy shape
           const legacy = {
-            id: taskId, // Keep as taskId for consistent polling
-            status: 'submitted',
+            id: taskId,
+            status: 'submitted' as const,
             title: '',
             created_at: new Date().toISOString(),
             model_name: '',
@@ -42,12 +41,20 @@ export async function GET(request: NextRequest) {
             video_url: '',
             duration: 0,
           }
-
-          if (!data || !Array.isArray(data.sunoData) || data.sunoData.length === 0) {
+          
+          // Check if we got a successful response
+          if (!apiResponse.data) {
+            console.warn(`[Status] No data for task ${taskId}`)
             return legacy
           }
 
-          const item = data.sunoData[0]
+          const data = apiResponse.data
+
+          if (!data || !data.response || !Array.isArray(data.response.sunoData) || data.response.sunoData.length === 0) {
+            return legacy
+          }
+
+          const item = data.response.sunoData[0]
           const status = data.status
 
           const mappedStatus =
@@ -64,7 +71,7 @@ export async function GET(request: NextRequest) {
             model_name: item.modelName || '',
             image_url: item.imageUrl || '',
             audio_url: item.audioUrl || '',
-            lyric: item.lyric || '',
+            lyric: '', // Not available in response
             tags: item.tags || '',
             prompt: item.prompt || '',
             video_url: '',
@@ -74,7 +81,7 @@ export async function GET(request: NextRequest) {
           console.error('❌ [Status] Error for task', taskId, e)
           return {
             id: taskId,
-            status: 'submitted',
+            status: 'submitted' as const,
             title: '',
             created_at: new Date().toISOString(),
             model_name: '',
@@ -93,7 +100,7 @@ export async function GET(request: NextRequest) {
     )
 
     // Log quick summary
-    results.forEach((song) => {
+    results.forEach((song: any) => {
       const hasAudio = song.audio_url ? '🎵 audio ready' : '⏳ processing'
       console.log(`[Status] ${song.id}: ${song.status} ${hasAudio}`)
     })

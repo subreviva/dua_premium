@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     // Map legacy model names to official API models
-    const mapModel = (m: string): string => {
+    const mapModel = (m: string): "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5" => {
       switch (m) {
         case 'chirp-v3-5':
         case 'chirp-v3-0':

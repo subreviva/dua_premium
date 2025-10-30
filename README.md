@@ -1,30 +1,72 @@
-# Remix of Untitled Chat
+# Suno AI Music Creation Platform
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A premium AI-powered music creation platform built with Next.js 16 and the Suno API.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/estracaofficial-gmailcoms-projects/v0-remix-of-untitled-chat)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/Ovo81fGtJGu)
+## Features
 
-## Overview
+- **Music Generation**: Create AI-generated music from text prompts
+- **Custom & Simple Modes**: Choose between simple prompts or detailed custom parameters
+- **Advanced Controls**: Fine-tune vocal gender, weirdness, style influence, and more
+- **Lyrics Generation**: Generate lyrics separately or as part of music creation
+- **Audio Processing**: 
+  - Vocal/instrumental separation
+  - WAV format conversion
+  - Audio extension
+  - Cover creation
+- **Music Video Generation**: Create videos for your generated music
+- **Persona System**: Generate and use vocal personas
+- **Style Boosting**: Enhance and remaster existing tracks
+- **Multiple Model Versions**: Support for V3.5, V4, V4.5, V4.5+, and V5 models
+- **Credits Display**: Real-time monitoring of API credits and usage
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## Setup
 
-## Deployment
+1. Clone the repository
+2. Install dependencies:
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-Your project is live at:
+3. Create a `.env.local` file and add your Suno API key:
+   \`\`\`env
+   SUNO_API_KEY=your_api_key_here
+   \`\`\`
+   Get your API key from: https://sunoapi.org/
 
-**[https://vercel.com/estracaofficial-gmailcoms-projects/v0-remix-of-untitled-chat](https://vercel.com/estracaofficial-gmailcoms-projects/v0-remix-of-untitled-chat)**
+4. Run the development server:
+   \`\`\`bash
+   npm run dev
+   \`\`\`
 
-## Build your app
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-Continue building your app on:
+## API Integration
 
-**[https://v0.app/chat/projects/Ovo81fGtJGu](https://v0.app/chat/projects/Ovo81fGtJGu)**
+This project uses the official Suno API (https://docs.sunoapi.org/) with complete implementation of:
 
-## How It Works
+- Music generation and extension
+- Lyrics creation
+- Audio processing (WAV conversion, vocal separation)
+- Video generation
+- File uploads (base64, stream, URL)
+- Credit management
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+All API endpoints are properly configured and follow the official documentation.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **UI**: React 19.2, Tailwind CSS v4
+- **Components**: shadcn/ui
+- **API**: Suno API v1
+- **TypeScript**: Full type safety
+
+## Environment Variables
+
+Required environment variables:
+
+- `SUNO_API_KEY`: Your Suno API key (required)
+
+## License
+
+MIT

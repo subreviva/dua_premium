@@ -1,517 +1,752 @@
-/**
- * Suno API Client (Official)
- * Base: https://api.sunoapi.org/api/v1
- * Auth: Bearer token in Authorization header
- */
+// Suno API Client - Complete implementation based on official documentation
+// https://docs.sunoapi.org/
 
-const SUNO_API_URL = 'https://api.sunoapi.org/api/v1'
-// Use server-only env var (do NOT expose publicly)
-const SUNO_API_KEY = process.env.SUNO_API_KEY
-
-export interface SunoTaskResponse {
-  code: number
-  msg: string
-  data: {
-    taskId: string
-  } | null
+export interface SunoConfig {
+  apiKey: string
+  baseUrl?: string
 }
 
-export type SunoRecordStatus =
-  | 'PENDING'
-  | 'TEXT_SUCCESS'
-  | 'FIRST_SUCCESS'
-  | 'SUCCESS'
-  | 'CREATE_TASK_FAILED'
-  | 'GENERATE_AUDIO_FAILED'
-  | 'CALLBACK_EXCEPTION'
-  | 'SENSITIVE_WORD_ERROR'
-
-export interface SunoRecordItem {
-  id: string
-  audioUrl?: string
-  streamAudioUrl?: string
-  imageUrl?: string
+// Music Generation
+export interface GenerateMusicParams {
   prompt?: string
-  modelName?: string
-  title?: string
-  tags?: string
-  lyric?: string
-  duration?: number
-  createTime?: string
-}
-
-export interface SunoRecordInfoData {
-  status: SunoRecordStatus
-  sunoData: SunoRecordItem[]
-}
-
-export interface SunoRecordInfoResponse {
-  code: number
-  msg: string
-  data: SunoRecordInfoData | null
-}
-
-export interface SunoCreditResponse {
-  code: number
-  msg: string
-  data: number
-}
-
-// Legacy UI compatibility type (matches UI expectations)
-export interface SunoSong {
-  id: string
-  title: string
-  image_url: string
-  lyric: string
-  audio_url: string
-  video_url: string
-  created_at: string
-  model_name: string
-  status: 'submitted' | 'streaming' | 'complete' | 'error'
-  gpt_description_prompt: string
-  prompt: string
-  type: string
-  tags: string
-  duration: number
-}
-
-async function postSunoAPI<T>(endpoint: string, body: object): Promise<T> {
-  if (!SUNO_API_KEY) {
-    throw new Error('Missing SUNO_API_KEY environment variable')
-  }
-
-  console.log('[Suno API] POST request:', {
-    endpoint,
-    url: `${SUNO_API_URL}${endpoint}`,
-    body: JSON.stringify(body, null, 2)
-  })
-
-  const response = await fetch(`${SUNO_API_URL}${endpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${SUNO_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  })
-
-  const responseData = await response.json()
-  
-  console.log('[Suno API] Response:', {
-    status: response.status,
-    ok: response.ok,
-    data: responseData
-  })
-
-  if (!response.ok) {
-    const errorText = JSON.stringify(responseData)
-    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`)
-  }
-
-  return responseData
-}
-
-async function getSunoAPI<T>(endpoint: string): Promise<T> {
-  if (!SUNO_API_KEY) {
-    throw new Error('Missing SUNO_API_KEY environment variable')
-  }
-  const response = await fetch(`${SUNO_API_URL}${endpoint}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${SUNO_API_KEY}`,
-    },
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`)
-  }
-
-  return response.json()
-}
-
-export async function generateMusic(params: {
-  prompt: string
-  style?: string
-  title?: string
-  customMode?: boolean
-  instrumental?: boolean
-  model?: string
-  callBackUrl: string // REQUIRED by Suno API
-  negativeTags?: string
-  vocalGender?: 'm' | 'f'
-  styleWeight?: number
-  weirdnessConstraint?: number
-  audioWeight?: number
-  personaId?: string
-}): Promise<SunoTaskResponse> {
-  // Map camelCase to API format (keeping camelCase per docs)
-  const apiParams: any = {
-    prompt: params.prompt,
-    customMode: params.customMode,
-    instrumental: params.instrumental,
-    model: params.model,
-    callBackUrl: params.callBackUrl, // camelCase per docs!
-  }
-  
-  // Only add optional fields if they have values
-  if (params.style) apiParams.style = params.style
-  if (params.title) apiParams.title = params.title
-  if (params.negativeTags) apiParams.negativeTags = params.negativeTags
-  if (params.vocalGender) apiParams.vocalGender = params.vocalGender
-  if (params.styleWeight !== undefined) apiParams.styleWeight = params.styleWeight
-  if (params.weirdnessConstraint !== undefined) apiParams.weirdnessConstraint = params.weirdnessConstraint
-  if (params.audioWeight !== undefined) apiParams.audioWeight = params.audioWeight
-  if (params.personaId) apiParams.personaId = params.personaId
-  
-  return postSunoAPI<SunoTaskResponse>('/generate', apiParams)
-}
-
-export async function extendMusic(params: {
-  audioId: string
-  prompt?: string
-  style?: string
-  title?: string
-  continueAt?: number
-  defaultParamFlag: boolean
-  model: string
-  callBackUrl: string // REQUIRED by Suno API
-  negativeTags?: string
-  vocalGender?: 'm' | 'f'
-  styleWeight?: number
-  weirdnessConstraint?: number
-  audioWeight?: number
-  personaId?: string
-}): Promise<SunoTaskResponse> {
-  // Map to API format (keeping camelCase per docs)
-  const apiParams: any = {
-    audioId: params.audioId,
-    defaultParamFlag: params.defaultParamFlag,
-    model: params.model,
-    callBackUrl: params.callBackUrl,
-  }
-  
-  // Only add optional fields if they have values
-  if (params.prompt) apiParams.prompt = params.prompt
-  if (params.style) apiParams.style = params.style
-  if (params.title) apiParams.title = params.title
-  if (params.continueAt !== undefined) apiParams.continueAt = params.continueAt
-  if (params.negativeTags) apiParams.negativeTags = params.negativeTags
-  if (params.vocalGender) apiParams.vocalGender = params.vocalGender
-  if (params.styleWeight !== undefined) apiParams.styleWeight = params.styleWeight
-  if (params.weirdnessConstraint !== undefined) apiParams.weirdnessConstraint = params.weirdnessConstraint
-  if (params.audioWeight !== undefined) apiParams.audioWeight = params.audioWeight
-  if (params.personaId) apiParams.personaId = params.personaId
-  
-  return postSunoAPI<SunoTaskResponse>('/generate/extend', apiParams)
-}
-
-export async function generateLyrics(params: {
-  prompt: string
-  callBackUrl: string // REQUIRED per docs
-}): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/lyrics', params)
-}
-
-export async function getTaskStatus(taskId: string): Promise<SunoRecordInfoResponse> {
-  // Official docs: GET /generate/record-info?taskId=...
-  const params = new URLSearchParams({ taskId })
-  return getSunoAPI<SunoRecordInfoResponse>(`/generate/record-info?${params.toString()}`)
-}
-
-export async function getCredits(): Promise<SunoCreditResponse> {
-  return getSunoAPI<SunoCreditResponse>('/generate/credit')
-}
-
-// ========== Additional Endpoints per Official Docs ==========
-
-/**
- * POST /generate/upload-cover
- * Upload an audio and create a cover preserving original melody
- */
-export async function uploadCover(params: {
-  uploadUrl: string
-  prompt?: string // Required if customMode=false OR if customMode=true + instrumental=false
-  style?: string // Required if customMode=true
-  title?: string // Required if customMode=true
+  gpt_description_prompt?: string
   customMode: boolean
-  instrumental?: boolean
-  model?: string
-  callBackUrl: string
+  instrumental: boolean
+  model: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  title?: string
+  style?: string
   negativeTags?: string
-  vocalGender?: 'm' | 'f'
-  styleWeight?: number
-  weirdnessConstraint?: number
-  audioWeight?: number
+  vocalGender?: "m" | "f"
+  styleWeight?: number // 0-1
+  weirdnessConstraint?: number // 0-1
+  audioWeight?: number // 0-1
+  generateVideo?: boolean
   personaId?: string
-}): Promise<SunoTaskResponse> {
-  const apiParams: any = {
-    uploadUrl: params.uploadUrl,
-    customMode: params.customMode,
-    callBackUrl: params.callBackUrl,
-  }
-  
-  if (params.prompt) apiParams.prompt = params.prompt
-  if (params.style) apiParams.style = params.style
-  if (params.title) apiParams.title = params.title
-  if (params.instrumental !== undefined) apiParams.instrumental = params.instrumental
-  if (params.model) apiParams.model = params.model
-  if (params.negativeTags) apiParams.negativeTags = params.negativeTags
-  if (params.vocalGender) apiParams.vocalGender = params.vocalGender
-  if (params.styleWeight !== undefined) apiParams.styleWeight = params.styleWeight
-  if (params.weirdnessConstraint !== undefined) apiParams.weirdnessConstraint = params.weirdnessConstraint
-  if (params.audioWeight !== undefined) apiParams.audioWeight = params.audioWeight
-  if (params.personaId) apiParams.personaId = params.personaId
-  
-  return postSunoAPI<SunoTaskResponse>('/generate/upload-cover', apiParams)
+  callBackUrl?: string
 }
 
-/**
- * POST /generate/upload-extend
- * Extend a user-provided audio file
- */
-export async function uploadExtend(params: {
-  uploadUrl: string
+// Extend Music
+export interface ExtendMusicParams {
+  audioId: string
+  defaultParamFlag?: boolean
   prompt?: string
   style?: string
   title?: string
   continueAt?: number
-  defaultParamFlag: boolean
-  model?: string
-  callBackUrl: string
-  instrumental?: boolean
-  negativeTags?: string
-  vocalGender?: 'm' | 'f'
-  styleWeight?: number
-  weirdnessConstraint?: number
-  audioWeight?: number
-  personaId?: string
-}): Promise<SunoTaskResponse> {
-  const apiParams: any = {
-    uploadUrl: params.uploadUrl,
-    defaultParamFlag: params.defaultParamFlag,
-    callBackUrl: params.callBackUrl,
-  }
-  
-  if (params.prompt) apiParams.prompt = params.prompt
-  if (params.style) apiParams.style = params.style
-  if (params.title) apiParams.title = params.title
-  if (params.continueAt !== undefined) apiParams.continueAt = params.continueAt
-  if (params.model) apiParams.model = params.model
-  if (params.instrumental !== undefined) apiParams.instrumental = params.instrumental
-  if (params.negativeTags) apiParams.negativeTags = params.negativeTags
-  if (params.vocalGender) apiParams.vocalGender = params.vocalGender
-  if (params.styleWeight !== undefined) apiParams.styleWeight = params.styleWeight
-  if (params.weirdnessConstraint !== undefined) apiParams.weirdnessConstraint = params.weirdnessConstraint
-  if (params.audioWeight !== undefined) apiParams.audioWeight = params.audioWeight
-  if (params.personaId) apiParams.personaId = params.personaId
-  
-  return postSunoAPI<SunoTaskResponse>('/generate/upload-extend', apiParams)
+  model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  callBackUrl?: string
 }
 
-/**
- * POST /generate/add-instrumental
- * Create instrumental accompaniment from audio (voice or melody)
- */
-export async function addInstrumental(params: {
-  uploadUrl: string
-  title: string
-  tags: string
-  callBackUrl: string
-  negativeTags?: string
-  vocalGender?: 'm' | 'f'
-  styleWeight?: number
-  weirdnessConstraint?: number
-  audioWeight?: number
-  model?: 'V4_5PLUS' | 'V5'
-}): Promise<SunoTaskResponse> {
-  const apiParams: any = {
-    uploadUrl: params.uploadUrl,
-    title: params.title,
-    tags: params.tags,
-    callBackUrl: params.callBackUrl,
-  }
-  
-  if (params.negativeTags) apiParams.negativeTags = params.negativeTags
-  if (params.vocalGender) apiParams.vocalGender = params.vocalGender
-  if (params.styleWeight !== undefined) apiParams.styleWeight = params.styleWeight
-  if (params.weirdnessConstraint !== undefined) apiParams.weirdnessConstraint = params.weirdnessConstraint
-  if (params.audioWeight !== undefined) apiParams.audioWeight = params.audioWeight
-  if (params.model) apiParams.model = params.model
-  
-  return postSunoAPI<SunoTaskResponse>('/generate/add-instrumental', apiParams)
+// Generate Lyrics
+export interface GenerateLyricsParams {
+  prompt: string
+  callBackUrl?: string
 }
 
-/**
- * POST /generate/add-vocals
- * Add AI-generated vocals to instrumental track
- */
-export async function addVocals(params: {
+// Add Vocals
+export interface AddVocalsParams {
   uploadUrl: string
   prompt: string
   title: string
   style: string
-  callBackUrl: string
-  negativeTags?: string
-  vocalGender?: 'm' | 'f'
+  negativeTags: string
+  vocalGender?: "m" | "f"
   styleWeight?: number
   weirdnessConstraint?: number
   audioWeight?: number
-  model?: 'V4_5PLUS' | 'V5'
-}): Promise<SunoTaskResponse> {
-  const apiParams: any = {
-    uploadUrl: params.uploadUrl,
-    prompt: params.prompt,
-    title: params.title,
-    style: params.style,
-    callBackUrl: params.callBackUrl,
-  }
-  
-  if (params.negativeTags) apiParams.negativeTags = params.negativeTags
-  if (params.vocalGender) apiParams.vocalGender = params.vocalGender
-  if (params.styleWeight !== undefined) apiParams.styleWeight = params.styleWeight
-  if (params.weirdnessConstraint !== undefined) apiParams.weirdnessConstraint = params.weirdnessConstraint
-  if (params.audioWeight !== undefined) apiParams.audioWeight = params.audioWeight
-  if (params.model) apiParams.model = params.model
-  
-  return postSunoAPI<SunoTaskResponse>('/generate/add-vocals', apiParams)
+  model?: "V4_5PLUS" | "V5"
+  callBackUrl?: string
 }
 
-/**
- * POST /generate/get-timestamped-lyrics
- * Generate timestamped lyrics for karaoke-style display
- */
-export async function getTimestampedLyrics(params: {
-  taskId: string
-  audioId?: string
-  musicIndex?: number
-}): Promise<any> {
-  return postSunoAPI<any>('/generate/get-timestamped-lyrics', params)
+// Add Instrumental
+export interface AddInstrumentalParams {
+  uploadUrl: string
+  title: string
+  tags: string
+  negativeTags: string
+  vocalGender?: "m" | "f"
+  styleWeight?: number
+  weirdnessConstraint?: number
+  audioWeight?: number
+  model?: "V4_5PLUS" | "V5"
+  callBackUrl?: string
 }
 
-/**
- * POST /vocal-removal/generate
- * Separate tracks into stems (vocal/instrumental or multi-stem)
- */
-export async function separateStems(params: {
-  taskId: string
-  audioId: string
-  type: 'separate_vocal' | 'split_stem' // separate_vocal=1 credit, split_stem=5 credits
-  callBackUrl: string
-}): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/vocal-removal/generate', params)
+// Cover Music
+export interface CoverMusicParams {
+  uploadUrl: string
+  prompt?: string
+  tags?: string
+  title?: string
+  model?: "V4_5PLUS" | "V5"
+  callBackUrl?: string
 }
 
-/**
- * GET /vocal-removal/record-info
- * Get stem separation details
- */
-export async function getStemStatus(taskId: string): Promise<any> {
-  const params = new URLSearchParams({ taskId })
-  return getSunoAPI<any>(`/vocal-removal/record-info?${params.toString()}`)
+// Boost Music Style
+export interface BoostMusicStyleParams {
+  content: string
 }
 
-/**
- * POST /wav/generate
- * Convert existing track to high-quality WAV
- */
-export async function convertToWav(params: {
-  taskId: string
-  audioId: string
-  callBackUrl: string
-}): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/wav/generate', params)
-}
-
-/**
- * GET /wav/record-info
- * Get WAV conversion status
- */
-export async function getWavStatus(taskId: string): Promise<any> {
-  const params = new URLSearchParams({ taskId })
-  return getSunoAPI<any>(`/wav/record-info?${params.toString()}`)
-}
-
-/**
- * POST /mp4/generate
- * Create music video with animated visualization
- */
-export async function generateMusicVideo(params: {
-  taskId: string
-  audioId: string
-  callBackUrl: string
-  author?: string // max 50 chars
-  domainName?: string // max 50 chars
-}): Promise<SunoTaskResponse> {
-  const apiParams: any = {
-    taskId: params.taskId,
-    audioId: params.audioId,
-    callBackUrl: params.callBackUrl,
-  }
-  
-  if (params.author) apiParams.author = params.author
-  if (params.domainName) apiParams.domainName = params.domainName
-  
-  return postSunoAPI<SunoTaskResponse>('/mp4/generate', apiParams)
-}
-
-/**
- * GET /mp4/record-info
- * Get music video generation status
- */
-export async function getVideoStatus(taskId: string): Promise<any> {
-  const params = new URLSearchParams({ taskId })
-  return getSunoAPI<any>(`/mp4/record-info?${params.toString()}`)
-}
-
-/**
- * POST /suno/cover/generate
- * Generate custom cover images for existing music
- */
-export async function generateCover(params: {
-  taskId: string
-  callBackUrl: string
-}): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/suno/cover/generate', params)
-}
-
-/**
- * GET /suno/cover/record-info
- * Get cover generation details
- */
-export async function getCoverStatus(taskId: string): Promise<any> {
-  const params = new URLSearchParams({ taskId })
-  return getSunoAPI<any>(`/suno/cover/record-info?${params.toString()}`)
-}
-
-/**
- * POST /style/generate
- * Boost music style for V4_5+ models (more detailed style control)
- */
-export async function boostStyle(params: {
-  content: string // longer style description
-}): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/style/generate', params)
-}
-
-/**
- * POST /generate/generate-persona
- * Create custom persona from existing music for reuse
- */
-export async function generatePersona(params: {
+// Generate Persona
+export interface GeneratePersonaParams {
   taskId: string
   musicIndex: number
   name: string
   description: string
-}): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/generate/generate-persona', params)
 }
 
-/**
- * GET /lyrics/record-info
- * Get lyrics generation details and status
- */
-export async function getLyricsStatus(taskId: string): Promise<any> {
-  const params = new URLSearchParams({ taskId })
-  return getSunoAPI<any>(`/lyrics/record-info?${params.toString()}`)
+// Convert to WAV
+export interface ConvertToWavParams {
+  taskId: string
+  audioId: string
+  callBackUrl: string
 }
+
+// Separate Vocals
+export interface SeparateVocalsParams {
+  audioId: string
+  callBackUrl?: string
+}
+
+// Create Music Video
+export interface CreateMusicVideoParams {
+  audioId: string
+  callBackUrl?: string
+}
+
+// Get Timestamped Lyrics
+export interface GetTimestampedLyricsParams {
+  taskId: string
+  audioId?: string
+  musicIndex?: 0 | 1
+}
+
+// Replace Music Section
+export interface ReplaceMusicSectionParams {
+  taskId: string
+  musicIndex: number
+  prompt: string
+  tags: string
+  title: string
+  negativeTags?: string
+  infillStartS: number
+  infillEndS: number
+  callBackUrl?: string
+}
+
+// Generate Music Cover Image
+export interface GenerateMusicCoverParams {
+  taskId: string
+  callBackUrl: string
+}
+
+// API Response Types
+export interface ApiResponse<T> {
+  code: number
+  msg: string
+  data: T
+}
+
+export interface TaskResponse {
+  taskId: string
+}
+
+export interface MusicGenerationResult {
+  id: string
+  audioUrl: string
+  streamAudioUrl: string
+  videoUrl?: string
+  imageUrl: string
+  prompt: string
+  modelName: string
+  title: string
+  tags: string
+  duration: number
+  status: "pending" | "processing" | "complete" | "error"
+  createTime: string
+  lyrics?: string
+}
+
+export interface CreditsResponse {
+  credits: number
+  usedCredits?: number
+  totalCredits?: number
+}
+
+export interface LyricsResult {
+  alignedWords?: Array<{
+    word: string
+    success: boolean
+    startS: number
+    endS: number
+    palign: number
+  }>
+  waveformData?: number[]
+  hootCer?: number
+  isStreamed?: boolean
+  lyrics?: string
+  timestampedLyrics?: Array<{
+    timestamp: number
+    text: string
+  }>
+}
+
+export interface LyricsGenerationResult {
+  text: string
+  title: string
+  status: "complete" | "failed"
+  errorMessage: string
+}
+
+export interface LyricsDetailsResponse {
+  taskId: string
+  param: string
+  response: {
+    taskId: string
+    data: LyricsGenerationResult[]
+  }
+  status:
+    | "PENDING"
+    | "SUCCESS"
+    | "CREATE_TASK_FAILED"
+    | "GENERATE_LYRICS_FAILED"
+    | "CALLBACK_EXCEPTION"
+    | "SENSITIVE_WORD_ERROR"
+  type: "LYRICS"
+  errorCode?: number
+  errorMessage?: string
+}
+
+export interface SeparationResult {
+  vocalUrl: string
+  instrumentalUrl: string
+}
+
+export interface MusicGenerationDetailsResponse {
+  taskId: string
+  parentMusicId?: string
+  param: string
+  response: {
+    taskId: string
+    sunoData: Array<{
+      id: string
+      audioUrl: string
+      streamAudioUrl: string
+      imageUrl: string
+      prompt: string
+      modelName: string
+      title: string
+      tags: string
+      createTime: string
+      duration: number
+    }>
+  }
+  status:
+    | "PENDING"
+    | "TEXT_SUCCESS"
+    | "FIRST_SUCCESS"
+    | "SUCCESS"
+    | "CREATE_TASK_FAILED"
+    | "GENERATE_AUDIO_FAILED"
+    | "CALLBACK_EXCEPTION"
+    | "SENSITIVE_WORD_ERROR"
+  type: "GENERATE" | "EXTEND" | "UPLOAD_COVER" | "UPLOAD_EXTEND"
+  operationType?: "generate" | "extend" | "upload_cover" | "upload_extend"
+  errorCode?: number
+  errorMessage?: string
+}
+
+// CoverDetailsResponse interface for cover generation details
+export interface CoverDetailsResponse {
+  taskId: string
+  parentTaskId: string
+  callbackUrl: string
+  completeTime?: string
+  response?: {
+    images: string[]
+  }
+  successFlag: 0 | 1 | 2 | 3 // 0-Pending, 1-Success, 2-Generating, 3-Generation failed
+  createTime: string
+  errorCode?: number
+  errorMessage?: string
+}
+
+// PersonaResponse interface for persona generation
+export interface PersonaResponse {
+  personaId: string
+  name: string
+  description: string
+}
+
+export interface BoostStyleResponse {
+  // Define the structure of BoostStyleResponse here
+  id: string
+  styleUrl: string
+}
+
+export class SunoAPIClient {
+  private apiKey: string
+  private baseUrl: string
+
+  constructor(config: SunoConfig) {
+    this.apiKey = config.apiKey
+    this.baseUrl = config.baseUrl || "https://api.sunoapi.org/api/v1"
+  }
+
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`)
+    }
+
+    return response.json()
+  }
+
+  // Music Generation APIs
+  async generateMusic(params: GenerateMusicParams): Promise<ApiResponse<TaskResponse>> {
+    return this.request("/generate", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async extendMusic(params: ExtendMusicParams): Promise<ApiResponse<TaskResponse>> {
+    return this.request("/generate/extend", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async coverMusic(params: CoverMusicParams): Promise<ApiResponse<TaskResponse>> {
+    return this.request("/cover", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async addVocals(params: AddVocalsParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.uploadUrl || !params.prompt || !params.title || !params.style || !params.negativeTags) {
+      throw new SunoAPIError("Missing required parameters for Add Vocals", 400)
+    }
+
+    // Validate optional parameters
+    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
+      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    }
+
+    if (
+      params.weirdnessConstraint !== undefined &&
+      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+    ) {
+      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
+    }
+
+    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
+      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+    }
+
+    return this.request("/generate/add-vocals", {
+      method: "POST",
+      body: JSON.stringify({
+        ...params,
+        model: params.model || "V4_5PLUS",
+      }),
+    })
+  }
+
+  async addInstrumental(params: AddInstrumentalParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.uploadUrl || !params.title || !params.tags || !params.negativeTags) {
+      throw new SunoAPIError("Missing required parameters for Add Instrumental", 400)
+    }
+
+    // Validate optional parameters
+    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
+      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    }
+
+    if (
+      params.weirdnessConstraint !== undefined &&
+      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+    ) {
+      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
+    }
+
+    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
+      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+    }
+
+    return this.request("/generate/add-instrumental", {
+      method: "POST",
+      body: JSON.stringify({
+        ...params,
+        model: params.model || "V4_5PLUS",
+      }),
+    })
+  }
+
+  async boostMusicStyle(params: BoostMusicStyleParams): Promise<ApiResponse<BoostStyleResponse>> {
+    return this.request("/style/generate", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async generatePersona(params: GeneratePersonaParams): Promise<ApiResponse<PersonaResponse>> {
+    // Validate required parameters
+    if (!params.taskId || params.musicIndex === undefined || !params.name || !params.description) {
+      throw new SunoAPIError("Missing required parameters for Generate Persona", 400)
+    }
+
+    return this.request("/generate/generate-persona", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async getMusicDetails(taskId: string): Promise<ApiResponse<MusicGenerationDetailsResponse>> {
+    return this.request(`/generate/record-info?taskId=${taskId}`, {
+      method: "GET",
+    })
+  }
+
+  // Lyrics APIs
+  async generateLyrics(params: GenerateLyricsParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.prompt) {
+      throw new SunoAPIError("prompt is required", 400)
+    }
+
+    if (!params.callBackUrl) {
+      throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    // Validate prompt length (max 200 words)
+    const wordCount = params.prompt.trim().split(/\s+/).length
+    if (wordCount > 200) {
+      throw new SunoAPIError("Prompt exceeds maximum word limit of 200 words", 413)
+    }
+
+    return this.request("/lyrics", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async getTimestampedLyrics(params: GetTimestampedLyricsParams): Promise<ApiResponse<LyricsResult>> {
+    if (!params.taskId) {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    return this.request("/generate/get-timestamped-lyrics", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async getLyricsDetails(taskId: string): Promise<ApiResponse<LyricsDetailsResponse>> {
+    return this.request(`/lyrics/record-info?taskId=${taskId}`, {
+      method: "GET",
+    })
+  }
+
+  // Audio Processing APIs
+  async convertToWav(params: ConvertToWavParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.taskId || !params.audioId || !params.callBackUrl) {
+      throw new SunoAPIError("Missing required parameters for Convert to WAV", 400)
+    }
+
+    return this.request("/wav/generate", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async getWavDetails(taskId: string): Promise<ApiResponse<WavDetailsResponse>> {
+    return this.request(`/wav/record-info?taskId=${taskId}`, {
+      method: "GET",
+    })
+  }
+
+  async separateVocals(params: SeparateVocalsParams): Promise<ApiResponse<TaskResponse>> {
+    return this.request("/separation/separate", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async getSeparationDetails(taskId: string): Promise<ApiResponse<SeparationResult>> {
+    return this.request(`/separation/record-info?taskId=${taskId}`, {
+      method: "GET",
+    })
+  }
+
+  // Video APIs
+  async createMusicVideo(params: CreateMusicVideoParams): Promise<ApiResponse<TaskResponse>> {
+    return this.request("/video/create", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async getVideoDetails(taskId: string): Promise<ApiResponse<{ videoUrl: string }>> {
+    return this.request(`/video/record-info?taskId=${taskId}`, {
+      method: "GET",
+    })
+  }
+
+  async getCoverDetails(taskId: string): Promise<ApiResponse<CoverDetailsResponse>> {
+    return this.request(`/suno/cover/record-info?taskId=${taskId}`, {
+      method: "GET",
+    })
+  }
+
+  // Account Management
+  async getRemainingCredits(): Promise<ApiResponse<CreditsResponse>> {
+    return this.request("/generate/credit", {
+      method: "GET",
+    })
+  }
+
+  // File Upload APIs
+  async uploadBase64(file: string, fileName: string): Promise<ApiResponse<{ uploadUrl: string }>> {
+    return this.request("/file/upload-base64", {
+      method: "POST",
+      body: JSON.stringify({ file, fileName }),
+    })
+  }
+
+  async uploadFromUrl(url: string): Promise<ApiResponse<{ uploadUrl: string }>> {
+    return this.request("/file/upload-url", {
+      method: "POST",
+      body: JSON.stringify({ url }),
+    })
+  }
+
+  async waitForCompletion(taskId: string, maxWaitTime = 600000): Promise<MusicGenerationDetailsResponse> {
+    const startTime = Date.now()
+
+    while (Date.now() - startTime < maxWaitTime) {
+      const response = await this.getMusicDetails(taskId)
+
+      if (response.code === 200 && response.data) {
+        if (response.data.status === "SUCCESS") {
+          return response.data
+        }
+
+        if (
+          ["CREATE_TASK_FAILED", "GENERATE_AUDIO_FAILED", "CALLBACK_EXCEPTION", "SENSITIVE_WORD_ERROR"].includes(
+            response.data.status,
+          )
+        ) {
+          throw new SunoAPIError(response.data.errorMessage || "Task failed", response.data.errorCode || 500)
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 5000))
+    }
+
+    throw new Error("Task timeout")
+  }
+
+  async replaceSection(params: ReplaceMusicSectionParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.taskId || !params.prompt || !params.tags || !params.title) {
+      throw new SunoAPIError("Missing required parameters for Replace Section", 400)
+    }
+
+    // Validate time range
+    if (params.infillStartS < 0 || params.infillEndS < 0) {
+      throw new SunoAPIError("Time values must be non-negative", 400)
+    }
+
+    if (params.infillStartS >= params.infillEndS) {
+      throw new SunoAPIError("infillStartS must be less than infillEndS", 400)
+    }
+
+    return this.request("/generate/replace-section", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async generateMusicCover(params: GenerateMusicCoverParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters
+    if (!params.taskId || !params.callBackUrl) {
+      throw new SunoAPIError("Missing required parameters for Generate Music Cover", 400)
+    }
+
+    return this.request("/suno/cover/generate", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async uploadAndCover(params: UploadAndCoverParams): Promise<ApiResponse<TaskResponse>> {
+    return this.request("/upload/cover", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async uploadAndExtend(params: UploadAndExtendParams): Promise<ApiResponse<TaskResponse>> {
+    return this.request("/upload/extend", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+}
+
+export interface UploadAndCoverParams {
+  uploadUrl: string
+  prompt?: string
+  style?: string
+  title?: string
+  model?: "V4_5PLUS" | "V5"
+  callBackUrl?: string
+}
+
+export interface UploadAndExtendParams {
+  uploadUrl: string
+  prompt?: string
+  style?: string
+  title?: string
+  continueAt?: number
+  model?: "V4_5PLUS" | "V5"
+  callBackUrl?: string
+}
+
+export class SunoAPIError extends Error {
+  constructor(
+    message: string,
+    public code: number,
+    public details?: unknown,
+  ) {
+    super(message)
+    this.name = "SunoAPIError"
+  }
+}
+
+let sunoClient: SunoAPIClient | null = null
+
+export function getSunoClient(): SunoAPIClient {
+  if (!sunoClient) {
+    const apiKey = process.env.SUNO_API_KEY || ""
+    if (!apiKey) {
+      throw new Error("SUNO_API_KEY environment variable is not set")
+    }
+    sunoClient = new SunoAPIClient({ apiKey })
+  }
+  return sunoClient
+}
+
+export async function generateMusic(params: GenerateMusicParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.generateMusic(params)
+}
+
+export async function generateLyrics(params: GenerateLyricsParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.generateLyrics(params)
+}
+
+export async function getMusicDetails(taskId: string): Promise<ApiResponse<MusicGenerationDetailsResponse>> {
+  const client = getSunoClient()
+  return client.getMusicDetails(taskId)
+}
+
+export async function getLyricsDetails(taskId: string): Promise<ApiResponse<LyricsDetailsResponse>> {
+  const client = getSunoClient()
+  return client.getLyricsDetails(taskId)
+}
+
+export async function getRemainingCredits(): Promise<ApiResponse<CreditsResponse>> {
+  const client = getSunoClient()
+  return client.getRemainingCredits()
+}
+
+export async function uploadAndCover(params: UploadAndCoverParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.uploadAndCover(params)
+}
+
+export async function uploadAndExtend(params: UploadAndExtendParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.uploadAndExtend(params)
+}
+
+export const SunoAPI = SunoAPIClient
+
+export async function pollMusicStatus(taskId: string): Promise<
+  ApiResponse<{
+    callbackType: CallbackType
+    task_id: string
+    data: MusicGenerationDetailsResponse | null
+  }>
+> {
+  const client = getSunoClient()
+  const result = await client.getMusicDetails(taskId)
+
+  let callbackType: CallbackType = "first"
+  if (result.data.status === "SUCCESS") {
+    callbackType = "complete"
+  } else if (result.data.status === "TEXT_SUCCESS") {
+    callbackType = "text"
+  } else if (
+    ["CREATE_TASK_FAILED", "GENERATE_AUDIO_FAILED", "CALLBACK_EXCEPTION", "SENSITIVE_WORD_ERROR"].includes(
+      result.data.status,
+    )
+  ) {
+    callbackType = "error"
+  }
+
+  return {
+    code: result.code,
+    msg: result.msg,
+    data: {
+      callbackType,
+      task_id: taskId,
+      data: result.data,
+    },
+  }
+}
+
+type CallbackType = "text" | "first" | "complete" | "error"
+
+// WavDetailsResponse interface to match API documentation
+export interface WavDetailsResponse {
+  taskId: string
+  musicId: string
+  callbackUrl: string
+  completeTime?: string
+  response?: {
+    audioWavUrl: string
+  }
+  successFlag: "PENDING" | "SUCCESS" | "CREATE_TASK_FAILED" | "GENERATE_WAV_FAILED" | "CALLBACK_EXCEPTION"
+  createTime: string
+  errorCode?: number
+  errorMessage?: string
+}
+
+// Backward compatibility aliases for old API routes
+export const getTaskStatus = getMusicDetails
+export const getCredits = getRemainingCredits
+
+// Wrapper function for backward compatibility with old extend music route
+export async function extendMusic(params: ExtendMusicParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.extendMusic(params)
+}
+
+// Export type aliases for backward compatibility
+export type SunoRecordInfoResponse = MusicGenerationDetailsResponse
