@@ -46,7 +46,7 @@ export interface ExtendMusicParams {
 // Generate Lyrics
 export interface GenerateLyricsParams {
   prompt: string
-  callBackUrl?: string
+  callBackUrl: string // Required per official documentation
 }
 
 // Add Vocals
@@ -925,19 +925,26 @@ export class SunoAPIClient {
 
   // Lyrics APIs
   async generateLyrics(params: GenerateLyricsParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
-    if (!params.prompt) {
+    // Validate required parameters individually
+    if (!params.prompt || params.prompt.trim() === "") {
       throw new SunoAPIError("prompt is required", 400)
     }
 
-    if (!params.callBackUrl) {
+    if (!params.callBackUrl || params.callBackUrl.trim() === "") {
       throw new SunoAPIError("callBackUrl is required", 400)
     }
 
+    // Validate callBackUrl format
+    try {
+      new URL(params.callBackUrl)
+    } catch {
+      throw new SunoAPIError("callBackUrl must be a valid URL", 400)
+    }
+
     // Validate prompt length (max 200 words)
-    const wordCount = params.prompt.trim().split(/\s+/).length
+    const wordCount = params.prompt.trim().split(/\s+/).filter(word => word.length > 0).length
     if (wordCount > 200) {
-      throw new SunoAPIError("Prompt exceeds maximum word limit of 200 words", 413)
+      throw new SunoAPIError(`Prompt exceeds maximum word limit of 200 words (current: ${wordCount} words)`, 413)
     }
 
     return this.request("/lyrics", {
