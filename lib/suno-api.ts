@@ -142,68 +142,66 @@ export interface GenerateMusicParams extends WebhookConfig {
  * 
  * Use the clip id of the song generated on the platform to extend the song
  * 
- * REQUIRED FIELDS:
- * - task_type: "extend_music"
- * - custom_mode: true (always required for extend)
- * - prompt: Song lyrics
- * - continue_clip_id: Clip ID of song to extend
- * - continue_at: Starting number of seconds to extend
- * - mv: Model version
+ * REQUIRED FIELDS (per OpenAPI spec):
+ * - custom_mode: true (REQUIRED)
+ * - prompt: Song lyrics (REQUIRED)
+ * - continue_clip_id: Clip ID of song to extend (REQUIRED)
+ * - continue_at: Starting number of seconds to extend (REQUIRED)
+ * - mv: Model version (REQUIRED)
+ * - task_type: "extend_music" (auto-added by client)
  * 
  * @see https://docs.sunoapi.com/create-suno-music
  */
-export interface ExtendMusicParams {
-  /** Clip ID of the song to be extended (REQUIRED) */
-  audioId: string
+export interface ExtendMusicParams extends WebhookConfig {
+  // ============= REQUIRED FIELDS =============
   
-  /** Custom parameters flag */
-  defaultParamFlag?: boolean
+  /** Custom mode flag (REQUIRED - must be true for extend) */
+  custom_mode: boolean
   
   /** 
-   * Song lyrics (REQUIRED when defaultParamFlag = true)
+   * Song lyrics (REQUIRED)
    * Max length: 
    * - v4 and below: 3000 characters
    * - v4.5+: 5000 characters
    */
-  prompt?: string
+  prompt: string
+  
+  /** Clip ID of the song to be extended (REQUIRED) */
+  continue_clip_id: string
+  
+  /** Starting number of seconds to extend (REQUIRED) */
+  continue_at: number
+  
+  /** Model version (REQUIRED) */
+  mv: "chirp-v3-5" | "chirp-v4" | "chirp-v4-5" | "chirp-v4-5-plus" | "chirp-v5"
+  
+  // ============= OPTIONAL FIELDS =============
+  
+  /** Song title (max 120 characters) */
+  title?: string
   
   /** 
-   * Song's style or genre (REQUIRED when defaultParamFlag = true)
+   * Song's style or genre
    * Max length:
    * - v4 and below: 200 characters
    * - v4.5+: 1000 characters
    */
-  style?: string
-  
-  /** Song title (REQUIRED when defaultParamFlag = true) */
-  title?: string
-  
-  /** Starting number of seconds to extend (REQUIRED when defaultParamFlag = true) */
-  continueAt?: number
-  
-  /** Persona ID (optional) */
-  personaId?: string
-  
-  /** Model version */
-  model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  tags?: string
   
   /** Elements to avoid in your songs */
-  negativeTags?: string
-  
-  /** Control vocal gender: "f" (Female) or "m" (Male) */
-  vocalGender?: "m" | "f"
+  negative_tags?: string
   
   /** Weight of the tags field (style). Range: 0-1 */
-  styleWeight?: number
+  style_weight?: number
   
   /** Randomness or weirdness of the song. Range: 0-1 */
-  weirdnessConstraint?: number
+  weirdness_constraint?: number
   
-  /** Audio weight. Range: 0-1 */
-  audioWeight?: number
-  
-  /** Webhook callback URL (will be auto-generated if not provided) */
-  callBackUrl?: string
+  /** 
+   * Control vocal gender: "f" (Female) or "m" (Male)
+   * Support: chirp-v4-5, chirp-v4-5-plus, chirp-v5
+   */
+  vocal_gender?: "f" | "m"
 }
 
 /**
@@ -970,49 +968,74 @@ export class SunoAPIClient {
   }
 
   async extendMusic(params: ExtendMusicParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate based on official documentation at https://docs.sunoapi.org/
+    // Validate based on official OpenAPI specification
     
-    // audioId is ALWAYS required
-    if (!params.audioId) {
-      throw new SunoAPIError("audioId is required", 400)
+    // ============= REQUIRED FIELDS VALIDATION =============
+    
+    if (!params.custom_mode) {
+      throw new SunoAPIError("custom_mode is required and must be true for extend music", 400)
     }
-
-    if (params.defaultParamFlag) {
-      // CUSTOM PARAMETERS MODE: requires continueAt, prompt, style, and title
-      if (params.continueAt === undefined) {
-        throw new SunoAPIError("continueAt is required when defaultParamFlag is true", 400)
-      }
-      if (!params.prompt) {
-        throw new SunoAPIError("prompt is required when defaultParamFlag is true", 400)
-      }
-      if (!params.style) {
-        throw new SunoAPIError("style is required when defaultParamFlag is true", 400)
-      }
-      if (!params.title) {
-        throw new SunoAPIError("title is required when defaultParamFlag is true", 400)
-      }
-
-      // Validate continueAt range (must be > 0 and < audio duration)
-      if (params.continueAt <= 0) {
-        throw new SunoAPIError("continueAt must be greater than 0", 400)
+    
+    if (!params.prompt || params.prompt.trim() === "") {
+      throw new SunoAPIError("prompt is required for extend music", 400)
+    }
+    
+    if (!params.continue_clip_id || params.continue_clip_id.trim() === "") {
+      throw new SunoAPIError("continue_clip_id is required for extend music", 400)
+    }
+    
+    if (params.continue_at === undefined || params.continue_at === null) {
+      throw new SunoAPIError("continue_at is required for extend music", 400)
+    }
+    
+    if (params.continue_at <= 0) {
+      throw new SunoAPIError("continue_at must be greater than 0", 400)
+    }
+    
+    if (!params.mv) {
+      throw new SunoAPIError("mv (model version) is required for extend music", 400)
+    }
+    
+    // ============= CHARACTER LIMITS VALIDATION =============
+    
+    // Validate prompt length (model-specific limits)
+    const isV3OrV4 = params.mv === "chirp-v3-5" || params.mv === "chirp-v4"
+    const maxPromptLength = isV3OrV4 ? 3000 : 5000
+    if (params.prompt.length > maxPromptLength) {
+      throw new SunoAPIError(
+        `prompt exceeds maximum character limit of ${maxPromptLength} for ${params.mv}`,
+        413
+      )
+    }
+    
+    // Validate tags length (model-specific limits)
+    if (params.tags) {
+      const maxTagsLength = isV3OrV4 ? 200 : 1000
+      if (params.tags.length > maxTagsLength) {
+        throw new SunoAPIError(
+          `tags exceeds maximum character limit of ${maxTagsLength} for ${params.mv}`,
+          413
+        )
       }
     }
-    // When defaultParamFlag is false: only audioId is required (uses original audio parameters)
-
+    
+    // Validate title length (max 120 characters)
+    if (params.title && params.title.length > 120) {
+      throw new SunoAPIError("title exceeds maximum character limit of 120 characters", 413)
+    }
+    
+    // ============= RANGE PARAMETERS VALIDATION =============
+    
     // Validate optional range parameters (0-1)
-    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
-      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    if (params.style_weight !== undefined && (params.style_weight < 0 || params.style_weight > 1)) {
+      throw new SunoAPIError("style_weight must be between 0 and 1", 400)
     }
 
     if (
-      params.weirdnessConstraint !== undefined &&
-      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+      params.weirdness_constraint !== undefined &&
+      (params.weirdness_constraint < 0 || params.weirdness_constraint > 1)
     ) {
-      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
-    }
-
-    if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
-      throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
+      throw new SunoAPIError("weirdness_constraint must be between 0 and 1", 400)
     }
 
     return this.request("/suno/create", {

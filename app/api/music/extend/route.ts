@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { extendMusic } from '@/lib/suno-api'
+import { SunoAPIClient } from '@/lib/suno-api'
 
 export const runtime = 'edge'
 export const maxDuration = 50
@@ -8,94 +8,90 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const { 
-      audio_id, 
+      audio_id,       // Legacy field name
+      clip_id,        // New field name (OpenAPI spec)
       prompt,
       continue_at,
       title,
       tags,
       negative_tags,
-      model = 'chirp-v3-5',
-      default_param_flag = true,
-      persona_id,
+      model = 'chirp-v5',
       vocal_gender,
       style_weight,
-      weirdness_constraint,
-      audio_weight
+      weirdness_constraint
     } = body
 
-    if (!audio_id || typeof audio_id !== 'string') {
+    // Support both legacy and new field names
+    const continue_clip_id = clip_id || audio_id
+    
+    if (!continue_clip_id || typeof continue_clip_id !== 'string') {
       return NextResponse.json({ 
         success: false, 
-        error: 'Audio ID is required' 
+        error: 'clip_id (or audio_id) is required' 
       }, { status: 400 })
     }
 
-    // Prompt is only required when default_param_flag is true
-    if (default_param_flag && !prompt) {
+    if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ 
         success: false, 
-        error: 'Prompt is required when using custom parameters' 
+        error: 'prompt is required for extend music' 
       }, { status: 400 })
     }
 
-    // Map legacy model names to official API models
-    const mapModel = (m: string): "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5" => {
-      switch (m) {
-        case 'chirp-v3-5':
-        case 'chirp-v3-0':
-          return 'V3_5'
-        case 'chirp-auk':
-          return 'V4_5'
-        case 'chirp-bluejay':
-          return 'V4_5PLUS'
-        case 'chirp-crow':
-          return 'V5'
-        default:
-          return 'V5'
-      }
+    if (typeof continue_at !== 'number') {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'continue_at (number of seconds) is required' 
+      }, { status: 400 })
     }
 
-    console.log('🎵 [Extend] Request (Suno API):', { 
-      audio_id, 
+    const apiKey = process.env.SUNO_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'SUNO_API_KEY not configured' 
+      }, { status: 500 })
+    }
+
+    console.log('🎵 [Extend] Request:', { 
+      continue_clip_id, 
       model, 
-      defaultParamFlag: default_param_flag,
-      continueAt: continue_at 
+      continue_at,
+      hasPrompt: !!prompt,
+      hasTags: !!tags
     })
 
     const callBackUrl = `${new URL(req.url).origin}/api/music/callback`
 
-    // Build payload according to official API spec
+    // Build payload according to OpenAPI specification
     const payload: any = {
-      audioId: audio_id,
-      defaultParamFlag: default_param_flag,
-      model: mapModel(model),
-      callBackUrl, // REQUIRED by Suno API
+      custom_mode: true,           // REQUIRED (always true for extend)
+      prompt,                       // REQUIRED (song lyrics)
+      continue_clip_id,             // REQUIRED (clip ID to extend)
+      continue_at,                  // REQUIRED (starting seconds)
+      mv: model,                    // REQUIRED (model version)
+      webhook_url: callBackUrl,     // Optional webhook
     }
 
-    // Add optional fields based on defaultParamFlag
-    if (default_param_flag) {
-      // Custom parameters mode - requires continueAt, prompt, style, title
-      if (prompt) payload.prompt = prompt
-      if (tags) payload.style = tags
-      if (title) payload.title = title
-      if (typeof continue_at === 'number') payload.continueAt = continue_at
-    }
-    
-    // Optional advanced parameters (work in both modes)
-    if (persona_id) payload.personaId = persona_id
-    if (negative_tags) payload.negativeTags = negative_tags
-    if (vocal_gender) payload.vocalGender = vocal_gender
-    if (typeof style_weight === 'number') payload.styleWeight = style_weight
-    if (typeof weirdness_constraint === 'number') payload.weirdnessConstraint = weirdness_constraint
-    if (typeof audio_weight === 'number') payload.audioWeight = audio_weight
+    // Add optional fields
+    if (title) payload.title = title
+    if (tags) payload.tags = tags
+    if (negative_tags) payload.negative_tags = negative_tags
+    if (vocal_gender) payload.vocal_gender = vocal_gender
+    if (typeof style_weight === 'number') payload.style_weight = style_weight
+    if (typeof weirdness_constraint === 'number') payload.weirdness_constraint = weirdness_constraint
 
     console.log('🎵 [Extend] Payload:', JSON.stringify(payload, null, 2))
 
-    const res = await extendMusic(payload)
+    const sunoAPI = new SunoAPIClient({ apiKey })
+    const res = await sunoAPI.extendMusic(payload)
 
-    if (res.code !== 200 || !res.data?.taskId) {
+    if (!res.data?.taskId) {
       console.error('❌ [Extend] Suno API error:', res)
-      return NextResponse.json({ success: false, error: res.msg || 'Suno API error' }, { status: 500 })
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Suno API error' 
+      }, { status: 500 })
     }
 
     const taskId = res.data.taskId
@@ -103,18 +99,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      songs: [
-        {
-          id: taskId,
-          status: 'submitted',
-          title: title || '',
-          created_at: new Date().toISOString(),
-          model_name: mapModel(model),
-          image_url: '',
-          audio_url: '',
-          lyric: '',
-        },
-      ],
+      data: {
+        task_id: taskId,
+        message: 'success'
+      }
     })
 
   } catch (error: unknown) {
