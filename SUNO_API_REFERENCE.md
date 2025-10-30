@@ -336,7 +336,150 @@ Retrieve detailed information about a lyrics generation task.
 ```
 
 #### Polling Recommendation
-Poll every 30 seconds until status becomes `SUCCESS` or a failure state.
+Poll every 30 seconds until successFlag becomes `SUCCESS` or a failure state.
+
+---
+
+### 24. Base64 File Upload
+**POST** `/api/file-upload/base64`
+
+Upload files via Base64 encoded data to temporary storage. Files automatically deleted after 3 days.
+
+#### Required Fields
+- `base64Data` (string - Base64 encoded file data or data URL format)
+- `uploadPath` (string - File upload path without leading/trailing slashes)
+
+#### Optional Fields
+- `fileName` (string - Filename with extension, random if not provided)
+
+#### Base64 Data Formats
+- Data URL format: `data:image/png;base64,iVBORw0KGgo...`
+- Pure Base64 string: `iVBORw0KGgo...`
+
+#### Response
+```json
+{
+  "success": true,
+  "code": 200,
+  "msg": "File uploaded successfully",
+  "data": {
+    "fileName": "uploaded-image.png",
+    "filePath": "images/user-uploads/uploaded-image.png",
+    "downloadUrl": "https://tempfile.redpandaai.co/xxx/images/user-uploads/uploaded-image.png",
+    "fileSize": 154832,
+    "mimeType": "image/png",
+    "uploadedAt": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+#### File Management
+- **Storage**: Temporary (3-day auto-deletion)
+- **Base URL**: https://tempfile.redpandaai.co
+- **Overwrite**: Same filename overwrites existing file
+- **Limits**: 10 MB max (Base64 encoding adds ~33% overhead)
+
+---
+
+### 25. File Stream Upload
+**POST** `/api/file-upload/stream`
+
+Upload files via multipart/form-data stream. Recommended for files > 5 MB.
+
+#### Content-Type
+`multipart/form-data`
+
+#### Form Fields
+- `file` (File, required) - Binary file data
+- `uploadPath` (string, required) - File upload path without leading/trailing slashes
+- `fileName` (string, optional) - Filename with extension
+
+#### Advantages
+- More efficient for large files (> 5 MB)
+- No Base64 encoding overhead
+- Browser native file upload support
+- Direct binary transfer
+
+#### Response
+```json
+{
+  "success": true,
+  "code": 200,
+  "msg": "File uploaded successfully",
+  "data": {
+    "fileName": "uploaded-video.mp4",
+    "filePath": "videos/user-uploads/uploaded-video.mp4",
+    "downloadUrl": "https://tempfile.redpandaai.co/xxx/videos/user-uploads/uploaded-video.mp4",
+    "fileSize": 25641234,
+    "mimeType": "video/mp4",
+    "uploadedAt": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+#### Limits
+- **Max Size**: 50 MB per file
+- **Storage**: Temporary (3-day auto-deletion)
+- **Recommendation**: Use for files > 5 MB
+
+---
+
+### 26. URL File Upload
+**POST** `/api/file-upload/url`
+
+Download files from URLs and upload to temporary storage.
+
+#### Required Fields
+- `fileUrl` (string - File download URL, must be HTTP or HTTPS)
+- `uploadPath` (string - File upload path without leading/trailing slashes)
+
+#### Optional Fields
+- `fileName` (string - Filename with extension, random if not provided)
+
+#### Use Cases
+- Import files from external APIs
+- Copy files from public URLs
+- Transfer files between services
+- Download and re-host content
+
+#### URL Requirements
+- Must be valid HTTP or HTTPS URL
+- Must be publicly accessible (no authentication)
+- Must return binary content
+- Source server must allow downloads
+
+#### Response
+```json
+{
+  "success": true,
+  "code": 200,
+  "msg": "File uploaded successfully",
+  "data": {
+    "fileName": "downloaded-doc.pdf",
+    "filePath": "documents/downloads/downloaded-doc.pdf",
+    "downloadUrl": "https://tempfile.redpandaai.co/xxx/documents/downloads/downloaded-doc.pdf",
+    "fileSize": 2458912,
+    "mimeType": "application/pdf",
+    "uploadedAt": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+#### Limits
+- **Max Size**: 50 MB per file
+- **Timeout**: 60 seconds download timeout
+- **Redirects**: Follows redirects automatically
+
+#### Supported File Formats (All Methods)
+- **Images**: jpg, png, gif, webp, svg, bmp, ico
+- **Audio**: mp3, wav, ogg, m4a, flac, aac
+- **Video**: mp4, webm, mov, avi, mkv
+- **Documents**: pdf, doc, docx, txt, csv, json
+- **Archives**: zip, rar, tar, gz
+
+---
+
+## 🔄 Callbacks
 
 ---
 
@@ -786,11 +929,14 @@ All endpoints: **100% Complete**
 - Create Music Video ✅
 - Get Video Details ✅
 - Get Remaining Credits ✅
+- Base64 File Upload ✅
+- Stream File Upload ✅
+- URL File Upload ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
 
-**Total**: 24 API features (23 endpoints + callbacks)
+**Total**: 27 API features (26 endpoints + callbacks)
 
 ---
 
