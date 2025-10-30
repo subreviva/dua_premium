@@ -8,8 +8,11 @@ The Suno API uses callbacks to notify your application when music generation tas
 
 ### Primary Callback Endpoints
 
-1. **`/api/music/callback`** - Legacy endpoint for backward compatibility
-2. **`/api/suno/callback`** - New comprehensive callback handler
+1. **`/api/music/callback`** - Main callback endpoint for all music operations
+   - Music generation (POST /api/music/generate)
+   - Music extension (POST /api/music/extend)
+   - Audio covering (POST /api/music/cover)
+2. **`/api/suno/callback`** - Comprehensive callback handler for advanced features
 3. **`/api/callback`** - Global callback endpoint
 
 All endpoints follow the same callback format as specified in the official Suno API documentation.

@@ -33,7 +33,13 @@ export interface ExtendMusicParams {
   style?: string
   title?: string
   continueAt?: number
+  personaId?: string
   model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  negativeTags?: string
+  vocalGender?: "m" | "f"
+  styleWeight?: number // 0-1
+  weirdnessConstraint?: number // 0-1
+  audioWeight?: number // 0-1
   callBackUrl?: string
 }
 
@@ -612,7 +618,15 @@ export interface UploadAndCoverParams {
   prompt?: string
   style?: string
   title?: string
-  model?: "V4_5PLUS" | "V5"
+  customMode: boolean
+  instrumental: boolean
+  personaId?: string
+  model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  negativeTags?: string
+  vocalGender?: "m" | "f"
+  styleWeight?: number // 0-1
+  weirdnessConstraint?: number // 0-1
+  audioWeight?: number // 0-1
   callBackUrl?: string
 }
 

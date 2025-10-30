@@ -14,7 +14,13 @@ export async function POST(req: Request) {
       title,
       tags,
       negative_tags,
-      model = 'chirp-v3-5'
+      model = 'chirp-v3-5',
+      default_param_flag = true,
+      persona_id,
+      vocal_gender,
+      style_weight,
+      weirdness_constraint,
+      audio_weight
     } = body
 
     if (!audio_id || typeof audio_id !== 'string') {
@@ -24,10 +30,11 @@ export async function POST(req: Request) {
       }, { status: 400 })
     }
 
-    if (!prompt || typeof prompt !== 'string') {
+    // Prompt is only required when default_param_flag is true
+    if (default_param_flag && !prompt) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Prompt is required' 
+        error: 'Prompt is required when using custom parameters' 
       }, { status: 400 })
     }
 
@@ -48,21 +55,43 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log('🎵 [Extend] Request (Suno API):', { audio_id, model })
+    console.log('🎵 [Extend] Request (Suno API):', { 
+      audio_id, 
+      model, 
+      defaultParamFlag: default_param_flag,
+      continueAt: continue_at 
+    })
 
     const callBackUrl = `${new URL(req.url).origin}/api/music/callback`
 
-    const res = await extendMusic({
+    // Build payload according to official API spec
+    const payload: any = {
       audioId: audio_id,
-      prompt: prompt || undefined,
-      title: title || undefined,
-      style: tags || undefined,
-      continueAt: typeof continue_at === 'number' ? continue_at : undefined,
-      defaultParamFlag: true,
+      defaultParamFlag: default_param_flag,
       model: mapModel(model),
       callBackUrl, // REQUIRED by Suno API
-      // negative_tags is not directly supported; ignored here
-    })
+    }
+
+    // Add optional fields based on defaultParamFlag
+    if (default_param_flag) {
+      // Custom parameters mode - requires continueAt, prompt, style, title
+      if (prompt) payload.prompt = prompt
+      if (tags) payload.style = tags
+      if (title) payload.title = title
+      if (typeof continue_at === 'number') payload.continueAt = continue_at
+    }
+    
+    // Optional advanced parameters (work in both modes)
+    if (persona_id) payload.personaId = persona_id
+    if (negative_tags) payload.negativeTags = negative_tags
+    if (vocal_gender) payload.vocalGender = vocal_gender
+    if (typeof style_weight === 'number') payload.styleWeight = style_weight
+    if (typeof weirdness_constraint === 'number') payload.weirdnessConstraint = weirdness_constraint
+    if (typeof audio_weight === 'number') payload.audioWeight = audio_weight
+
+    console.log('🎵 [Extend] Payload:', JSON.stringify(payload, null, 2))
+
+    const res = await extendMusic(payload)
 
     if (res.code !== 200 || !res.data?.taskId) {
       console.error('❌ [Extend] Suno API error:', res)
