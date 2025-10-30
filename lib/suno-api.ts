@@ -632,10 +632,31 @@ export interface UploadAndCoverParams {
 
 export interface UploadAndExtendParams {
   uploadUrl: string
+  defaultParamFlag: boolean
+  instrumental?: boolean
   prompt?: string
   style?: string
   title?: string
   continueAt?: number
+  personaId?: string
+  model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  negativeTags?: string
+  vocalGender?: "m" | "f"
+  styleWeight?: number // 0-1
+  weirdnessConstraint?: number // 0-1
+  audioWeight?: number // 0-1
+  callBackUrl?: string
+}
+
+export interface AddInstrumentalParams {
+  uploadUrl: string
+  title: string
+  tags: string
+  negativeTags: string
+  vocalGender?: "m" | "f"
+  styleWeight?: number // 0-1
+  weirdnessConstraint?: number // 0-1
+  audioWeight?: number // 0-1
   model?: "V4_5PLUS" | "V5"
   callBackUrl?: string
 }
@@ -697,6 +718,11 @@ export async function uploadAndCover(params: UploadAndCoverParams): Promise<ApiR
 export async function uploadAndExtend(params: UploadAndExtendParams): Promise<ApiResponse<TaskResponse>> {
   const client = getSunoClient()
   return client.uploadAndExtend(params)
+}
+
+export async function addInstrumental(params: AddInstrumentalParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.addInstrumental(params)
 }
 
 export const SunoAPI = SunoAPIClient
