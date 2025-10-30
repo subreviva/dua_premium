@@ -832,13 +832,23 @@ export class SunoAPIClient {
   }
 
   async generateCover(params: GenerateCoverParams): Promise<ApiResponse<CoverResponse>> {
-    // Validate required parameters
-    if (!params.taskId) {
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // taskId is REQUIRED - Original music task ID from generation interface
+    if (!params.taskId || params.taskId.trim() === "") {
       throw new SunoAPIError("taskId is required", 400)
     }
 
-    if (!params.callBackUrl) {
+    // callBackUrl is REQUIRED - URL for receiving cover generation completion updates
+    if (!params.callBackUrl || params.callBackUrl.trim() === "") {
       throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    // Validate URL format for callBackUrl
+    try {
+      new URL(params.callBackUrl)
+    } catch {
+      throw new SunoAPIError("callBackUrl must be a valid URL", 400)
     }
 
     return this.request("/suno/cover/generate", {
@@ -1124,9 +1134,23 @@ export class SunoAPIClient {
   }
 
   async generateMusicCover(params: GenerateMusicCoverParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
-    if (!params.taskId || !params.callBackUrl) {
-      throw new SunoAPIError("Missing required parameters for Generate Music Cover", 400)
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // taskId is REQUIRED - Original music task ID from generation interface
+    if (!params.taskId || params.taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    // callBackUrl is REQUIRED - URL for receiving cover generation completion updates
+    if (!params.callBackUrl || params.callBackUrl.trim() === "") {
+      throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    // Validate URL format for callBackUrl
+    try {
+      new URL(params.callBackUrl)
+    } catch {
+      throw new SunoAPIError("callBackUrl must be a valid URL", 400)
     }
 
     return this.request("/suno/cover/generate", {
