@@ -791,9 +791,25 @@ export class SunoAPIClient {
   }
 
   async generatePersona(params: GeneratePersonaParams): Promise<ApiResponse<PersonaResponse>> {
-    // Validate required parameters
-    if (!params.taskId || params.musicIndex === undefined || !params.name || !params.description) {
-      throw new SunoAPIError("Missing required parameters for Generate Persona", 400)
+    // Validate required parameters individually
+    if (!params.taskId || params.taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+    
+    if (params.musicIndex === undefined || params.musicIndex === null) {
+      throw new SunoAPIError("musicIndex is required", 400)
+    }
+    
+    if (typeof params.musicIndex !== "number" || params.musicIndex < 0) {
+      throw new SunoAPIError("musicIndex must be a non-negative integer (0 or 1)", 400)
+    }
+    
+    if (!params.name || params.name.trim() === "") {
+      throw new SunoAPIError("name is required", 400)
+    }
+    
+    if (!params.description || params.description.trim() === "") {
+      throw new SunoAPIError("description is required", 400)
     }
 
     return this.request("/generate/generate-persona", {
