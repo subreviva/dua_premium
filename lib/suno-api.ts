@@ -911,5 +911,17 @@ export async function extendMusic(params: ExtendMusicParams): Promise<ApiRespons
   return client.extendMusic(params)
 }
 
+// Export wrapper for convertToWav
+export async function convertToWav(params: ConvertToWavParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.convertToWav(params)
+}
+
+// Export wrapper for getWavDetails
+export async function getWavDetails(taskId: string): Promise<ApiResponse<WavDetailsResponse>> {
+  const client = getSunoClient()
+  return client.getWavDetails(taskId)
+}
+
 // Export type aliases for backward compatibility
 export type SunoRecordInfoResponse = MusicGenerationDetailsResponse
