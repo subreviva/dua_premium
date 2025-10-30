@@ -30,6 +30,22 @@ import { FileUpload } from "@/components/file-upload"
 import { LyricsGenerator } from "@/components/lyrics-generator"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
+// Helper function to save songs to localStorage
+function saveSongToLocalStorage(songData: any) {
+  try {
+    const stored = localStorage.getItem("suno-songs")
+    const songs = stored ? JSON.parse(stored) : []
+    
+    // Add new song at the beginning
+    songs.unshift(songData)
+    
+    localStorage.setItem("suno-songs", JSON.stringify(songs))
+    console.log("[v0] Saved song to localStorage:", songData.title)
+  } catch (error) {
+    console.error("[v0] Error saving song to localStorage:", error)
+  }
+}
+
 export function CreatePanel() {
   const [mode, setMode] = useState<"simple" | "custom">("simple")
   const [lyricsExpanded, setLyricsExpanded] = useState(false)
@@ -288,6 +304,30 @@ export function CreatePanel() {
           clearInterval(poll)
           setGenerationStatus("Complete! ✓")
           console.log("[v0] Music generation complete:", result.data.response?.data)
+          
+          // Save generated songs to localStorage
+          const generatedSongs = result.data.response?.data || []
+          generatedSongs.forEach((song: any) => {
+            const songData = {
+              id: song.id || song.audio_id || Math.random().toString(36).substr(2, 9),
+              title: song.title || "Untitled",
+              version: song.model_name || selectedVersion,
+              genre: song.tags || song.style || styles || "Unknown",
+              duration: song.duration ? `${Math.floor(song.duration / 60)}:${String(song.duration % 60).padStart(2, '0')}` : "0:00",
+              thumbnail: song.image_url || song.image_large_url || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
+              gradient: "from-purple-600 to-pink-600",
+              audioUrl: song.audio_url,
+              streamAudioUrl: song.stream_audio_url,
+              videoUrl: song.video_url,
+              imageUrl: song.image_url,
+              prompt: song.prompt || lyrics || songDescription,
+              lyrics: song.lyric,
+              tags: song.tags,
+              modelName: song.model_name,
+              createdAt: new Date().toISOString(),
+            }
+            saveSongToLocalStorage(songData)
+          })
           
           // Atualizar créditos
           fetchCredits()

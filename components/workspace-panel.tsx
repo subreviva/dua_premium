@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Search, Filter, ChevronDown } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Search, Filter, ChevronDown, Music, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SongCard } from "@/components/song-card"
@@ -12,81 +12,95 @@ interface WorkspacePanelProps {
   workspaceName: string
 }
 
-// Mock data
-const mockSongs = [
-  {
-    id: "1",
-    title: "Untitled",
-    version: "v5",
-    genre: "Rap hiphop",
-    duration: "0:35",
-    thumbnail:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
-    gradient: "from-orange-600 to-amber-700",
-  },
-  {
-    id: "2",
-    title: "Untitled",
-    version: "v5",
-    genre: "Rap hiphop",
-    duration: "1:13",
-    thumbnail:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
-    gradient: "from-pink-500 via-purple-500 to-orange-500",
-  },
-  {
-    id: "3",
-    title: "2025-10-26_18:13:59",
-    version: "",
-    genre: "A solo human vocal performance",
-    duration: "0:11",
-    uploaded: true,
-    thumbnail:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
-    gradient: "from-yellow-400 via-pink-500 to-purple-600",
-  },
-  {
-    id: "4",
-    title: "Blue Skies, Cold Nights",
-    version: "v5",
-    genre: "rap, bassline groove, sparse synth stabs",
-    duration: "2:22",
-    thumbnail:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
-    gradient: "from-teal-700 to-teal-900",
-  },
-  {
-    id: "5",
-    title: "Blue Skies, Cold Nights",
-    version: "v5",
-    genre: "rap, bassline groove, sparse synth stabs",
-    duration: "1:48",
-    featured: true,
-    thumbnail:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
-    gradient: "from-teal-700 to-teal-900",
-  },
-  {
-    id: "6",
-    title: "Neon Nostalgia",
-    version: "v5",
-    genre: "groovy synths, f980s-inspired, punchy drum",
-    duration: "2:26",
-    thumbnail:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20ecra%CC%83%202025-10-28%2C%20a%CC%80s%2005.27.30-h6Z8C7Z8K2D4OrxMdjVjEYabAZVZ49.png",
-    gradient: "from-blue-600 to-purple-700",
-  },
-]
+interface Song {
+  id: string
+  title: string
+  version: string
+  genre: string
+  duration: string
+  thumbnail: string
+  gradient: string
+  audioUrl?: string
+  streamAudioUrl?: string
+  videoUrl?: string
+  imageUrl?: string
+  prompt?: string
+  lyrics?: string
+  tags?: string
+  modelName?: string
+  uploaded?: boolean
+  featured?: boolean
+  liked?: boolean
+  isPublic?: boolean
+  createdAt?: string
+}
 
 export function WorkspacePanel({ workspaceName }: WorkspacePanelProps) {
   const [selectedSong, setSelectedSong] = useState<string | null>(null)
   const [editingSong, setEditingSong] = useState<string | null>(null)
-  const [songs, setSongs] = useState(mockSongs)
+  const [songs, setSongs] = useState<Song[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [filterLiked, setFilterLiked] = useState(false)
   const [filterPublic, setFilterPublic] = useState(false)
   const [filterUploads, setFilterUploads] = useState(false)
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest")
+
+  // Load songs from localStorage
+  useEffect(() => {
+    const loadSongs = () => {
+      try {
+        const stored = localStorage.getItem("suno-songs")
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          setSongs(parsed)
+          console.log("[v0] Loaded", parsed.length, "songs from localStorage")
+        }
+      } catch (error) {
+        console.error("[v0] Error loading songs:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadSongs()
+
+    // Listen for storage events (updates from other tabs/windows)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "suno-songs" && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue)
+          setSongs(parsed)
+          console.log("[v0] Songs updated from storage event")
+        } catch (error) {
+          console.error("[v0] Error parsing storage event:", error)
+        }
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+
+    // Reload every 5 seconds to catch updates
+    const interval = setInterval(() => {
+      const stored = localStorage.getItem("suno-songs")
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored)
+          if (JSON.stringify(parsed) !== JSON.stringify(songs)) {
+            setSongs(parsed)
+            console.log("[v0] Songs updated from interval check")
+          }
+        } catch (error) {
+          console.error("[v0] Error in interval check:", error)
+        }
+      }
+    }, 5000)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      clearInterval(interval)
+    }
+  }, [songs])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -209,12 +223,27 @@ export function WorkspacePanel({ workspaceName }: WorkspacePanelProps) {
 
         {/* Songs List */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-6">
-          {filteredSongs.length === 0 ? (
+          {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <p className="text-neutral-400 mb-4">No songs found</p>
-              <Button variant="link" className="text-neutral-500" onClick={handleResetFilters}>
-                Reset filters
-              </Button>
+              <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
+              <p className="text-neutral-400">Loading songs...</p>
+            </div>
+          ) : filteredSongs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              {songs.length === 0 ? (
+                <>
+                  <Music className="h-16 w-16 text-neutral-700 mb-4" />
+                  <p className="text-neutral-400 mb-2 text-lg font-semibold">No songs yet</p>
+                  <p className="text-neutral-500 text-sm mb-4">Create your first song to get started!</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-neutral-400 mb-4">No songs found</p>
+                  <Button variant="link" className="text-neutral-500" onClick={handleResetFilters}>
+                    Reset filters
+                  </Button>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-3">

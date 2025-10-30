@@ -6,8 +6,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const client = getSunoClient()
 
+    // Auto-generate callBackUrl if not provided (REQUIRED by Suno API)
+    const origin = request.headers.get("origin") || request.headers.get("referer")?.split("/").slice(0, 3).join("/") || "http://localhost:3000"
+    const callBackUrl = body.callBackUrl || `${origin}/api/suno/callback`
+
     const params = {
       ...body,
+      callBackUrl, // Ensure callBackUrl is always present
       // Ensure vocal gender is in correct format
       vocalGender: body.vocalGender === "male" ? "m" : body.vocalGender === "female" ? "f" : body.vocalGender,
       // Ensure weights are in 0-1 range
