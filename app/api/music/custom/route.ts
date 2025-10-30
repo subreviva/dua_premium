@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { SunoAPIClient } from '@/lib/suno-api'
 
 export const runtime = 'edge'
 export const maxDuration = 50
@@ -36,16 +37,12 @@ export async function POST(req: Request) {
       }, { status: 400 })
     }
 
-    const sunoApiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
-    
-    const requestBody = {
-      prompt: lyrics,
-      tags,
-      title,
-      make_instrumental: instrumental,
-      model_version: model,
-      wait_audio: false,
-      ...(negative_tags && { negative_tags })
+    const apiKey = process.env.SUNO_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'SUNO_API_KEY not configured' 
+      }, { status: 500 })
     }
 
     console.log('🎵 [Custom] Request:', { 
@@ -56,32 +53,22 @@ export async function POST(req: Request) {
       hasNegativeTags: !!negative_tags
     })
 
-    const response = await fetch(`${sunoApiUrl}/api/custom_generate`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-      // ❌ REMOVE: signal: AbortSignal.timeout(...)
+    const sunoAPI = new SunoAPIClient({ apiKey })
+    const result = await sunoAPI.generateMusic({
+      custom_mode: true,
+      prompt: lyrics,
+      title,
+      tags,
+      mv: model as any, // Type conversion for model versions
+      make_instrumental: instrumental,
+      negative_tags,
     })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [Custom] Suno API error:', response.status, errorText)
-      return NextResponse.json({ 
-        success: false, 
-        error: `API error: ${response.status}` 
-      }, { status: response.status })
-    }
-
-    const data = await response.json()
     
-    console.log('✅ [Custom] Success:', data.length, 'songs IDs returned')
+    console.log('✅ [Custom] Success:', result)
     
     return NextResponse.json({ 
       success: true, 
-      songs: data 
+      data: result.data
     })
 
   } catch (error: unknown) {

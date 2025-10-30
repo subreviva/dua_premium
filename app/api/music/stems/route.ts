@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { SunoAPIClient } from '@/lib/suno-api'
 
 export const runtime = 'edge'
 export const maxDuration = 50
@@ -15,35 +16,24 @@ export async function POST(req: Request) {
       }, { status: 400 })
     }
 
-    const sunoApiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
+    const apiKey = process.env.SUNO_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'SUNO_API_KEY not configured' 
+      }, { status: 500 })
+    }
     
     console.log('🎵 [Stems] Request:', { audio_id })
 
-    const response = await fetch(`${sunoApiUrl}/api/generate_stems`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ audio_id })
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [Stems] Suno API error:', response.status, errorText)
-      return NextResponse.json({ 
-        success: false, 
-        error: `API error: ${response.status}` 
-      }, { status: response.status })
-    }
-
-    const data = await response.json()
+    const sunoAPI = new SunoAPIClient({ apiKey })
+    const result = await sunoAPI.stemsBasic({ clip_id: audio_id })
     
-    console.log('✅ [Stems] Success:', data)
+    console.log('✅ [Stems] Success:', result)
     
     return NextResponse.json({ 
       success: true, 
-      data 
+      data: result.data 
     })
 
   } catch (error: unknown) {

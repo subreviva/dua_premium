@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { SunoAPIClient } from '@/lib/suno-api'
 
 export const runtime = 'edge'
 export const maxDuration = 50
@@ -6,7 +7,7 @@ export const maxDuration = 50
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { prompt } = body
+    const { prompt, callBackUrl } = body
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ 
@@ -15,35 +16,31 @@ export async function POST(req: Request) {
       }, { status: 400 })
     }
 
-    const sunoApiUrl = process.env.NEXT_PUBLIC_SUNO_API_URL || 'https://suno-production.up.railway.app'
+    const apiKey = process.env.SUNO_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'SUNO_API_KEY not configured' 
+      }, { status: 500 })
+    }
     
     console.log('🎵 [Lyrics] Request:', { promptLength: prompt.length })
 
-    const response = await fetch(`${sunoApiUrl}/api/generate_lyrics`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ prompt })
+    const sunoAPI = new SunoAPIClient({ apiKey })
+    
+    // Auto-generate callback URL if not provided
+    const finalCallBackUrl = callBackUrl || `${req.headers.get('origin') || 'http://localhost:3000'}/api/suno/callback/lyrics`
+    
+    const result = await sunoAPI.generateLyrics({ 
+      prompt,
+      callBackUrl: finalCallBackUrl
     })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [Lyrics] Suno API error:', response.status, errorText)
-      return NextResponse.json({ 
-        success: false, 
-        error: `API error: ${response.status}` 
-      }, { status: response.status })
-    }
-
-    const data = await response.json()
     
     console.log('✅ [Lyrics] Success')
     
     return NextResponse.json({ 
       success: true, 
-      data 
+      data: result.data 
     })
 
   } catch (error: unknown) {
