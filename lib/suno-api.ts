@@ -394,13 +394,11 @@ export class SunoAPIClient {
 
   // Music Generation APIs
   async generateMusic(params: GenerateMusicParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
-    if (!params.customMode && !params.prompt && !params.gpt_description_prompt) {
-      throw new SunoAPIError("Either prompt or gpt_description_prompt is required when customMode is false", 400)
-    }
-
-    if (params.customMode && !params.prompt) {
-      throw new SunoAPIError("prompt is required when customMode is true", 400)
+    // Validate required parameters based on mode
+    // Custom mode: requires either prompt (lyrics) OR gpt_description_prompt (description)
+    // Simple mode: requires either prompt (lyrics) OR gpt_description_prompt (description)
+    if (!params.prompt && !params.gpt_description_prompt) {
+      throw new SunoAPIError("Either prompt or gpt_description_prompt is required", 400)
     }
 
     // Validate optional range parameters
@@ -419,13 +417,13 @@ export class SunoAPIClient {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
     }
 
-    // Validate prompt length (max 3000 characters for custom mode)
-    if (params.customMode && params.prompt && params.prompt.length > 3000) {
+    // Validate prompt length (max 3000 characters when provided)
+    if (params.prompt && params.prompt.length > 3000) {
       throw new SunoAPIError("Prompt exceeds maximum character limit of 3000 characters", 413)
     }
 
-    // Validate gpt_description_prompt length (max 200 characters for simple mode)
-    if (!params.customMode && params.gpt_description_prompt && params.gpt_description_prompt.length > 200) {
+    // Validate gpt_description_prompt length (max 200 characters when provided)
+    if (params.gpt_description_prompt && params.gpt_description_prompt.length > 200) {
       throw new SunoAPIError("Description prompt exceeds maximum character limit of 200 characters", 413)
     }
 
