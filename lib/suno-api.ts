@@ -110,7 +110,9 @@ export interface ConvertToWavParams {
 
 // Separate Vocals
 export interface SeparateVocalsParams {
+  taskId: string
   audioId: string
+  type?: "separate_vocal" | "split_stem"
   callBackUrl?: string
 }
 
@@ -226,6 +228,34 @@ export interface LyricsDetailsResponse {
 export interface SeparationResult {
   vocalUrl: string
   instrumentalUrl: string
+}
+
+export interface VocalSeparationDetailsResponse {
+  taskId: string
+  musicId: string
+  callbackUrl: string
+  musicIndex: number
+  completeTime?: string
+  response?: {
+    originUrl?: string
+    instrumentalUrl?: string
+    vocalUrl?: string
+    backingVocalsUrl?: string
+    drumsUrl?: string
+    bassUrl?: string
+    guitarUrl?: string
+    keyboardUrl?: string
+    percussionUrl?: string
+    stringsUrl?: string
+    synthUrl?: string
+    fxUrl?: string
+    brassUrl?: string
+    woodwindsUrl?: string
+  }
+  successFlag: "PENDING" | "SUCCESS" | "CREATE_TASK_FAILED" | "GENERATE_AUDIO_FAILED" | "CALLBACK_EXCEPTION"
+  createTime: string
+  errorCode?: number
+  errorMessage?: string
 }
 
 export interface MusicGenerationDetailsResponse {
@@ -530,14 +560,14 @@ export class SunoAPIClient {
   }
 
   async separateVocals(params: SeparateVocalsParams): Promise<ApiResponse<TaskResponse>> {
-    return this.request("/separation/separate", {
+    return this.request("/vocal-removal/generate", {
       method: "POST",
       body: JSON.stringify(params),
     })
   }
 
-  async getSeparationDetails(taskId: string): Promise<ApiResponse<SeparationResult>> {
-    return this.request(`/separation/record-info?taskId=${taskId}`, {
+  async getVocalSeparationDetails(taskId: string): Promise<ApiResponse<VocalSeparationDetailsResponse>> {
+    return this.request(`/vocal-removal/record-info?taskId=${taskId}`, {
       method: "GET",
     })
   }
@@ -921,6 +951,18 @@ export async function convertToWav(params: ConvertToWavParams): Promise<ApiRespo
 export async function getWavDetails(taskId: string): Promise<ApiResponse<WavDetailsResponse>> {
   const client = getSunoClient()
   return client.getWavDetails(taskId)
+}
+
+// Export wrapper for separateVocals
+export async function separateVocals(params: SeparateVocalsParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.separateVocals(params)
+}
+
+// Export wrapper for getVocalSeparationDetails
+export async function getVocalSeparationDetails(taskId: string): Promise<ApiResponse<VocalSeparationDetailsResponse>> {
+  const client = getSunoClient()
+  return client.getVocalSeparationDetails(taskId)
 }
 
 // Export type aliases for backward compatibility
