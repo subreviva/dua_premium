@@ -120,8 +120,8 @@ export interface ConvertToWavParams {
 export interface SeparateVocalsParams {
   taskId: string
   audioId: string
-  type?: "separate_vocal" | "split_stem"
-  callBackUrl?: string
+  type?: "separate_vocal" | "split_stem" // Optional, defaults to "separate_vocal"
+  callBackUrl: string // Required per official documentation
 }
 
 // Create Music Video
@@ -1023,6 +1023,31 @@ export class SunoAPIClient {
   }
 
   async separateVocals(params: SeparateVocalsParams): Promise<ApiResponse<TaskResponse>> {
+    // Validate required parameters individually
+    if (!params.taskId || params.taskId.trim() === "") {
+      throw new SunoAPIError("taskId is required", 400)
+    }
+
+    if (!params.audioId || params.audioId.trim() === "") {
+      throw new SunoAPIError("audioId is required", 400)
+    }
+
+    if (!params.callBackUrl || params.callBackUrl.trim() === "") {
+      throw new SunoAPIError("callBackUrl is required", 400)
+    }
+
+    // Validate callBackUrl format
+    try {
+      new URL(params.callBackUrl)
+    } catch {
+      throw new SunoAPIError("callBackUrl must be a valid URL", 400)
+    }
+
+    // Validate type if provided
+    if (params.type && !["separate_vocal", "split_stem"].includes(params.type)) {
+      throw new SunoAPIError("type must be either 'separate_vocal' or 'split_stem'", 400)
+    }
+
     return this.request("/vocal-removal/generate", {
       method: "POST",
       body: JSON.stringify(params),
