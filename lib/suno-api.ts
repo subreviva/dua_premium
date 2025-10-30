@@ -406,26 +406,39 @@ export class SunoAPIClient {
     
     if (params.customMode) {
       // CUSTOM MODE validation
-      if (!params.instrumental) {
-        // Custom Mode + NOT instrumental: requires style, title, AND prompt (as exact lyrics)
-        if (!params.style) {
-          throw new SunoAPIError("style is required in Custom Mode", 400)
-        }
-        if (!params.title) {
-          throw new SunoAPIError("title is required in Custom Mode", 400)
-        }
-        if (!params.prompt) {
-          throw new SunoAPIError("prompt (lyrics) is required in Custom Mode when instrumental is false", 400)
-        }
-      } else {
-        // Custom Mode + instrumental: requires only style and title
-        if (!params.style) {
-          throw new SunoAPIError("style is required in Custom Mode", 400)
-        }
-        if (!params.title) {
-          throw new SunoAPIError("title is required in Custom Mode", 400)
+      // If gpt_description_prompt is provided, it auto-generates everything (style, title, lyrics)
+      // Otherwise, requires manual inputs
+      
+      if (!params.gpt_description_prompt) {
+        // Manual mode: need explicit inputs
+        
+        if (params.instrumental === false) {
+          // Custom Mode + NOT instrumental: requires style, title, AND prompt (as exact lyrics)
+          if (!params.style) {
+            throw new SunoAPIError("style is required in Custom Mode (or use gpt_description_prompt)", 400)
+          }
+          if (!params.title) {
+            throw new SunoAPIError("title is required in Custom Mode (or use gpt_description_prompt)", 400)
+          }
+          if (!params.prompt) {
+            throw new SunoAPIError("prompt (lyrics) is required in Custom Mode when instrumental is false", 400)
+          }
+        } else if (params.instrumental === true) {
+          // Custom Mode + instrumental: requires only style and title
+          if (!params.style) {
+            throw new SunoAPIError("style is required in Custom Mode (or use gpt_description_prompt)", 400)
+          }
+          if (!params.title) {
+            throw new SunoAPIError("title is required in Custom Mode (or use gpt_description_prompt)", 400)
+          }
+        } else {
+          // instrumental is undefined - treat as auto-mode, requires at least description
+          if (!params.style && !params.title && !params.prompt) {
+            throw new SunoAPIError("Custom Mode requires either gpt_description_prompt, or style+title, or prompt", 400)
+          }
         }
       }
+      // If gpt_description_prompt is provided, no other validation needed - API will auto-generate
     } else {
       // NON-CUSTOM MODE validation
       // Always requires prompt (used as idea, lyrics auto-generated)
