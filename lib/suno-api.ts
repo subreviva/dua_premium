@@ -1224,7 +1224,7 @@ export class SunoAPIClient {
 
   // Account Management
   async getRemainingCredits(): Promise<ApiResponse<CreditsResponse>> {
-    return this.request("/generate/credit", {
+    return this.request("/credit", {
       method: "GET",
     })
   }
