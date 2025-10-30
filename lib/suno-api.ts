@@ -394,14 +394,69 @@ export class SunoAPIClient {
 
   // Music Generation APIs
   async generateMusic(params: GenerateMusicParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters based on mode
-    // Custom mode: requires either prompt (lyrics) OR gpt_description_prompt (description)
-    // Simple mode: requires either prompt (lyrics) OR gpt_description_prompt (description)
-    if (!params.prompt && !params.gpt_description_prompt) {
-      throw new SunoAPIError("Either prompt or gpt_description_prompt is required", 400)
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    if (params.customMode) {
+      // CUSTOM MODE validation
+      if (!params.instrumental) {
+        // Custom Mode + NOT instrumental: requires style, title, AND prompt (as exact lyrics)
+        if (!params.style) {
+          throw new SunoAPIError("style is required in Custom Mode", 400)
+        }
+        if (!params.title) {
+          throw new SunoAPIError("title is required in Custom Mode", 400)
+        }
+        if (!params.prompt) {
+          throw new SunoAPIError("prompt (lyrics) is required in Custom Mode when instrumental is false", 400)
+        }
+      } else {
+        // Custom Mode + instrumental: requires only style and title
+        if (!params.style) {
+          throw new SunoAPIError("style is required in Custom Mode", 400)
+        }
+        if (!params.title) {
+          throw new SunoAPIError("title is required in Custom Mode", 400)
+        }
+      }
+    } else {
+      // NON-CUSTOM MODE validation
+      // Always requires prompt (used as idea, lyrics auto-generated)
+      if (!params.prompt) {
+        throw new SunoAPIError("prompt is required in Non-custom Mode", 400)
+      }
+      // Validate max 500 characters for non-custom mode
+      if (params.prompt.length > 500) {
+        throw new SunoAPIError("Prompt in Non-custom Mode exceeds maximum of 500 characters", 413)
+      }
     }
 
-    // Validate optional range parameters
+    // Validate prompt length for Custom Mode (model-specific limits)
+    if (params.customMode && params.prompt) {
+      const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
+      const maxLength = isV3OrV4 ? 3000 : 5000
+      if (params.prompt.length > maxLength) {
+        throw new SunoAPIError(
+          `Prompt exceeds maximum character limit of ${maxLength} for ${params.model}`,
+          413,
+        )
+      }
+    }
+
+    // Validate style length (model-specific limits)
+    if (params.style) {
+      const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
+      const maxLength = isV3OrV4 ? 200 : 1000
+      if (params.style.length > maxLength) {
+        throw new SunoAPIError(`Style exceeds maximum character limit of ${maxLength} for ${params.model}`, 413)
+      }
+    }
+
+    // Validate title length (max 80 characters)
+    if (params.title && params.title.length > 80) {
+      throw new SunoAPIError("Title exceeds maximum character limit of 80 characters", 413)
+    }
+
+    // Validate optional range parameters (0-1)
     if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
       throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
     }
@@ -415,16 +470,6 @@ export class SunoAPIClient {
 
     if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
-    }
-
-    // Validate prompt length (max 3000 characters when provided)
-    if (params.prompt && params.prompt.length > 3000) {
-      throw new SunoAPIError("Prompt exceeds maximum character limit of 3000 characters", 413)
-    }
-
-    // Validate gpt_description_prompt length (max 200 characters when provided)
-    if (params.gpt_description_prompt && params.gpt_description_prompt.length > 200) {
-      throw new SunoAPIError("Description prompt exceeds maximum character limit of 200 characters", 413)
     }
 
     return this.request("/generate", {
