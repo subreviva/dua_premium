@@ -1060,13 +1060,11 @@ export class SunoAPIClient {
   }
 
   async uploadAndExtend(params: UploadAndExtendParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // uploadUrl is ALWAYS required (audio file URL, max 2 minutes)
     if (!params.uploadUrl) {
       throw new SunoAPIError("uploadUrl is required", 400)
-    }
-
-    if (params.defaultParamFlag === undefined) {
-      throw new SunoAPIError("defaultParamFlag is required", 400)
     }
 
     // Validate URL format
@@ -1076,7 +1074,62 @@ export class SunoAPIClient {
       throw new SunoAPIError("uploadUrl must be a valid URL", 400)
     }
 
-    // Validate optional range parameters
+    if (params.defaultParamFlag) {
+      // CUSTOM PARAMETER MODE: requires style, title, continueAt
+      // + prompt if instrumental is false
+      if (!params.style) {
+        throw new SunoAPIError("style is required when defaultParamFlag is true", 400)
+      }
+      if (!params.title) {
+        throw new SunoAPIError("title is required when defaultParamFlag is true", 400)
+      }
+      if (params.continueAt === undefined) {
+        throw new SunoAPIError("continueAt is required when defaultParamFlag is true", 400)
+      }
+
+      // Validate continueAt range (must be > 0 and < audio duration)
+      if (params.continueAt <= 0) {
+        throw new SunoAPIError("continueAt must be greater than 0", 400)
+      }
+
+      // If NOT instrumental, prompt is required (used as exact lyrics)
+      if (params.instrumental === false && !params.prompt) {
+        throw new SunoAPIError("prompt is required when defaultParamFlag is true and instrumental is false", 400)
+      }
+
+      // Validate prompt length for custom mode (model-specific limits)
+      if (params.prompt) {
+        const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
+        const maxLength = isV3OrV4 ? 3000 : 5000
+        if (params.prompt.length > maxLength) {
+          throw new SunoAPIError(
+            `Prompt exceeds maximum character limit of ${maxLength} for ${params.model}`,
+            413,
+          )
+        }
+      }
+
+      // Validate style length (model-specific limits)
+      if (params.style) {
+        const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
+        const maxLength = isV3OrV4 ? 200 : 1000
+        if (params.style.length > maxLength) {
+          throw new SunoAPIError(`Style exceeds maximum character limit of ${maxLength} for ${params.model}`, 413)
+        }
+      }
+
+      // Validate title length (model-specific limits)
+      if (params.title) {
+        const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
+        const maxLength = isV3OrV4 ? 80 : 100
+        if (params.title.length > maxLength) {
+          throw new SunoAPIError(`Title exceeds maximum character limit of ${maxLength} for ${params.model}`, 413)
+        }
+      }
+    }
+    // When defaultParamFlag is false: only uploadUrl is required
+
+    // Validate optional range parameters (0-1)
     if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
       throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
     }
@@ -1090,11 +1143,6 @@ export class SunoAPIClient {
 
     if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
-    }
-
-    // Validate continueAt parameter (must be positive if provided)
-    if (params.continueAt !== undefined && params.continueAt < 0) {
-      throw new SunoAPIError("continueAt must be non-negative", 400)
     }
 
     return this.request("/upload/extend", {
@@ -1124,19 +1172,19 @@ export interface UploadAndCoverParams {
 export interface UploadAndExtendParams {
   uploadUrl: string
   defaultParamFlag: boolean
+  model: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  callBackUrl: string
   instrumental?: boolean
   prompt?: string
   style?: string
   title?: string
   continueAt?: number
   personaId?: string
-  model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
   negativeTags?: string
-  vocalGender?: "m" | "f"
-  styleWeight?: number // 0-1
-  weirdnessConstraint?: number // 0-1
-  audioWeight?: number // 0-1
-  callBackUrl?: string
+  vocalGender?: "male" | "female" | "mixed"
+  styleWeight?: number
+  weirdnessConstraint?: number
+  audioWeight?: number
 }
 
 export interface AddInstrumentalParams {
