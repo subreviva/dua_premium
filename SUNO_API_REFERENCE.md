@@ -61,14 +61,52 @@ Complete implementation of Suno API v1, fully aligned with [official documentati
 
 ---
 
-### 4. Check Status
+### 4. Upload & Extend
+**POST** `/api/music/upload-extend`
+
+#### Required Fields
+- `upload_url` (string, max 2min audio)
+- `default_param_flag` (boolean)
+- `model` (string)
+- `callBackUrl` (string)
+
+#### Required if `default_param_flag=true`
+- `style`, `title`, `continue_at` (number)
+- `prompt` (required if `instrumental=false`)
+
+#### Optional Fields
+- `instrumental`, `persona_id`, `negative_tags`, `vocal_gender`
+- `style_weight`, `weirdness_constraint`, `audio_weight`
+
+---
+
+### 5. Add Instrumental
+**POST** `/api/music/add-instrumental`
+
+Generate musical accompaniment for vocals/melody.
+
+#### Required Fields
+- `upload_url` (string, vocal/melody audio)
+- `title` (string)
+- `tags` (string - desired style)
+- `negative_tags` (string - styles to exclude)
+- `model` (V4_5PLUS|V5, default: V4_5PLUS)
+- `callBackUrl` (string)
+
+#### Optional Fields
+- `vocal_gender` (m|f)
+- `style_weight`, `weirdness_constraint`, `audio_weight` (0-1)
+
+---
+
+### 6. Check Status
 **GET** `/api/music/status?ids=task1,task2`
 
 Poll task status with comma-separated IDs.
 
 ---
 
-### 5. Get Credits
+### 7. Get Credits
 **GET** `/api/music/credits`
 
 Check remaining API credits.
@@ -147,6 +185,8 @@ All endpoints: **100% Complete**
 - Music Generation ✅
 - Music Extension ✅
 - Upload & Cover ✅
+- Upload & Extend ✅
+- Add Instrumental ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
