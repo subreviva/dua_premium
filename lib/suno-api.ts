@@ -1,5 +1,6 @@
-// Suno API Client - Complete implementation based on official documentation
-// https://docs.sunoapi.org/
+// AI Music API Client - Complete implementation based on official documentation
+// https://aimusicapi.ai/ (formerly sunoapi.org)
+// API Key Dashboard: https://aimusicapi.ai/dashboard/apikey
 
 export interface SunoConfig {
   apiKey: string
@@ -380,7 +381,7 @@ export class SunoAPIClient {
 
   constructor(config: SunoConfig) {
     this.apiKey = config.apiKey
-    this.baseUrl = config.baseUrl || "https://api.sunoapi.org/api/v1"
+    this.baseUrl = config.baseUrl || "https://api.aimusicapi.ai/api/v1"
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
