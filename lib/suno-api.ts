@@ -1,6 +1,14 @@
-// AI Music API Client - Complete implementation based on official documentation
-// https://aimusicapi.ai/ (formerly sunoapi.org)
-// API Key Dashboard: https://aimusicapi.ai/dashboard/apikey
+/**
+ * Suno API Client - Official Implementation
+ * 
+ * Base URL: https://api.aimusicapi.ai/api/v1
+ * Alternative: https://api.sunoapi.com/api/v1
+ * Documentation: https://docs.sunoapi.com/create-suno-music
+ * Dashboard: https://aimusicapi.ai/dashboard
+ * API Keys: https://aimusicapi.ai/dashboard/apikey
+ * 
+ * @see SUNO_API_OFFICIAL_DOCS.md for complete field reference
+ */
 
 import { ApiValidator, AiMusicApiError } from "./ai-music-api-errors"
 import type { WebhookConfig } from "./ai-music-api-webhooks"
@@ -10,57 +18,192 @@ export interface SunoConfig {
   baseUrl?: string
 }
 
-// Music Generation (Updated with latest documentation)
+/**
+ * Music Generation Parameters (Official API Specification)
+ * 
+ * KEY FIELD USAGE:
+ * 1. Custom Mode (custom_mode = true):
+ *    - Customize song's title, style, and lyrics via: title, tags, prompt
+ *    - With auto_lyrics = true: Auto-generate lyrics from prompt description
+ * 
+ * 2. Non-Custom Mode (custom_mode = false):
+ *    - Only need gpt_description_prompt to describe the music
+ * 
+ * 3. Instrumental Control:
+ *    - Use make_instrumental to generate instrumental-only music
+ * 
+ * @see https://docs.sunoapi.com/create-suno-music
+ */
 export interface GenerateMusicParams extends WebhookConfig {
-  // Core fields
-  custom_mode: boolean // Required
-  mv: "chirp-v3-5" | "chirp-v4" | "chirp-v4-5" | "chirp-v4-5-plus" | "chirp-v5" // Required
+  // ============= REQUIRED FIELDS =============
   
-  // Custom mode fields (required if custom_mode = true)
-  prompt?: string // Lyrics - max 3000 (v4 and below) or 5000 (v4.5+) characters
-  title?: string // Max 120 characters
-  tags?: string // Style/genre - max 200 (v4 and below) or 1000 (v4.5+) characters
+  /** 
+   * Boolean switch for enabling custom mode
+   * - true: Control title, style, and lyrics (via title, tags, prompt)
+   * - false: Only need gpt_description_prompt
+   */
+  custom_mode: boolean
   
-  // Non-custom mode field (required if custom_mode = false)
-  gpt_description_prompt?: string // Max 400 characters
+  /** 
+   * Model version for generation
+   * Recommended: chirp-v5 (8 min duration, best quality)
+   */
+  mv: "chirp-v3-5" | "chirp-v4" | "chirp-v4-5" | "chirp-v4-5-plus" | "chirp-v5"
   
-  // Optional fields
+  // ============= CUSTOM MODE FIELDS (custom_mode = true) =============
+  
+  /** 
+   * Song lyrics (Required if custom_mode = true and not using auto_lyrics)
+   * Max length: 
+   * - v4 and below: 3000 characters
+   * - v4.5+, v4.5-plus, v5: 5000 characters
+   */
+  prompt?: string
+  
+  /** 
+   * Song title
+   * Max length: 80 characters (120 in some endpoints)
+   */
+  title?: string
+  
+  /** 
+   * Song's style or genre
+   * Max length:
+   * - v4 and below: 200 characters
+   * - v4.5+, v4.5-plus, v5: 1000 characters
+   */
+  tags?: string
+  
+  // ============= NON-CUSTOM MODE FIELD (custom_mode = false) =============
+  
+  /** 
+   * Description of the song (Required if custom_mode = false)
+   * Max length: 400 characters
+   */
+  gpt_description_prompt?: string
+  
+  // ============= OPTIONAL FIELDS (ALL MODES) =============
+  
+  /** Generate instrumental-only music */
   make_instrumental?: boolean
-  negative_tags?: string
-  style_weight?: number // 0-1
-  weirdness_constraint?: number // 0-1
-  vocal_gender?: "f" | "m" // Female/Male - supported by v4.5, v4.5+, v5
-  auto_lyrics?: boolean // Auto generate lyrics and style (must use with custom_mode: true)
-  persona_id?: string // Required if task_type = persona_music
   
-  // Legacy compatibility (will be mapped internally)
-  customMode?: boolean // Maps to custom_mode
-  instrumental?: boolean // Maps to make_instrumental
-  model?: string // Maps to mv
-  style?: string // Maps to tags
-  negativeTags?: string // Maps to negative_tags
-  vocalGender?: "m" | "f" // Maps to vocal_gender
-  styleWeight?: number // Maps to style_weight
-  weirdnessConstraint?: number // Maps to weirdness_constraint
-  callBackUrl?: string // Maps to webhook_url
+  /** Elements to avoid in your songs */
+  negative_tags?: string
+  
+  /** Weight of the tags field (style). Range: 0-1 */
+  style_weight?: number
+  
+  /** Randomness or weirdness of the song. Range: 0-1 */
+  weirdness_constraint?: number
+  
+  /** 
+   * Control vocal gender: "f" (Female) or "m" (Male)
+   * Support: chirp-v4-5, chirp-v4-5-plus, chirp-v5
+   */
+  vocal_gender?: "f" | "m"
+  
+  /** 
+   * Auto generate lyrics and style
+   * Must be used with custom_mode: true
+   */
+  auto_lyrics?: boolean
+  
+  /** 
+   * ID of a persona created via "create persona" API
+   * Required if task_type = persona_music
+   */
+  persona_id?: string
+  
+  // ============= LEGACY COMPATIBILITY (DEPRECATED) =============
+  // These fields are kept for backward compatibility and will be mapped internally
+  
+  /** @deprecated Use custom_mode instead */
+  customMode?: boolean
+  /** @deprecated Use make_instrumental instead */
+  instrumental?: boolean
+  /** @deprecated Use mv instead */
+  model?: string
+  /** @deprecated Use tags instead */
+  style?: string
+  /** @deprecated Use negative_tags instead */
+  negativeTags?: string
+  /** @deprecated Use vocal_gender instead */
+  vocalGender?: "m" | "f"
+  /** @deprecated Use style_weight instead */
+  styleWeight?: number
+  /** @deprecated Use weirdness_constraint instead */
+  weirdnessConstraint?: number
+  /** @deprecated Use webhook_url instead */
+  callBackUrl?: string
 }
 
-// Extend Music
+/**
+ * Extend Music Parameters (Official API Specification)
+ * 
+ * Use the clip id of the song generated on the platform to extend the song
+ * 
+ * REQUIRED FIELDS:
+ * - task_type: "extend_music"
+ * - custom_mode: true (always required for extend)
+ * - prompt: Song lyrics
+ * - continue_clip_id: Clip ID of song to extend
+ * - continue_at: Starting number of seconds to extend
+ * - mv: Model version
+ * 
+ * @see https://docs.sunoapi.com/create-suno-music
+ */
 export interface ExtendMusicParams {
+  /** Clip ID of the song to be extended (REQUIRED) */
   audioId: string
+  
+  /** Custom parameters flag */
   defaultParamFlag?: boolean
+  
+  /** 
+   * Song lyrics (REQUIRED when defaultParamFlag = true)
+   * Max length: 
+   * - v4 and below: 3000 characters
+   * - v4.5+: 5000 characters
+   */
   prompt?: string
+  
+  /** 
+   * Song's style or genre (REQUIRED when defaultParamFlag = true)
+   * Max length:
+   * - v4 and below: 200 characters
+   * - v4.5+: 1000 characters
+   */
   style?: string
+  
+  /** Song title (REQUIRED when defaultParamFlag = true) */
   title?: string
+  
+  /** Starting number of seconds to extend (REQUIRED when defaultParamFlag = true) */
   continueAt?: number
+  
+  /** Persona ID (optional) */
   personaId?: string
+  
+  /** Model version */
   model?: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+  
+  /** Elements to avoid in your songs */
   negativeTags?: string
+  
+  /** Control vocal gender: "f" (Female) or "m" (Male) */
   vocalGender?: "m" | "f"
-  styleWeight?: number // 0-1
-  weirdnessConstraint?: number // 0-1
-  audioWeight?: number // 0-1
-  callBackUrl?: string // Optional - will be auto-generated by API route if not provided
+  
+  /** Weight of the tags field (style). Range: 0-1 */
+  styleWeight?: number
+  
+  /** Randomness or weirdness of the song. Range: 0-1 */
+  weirdnessConstraint?: number
+  
+  /** Audio weight. Range: 0-1 */
+  audioWeight?: number
+  
+  /** Webhook callback URL (will be auto-generated if not provided) */
+  callBackUrl?: string
 }
 
 // Generate Lyrics
