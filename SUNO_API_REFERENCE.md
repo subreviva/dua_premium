@@ -199,6 +199,63 @@ Usually generates 2 different style cover images.
 
 ---
 
+### 12. Replace Music Section
+**POST** `/api/music/replace-section`
+
+Replace a specific time segment within existing music.
+
+#### Required Fields
+- `taskId` (string - original task ID)
+- `musicIndex` (integer - song index, 0 or 1)
+- `prompt` (string - replacement content description)
+- `tags` (string - music style)
+- `title` (string)
+- `infillStartS` (number - start time in seconds)
+- `infillEndS` (number - end time in seconds, must be > infillStartS)
+
+#### Optional Fields
+- `negativeTags` (string - styles to avoid)
+- `callBackUrl` (string)
+
+#### Notes
+Time range defined by infillStartS and infillEndS. Replacement blends seamlessly with existing audio.
+
+---
+
+### 13. Get Cover Details
+**GET** `/api/music/cover-details?taskId=xxx`
+
+Get detailed information about cover generation tasks.
+
+#### Query Parameters
+- `taskId` (string - cover generation task ID)
+
+#### Response
+- `successFlag` - 0=pending, 1=success, 2=generating, 3=failed
+- `response.images[]` - Array of generated cover image URLs
+- Usually 2 different style covers
+
+---
+
+### 14. Generate Persona
+**POST** `/api/music/generate-persona`
+
+Create a personalized music Persona with unique identity.
+
+#### Required Fields
+- `taskId` (string - from any generation endpoint)
+- `musicIndex` (integer - track index, 0 or 1)
+- `name` (string - Persona name)
+- `description` (string - detailed characteristics)
+
+#### Response
+Returns `personaId` to use in subsequent generation requests for similar style.
+
+#### Usage
+Use personaId in Generate, Extend, Upload-Cover, or Upload-Extend endpoints.
+
+---
+
 ## 🔔 Callbacks
 
 Format:
@@ -277,6 +334,9 @@ All endpoints: **100% Complete**
 - Timestamped Lyrics ✅
 - Boost Style ✅
 - Generate Cover ✅
+- Replace Section ✅
+- Cover Details ✅
+- Generate Persona ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
