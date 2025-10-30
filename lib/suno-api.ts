@@ -140,7 +140,26 @@ export async function generateMusic(params: {
   callBackUrl: string // REQUIRED by Suno API
   negativeTags?: string
 }): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/generate', params)
+  // Map camelCase to snake_case for API
+  const apiParams = {
+    prompt: params.prompt,
+    style: params.style,
+    title: params.title,
+    custom_mode: params.customMode,
+    instrumental: params.instrumental,
+    model: params.model,
+    callback_url: params.callBackUrl, // Try snake_case
+    negative_tags: params.negativeTags,
+  }
+  
+  // Remove undefined values
+  Object.keys(apiParams).forEach(key => {
+    if (apiParams[key as keyof typeof apiParams] === undefined) {
+      delete apiParams[key as keyof typeof apiParams]
+    }
+  })
+  
+  return postSunoAPI<SunoTaskResponse>('/generate', apiParams)
 }
 
 export async function extendMusic(params: {
@@ -153,7 +172,26 @@ export async function extendMusic(params: {
   model: string
   callBackUrl: string // REQUIRED by Suno API
 }): Promise<SunoTaskResponse> {
-  return postSunoAPI<SunoTaskResponse>('/generate/extend', params)
+  // Map camelCase to snake_case for API
+  const apiParams = {
+    audio_id: params.audioId,
+    prompt: params.prompt,
+    style: params.style,
+    title: params.title,
+    continue_at: params.continueAt,
+    default_param_flag: params.defaultParamFlag,
+    model: params.model,
+    callback_url: params.callBackUrl, // Try snake_case
+  }
+  
+  // Remove undefined values
+  Object.keys(apiParams).forEach(key => {
+    if (apiParams[key as keyof typeof apiParams] === undefined) {
+      delete apiParams[key as keyof typeof apiParams]
+    }
+  })
+  
+  return postSunoAPI<SunoTaskResponse>('/generate/extend', apiParams)
 }
 
 export async function generateLyrics(params: {
