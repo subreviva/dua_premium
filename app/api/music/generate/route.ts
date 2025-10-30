@@ -55,16 +55,20 @@ export async function POST(request: Request) {
     // Build official request body with required callBackUrl
     const callBackUrl = `${new URL(request.url).origin}/api/music/callback`
     
-    const payload = {
+    const payload: any = {
       prompt: is_custom ? (lyrics || prompt) : prompt,
-      style: tags || undefined,
-      title: title || undefined,
       customMode: !!is_custom,
       instrumental: !!instrumental,
       model: mapModel(model),
-      negativeTags: negative_tags || undefined,
       callBackUrl, // REQUIRED by Suno API
     }
+
+    // Only add optional fields if they have values
+    if (tags) payload.style = tags
+    if (title) payload.title = title
+    if (negative_tags) payload.negativeTags = negative_tags
+
+    console.log('[Music Generate] Payload:', JSON.stringify(payload, null, 2))
 
     const result = await generateMusic(payload)
 

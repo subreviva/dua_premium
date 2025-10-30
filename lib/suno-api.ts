@@ -79,6 +79,13 @@ async function postSunoAPI<T>(endpoint: string, body: object): Promise<T> {
   if (!SUNO_API_KEY) {
     throw new Error('Missing SUNO_API_KEY environment variable')
   }
+
+  console.log('[Suno API] POST request:', {
+    endpoint,
+    url: `${SUNO_API_URL}${endpoint}`,
+    body: JSON.stringify(body, null, 2)
+  })
+
   const response = await fetch(`${SUNO_API_URL}${endpoint}`, {
     method: 'POST',
     headers: {
@@ -88,12 +95,20 @@ async function postSunoAPI<T>(endpoint: string, body: object): Promise<T> {
     body: JSON.stringify(body),
   })
 
+  const responseData = await response.json()
+  
+  console.log('[Suno API] Response:', {
+    status: response.status,
+    ok: response.ok,
+    data: responseData
+  })
+
   if (!response.ok) {
-    const errorText = await response.text()
+    const errorText = JSON.stringify(responseData)
     throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`)
   }
 
-  return response.json()
+  return responseData
 }
 
 async function getSunoAPI<T>(endpoint: string): Promise<T> {
