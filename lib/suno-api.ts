@@ -1122,13 +1122,18 @@ export class SunoAPIClient {
   }
 
   async uploadFileUrl(params: UrlUploadParams): Promise<ApiResponse<FileUploadResult>> {
-    // Validate required parameters
-    if (!params.fileUrl) {
+    // Validate required parameters individually
+    if (!params.fileUrl || params.fileUrl.trim() === "") {
       throw new SunoAPIError("fileUrl is required", 400)
     }
 
-    if (!params.uploadPath) {
+    if (!params.uploadPath || params.uploadPath.trim() === "") {
       throw new SunoAPIError("uploadPath is required", 400)
+    }
+
+    // Validate uploadPath format (no leading/trailing slashes)
+    if (params.uploadPath.startsWith("/") || params.uploadPath.endsWith("/")) {
+      throw new SunoAPIError("uploadPath must not have leading or trailing slashes", 400)
     }
 
     // Validate URL format
