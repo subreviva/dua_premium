@@ -133,6 +133,72 @@ Check remaining API credits.
 
 ---
 
+### 9. Get Timestamped Lyrics
+**POST** `/api/music/timestamped-lyrics`
+
+Retrieve timestamped lyrics for synchronized display during playback.
+
+#### Required Fields
+- `taskId` (string - music generation task ID)
+
+#### Optional Fields
+- `audioId` (string - specific audio ID, takes priority)
+- `musicIndex` (0|1 - track index if audioId not provided)
+
+#### Response
+- `alignedWords[]` - Word-level timing info
+- `waveformData[]` - For audio visualization
+- `hootCer` - Alignment accuracy score
+- `isStreamed` - Streaming audio flag
+
+---
+
+### 10. Boost Music Style
+**POST** `/api/music/boost-style`
+
+Generate enhanced style descriptions from simple inputs using AI.
+
+#### Required Fields
+- `content` (string - concise style description, max 500 chars)
+
+#### Response
+- `result` - Enhanced style description
+- `creditsConsumed`, `creditsRemaining`
+- `successFlag` - 0=pending, 1=success, 2=failed
+
+#### Example
+Input: "Pop, Mysterious"  
+Output: "Upbeat pop with enigmatic melodies, layered synths, and haunting vocals..."
+
+---
+
+### 11. Generate Music Cover
+**POST** `/api/music/generate-cover`
+
+Create personalized cover images for generated music.
+
+#### Required Fields
+- `taskId` (string - original music task ID)
+- `callBackUrl` (string - callback for completion)
+
+#### Response
+Returns new `taskId` for cover generation.
+
+#### Callback Format
+```json
+{
+  "code": 200,
+  "data": {
+    "taskId": "...",
+    "images": ["url1.png", "url2.png"]
+  }
+}
+```
+
+Usually generates 2 different style cover images.
+
+---
+
 ## 🔔 Callbacks
 
 Format:
@@ -208,6 +274,9 @@ All endpoints: **100% Complete**
 - Upload & Extend ✅
 - Add Instrumental ✅
 - Add Vocals ✅
+- Timestamped Lyrics ✅
+- Boost Style ✅
+- Generate Cover ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
