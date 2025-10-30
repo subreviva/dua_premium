@@ -340,6 +340,91 @@ Poll every 30 seconds until status becomes `SUCCESS` or a failure state.
 
 ---
 
+### 17. Convert to WAV Format
+**POST** `/api/music/convert-wav`
+
+Convert existing music tracks to high-quality WAV format.
+
+#### Required Fields
+- `taskId` (string - music generation task ID)
+- `audioId` (string - specific track ID to convert)
+- `callBackUrl` (string - URL to receive completion notification)
+
+#### Features
+- High-quality lossless WAV format
+- Uncompressed audio (5-10x larger than MP3)
+- Suitable for professional audio production
+- Callback notification when conversion completes
+
+#### Response
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "taskId": "988e****c8d3"
+  }
+}
+```
+
+#### Callback Format (Success)
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "audioWavUrl": "https://example.com/s/04e6****e727.wav",
+    "task_id": "988e****c8d3"
+  }
+}
+```
+
+#### Notes
+- WAV files are significantly larger than MP3
+- Download URLs may have time limits
+- Ensure adequate storage space
+
+---
+
+### 18. Get WAV Conversion Details
+**GET** `/api/music/wav-details?taskId={taskId}`
+
+Retrieve detailed information about a WAV conversion task.
+
+#### Query Parameters
+- `taskId` (string, required) - Task ID from Convert to WAV
+
+#### Status Values
+- `PENDING` - Conversion in progress
+- `SUCCESS` - Conversion completed successfully
+- `CREATE_TASK_FAILED` - Failed to create task
+- `GENERATE_WAV_FAILED` - Conversion failed
+- `CALLBACK_EXCEPTION` - Callback error
+
+#### Response Format
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "taskId": "988e****c8d3",
+    "musicId": "8551****662c",
+    "callbackUrl": "https://api.example.com/callback",
+    "completeTime": "2025-01-01 00:10:00",
+    "response": {
+      "audioWavUrl": "https://example.com/s/04e6****e727.wav"
+    },
+    "successFlag": "SUCCESS",
+    "createTime": "2025-01-01 00:00:00"
+  }
+}
+```
+
+#### Polling Recommendation
+Poll every 30 seconds until successFlag becomes `SUCCESS` or a failure state.
+
+---
+
 ## 🔔 Callbacks
 
 Format:
@@ -423,11 +508,13 @@ All endpoints: **100% Complete**
 - Generate Persona ✅
 - Generate Lyrics ✅
 - Get Lyrics Details ✅
+- Convert to WAV ✅
+- Get WAV Details ✅
 - Status Polling ✅
 - Callbacks ✅
 - All Models ✅
 
-**Total**: 17 API features (16 endpoints + callbacks)
+**Total**: 19 API features (18 endpoints + callbacks)
 
 ---
 
