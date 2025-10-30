@@ -1,5 +1,19 @@
 # Suno Clone Setup Instructions
 
+## Prerequisites
+
+- **Node.js**: Version >= 18 (required for MCP server and development)
+- **npm** or **pnpm**: Package manager
+
+Check your Node.js version:
+```bash
+node --version
+```
+
+If needed, install/update from [nodejs.org](https://nodejs.org/)
+
+---
+
 ## Environment Variables
 
 To use the Suno API integration, you need to add your API key as an environment variable:
@@ -30,3 +44,28 @@ This implementation includes all Suno API features:
 - Audio processing (WAV conversion, vocal separation)
 - Music video generation
 - Credits management
+
+---
+
+## Optional: MCP Setup (Model Context Protocol)
+
+Want to access AI Music API documentation directly in your IDE?
+
+**MCP** allows you to query API endpoints, schemas, parameters, and examples using `@AI Music API` in:
+- GitHub Copilot (VS Code)
+- Claude Desktop
+
+### Quick Setup (2 minutes)
+
+Follow the detailed guide: **[MCP_QUICK_START.md](./MCP_QUICK_START.md)**
+
+**What you get:**
+- Instant API documentation access
+- Query endpoints: `@AI Music API list all endpoints`
+- Get examples: `@AI Music API curl example for v5 model`
+- Check schemas: `@AI Music API response schema for /status`
+- Debug help: `@AI Music API what error codes can /generate return`
+
+**Requirements:**
+- Node.js >= 18
+- GitHub Copilot or Claude Desktop
