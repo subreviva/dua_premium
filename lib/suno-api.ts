@@ -876,9 +876,9 @@ export class SunoAPIClient {
 
   // Music Generation APIs
   async generateMusic(params: GenerateMusicParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate based on official documentation at https://docs.sunoapi.org/
+    // Validate based on official OpenAPI specification
     
-    if (params.customMode) {
+    if (params.custom_mode) {
       // CUSTOM MODE validation
       // If gpt_description_prompt is provided, it auto-generates everything (style, title, lyrics)
       // Otherwise, requires manual inputs
@@ -886,29 +886,29 @@ export class SunoAPIClient {
       if (!params.gpt_description_prompt) {
         // Manual mode: need explicit inputs
         
-        if (params.instrumental === false) {
-          // Custom Mode + NOT instrumental: requires style, title, AND prompt (as exact lyrics)
-          if (!params.style) {
-            throw new SunoAPIError("style is required in Custom Mode (or use gpt_description_prompt)", 400)
+        if (params.make_instrumental === false) {
+          // Custom Mode + NOT instrumental: requires tags, title, AND prompt (as exact lyrics)
+          if (!params.tags) {
+            throw new SunoAPIError("tags is required in Custom Mode (or use gpt_description_prompt)", 400)
           }
           if (!params.title) {
             throw new SunoAPIError("title is required in Custom Mode (or use gpt_description_prompt)", 400)
           }
           if (!params.prompt) {
-            throw new SunoAPIError("prompt (lyrics) is required in Custom Mode when instrumental is false", 400)
+            throw new SunoAPIError("prompt (lyrics) is required in Custom Mode when make_instrumental is false", 400)
           }
-        } else if (params.instrumental === true) {
-          // Custom Mode + instrumental: requires only style and title
-          if (!params.style) {
-            throw new SunoAPIError("style is required in Custom Mode (or use gpt_description_prompt)", 400)
+        } else if (params.make_instrumental === true) {
+          // Custom Mode + instrumental: requires only tags and title
+          if (!params.tags) {
+            throw new SunoAPIError("tags is required in Custom Mode (or use gpt_description_prompt)", 400)
           }
           if (!params.title) {
             throw new SunoAPIError("title is required in Custom Mode (or use gpt_description_prompt)", 400)
           }
         } else {
-          // instrumental is undefined - treat as auto-mode, requires at least description
-          if (!params.style && !params.title && !params.prompt) {
-            throw new SunoAPIError("Custom Mode requires either gpt_description_prompt, or style+title, or prompt", 400)
+          // make_instrumental is undefined - treat as auto-mode, requires at least description
+          if (!params.tags && !params.title && !params.prompt) {
+            throw new SunoAPIError("Custom Mode requires either gpt_description_prompt, or tags+title, or prompt", 400)
           }
         }
       }
@@ -916,54 +916,54 @@ export class SunoAPIClient {
     } else {
       // NON-CUSTOM MODE validation
       // Always requires prompt (used as idea, lyrics auto-generated)
-      if (!params.prompt) {
-        throw new SunoAPIError("prompt is required in Non-custom Mode", 400)
+      if (!params.prompt && !params.gpt_description_prompt) {
+        throw new SunoAPIError("gpt_description_prompt is required in Non-custom Mode", 400)
       }
-      // Validate max 500 characters for non-custom mode
-      if (params.prompt.length > 500) {
-        throw new SunoAPIError("Prompt in Non-custom Mode exceeds maximum of 500 characters", 413)
+      // Validate max 400 characters for non-custom mode description
+      if (params.gpt_description_prompt && params.gpt_description_prompt.length > 400) {
+        throw new SunoAPIError("gpt_description_prompt in Non-custom Mode exceeds maximum of 400 characters", 413)
       }
     }
 
     // Validate prompt length for Custom Mode (model-specific limits)
-    if (params.customMode && params.prompt) {
-      const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
+    if (params.custom_mode && params.prompt) {
+      const isV3OrV4 = params.mv === "chirp-v3-5" || params.mv === "chirp-v4"
       const maxLength = isV3OrV4 ? 3000 : 5000
       if (params.prompt.length > maxLength) {
         throw new SunoAPIError(
-          `Prompt exceeds maximum character limit of ${maxLength} for ${params.model}`,
+          `Prompt exceeds maximum character limit of ${maxLength} for ${params.mv}`,
           413,
         )
       }
     }
 
-    // Validate style length (model-specific limits)
-    if (params.style) {
-      const isV3OrV4 = params.model === "V3_5" || params.model === "V4"
+    // Validate tags length (model-specific limits)
+    if (params.tags) {
+      const isV3OrV4 = params.mv === "chirp-v3-5" || params.mv === "chirp-v4"
       const maxLength = isV3OrV4 ? 200 : 1000
-      if (params.style.length > maxLength) {
-        throw new SunoAPIError(`Style exceeds maximum character limit of ${maxLength} for ${params.model}`, 413)
+      if (params.tags.length > maxLength) {
+        throw new SunoAPIError(`tags exceeds maximum character limit of ${maxLength} for ${params.mv}`, 413)
       }
     }
 
-    // Validate title length (max 80 characters)
-    if (params.title && params.title.length > 80) {
-      throw new SunoAPIError("Title exceeds maximum character limit of 80 characters", 413)
+    // Validate title length (max 120 characters per OpenAPI spec)
+    if (params.title && params.title.length > 120) {
+      throw new SunoAPIError("title exceeds maximum character limit of 120 characters", 413)
     }
 
     // Validate optional range parameters (0-1)
-    if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
-      throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
+    if (params.style_weight !== undefined && (params.style_weight < 0 || params.style_weight > 1)) {
+      throw new SunoAPIError("style_weight must be between 0 and 1", 400)
     }
 
     if (
-      params.weirdnessConstraint !== undefined &&
-      (params.weirdnessConstraint < 0 || params.weirdnessConstraint > 1)
+      params.weirdness_constraint !== undefined &&
+      (params.weirdness_constraint < 0 || params.weirdness_constraint > 1)
     ) {
-      throw new SunoAPIError("weirdnessConstraint must be between 0 and 1", 400)
+      throw new SunoAPIError("weirdness_constraint must be between 0 and 1", 400)
     }
 
-    return this.request("/generate", {
+    return this.request("/suno/create", {
       method: "POST",
       body: JSON.stringify(params),
     })
@@ -1015,9 +1015,9 @@ export class SunoAPIClient {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
     }
 
-    return this.request("/generate/extend", {
+    return this.request("/suno/create", {
       method: "POST",
-      body: JSON.stringify(params),
+      body: JSON.stringify({ ...params, task_type: "extend_music" }),
     })
   }
 
@@ -1117,12 +1117,13 @@ export class SunoAPIClient {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
     }
 
-    return this.request("/cover", {
+    return this.request("/suno/create", {
       method: "POST",
-      body: JSON.stringify(params),
+      body: JSON.stringify({ ...params, task_type: "cover_music" }),
     })
   }
 
+  // Concat Music API
   /**
    * Concat Music - Get the complete song corresponding to the extend operation
    * @see https://docs.sunoapi.com/create-suno-music
