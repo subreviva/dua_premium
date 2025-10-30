@@ -479,12 +479,36 @@ export class SunoAPIClient {
   }
 
   async extendMusic(params: ExtendMusicParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate required parameters
+    // Validate based on official documentation at https://docs.sunoapi.org/
+    
+    // audioId is ALWAYS required
     if (!params.audioId) {
       throw new SunoAPIError("audioId is required", 400)
     }
 
-    // Validate optional range parameters
+    if (params.defaultParamFlag) {
+      // CUSTOM PARAMETERS MODE: requires continueAt, prompt, style, and title
+      if (params.continueAt === undefined) {
+        throw new SunoAPIError("continueAt is required when defaultParamFlag is true", 400)
+      }
+      if (!params.prompt) {
+        throw new SunoAPIError("prompt is required when defaultParamFlag is true", 400)
+      }
+      if (!params.style) {
+        throw new SunoAPIError("style is required when defaultParamFlag is true", 400)
+      }
+      if (!params.title) {
+        throw new SunoAPIError("title is required when defaultParamFlag is true", 400)
+      }
+
+      // Validate continueAt range (must be > 0 and < audio duration)
+      if (params.continueAt <= 0) {
+        throw new SunoAPIError("continueAt must be greater than 0", 400)
+      }
+    }
+    // When defaultParamFlag is false: only audioId is required (uses original audio parameters)
+
+    // Validate optional range parameters (0-1)
     if (params.styleWeight !== undefined && (params.styleWeight < 0 || params.styleWeight > 1)) {
       throw new SunoAPIError("styleWeight must be between 0 and 1", 400)
     }
@@ -498,11 +522,6 @@ export class SunoAPIClient {
 
     if (params.audioWeight !== undefined && (params.audioWeight < 0 || params.audioWeight > 1)) {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
-    }
-
-    // Validate continueAt parameter (must be positive if provided)
-    if (params.continueAt !== undefined && params.continueAt < 0) {
-      throw new SunoAPIError("continueAt must be non-negative", 400)
     }
 
     return this.request("/generate/extend", {
