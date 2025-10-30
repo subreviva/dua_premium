@@ -197,28 +197,57 @@ export function CreatePanel() {
     
     try {
       const modelMap: Record<string, string> = {
-        "v5-pro-beta": "V5",
-        "v4.5-plus": "V4_5PLUS",
-        "v4.5-pro": "V4_5",
+        "v5 Pro Beta": "V5",
+        "v4.5+ Pro": "V4_5PLUS",
+        "v4.5 Pro": "V4_5",
         "v4.5-all": "V4_5",
-        "v4-pro": "V4",
+        "v4 Pro": "V4",
         "v3.5": "V3_5",
       }
 
-      const params = {
+      // Build params object - only include fields with values
+      const params: any = {
         customMode: mode === "custom",
         instrumental: isInstrumental,
         model: modelMap[selectedVersion] || "V4_5",
-        prompt: mode === "simple" && lyrics ? lyrics : undefined,
-        gpt_description_prompt:
-          mode === "custom" ? songDescription : mode === "simple" && !lyrics ? songDescription : undefined,
-        title: songTitle || undefined,
-        style: styles || undefined,
-        negativeTags: excludeStyles ? styles : undefined,
         vocalGender: vocalGender === "male" ? "m" : "f",
         styleWeight: styleInfluence[0] / 100,
         weirdnessConstraint: weirdness[0] / 100,
       }
+
+      // Add prompt fields based on mode
+      if (mode === "custom") {
+        // Custom mode: use gpt_description_prompt to auto-generate
+        if (songDescription) {
+          params.gpt_description_prompt = songDescription
+        }
+        // Add lyrics if provided
+        if (lyrics) {
+          params.prompt = lyrics
+        }
+        // Add style tags
+        if (styles) {
+          params.style = styles
+        }
+        // Add title if provided
+        if (songTitle) {
+          params.title = songTitle
+        }
+      } else {
+        // Simple mode: use prompt for description OR lyrics
+        if (lyrics) {
+          params.prompt = lyrics
+        } else if (songDescription) {
+          params.gpt_description_prompt = songDescription
+        }
+      }
+
+      // Add negative tags if excluding styles
+      if (excludeStyles && styles) {
+        params.negativeTags = styles
+      }
+
+      console.log('[v0] Generation params:', JSON.stringify(params, null, 2))
 
       if (uploadedAudioUrl) {
         setGenerationStatus("Uploading audio...")
@@ -307,7 +336,16 @@ export function CreatePanel() {
           
           // Save generated songs to localStorage
           const generatedSongs = result.data.response?.data || []
-          generatedSongs.forEach((song: any) => {
+          console.log(`[v0] Saving ${generatedSongs.length} songs to localStorage`)
+          
+          generatedSongs.forEach((song: any, index: number) => {
+            console.log(`[v0] Processing song ${index + 1}:`, {
+              id: song.id,
+              title: song.title,
+              audio_url: song.audio_url,
+              prompt: song.prompt
+            })
+            
             const songData = {
               id: song.id || song.audio_id || Math.random().toString(36).substr(2, 9),
               title: song.title || "Untitled",
@@ -326,8 +364,14 @@ export function CreatePanel() {
               modelName: song.model_name,
               createdAt: new Date().toISOString(),
             }
+            
+            console.log('[v0] Saving song data:', songData)
             saveSongToLocalStorage(songData)
           })
+          
+          console.log('[v0] All songs saved. Triggering storage event.')
+          // Trigger storage event for other tabs/components
+          window.dispatchEvent(new Event('storage'))
           
           // Atualizar créditos
           fetchCredits()
