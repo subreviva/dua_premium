@@ -118,8 +118,11 @@ export interface SeparateVocalsParams {
 
 // Create Music Video
 export interface CreateMusicVideoParams {
+  taskId: string
   audioId: string
   callBackUrl?: string
+  author?: string
+  domainName?: string
 }
 
 // Get Timestamped Lyrics
@@ -179,6 +182,21 @@ export interface CreditsResponse {
   credits: number
   usedCredits?: number
   totalCredits?: number
+}
+
+export interface MusicVideoDetailsResponse {
+  taskId: string
+  musicId: string
+  callbackUrl: string
+  musicIndex: number
+  completeTime?: string
+  response?: {
+    videoUrl: string
+  }
+  successFlag: "PENDING" | "SUCCESS" | "CREATE_TASK_FAILED" | "GENERATE_MP4_FAILED" | "CALLBACK_EXCEPTION"
+  createTime: string
+  errorCode?: number
+  errorMessage?: string
 }
 
 export interface LyricsResult {
@@ -574,14 +592,14 @@ export class SunoAPIClient {
 
   // Video APIs
   async createMusicVideo(params: CreateMusicVideoParams): Promise<ApiResponse<TaskResponse>> {
-    return this.request("/video/create", {
+    return this.request("/mp4/generate", {
       method: "POST",
       body: JSON.stringify(params),
     })
   }
 
-  async getVideoDetails(taskId: string): Promise<ApiResponse<{ videoUrl: string }>> {
-    return this.request(`/video/record-info?taskId=${taskId}`, {
+  async getMusicVideoDetails(taskId: string): Promise<ApiResponse<MusicVideoDetailsResponse>> {
+    return this.request(`/mp4/record-info?taskId=${taskId}`, {
       method: "GET",
     })
   }
@@ -876,6 +894,16 @@ export async function getCoverDetails(taskId: string): Promise<ApiResponse<Cover
 export async function generatePersona(params: GeneratePersonaParams): Promise<ApiResponse<PersonaResponse>> {
   const client = getSunoClient()
   return client.generatePersona(params)
+}
+
+export async function createMusicVideo(params: CreateMusicVideoParams): Promise<ApiResponse<TaskResponse>> {
+  const client = getSunoClient()
+  return client.createMusicVideo(params)
+}
+
+export async function getMusicVideoDetails(taskId: string): Promise<ApiResponse<MusicVideoDetailsResponse>> {
+  const client = getSunoClient()
+  return client.getMusicVideoDetails(taskId)
 }
 
 export const SunoAPI = SunoAPIClient
