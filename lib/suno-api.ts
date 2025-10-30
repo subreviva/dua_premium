@@ -199,6 +199,34 @@ export interface MusicVideoDetailsResponse {
   errorMessage?: string
 }
 
+// File Upload Interfaces
+export interface Base64UploadParams {
+  base64Data: string // Base64 encoded file data or data URL format
+  uploadPath: string // File upload path without leading/trailing slashes
+  fileName?: string // Optional filename with extension
+}
+
+export interface StreamUploadParams {
+  file: File | Blob // File to upload (binary data)
+  uploadPath: string // File upload path without leading/trailing slashes
+  fileName?: string // Optional filename with extension
+}
+
+export interface UrlUploadParams {
+  fileUrl: string // File download URL (HTTP or HTTPS)
+  uploadPath: string // File upload path without leading/trailing slashes
+  fileName?: string // Optional filename with extension
+}
+
+export interface FileUploadResult {
+  fileName: string // File name
+  filePath: string // Complete file path in storage
+  downloadUrl: string // File download URL
+  fileSize: number // File size in bytes
+  mimeType: string // File MIME type
+  uploadedAt: string // Upload timestamp (ISO format)
+}
+
 export interface LyricsResult {
   alignedWords?: Array<{
     word: string
@@ -590,6 +618,35 @@ export class SunoAPIClient {
     })
   }
 
+  // File Upload APIs
+  async uploadFileBase64(params: Base64UploadParams): Promise<ApiResponse<FileUploadResult>> {
+    return this.request("/file-base64-upload", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
+  async uploadFileStream(params: StreamUploadParams): Promise<ApiResponse<FileUploadResult>> {
+    const formData = new FormData()
+    formData.append("file", params.file)
+    formData.append("uploadPath", params.uploadPath)
+    if (params.fileName) {
+      formData.append("fileName", params.fileName)
+    }
+
+    return this.request("/file-stream-upload", {
+      method: "POST",
+      body: formData,
+    })
+  }
+
+  async uploadFileUrl(params: UrlUploadParams): Promise<ApiResponse<FileUploadResult>> {
+    return this.request("/file-url-upload", {
+      method: "POST",
+      body: JSON.stringify(params),
+    })
+  }
+
   // Video APIs
   async createMusicVideo(params: CreateMusicVideoParams): Promise<ApiResponse<TaskResponse>> {
     return this.request("/mp4/generate", {
@@ -904,6 +961,21 @@ export async function createMusicVideo(params: CreateMusicVideoParams): Promise<
 export async function getMusicVideoDetails(taskId: string): Promise<ApiResponse<MusicVideoDetailsResponse>> {
   const client = getSunoClient()
   return client.getMusicVideoDetails(taskId)
+}
+
+export async function uploadFileBase64(params: Base64UploadParams): Promise<ApiResponse<FileUploadResult>> {
+  const client = getSunoClient()
+  return client.uploadFileBase64(params)
+}
+
+export async function uploadFileStream(params: StreamUploadParams): Promise<ApiResponse<FileUploadResult>> {
+  const client = getSunoClient()
+  return client.uploadFileStream(params)
+}
+
+export async function uploadFileUrl(params: UrlUploadParams): Promise<ApiResponse<FileUploadResult>> {
+  const client = getSunoClient()
+  return client.uploadFileUrl(params)
 }
 
 export const SunoAPI = SunoAPIClient
