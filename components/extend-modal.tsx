@@ -24,35 +24,95 @@ export function ExtendModal({ onClose, song }: ExtendModalProps) {
   const handleExtend = async () => {
     setIsExtending(true)
     try {
-      const response = await fetch("/api/suno/extend", {
+      // Parse continue_at from "03:14.0" to seconds
+      const [minutes, seconds] = extendFrom.split(":")
+      const continueAtSeconds = parseInt(minutes) * 60 + parseFloat(seconds)
+
+      const response = await fetch("/api/suno/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          audioId: song.id,
-          prompt: styles,
-          continueAt: extendFrom,
-          model: "V3_5",
-          lyrics: lyrics || undefined,
+          task_type: "extend_music",
+          custom_mode: true,
+          continue_clip_id: song.id,
+          continue_at: continueAtSeconds,
+          prompt: lyrics || styles,
+          title: song.title ? `${song.title} (Extended)` : undefined,
+          tags: styles,
+          mv: "chirp-v5",
         }),
       })
 
-      const data = await response.json()
-      console.log("[v0] Extend response:", data)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
-      if (data.taskId) {
+      const result = await response.json()
+      console.log("[v0] Extend started:", result)
+
+      if (result.code === 200 && result.data?.taskId) {
+        // Poll for completion
         const pollInterval = setInterval(async () => {
-          const detailsResponse = await fetch(`/api/suno/details/${data.taskId}`)
+          const detailsResponse = await fetch(`/api/suno/details/${result.data.taskId}`)
           const details = await detailsResponse.json()
 
-          if (details.status === "completed") {
+          console.log("[v0] Extend status:", details.data?.status)
+
+          if (details.code === 200 && details.data?.status === "SUCCESS") {
             clearInterval(pollInterval)
-            console.log("[v0] Extended audio ready:", details)
+            console.log("[v0] Extended audio ready:", details.data.response?.data)
+            
+            // Save to localStorage
+            const extendedSongs = details.data.response?.data || []
+            extendedSongs.forEach((extendedSong: any) => {
+              const songData = {
+                id: extendedSong.id || Math.random().toString(36).substr(2, 9),
+                title: extendedSong.title || `${song.title} (Extended)`,
+                version: extendedSong.model_name || "v5",
+                genre: extendedSong.tags || styles,
+                duration: extendedSong.duration ? `${Math.floor(extendedSong.duration / 60)}:${String(extendedSong.duration % 60).padStart(2, '0')}` : "0:00",
+                thumbnail: extendedSong.image_url || song.thumbnail,
+                gradient: song.gradient || "from-purple-600 to-pink-600",
+                audioUrl: extendedSong.audio_url,
+                videoUrl: extendedSong.video_url,
+                imageUrl: extendedSong.image_url,
+                prompt: extendedSong.prompt || lyrics || styles,
+                lyrics: extendedSong.lyric,
+                tags: extendedSong.tags,
+                modelName: extendedSong.model_name,
+                createdAt: new Date().toISOString(),
+              }
+              
+              const stored = localStorage.getItem("suno-songs")
+              const songs = stored ? JSON.parse(stored) : []
+              songs.unshift(songData)
+              localStorage.setItem("suno-songs", JSON.stringify(songs))
+            })
+            
+            window.dispatchEvent(new Event('storage'))
+            onClose()
+          } else if (details.data?.status === "FAILED") {
+            clearInterval(pollInterval)
+            console.error("[v0] Extend failed:", details)
+            alert("Extend failed. Please try again.")
+          }
+        }, 5000)
+
+        // Timeout after 5 minutes
+        setTimeout(() => {
+          clearInterval(pollInterval)
+          if (isExtending) {
+            console.log("[v0] Extend timeout")
+            alert("Extend is taking longer than expected. Check your workspace later.")
             onClose()
           }
-        }, 3000)
+        }, 300000)
+      } else {
+        throw new Error(result.msg || "No taskId received")
       }
     } catch (error) {
       console.error("[v0] Extend error:", error)
+      alert(`Extend failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     } finally {
       setIsExtending(false)
     }
