@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCredits } from '@/lib/suno-api'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const maxDuration = 50
 
 export async function GET(req: Request) {

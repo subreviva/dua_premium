@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { SunoAPIClient } from '@/lib/suno-api'
 import { handleApiError } from '@/lib/api-error-handler'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const maxDuration = 50
 
 export async function POST(req: Request) {

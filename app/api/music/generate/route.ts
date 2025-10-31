@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { generateMusic } from '@/lib/suno-api'
 
-// CRITICAL: Edge Runtime (sem isso = timeout 10s)
-export const runtime = 'edge'
+// CRITICAL: Node.js Runtime (necessário para crypto e melhor compatibilidade)
+export const runtime = 'nodejs'
 
-// CRITICAL: Timeout maior para Edge (default é 25s, aumentamos para 50s)
+// CRITICAL: Timeout maior (default é 10s, aumentamos para 50s)
 export const maxDuration = 50
 
 export async function POST(request: Request) {
