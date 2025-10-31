@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { SunoAPIClient } from '@/lib/suno-api'
+import { handleApiError } from '@/lib/api-error-handler'
 
 export const runtime = 'edge'
 export const maxDuration = 50
@@ -72,25 +73,6 @@ export async function POST(req: Request) {
     })
 
   } catch (error: unknown) {
-    console.error('❌ [Custom] Error:', error)
-    
-    if (error instanceof Error) {
-      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
-        return NextResponse.json({ 
-          success: false, 
-          error: 'Request timeout' 
-        }, { status: 408 })
-      }
-      
-      return NextResponse.json({ 
-        success: false, 
-        error: error.message 
-      }, { status: 500 })
-    }
-    
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Unknown error occurred' 
-    }, { status: 500 })
+    return handleApiError(error, 'Custom')
   }
 }

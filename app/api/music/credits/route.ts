@@ -14,7 +14,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: res.msg || 'Suno API error' }, { status: 500 })
     }
 
-    const creditsLeft = typeof res.data === 'number' ? res.data : 0
+    // Handle both numeric response and object response
+    let creditsLeft = 0
+    if (typeof res.data === 'number') {
+      creditsLeft = res.data
+    } else if (res.data && typeof res.data === 'object' && 'credits_remaining' in res.data) {
+      creditsLeft = (res.data as any).credits_remaining || 0
+    }
 
     // Wrap into legacy shape expected by UI
     const legacy = {
