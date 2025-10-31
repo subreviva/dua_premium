@@ -15,8 +15,8 @@ export function Sidebar({ currentView, onViewChange, selectedWorkspace }: Sideba
     window.open("https://suno.com/pricing", "_blank")
   }
 
-  const handleMoreFromSuno = () => {
-    window.open("https://suno.com", "_blank")
+  const handleMoreFromDuaMusic = () => {
+    window.open("https://duamusic.com", "_blank")
   }
 
   const handleEarnCredits = () => {
@@ -31,7 +31,7 @@ export function Sidebar({ currentView, onViewChange, selectedWorkspace }: Sideba
     <div className="w-[180px] bg-[#0a0a0a] border-r border-neutral-800 flex flex-col">
       {/* Logo */}
       <div className="p-6">
-        <h1 className="text-2xl font-bold tracking-tight">SUNO</h1>
+        <h1 className="text-2xl font-bold tracking-tight">DUA MUSIC</h1>
       </div>
 
       {/* User */}
@@ -139,10 +139,10 @@ export function Sidebar({ currentView, onViewChange, selectedWorkspace }: Sideba
         <Button
           variant="ghost"
           className="w-full justify-start text-neutral-400 hover:text-white text-sm px-2"
-          onClick={handleMoreFromSuno}
+          onClick={handleMoreFromDuaMusic}
         >
           <MoreHorizontal className="mr-2 h-4 w-4" />
-          More from Suno
+          Mais sobre DUA MUSIC
         </Button>
       </div>
     </div>

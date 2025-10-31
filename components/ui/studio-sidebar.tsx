@@ -184,7 +184,7 @@ export function StudioSidebar({
         {/* Tools List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2 premium-scrollbar">
           <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 px-2">
-            Ferramentas Suno API
+            Ferramentas DUA MUSIC
           </div>
           {studioTools.map((tool) => {
             const Icon = tool.icon

@@ -1,6 +1,6 @@
-# Suno AI Music Creation Platform
+# DUA MUSIC - AI Music Creation Platform
 
-A premium AI-powered music creation platform built with Next.js 16 and the Suno API.
+A premium AI-powered music creation platform built with Next.js 16 and powered by advanced AI models.
 
 ## 📚 Quick Links
 
