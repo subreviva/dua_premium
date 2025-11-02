@@ -2,7 +2,8 @@
 import { useState, useCallback } from 'react';
 import { AspectRatio, Color, ImageObject, TrendResult, GroundingChunk, GenerationConfig } from '@/types/designstudio';
 
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+// Aceitar ambas as variáveis para compatibilidade (Vercel pode usar qualquer uma)
+const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || process.env.GOOGLE_API_KEY;
 let ai: any = null;
 let GoogleGenAI: any, Modality: any, Type: any;
 
