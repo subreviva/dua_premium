@@ -6,7 +6,7 @@ import { useGoogleApi } from '@/hooks/useGoogleApi';
 import DesignToolbar from '@/components/designstudio/Toolbar';
 import DesignCanvas from '@/components/designstudio/Canvas';
 import DesignSidePanel from '@/components/designstudio/SidePanel';
-import PremiumNavbar from '@/components/PremiumNavbar';
+import { PremiumNavbar } from '@/components/ui/premium-navbar';
 import { BeamsBackground } from '@/components/ui/beams-background';
 
 export default function DesignStudioPage() {
