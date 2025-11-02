@@ -55,13 +55,25 @@ export const useDuaApi = () => {
       // Melhorar prompt automaticamente para qualidade profissional
       let finalPrompt = prompt;
       
-      // Adicionar instruções para evitar texto indesejado
-      const enhancedPrompt = `${prompt}, photorealistic, high quality, professional photography, no text, no words, no letters, no watermarks`;
+      // Detectar se o usuário quer texto na imagem
+      const wantsText = /\b(text|texto|palavra|letter|escrito|escrita|escrever|com as palavras|com o texto|sign|placa|lettering|typography|font)\b/i.test(prompt);
+      
+      if (wantsText) {
+        // Usuário quer texto - não bloquear
+        console.log('📝 Texto detectado no prompt - permitindo texto na imagem');
+        finalPrompt = `${prompt}, high quality, professional`;
+      } else {
+        // Usuário NÃO pediu texto - bloquear para evitar texto indesejado
+        console.log('🚫 Bloqueando texto indesejado');
+        finalPrompt = `${prompt}, photorealistic, high quality, professional photography, no text, no words, no letters, no watermarks`;
+      }
       
       if (config?.negativePrompt) {
-        finalPrompt = `${enhancedPrompt}. Avoid the following: ${config.negativePrompt}, text, words, letters, typography, captions, watermarks.`;
-      } else {
-        finalPrompt = enhancedPrompt;
+        if (wantsText) {
+          finalPrompt = `${finalPrompt}. Avoid the following: ${config.negativePrompt}.`;
+        } else {
+          finalPrompt = `${finalPrompt}. Avoid the following: ${config.negativePrompt}, text, words, letters, typography, captions, watermarks.`;
+        }
       }
       
       console.log('📝 Prompt final:', finalPrompt);
