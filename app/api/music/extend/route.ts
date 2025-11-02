@@ -1,130 +1,156 @@
-import { NextResponse } from 'next/server'
-import { SunoAPIClient } from '@/lib/suno-api'
+import { NextRequest, NextResponse } from "next/server"
+import { SunoAPIClient } from "@/lib/suno-api-official"
 
-export const runtime = 'nodejs'
-export const maxDuration = 50
-
-export async function POST(req: Request) {
+/**
+ * POST /api/music/extend
+ * 
+ * Extends existing music tracks while maintaining style consistency.
+ * 
+ * ⚠️ OFFICIAL IMPLEMENTATION per Suno_API_MegaDetalhada.txt Section 5
+ * 
+ * Required Parameters:
+ * - audioId: string - ID of track to extend
+ * - defaultParamFlag: boolean - Use custom params (true) or inherit (false)
+ * - model: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"
+ * - callBackUrl: string - HTTPS URL for callbacks
+ * 
+ * Conditional Parameters (if defaultParamFlag: true):
+ * - prompt: string - Description of extension (max 3000 chars)
+ * - style: string - Musical style (max 200 chars)
+ * - title: string - Song title (max 80 chars)
+ * - continueAt: number - Start point in seconds
+ * 
+ * Optional Parameters:
+ * - vocalGender: "m" | "f"
+ * - styleWeight: number (0-1)
+ * - weirdnessConstraint: number (0-1)
+ * - audioWeight: number (0-1)
+ * - personaId: string
+ */
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json()
-    const { 
-      audio_id,       // Legacy field name
-      clip_id,        // New field name (OpenAPI spec)
-      prompt,
-      continue_at,
-      title,
-      tags,
-      negative_tags,
-      model = 'chirp-v5',
-      vocal_gender,
-      style_weight,
-      weirdness_constraint
-    } = body
-
-    // Support both legacy and new field names
-    const continue_clip_id = clip_id || audio_id
-    
-    if (!continue_clip_id || typeof continue_clip_id !== 'string') {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'clip_id (or audio_id) is required' 
-      }, { status: 400 })
-    }
-
-    if (!prompt || typeof prompt !== 'string') {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'prompt is required for extend music' 
-      }, { status: 400 })
-    }
-
-    if (typeof continue_at !== 'number') {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'continue_at (number of seconds) is required' 
-      }, { status: 400 })
-    }
-
+    const body = await request.json()
     const apiKey = process.env.SUNO_API_KEY
+
     if (!apiKey) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'SUNO_API_KEY not configured' 
-      }, { status: 500 })
+      return NextResponse.json(
+        { success: false, error: "SUNO_API_KEY not configured" },
+        { status: 500 }
+      )
     }
 
-    console.log('🎵 [Extend] Request:', { 
-      continue_clip_id, 
-      model, 
-      continue_at,
-      hasPrompt: !!prompt,
-      hasTags: !!tags
-    })
-
-    const callBackUrl = `${new URL(req.url).origin}/api/music/callback`
-
-    // Build payload according to OpenAPI specification
-    const payload: any = {
-      custom_mode: true,           // REQUIRED (always true for extend)
-      prompt,                       // REQUIRED (song lyrics)
-      continue_clip_id,             // REQUIRED (clip ID to extend)
-      continue_at,                  // REQUIRED (starting seconds)
-      mv: model,                    // REQUIRED (model version)
-      webhook_url: callBackUrl,     // Optional webhook
+    // Validate required parameters
+    if (!body.audioId) {
+      return NextResponse.json(
+        { success: false, error: "audioId is required" },
+        { status: 400 }
+      )
     }
 
-    // Add optional fields
-    if (title) payload.title = title
-    if (tags) payload.tags = tags
-    if (negative_tags) payload.negative_tags = negative_tags
-    if (vocal_gender) payload.vocal_gender = vocal_gender
-    if (typeof style_weight === 'number') payload.style_weight = style_weight
-    if (typeof weirdness_constraint === 'number') payload.weirdness_constraint = weirdness_constraint
-
-    console.log('🎵 [Extend] Payload:', JSON.stringify(payload, null, 2))
-
-    const sunoAPI = new SunoAPIClient({ apiKey })
-    const res = await sunoAPI.extendMusic(payload)
-
-    if (!res.data?.taskId) {
-      console.error('❌ [Extend] Suno API error:', res)
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Suno API error' 
-      }, { status: 500 })
+    if (typeof body.defaultParamFlag !== "boolean") {
+      return NextResponse.json(
+        { success: false, error: "defaultParamFlag (boolean) is required" },
+        { status: 400 }
+      )
     }
 
-    const taskId = res.data.taskId
-    console.log('✅ [Extend] Task created:', taskId)
+    if (!body.model) {
+      return NextResponse.json(
+        { success: false, error: "model is required" },
+        { status: 400 }
+      )
+    }
+
+    // Validate conditional parameters if defaultParamFlag: true
+    if (body.defaultParamFlag === true) {
+      if (!body.prompt) {
+        return NextResponse.json(
+          { success: false, error: "prompt is required when defaultParamFlag: true" },
+          { status: 400 }
+        )
+      }
+      if (!body.style) {
+        return NextResponse.json(
+          { success: false, error: "style is required when defaultParamFlag: true" },
+          { status: 400 }
+        )
+      }
+      if (!body.title) {
+        return NextResponse.json(
+          { success: false, error: "title is required when defaultParamFlag: true" },
+          { status: 400 }
+        )
+      }
+      if (typeof body.continueAt !== "number") {
+        return NextResponse.json(
+          { success: false, error: "continueAt (number) is required when defaultParamFlag: true" },
+          { status: 400 }
+        )
+      }
+    }
+
+    const client = new SunoAPIClient({ apiKey })
+
+    // ⚠️ OFFICIAL PARAMETERS per MegaDetalhada.txt Section 5
+    const params: any = {
+      audioId: body.audioId,                  // ✅ camelCase
+      defaultParamFlag: body.defaultParamFlag, // ✅ camelCase
+      model: body.model,
+      callBackUrl: body.callBackUrl || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/music/callback`,
+
+      // Conditional parameters (only if defaultParamFlag: true)
+      ...(body.defaultParamFlag && {
+        prompt: body.prompt,
+        style: body.style,
+        title: body.title,
+        continueAt: body.continueAt,
+      }),
+
+      // Optional parameters
+      ...(body.vocalGender && { vocalGender: body.vocalGender }),
+      ...(body.styleWeight !== undefined && { styleWeight: body.styleWeight }),
+      ...(body.weirdnessConstraint !== undefined && { weirdnessConstraint: body.weirdnessConstraint }),
+      ...(body.audioWeight !== undefined && { audioWeight: body.audioWeight }),
+      ...(body.personaId && { personaId: body.personaId }),
+    }
+
+    console.log("[Extend] Sending request (camelCase):", JSON.stringify(params, null, 2))
+
+    const result = await client.extendMusic(params)
+
+    console.log("[Extend] Response:", result)
 
     return NextResponse.json({
       success: true,
       data: {
-        task_id: taskId,
-        message: 'success'
+        task_id: result.data.taskId,
+        message: "Extension started successfully"
       }
     })
 
-  } catch (error: unknown) {
-    console.error('❌ [Extend] Error:', error)
-    
-    if (error instanceof Error) {
-      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
-        return NextResponse.json({ 
-          success: false, 
-          error: 'Request timeout' 
-        }, { status: 408 })
-      }
-      
-      return NextResponse.json({ 
-        success: false, 
-        error: error.message 
-      }, { status: 500 })
+  } catch (error: any) {
+    console.error("[Extend] Error:", error)
+
+    // Handle SunoAPIError with specific status codes
+    if (error.name === "SunoAPIError") {
+      const statusCode = error.statusCode || 500
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+          code: error.code
+        },
+        { status: statusCode }
+      )
     }
-    
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Unknown error occurred' 
-    }, { status: 500 })
+
+    // Generic error
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to extend music"
+      },
+      { status: 500 }
+    )
   }
 }

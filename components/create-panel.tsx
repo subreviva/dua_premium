@@ -13,10 +13,7 @@ import {
   Shuffle,
   Plus,
   Info,
-  CheckSquare,
   Sparkles,
-  Upload,
-  Mic,
   Library,
   Undo2,
   Redo2,
@@ -25,10 +22,6 @@ import {
   Loader2,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { PersonasModal } from "@/components/personas-modal"
-import { FileUpload } from "@/components/file-upload"
-import { LyricsGenerator } from "@/components/lyrics-generator"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Helper function to save songs to localStorage
 function saveSongToLocalStorage(songData: any) {
@@ -56,16 +49,11 @@ export function CreatePanel() {
   const [lyrics, setLyrics] = useState("")
   const [styles, setStyles] = useState("")
   const [isInstrumental, setIsInstrumental] = useState(false)
-  const [showUploadModal, setShowUploadModal] = useState(false)
-  const [uploadedAudioUrl, setUploadedAudioUrl] = useState("")
   const [excludeStyles, setExcludeStyles] = useState(false)
   const [vocalGender, setVocalGender] = useState<"male" | "female">("male")
   const [weirdness, setWeirdness] = useState([50])
   const [styleInfluence, setStyleInfluence] = useState([50])
   const [songTitle, setSongTitle] = useState("")
-  const [saveToWorkspace, setSaveToWorkspace] = useState("My Workspace")
-  const [showPersonasModal, setShowPersonasModal] = useState(false)
-  const [showLyricsGenerator, setShowLyricsGenerator] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [generationStatus, setGenerationStatus] = useState<string>("")
@@ -112,17 +100,6 @@ export function CreatePanel() {
     ]
     const random = descriptions[Math.floor(Math.random() * descriptions.length)]
     setSongDescription(random)
-  }
-
-  const shuffleLyrics = async () => {
-    setGenerationStatus("Generating lyrics...")
-    try {
-      // Implementar chamada à API de geração de lyrics
-      setShowLyricsGenerator(true)
-    } catch (error) {
-      console.error("[v0] Error shuffling lyrics:", error)
-      setGenerationStatus("")
-    }
   }
 
   const handleLyricsChange = useCallback((newLyrics: string) => {
@@ -196,107 +173,62 @@ export function CreatePanel() {
     setGenerationStatus("Initializing...")
     
     try {
-      const modelMap: Record<string, string> = {
+      // ⚠️ OFFICIAL MODEL MAPPING per Suno_API_MegaDetalhada.txt Section 3
+      const modelMap: Record<string, "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5"> = {
+        "v5-pro-beta": "V5",
         "v5 Pro Beta": "V5",
+        "v4.5-plus": "V4_5PLUS",
         "v4.5+ Pro": "V4_5PLUS",
+        "v4.5-pro": "V4_5",
         "v4.5 Pro": "V4_5",
         "v4.5-all": "V4_5",
+        "v4-pro": "V4",
         "v4 Pro": "V4",
         "v3.5": "V3_5",
       }
 
-      // Build params object - only include fields with values
+      // ⚠️ OFFICIAL PARAMETERS per Suno_API_MegaDetalhada.txt Section 3
       const params: any = {
-        customMode: mode === "custom",
-        instrumental: isInstrumental,
-        model: modelMap[selectedVersion] || "V4_5",
-        vocalGender: vocalGender === "male" ? "m" : "f",
-        styleWeight: styleInfluence[0] / 100,
-        weirdnessConstraint: weirdness[0] / 100,
+        prompt: mode === "simple" ? songDescription : (lyrics || songDescription),
+        customMode: mode === "custom",      // ✅ camelCase
+        instrumental: isInstrumental,       // ✅ camelCase
+        model: modelMap[selectedVersion] || "V4_5",  // ✅ V3_5/V4/V4_5/V4_5PLUS/V5
+        
+        // Custom mode fields (only if custom)
+        ...(mode === "custom" && {
+          style: styles || undefined,
+          title: songTitle || undefined,
+        }),
+        
+        // Optional advanced parameters
+        vocalGender: vocalGender === "male" ? "m" : "f",  // ✅ camelCase
+        styleWeight: styleInfluence[0] / 100,              // ✅ camelCase
+        weirdnessConstraint: weirdness[0] / 100,           // ✅ camelCase
+        negativeTags: excludeStyles && styles ? styles : undefined,  // ✅ camelCase
+        
+        callBackUrl: `${window.location.origin}/api/music/callback`  // ✅ camelCase
       }
 
-      // Add prompt fields based on mode
-      if (mode === "custom") {
-        // Custom mode: use gpt_description_prompt to auto-generate
-        if (songDescription) {
-          params.gpt_description_prompt = songDescription
-        }
-        // Add lyrics if provided
-        if (lyrics) {
-          params.prompt = lyrics
-        }
-        // Add style tags
-        if (styles) {
-          params.style = styles
-        }
-        // Add title if provided
-        if (songTitle) {
-          params.title = songTitle
-        }
+      console.log('[Generate] Sending request (camelCase):', JSON.stringify(params, null, 2))
+
+      setGenerationStatus("Creating music...")
+      const response = await fetch("/api/music/custom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      console.log("[v0] Music generation started:", result)
+
+      if (result.success && result.data?.task_id) {
+        pollForResults(result.data.task_id)
       } else {
-        // Simple mode: use prompt for description OR lyrics
-        if (lyrics) {
-          params.prompt = lyrics
-        } else if (songDescription) {
-          params.gpt_description_prompt = songDescription
-        }
-      }
-
-      // Add negative tags if excluding styles
-      if (excludeStyles && styles) {
-        params.negativeTags = styles
-      }
-
-      console.log('[v0] Generation params:', JSON.stringify(params, null, 2))
-
-      if (uploadedAudioUrl) {
-        setGenerationStatus("Uploading audio...")
-        const uploadParams = {
-          url: uploadedAudioUrl,
-          prompt: lyrics || songDescription,
-          style: styles,
-          title: songTitle,
-          model: modelMap[selectedVersion] as "V4_5PLUS" | "V5",
-        }
-
-        const response = await fetch("/api/music/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(uploadParams),
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const result = await response.json()
-        console.log("[v0] Upload operation started:", result)
-
-        if (result.success && result.data?.task_id) {
-          pollForResults(result.data.task_id)
-        } else {
-          throw new Error(result.error || "No task_id received")
-        }
-      } else {
-        setGenerationStatus("Creating music...")
-        const response = await fetch("/api/music/custom", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(params),
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const result = await response.json()
-        console.log("[v0] Music generation started:", result)
-
-        if (result.success && result.data?.task_id) {
-          pollForResults(result.data.task_id)
-        } else {
-          throw new Error(result.error || "No task_id received")
-        }
+        throw new Error(result.error || "No task_id received")
       }
     } catch (error) {
       console.error("[v0] Error generating music:", error)
@@ -382,7 +314,6 @@ export function CreatePanel() {
             setSongDescription("")
             setLyrics("")
             setSongTitle("")
-            setUploadedAudioUrl("")
           }, 2000)
         } else if (!result.success) {
           clearInterval(poll)
@@ -406,12 +337,6 @@ export function CreatePanel() {
         setGenerationStatus("")
       }
     }, 5000)
-  }
-
-  const handleUploadComplete = (url: string) => {
-    setUploadedAudioUrl(url)
-    setShowUploadModal(false)
-    console.log("[v0] Audio uploaded:", url)
   }
 
   return (
@@ -489,72 +414,6 @@ export function CreatePanel() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar">
-          <div className="space-y-3">
-            <div className="text-sm text-neutral-400 font-medium">Upload, Record, or choose from Library</div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="premium-button premium-card border-white/10 hover:border-white/20 font-medium bg-transparent flex-1"
-                onClick={() => setShowUploadModal(true)}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Audio
-              </Button>
-              <Button
-                variant="outline"
-                className="premium-button premium-card border-white/10 hover:border-white/20 font-medium bg-transparent flex-1"
-                onClick={() => setShowPersonasModal(true)}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Persona
-              </Button>
-              <Button
-                variant="outline"
-                className="premium-button premium-card border-white/10 hover:border-white/20 font-medium bg-transparent flex-1"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Inspo
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="premium-button premium-card border-white/10 hover:border-white/20 font-medium bg-transparent flex-1 h-11"
-              onClick={() => setShowUploadModal(true)}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Upload
-            </Button>
-            <Button
-              variant="outline"
-              className="premium-button premium-card border-white/10 hover:border-white/20 font-medium bg-transparent flex-1 h-11"
-            >
-              <Mic className="mr-2 h-4 w-4" />
-              Record
-            </Button>
-          </div>
-
-          {uploadedAudioUrl && (
-            <div className="p-3 premium-card rounded-lg border border-purple-500/30 bg-purple-500/10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Music className="h-4 w-4 text-purple-400" />
-                  <span className="text-sm font-medium">Audio uploaded</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setUploadedAudioUrl("")}
-                  className="h-6 text-xs hover:bg-white/10"
-                >
-                  Remove
-                </Button>
-              </div>
-            </div>
-          )}
-
           {mode === "simple" && (
             <>
               <div className="space-y-3">
@@ -594,18 +453,6 @@ export function CreatePanel() {
                         </Button>
                       </>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        shuffleLyrics()
-                      }}
-                      className="h-7 w-7 p-0 hover:bg-white/10"
-                      title="Generate AI Lyrics"
-                    >
-                      <Shuffle className="h-4 w-4 text-purple-400" />
-                    </Button>
                     {lyricsExpanded ? (
                       <ChevronUp className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
                     ) : (
@@ -622,15 +469,6 @@ export function CreatePanel() {
                       onChange={(e) => handleLyricsChange(e.target.value)}
                       className="min-h-[120px] premium-input resize-none font-medium"
                     />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowLyricsGenerator(true)}
-                      className="premium-button border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 font-medium bg-transparent w-full"
-                    >
-                      <Sparkles className="mr-2 h-4 w-4 text-purple-400" />
-                      Generate AI Lyrics
-                    </Button>
                   </>
                 )}
               </div>
@@ -786,38 +624,6 @@ export function CreatePanel() {
                         className="premium-input font-medium"
                       />
                     </div>
-
-                    <div className="space-y-3">
-                      <label className="text-sm font-semibold flex items-center gap-2">
-                        <CheckSquare className="h-4 w-4 text-purple-400" />
-                        Save to...
-                      </label>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between premium-input font-medium hover:border-white/20 bg-transparent"
-                          >
-                            {saveToWorkspace}
-                            <ChevronDown className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-full glass-effect border-white/10">
-                          <DropdownMenuItem
-                            onClick={() => setSaveToWorkspace("My Workspace")}
-                            className="hover:bg-white/10 cursor-pointer"
-                          >
-                            My Workspace
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSaveToWorkspace("Other Workspace")}
-                            className="hover:bg-white/10 cursor-pointer"
-                          >
-                            Other Workspace
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
                   </div>
                 )}
               </div>
@@ -914,33 +720,6 @@ export function CreatePanel() {
           </Button>
         </div>
       </div>
-
-      <Dialog open={showUploadModal} onOpenChange={setShowUploadModal}>
-        <DialogContent className="glass-effect border-white/10 max-w-md">
-          <DialogHeader>
-            <DialogTitle>Upload Audio File</DialogTitle>
-            <DialogDescription>Upload an audio file to extend, cover, or add vocals/instrumentals</DialogDescription>
-          </DialogHeader>
-          <FileUpload onUploadComplete={handleUploadComplete} accept="audio/*" />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showLyricsGenerator} onOpenChange={setShowLyricsGenerator}>
-        <DialogContent className="glass-effect border-white/10 max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Generate Lyrics</DialogTitle>
-            <DialogDescription>Create AI-generated lyrics for your song</DialogDescription>
-          </DialogHeader>
-          <LyricsGenerator 
-            onGenerate={(generatedLyrics) => {
-              handleLyricsChange(generatedLyrics)
-              setShowLyricsGenerator(false)
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {showPersonasModal && <PersonasModal onClose={() => setShowPersonasModal(false)} />}
     </>
   )
 }

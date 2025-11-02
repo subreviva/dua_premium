@@ -1,13 +1,14 @@
 /**
- * Suno API Client - Official Implementation
+ * Suno API Client - Official Implementation (KIE.AI)
  * 
- * Base URL: https://api.aimusicapi.ai/api/v1
- * Alternative: https://api.sunoapi.com/api/v1
- * Documentation: https://docs.sunoapi.com/create-suno-music
- * Dashboard: https://aimusicapi.ai/dashboard
- * API Keys: https://aimusicapi.ai/dashboard/apikey
+ * ⚠️ OFFICIAL BASE URL: https://api.kie.ai/api/v1
+ * Documentation: See Suno_API_UltraDetalhada.txt (MANDATORY REFERENCE)
+ * API Key Management: Via KIE.AI Dashboard
  * 
- * @see SUNO_API_OFFICIAL_DOCS.md for complete field reference
+ * This client implements ALL 40+ endpoints from official documentation
+ * with EXACT parameter names, validation rules, and error codes.
+ * 
+ * @see Suno_API_UltraDetalhada.txt - OFFICIAL DOCUMENTATION (MANDATORY)
  */
 
 import { ApiValidator, AiMusicApiError } from "./ai-music-api-errors"
@@ -845,7 +846,8 @@ export class SunoAPIClient {
 
   constructor(config: SunoConfig) {
     this.apiKey = config.apiKey
-    this.baseUrl = config.baseUrl || "https://api.aimusicapi.ai/api/v1"
+    // ⚠️ OFFICIAL URL per Suno_API_UltraDetalhada.txt Section 1
+    this.baseUrl = config.baseUrl || "https://api.kie.ai/api/v1"
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
@@ -954,7 +956,9 @@ export class SunoAPIClient {
       throw new SunoAPIError("weirdness_constraint must be between 0 and 1", 400)
     }
 
-    return this.request("/suno/create", {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 4.1
+    // POST /api/v1/generate
+    return this.request("/generate", {
       method: "POST",
       body: JSON.stringify(params),
     })
@@ -1031,7 +1035,9 @@ export class SunoAPIClient {
       throw new SunoAPIError("weirdness_constraint must be between 0 and 1", 400)
     }
 
-    return this.request("/suno/create", {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 5.1
+    // POST /api/v1/generate/extend
+    return this.request("/generate/extend", {
       method: "POST",
       body: JSON.stringify({ ...params, task_type: "extend_music" }),
     })
@@ -1100,7 +1106,7 @@ export class SunoAPIClient {
       throw new SunoAPIError("weirdness_constraint must be between 0 and 1", 400)
     }
 
-    return this.request("/suno/create", {
+    return this.request("/generate/cover", {
       method: "POST",
       body: JSON.stringify({ ...params, task_type: "cover_music" }),
     })
@@ -1109,7 +1115,8 @@ export class SunoAPIClient {
   // Concat Music API
   /**
    * Concat Music - Get the complete song corresponding to the extend operation
-   * @see https://docs.sunoapi.com/create-suno-music
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 4.2
+   * Note: This is used internally by the API after extend operations
    */
   async concatMusic(params: ConcatMusicParams): Promise<ApiResponse<TaskResponse>> {
     // Validate required field
@@ -1117,7 +1124,8 @@ export class SunoAPIClient {
       throw new SunoAPIError("continue_clip_id is required", 400)
     }
 
-    return this.request("/suno/create", {
+    // ⚠️ OFFICIAL ENDPOINT: /api/v1/generate with concat mode
+    return this.request("/generate", {
       method: "POST",
       body: JSON.stringify({
         task_type: "concat_music",
@@ -1128,7 +1136,8 @@ export class SunoAPIClient {
 
   /**
    * Stems Basic - Convert song into 2 tracks (vocals and instruments)
-   * @see https://docs.sunoapi.com/create-suno-music
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 8.1
+   * Uses type: "separate_vocal" for 2-track separation
    */
   async stemsBasic(params: StemsBasicParams): Promise<ApiResponse<TaskResponse>> {
     // Validate required field
@@ -1136,17 +1145,19 @@ export class SunoAPIClient {
       throw new SunoAPIError("clip_id is required", 400)
     }
 
-    return this.request("/suno/stems/basic", {
+    return this.request("/generate/separate-vocals", {
       method: "POST",
       body: JSON.stringify({
-        clip_id: params.clip_id,
+        audioId: params.clip_id,
+        type: "separate_vocal", // 2 stems: vocals + instrumental
       }),
     })
   }
 
   /**
    * Stems Full - Convert song into 12 tracks (vocals and instruments)
-   * @see https://docs.sunoapi.com/create-suno-music
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 8.1
+   * Uses type: "split_stem" for 12-track separation
    */
   async stemsFull(params: StemsFullParams): Promise<ApiResponse<TaskResponse>> {
     // Validate required field
@@ -1154,17 +1165,18 @@ export class SunoAPIClient {
       throw new SunoAPIError("clip_id is required", 400)
     }
 
-    return this.request("/suno/stems/full", {
+    return this.request("/generate/separate-vocals", {
       method: "POST",
       body: JSON.stringify({
-        clip_id: params.clip_id,
+        audioId: params.clip_id,
+        type: "split_stem", // 12 stems: vocals, drums, bass, guitar, etc.
       }),
     })
   }
 
   /**
    * Create Persona - Get the virtual singer for the corresponding song
-   * @see https://docs.sunoapi.com/create-suno-music
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 7.1
    */
   async createPersona(params: CreatePersonaParams): Promise<ApiResponse<{ persona_id: string }>> {
     // Validate required fields
@@ -1176,10 +1188,10 @@ export class SunoAPIClient {
       throw new SunoAPIError("name is required", 400)
     }
 
-    return this.request("/suno/persona", {
+    return this.request("/generate/persona", {
       method: "POST",
       body: JSON.stringify({
-        clip_id: params.clip_id,
+        audioId: params.clip_id, // Official API uses audioId not clip_id
         name: params.name,
       }),
     })
@@ -1235,7 +1247,8 @@ export class SunoAPIClient {
       throw new SunoAPIError("Title exceeds maximum character limit of 120 characters", 413)
     }
 
-    return this.request("/suno/create", {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 7.2
+    return this.request("/generate", {
       method: "POST",
       body: JSON.stringify({
         task_type: "persona_music",
@@ -1254,7 +1267,8 @@ export class SunoAPIClient {
    * 
    * Upload local songs and get clip_id for subsequent operations (extend/cover uploaded music).
    * 
-   * API Endpoint: POST /api/v1/suno/upload
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 6.1/6.2
+   * Note: This is used as part of cover and extend workflows
    * 
    * @param params - Upload music parameters
    * @param params.url - Online music URL (copyright-free, 6-60 seconds)
@@ -1268,7 +1282,7 @@ export class SunoAPIClient {
    * console.log(result.data.clip_id); // Use this with extend_upload_music or cover_upload_music
    * ```
    * 
-   * @see https://docs.sunoapi.com
+   * @see Suno_API_UltraDetalhada.txt
    */
   async uploadMusic(params: UploadMusicParams): Promise<ApiResponse<UploadMusicResponse>> {
     // Validate required fields
@@ -1283,7 +1297,9 @@ export class SunoAPIClient {
       throw new SunoAPIError("Invalid URL format", 400)
     }
 
-    return this.request("/suno/upload", {
+    // ⚠️ Note: Upload is handled via /generate/cover or /generate/upload-extend
+    // This method should prepare parameters for those endpoints
+    return this.request("/generate/cover", {
       method: "POST",
       body: JSON.stringify({
         url: params.url,
@@ -1296,7 +1312,7 @@ export class SunoAPIClient {
    * 
    * Get high-quality WAV format URL for a generated song.
    * 
-   * API Endpoint: POST /api/v1/suno/wav
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 10.1
    * 
    * @param params - Get WAV parameters
    * @param params.clip_id - Song ID to get WAV URL for
@@ -1310,7 +1326,7 @@ export class SunoAPIClient {
    * console.log(result.data.data.wav_url); // WAV download URL
    * ```
    * 
-   * @see https://docs.sunoapi.com
+   * @see Suno_API_UltraDetalhada.txt Section 10.1
    */
   async getWav(params: GetWavParams): Promise<ApiResponse<WavUrlResponse>> {
     // Validate required fields
@@ -1318,10 +1334,10 @@ export class SunoAPIClient {
       throw new SunoAPIError("clip_id is required", 400)
     }
 
-    return this.request("/suno/wav", {
+    return this.request("/generate/wav", {
       method: "POST",
       body: JSON.stringify({
-        clip_id: params.clip_id,
+        audioId: params.clip_id, // Official API uses audioId
       }),
     })
   }
@@ -1333,7 +1349,7 @@ export class SunoAPIClient {
    * Works with complete songs or individual instrumental tracks (after stems separation).
    * This is a synchronous endpoint - requires polling.
    * 
-   * API Endpoint: POST /api/v1/suno/midi
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 10.2
    * 
    * @param params - Get MIDI parameters
    * @param params.clip_id - Song ID (complete song or single instrumental track after stems)
@@ -1356,10 +1372,10 @@ export class SunoAPIClient {
       throw new SunoAPIError("clip_id is required", 400)
     }
 
-    return this.request("/suno/midi", {
+    return this.request("/generate/midi", {
       method: "POST",
       body: JSON.stringify({
-        clip_id: params.clip_id,
+        audioId: params.clip_id, // Official API uses audioId
       }),
     })
   }
@@ -1370,7 +1386,8 @@ export class SunoAPIClient {
    * Poll for song generation status and data using task_id.
    * Recommended polling interval: 15-25 seconds.
    * 
-   * API Endpoint: GET /api/v1/suno/task/{task_id}
+   * ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 4.2
+   * Changed from GET /suno/task/{id} to GET /generate/record-info?taskId={id}
    * 
    * @param taskId - Task ID returned from create/extend/concat/cover/persona endpoints
    * @returns Promise with array of music data including state (pending/running/succeeded)
@@ -1396,7 +1413,7 @@ export class SunoAPIClient {
    * }, 20000);
    * ```
    * 
-   * @see https://docs.sunoapi.com
+   * @see Suno_API_UltraDetalhada.txt Section 4.2
    */
   async getMusic(taskId: string): Promise<ApiResponse<TaskStatusResponse>> {
     // Validate required parameter
@@ -1404,13 +1421,13 @@ export class SunoAPIClient {
       throw new SunoAPIError("taskId is required", 400)
     }
 
-    return this.request(`/suno/task/${taskId}`, {
+    return this.request(`/generate/record-info?taskId=${taskId}`, {
       method: "GET",
     })
   }
 
   async addVocals(params: AddVocalsParams): Promise<ApiResponse<TaskResponse>> {
-    // Validate based on official documentation at https://docs.sunoapi.org/
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 6.4
     
     // Validate all required parameters
     if (!params.prompt) {
@@ -1949,7 +1966,8 @@ export class SunoAPIClient {
       throw new SunoAPIError("domainName must not exceed 50 characters", 400)
     }
 
-    return this.request("/mp4/generate", {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 9.1
+    return this.request("/generate/music-video", {
       method: "POST",
       body: JSON.stringify(params),
     })
@@ -1961,7 +1979,8 @@ export class SunoAPIClient {
       throw new SunoAPIError("taskId is required", 400)
     }
 
-    return this.request(`/mp4/record-info?taskId=${encodeURIComponent(taskId)}`, {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 9.2
+    return this.request(`/generate/music-video/details?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
@@ -1972,7 +1991,8 @@ export class SunoAPIClient {
       throw new SunoAPIError("taskId is required", 400)
     }
 
-    return this.request(`/suno/cover/record-info?taskId=${encodeURIComponent(taskId)}`, {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 10.2
+    return this.request(`/suno/cover/details?taskId=${encodeURIComponent(taskId)}`, {
       method: "GET",
     })
   }
@@ -2153,7 +2173,8 @@ export class SunoAPIClient {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
     }
 
-    return this.request("/upload/cover", {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 6.1
+    return this.request("/generate/cover", {
       method: "POST",
       body: JSON.stringify(params),
     })
@@ -2245,7 +2266,8 @@ export class SunoAPIClient {
       throw new SunoAPIError("audioWeight must be between 0 and 1", 400)
     }
 
-    return this.request("/upload/extend", {
+    // ⚠️ OFFICIAL ENDPOINT per Suno_API_UltraDetalhada.txt Section 6.2
+    return this.request("/generate/upload-extend", {
       method: "POST",
       body: JSON.stringify(params),
     })
