@@ -333,66 +333,48 @@ export default function ImageStudioPage() {
       <div className="relative z-10 min-h-screen flex flex-col">
         <PremiumNavbar credits={100} showBackButton={true} backLink="/" variant="default" />
 
-        <section
-          className={cn(
-            "relative",
-            isMobile ? "pt-20 pb-8 px-6" : "pt-8 pb-6 px-4 sm:px-6 sm:pt-12 lg:pt-16 sm:pb-8 lg:pb-12",
-          )}
-        >
-          <div className="max-w-7xl mx-auto text-center">
-            <div className={cn(isMobile ? "mb-6" : "mb-3 sm:mb-4 lg:mb-6")}>
-              <RevealText
-                text="DUA VISION"
-                textColor="text-white"
-                overlayColor="text-cyan-400"
-                fontSize={
-                  isMobile ? "text-[42px] leading-[1.1]" : "text-[48px] sm:text-[70px] md:text-[100px] lg:text-[120px]"
-                }
-                letterDelay={0.08}
-                overlayDelay={0.05}
-                overlayDuration={0.4}
-                springDuration={600}
-                letterImages={[
-                  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1618556450994-a6a128ef0d9d?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=2070&h=2070&fit=crop",
-                  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=2070&h=2070&fit=crop",
-                ]}
-              />
-            </div>
-            <p
-              className={cn(
-                "text-white/60 max-w-2xl mx-auto leading-relaxed",
-                isMobile
-                  ? "text-base px-2 mb-6"
-                  : "text-sm sm:text-base md:text-lg lg:text-xl px-4 mb-4 sm:mb-6 lg:mb-8",
-              )}
-            >
-              Geração pura de imagens com IA Google Imagen. Para edição de imagens, use o <a href="/designstudio" className="text-cyan-400 hover:text-cyan-300 underline">Design Studio</a>.
+        {/* Header Premium - Mais compacto */}
+        <section className={cn(
+          "relative",
+          isMobile ? "pt-16 pb-6 px-6" : "pt-12 pb-8 px-6"
+        )}>
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className={cn(
+              "font-bold bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent mb-3",
+              isMobile ? "text-4xl" : "text-5xl"
+            )}>
+              Image Studio
+            </h1>
+            <p className={cn(
+              "text-white/60 leading-relaxed",
+              isMobile ? "text-sm px-2" : "text-base max-w-2xl mx-auto"
+            )}>
+              Geração pura com Google Imagen • Para edição use o{" "}
+              <a href="/designstudio" className="text-cyan-400 hover:text-cyan-300 transition-colors underline decoration-cyan-400/30">
+                Design Studio
+              </a>
             </p>
           </div>
         </section>
 
-        <main
-          className={cn(
-            "flex-1 flex flex-col items-center",
-            isMobile ? "px-6 pb-8" : "px-3 sm:px-4 lg:px-6 pb-4 sm:pb-6 lg:pb-8",
-          )}
-        >
-          <div className="w-full max-w-5xl">
-            <div
-              className={cn(
-                "relative backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden",
-                isMobile ? "rounded-3xl bg-black/70" : "rounded-2xl bg-black/40",
-              )}
-            >
-              <div className={cn(isMobile ? "p-6" : "p-4 sm:p-6 lg:p-8")}>
+        {/* Main Content - Layout Premium */}
+        <main className={cn(
+          "flex-1 flex flex-col items-center pb-safe",
+          isMobile ? "px-4 pb-6" : "px-6 pb-8"
+        )}>
+          <div className={cn(
+            "w-full",
+            isMobile ? "max-w-full" : "max-w-4xl"
+          )}>
+            {/* Card Premium Glassmorphism */}
+            <div className={cn(
+              "relative backdrop-blur-3xl border shadow-2xl overflow-hidden",
+              isMobile 
+                ? "rounded-3xl bg-black/80 border-white/5" 
+                : "rounded-2xl bg-black/60 border-white/10"
+            )}>
+              {/* Textarea Premium */}
+              <div className={cn(isMobile ? "p-5" : "p-6")}>
                 <Textarea
                   ref={textareaRef}
                   value={prompt}
@@ -400,378 +382,186 @@ export default function ImageStudioPage() {
                     setPrompt(e.target.value)
                     adjustHeight()
                   }}
-                  placeholder="Descreva a imagem que deseja criar do zero com IA... (somente geração, não edição)"
+                  placeholder="Descreva sua imagem..."
                   className={cn(
-                    "w-full px-0 py-0 resize-none border-0 bg-transparent text-white leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-white/30 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent",
-                    isMobile ? "text-base min-h-[160px]" : "text-base sm:text-lg min-h-[150px] sm:min-h-[200px]",
+                    "w-full px-0 py-0 resize-none border-0 bg-transparent text-white leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-white/40 scrollbar-hide",
+                    isMobile ? "text-base min-h-[140px]" : "text-lg min-h-[120px]",
                   )}
-                  style={{ overflow: "auto" }}
+                  style={{ 
+                    overflow: "auto",
+                    WebkitOverflowScrolling: "touch"
+                  }}
                 />
               </div>
 
-              <div
-                className={cn(
-                  "flex flex-col border-t border-white/10 bg-black/20",
-                  isMobile ? "gap-4 px-6 py-6 pb-8" : "gap-3 px-3 sm:px-4 lg:px-6 py-3 sm:py-4",
-                )}
-              >
+              {/* Controls Bar - Premium Design */}
+              <div className={cn(
+                "border-t bg-black/20 backdrop-blur-xl",
+                isMobile ? "border-white/5 p-4" : "border-white/10 p-5"
+              )}>
                 {isMobile ? (
-                  <>
-                    <div className="flex flex-col gap-4">
-                      {/* Header: Geração de Imagem */}
-                      <div className="flex items-center gap-3 px-4 py-3 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl">
-                        <Sparkles className="w-5 h-5 text-cyan-400" />
-                        <span className="text-base font-medium text-cyan-400">Geração de Imagem com IA</span>
-                      </div>
+                  /* Mobile: Vertical Stack */
+                  <div className="flex flex-col gap-3">
+                    {/* Row 1: Model + Aspect Ratio */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
+                        <SelectTrigger className="h-11 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl transition-all">
+                          <SelectValue placeholder="Modelo" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                          <SelectItem value="ultra">Ultra</SelectItem>
+                          <SelectItem value="standard">Standard</SelectItem>
+                          <SelectItem value="fast">Fast</SelectItem>
+                          <SelectItem value="imagen3">Imagen 3</SelectItem>
+                        </SelectContent>
+                      </Select>
 
-                      <div className="flex flex-col gap-3">
-                        <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
-                          <SelectTrigger className="h-14 px-5 text-base bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-2xl transition-all">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="ultra">Imagen 4 Ultra</SelectItem>
-                            <SelectItem value="standard">Imagen 4 Standard</SelectItem>
-                            <SelectItem value="fast">Imagen 4 Fast</SelectItem>
-                            <SelectItem value="imagen3">Imagen 3</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
-                          <SelectTrigger className="h-14 px-5 text-base bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-2xl transition-all">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="1:1">1:1</SelectItem>
-                            <SelectItem value="16:9">16:9</SelectItem>
-                            <SelectItem value="9:16">9:16</SelectItem>
-                            <SelectItem value="4:3">4:3</SelectItem>
-                            <SelectItem value="3:4">3:4</SelectItem>
-                            <SelectItem value="2:3">2:3</SelectItem>
-                            <SelectItem value="3:2">3:2</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex flex-col gap-3">
-                        <Select value={resolution} onValueChange={(v) => setResolution(v as '1K' | '2K')}>
-                          <SelectTrigger className="h-14 px-5 text-base bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-2xl transition-all">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="1K">1K (1024×1024)</SelectItem>
-                            <SelectItem value="2K">2K (2048×2048)</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-14 px-5 text-base bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl transition-all active:scale-[0.98]"
-                            >
-                              <Palette className="w-5 h-5 mr-2" />
-                              {styles.find((s) => s.id === selectedStyle)?.name}
-                              <ChevronDown className="w-4 h-4 ml-auto" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            className="w-56 bg-black/95 backdrop-blur-xl border-white/20"
-                            align="start"
-                          >
-                            <DropdownMenuLabel className="text-white/50 text-xs uppercase tracking-wider">
-                              Estilo Visual
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-white/10" />
-                            {styles.map((style) => {
-                              const Icon = style.icon
-                              return (
-                                <DropdownMenuItem
-                                  key={style.id}
-                                  onClick={() => setSelectedStyle(style.id)}
-                                  className={cn(
-                                    "text-white focus:bg-white/10 cursor-pointer transition-colors",
-                                    selectedStyle === style.id && "bg-white/10",
-                                  )}
-                                >
-                                  <Icon className="w-4 h-4 mr-2" />
-                                  {style.name}
-                                </DropdownMenuItem>
-                              )
-                            })}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-14 px-6 text-base bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-2xl transition-all active:scale-[0.98] justify-start"
-                          >
-                            <FileText className="w-5 h-5 mr-3" />
-                            Templates de Prompts
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          className="w-[calc(100vw-3rem)] bg-black/95 backdrop-blur-xl border-white/20"
-                          align="start"
-                        >
-                          <DropdownMenuLabel className="text-white/50 text-xs uppercase tracking-wider">
-                            Templates de Prompts
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-white/10" />
-                          {promptTemplates.map((template) => (
-                            <DropdownMenuItem
-                              key={template.name}
-                              onClick={() => handleTemplateSelect(template.template)}
-                              className="flex flex-col items-start gap-1 p-3 cursor-pointer focus:bg-white/10 text-white transition-colors"
-                            >
-                              <span className="font-medium text-sm">{template.name}</span>
-                              <p className="text-xs text-white/50 line-clamp-2">{template.template}</p>
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
+                        <SelectTrigger className="h-11 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl transition-all">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                          <SelectItem value="1:1">1:1</SelectItem>
+                          <SelectItem value="16:9">16:9</SelectItem>
+                          <SelectItem value="9:16">9:16</SelectItem>
+                          <SelectItem value="4:3">4:3</SelectItem>
+                          <SelectItem value="3:4">3:4</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
-                    <div className="flex flex-col gap-3 pt-2">
-                      <div className="flex items-center gap-2 text-white/70 text-sm justify-center">
-                        <Sparkles className="w-4 h-4" />
-                        <span className="font-medium">{numVariations}/imagem</span>
-                      </div>
+                    {/* Row 2: Resolution + Variations */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Select value={resolution} onValueChange={(v) => setResolution(v as '1K' | '2K')}>
+                        <SelectTrigger className="h-11 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl transition-all">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                          <SelectItem value="1K">1K</SelectItem>
+                          <SelectItem value="2K">2K</SelectItem>
+                        </SelectContent>
+                      </Select>
 
-                      <Button
-                        disabled={!prompt.trim() || imagenApi.isLoading}
-                        size="sm"
-                        className={cn(
-                          "h-16 px-8 text-lg rounded-2xl transition-all font-semibold active:scale-[0.98]",
-                          prompt.trim() && !imagenApi.isLoading
-                            ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-xl shadow-purple-500/30"
-                            : "bg-white/5 text-white/30 cursor-not-allowed",
-                        )}
-                        onClick={handleGenerate}
-                      >
-                        {imagenApi.isLoading ? (
-                          <>
-                            <Loader2 className="w-6 h-6 mr-2 animate-spin" />
-                            Gerando...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-6 h-6 mr-2" />
-                            Gerar
-                          </>
-                        )}
-                      </Button>
+                      <Select value={numVariations.toString()} onValueChange={(v) => setNumVariations(Number(v))}>
+                        <SelectTrigger className="h-11 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl transition-all">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                          <SelectItem value="1">1 imagem</SelectItem>
+                          <SelectItem value="2">2 imagens</SelectItem>
+                          <SelectItem value="3">3 imagens</SelectItem>
+                          <SelectItem value="4">4 imagens</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <div
+
+                    {/* Generate Button - iOS Premium */}
+                    <Button
+                      disabled={!prompt.trim() || imagenApi.isLoading}
+                      size="lg"
                       className={cn(
-                        "flex items-center gap-2 pb-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent",
-                        isMobile ? "flex-col" : "overflow-x-auto",
+                        "h-12 rounded-xl font-semibold transition-all active:scale-[0.98]",
+                        prompt.trim() && !imagenApi.isLoading
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg shadow-cyan-500/25"
+                          : "bg-white/5 text-white/30 cursor-not-allowed"
                       )}
+                      onClick={handleGenerate}
                     >
-                      <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
-                        {/* Badge: Geração de Imagem */}
-                        <div
-                          className={cn(
-                            "flex items-center gap-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg font-medium flex-shrink-0",
-                            isMobile ? "h-11 px-4 text-sm flex-1" : "px-3 h-9 text-xs sm:text-sm",
-                          )}
-                        >
-                          <Sparkles className="w-3.5 h-3.5" />
-                          <span>Geração de Imagem</span>
-                        </div>
-
-                        <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
-                          <SelectTrigger
-                            className={cn(
-                              "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all flex-shrink-0",
-                              isMobile
-                                ? "h-11 px-4 text-sm flex-1"
-                                : "h-9 px-3 text-xs sm:text-sm w-[110px] sm:w-[120px]",
-                            )}
-                          >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="ultra">Imagen 4 Ultra</SelectItem>
-                            <SelectItem value="standard">Imagen 4 Standard</SelectItem>
-                            <SelectItem value="fast">Imagen 4 Fast</SelectItem>
-                            <SelectItem value="imagen3">Imagen 3</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
-                        <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
-                          <SelectTrigger
-                            className={cn(
-                              "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all flex-shrink-0",
-                              isMobile
-                                ? "h-11 px-4 text-sm flex-1"
-                                : "h-9 px-3 text-xs sm:text-sm w-[80px] sm:w-[90px]",
-                            )}
-                          >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="1:1">1:1</SelectItem>
-                            <SelectItem value="16:9">16:9</SelectItem>
-                            <SelectItem value="9:16">9:16</SelectItem>
-                            <SelectItem value="4:3">4:3</SelectItem>
-                            <SelectItem value="3:4">3:4</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <Select value={resolution} onValueChange={(v) => setResolution(v as '1K' | '2K')}>
-                          <SelectTrigger
-                            className={cn(
-                              "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all flex-shrink-0",
-                              isMobile
-                                ? "h-11 px-4 text-sm flex-1"
-                                : "h-9 px-3 text-xs sm:text-sm w-[100px] sm:w-[110px]",
-                            )}
-                          >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="1K">1K (1024×1024)</SelectItem>
-                            <SelectItem value="2K">2K (2048×2048)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                "bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg transition-all flex-shrink-0 active:scale-95",
-                                isMobile ? "h-11 px-4 text-sm flex-1" : "h-9 px-3 text-xs sm:text-sm",
-                              )}
-                            >
-                              <Palette className="w-3.5 h-3.5 mr-1.5" />
-                              {isMobile ? (
-                                styles.find((s) => s.id === selectedStyle)?.name
-                              ) : (
-                                <>
-                                  <span className="hidden sm:inline">
-                                    {styles.find((s) => s.id === selectedStyle)?.name}
-                                  </span>
-                                  <span className="sm:hidden">Estilo</span>
-                                </>
-                              )}
-                              <ChevronDown className="w-3.5 h-3.5 ml-1.5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            className="w-56 bg-black/95 backdrop-blur-xl border-white/20"
-                            align="start"
-                          >
-                            <DropdownMenuLabel className="text-white/50 text-xs uppercase tracking-wider">
-                              Estilo Visual
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-white/10" />
-                            {styles.map((style) => {
-                              const Icon = style.icon
-                              return (
-                                <DropdownMenuItem
-                                  key={style.id}
-                                  onClick={() => setSelectedStyle(style.id)}
-                                  className={cn(
-                                    "text-white focus:bg-white/10 cursor-pointer transition-colors",
-                                    selectedStyle === style.id && "bg-white/10",
-                                  )}
-                                >
-                                  <Icon className="w-4 h-4 mr-2" />
-                                  {style.name}
-                                </DropdownMenuItem>
-                              )
-                            })}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-lg transition-all flex-shrink-0 active:scale-95",
-                                isMobile ? "h-11 w-11 p-0" : "h-9 w-9 p-0",
-                              )}
-                            >
-                              <FileText className="w-3.5 h-3.5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            className="w-[calc(100vw-2rem)] sm:w-80 bg-black/95 backdrop-blur-xl border-white/20"
-                            align="start"
-                          >
-                            <DropdownMenuLabel className="text-white/50 text-xs uppercase tracking-wider">
-                              Templates de Prompts
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-white/10" />
-                            {promptTemplates.map((template) => (
-                              <DropdownMenuItem
-                                key={template.name}
-                                onClick={() => handleTemplateSelect(template.template)}
-                                className="flex flex-col items-start gap-1 p-3 cursor-pointer focus:bg-white/10 text-white transition-colors"
-                              >
-                                <span className="font-medium text-sm">{template.name}</span>
-                                <p className="text-xs text-white/50 line-clamp-2">{template.template}</p>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      {imagenApi.isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Gerando...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5 mr-2" />
+                          Gerar Imagem
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  /* Desktop: Horizontal Compact */
+                  <div className="flex items-center gap-3">
+                    {/* Badge: Geração de Imagem */}
+                    <div className="flex items-center gap-2 px-3 py-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg text-sm font-medium flex-shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                      <span>Geração</span>
                     </div>
 
-                    <div className="flex items-center justify-between gap-3">
-                      <div
-                        className={cn(
-                          "flex items-center gap-2 text-white/70",
-                          isMobile ? "text-sm" : "text-xs sm:text-sm",
-                        )}
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span className="font-medium">{numVariations}/imagem</span>
-                      </div>
+                    <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
+                      <SelectTrigger className="h-9 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all w-[130px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                        <SelectItem value="ultra">Imagen Ultra</SelectItem>
+                        <SelectItem value="standard">Standard</SelectItem>
+                        <SelectItem value="fast">Fast</SelectItem>
+                        <SelectItem value="imagen3">Imagen 3</SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                      <Button
-                        disabled={!prompt.trim() || imagenApi.isLoading}
-                        size="sm"
-                        className={cn(
-                          "rounded-lg transition-all font-medium active:scale-95",
-                          isMobile ? "px-6 h-12 text-base flex-1" : "px-5 sm:px-6 h-10 sm:h-9 text-sm",
-                          prompt.trim() && !imagenApi.isLoading
-                            ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
-                            : "bg-white/5 text-white/30 cursor-not-allowed",
-                        )}
-                        onClick={handleGenerate}
-                      >
-                        {imagenApi.isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            {isMobile ? 'Gerando...' : 'Gerando'}
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4 mr-2" />
-                            Gerar
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </>
+                    <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
+                      <SelectTrigger className="h-9 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all w-[90px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                        <SelectItem value="1:1">1:1</SelectItem>
+                        <SelectItem value="16:9">16:9</SelectItem>
+                        <SelectItem value="9:16">9:16</SelectItem>
+                        <SelectItem value="4:3">4:3</SelectItem>
+                        <SelectItem value="3:4">3:4</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={resolution} onValueChange={(v) => setResolution(v as '1K' | '2K')}>
+                      <SelectTrigger className="h-9 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all w-[80px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                        <SelectItem value="1K">1K</SelectItem>
+                        <SelectItem value="2K">2K</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={numVariations.toString()} onValueChange={(v) => setNumVariations(Number(v))}>
+                      <SelectTrigger className="h-9 px-3 text-sm bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                        <SelectItem value="1">1 img</SelectItem>
+                        <SelectItem value="2">2 imgs</SelectItem>
+                        <SelectItem value="3">3 imgs</SelectItem>
+                        <SelectItem value="4">4 imgs</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <div className="flex-1" />
+
+                    {/* Generate Button Desktop */}
+                    <Button
+                      disabled={!prompt.trim() || imagenApi.isLoading}
+                      className={cn(
+                        "h-9 px-6 rounded-lg font-medium transition-all active:scale-95",
+                        prompt.trim() && !imagenApi.isLoading
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg shadow-cyan-500/20"
+                          : "bg-white/5 text-white/30 cursor-not-allowed"
+                      )}
+                      onClick={handleGenerate}
+                    >
+                      {imagenApi.isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Gerando
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Gerar
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
