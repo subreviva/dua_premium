@@ -1,124 +1,129 @@
-"use client"
+'use client';
 
-/**
- * Design Studio - Main Page
- * Página principal do estúdio de design com interface moderna
- */
-
-import { useState, useCallback } from "react"
-import { ToolId, CanvasContent, ImageObject } from "@/types/designstudio"
-import { DesignToolbar } from "@/components/designstudio/DesignToolbar"
-import { DesignCanvas } from "@/components/designstudio/DesignCanvas"
-import { DesignSidePanel } from "@/components/designstudio/DesignSidePanel"
-import { PremiumNavbar } from "@/components/ui/premium-navbar"
-import { BeamsBackground } from "@/components/ui/beams-background"
+import React, { useState, useCallback } from 'react';
+import { ToolId, CanvasContent, ImageObject } from '@/types/designstudio-full';
+import { useGoogleApi } from '@/hooks/useGoogleApi';
+import DesignToolbar from '@/components/designstudio/Toolbar';
+import DesignCanvas from '@/components/designstudio/Canvas';
+import DesignSidePanel from '@/components/designstudio/SidePanel';
+import PremiumNavbar from '@/components/PremiumNavbar';
+import { BeamsBackground } from '@/components/ui/beams-background';
 
 export default function DesignStudioPage() {
-  const [activeTool, setActiveTool] = useState<ToolId | null>(null)
-  const [canvasContent, setCanvasContent] = useState<CanvasContent>({ type: 'empty' })
-  const [history, setHistory] = useState<CanvasContent[]>([{ type: 'empty' }])
-  const [historyIndex, setHistoryIndex] = useState(0)
-  const [sessionGallery, setSessionGallery] = useState<ImageObject[]>([])
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [activeTool, setActiveTool] = useState<ToolId | null>(null);
+  const [canvasContent, setCanvasContent] = useState<CanvasContent>({ type: 'empty' });
+  const [history, setHistory] = useState<CanvasContent[]>([{ type: 'empty' }]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const [sessionGallery, setSessionGallery] = useState<ImageObject[]>([]);
+  
+  const api = useGoogleApi();
 
   const handleToolSelect = useCallback((toolId: ToolId) => {
-    setActiveTool(toolId)
-  }, [])
+    setActiveTool(toolId);
+    const textTools: ToolId[] = ['design-trends', 'analyze-image', 'design-assistant', 'export-project'];
+    if (textTools.includes(toolId) && canvasContent.type !== 'text-result') {
+      if (canvasContent.type === 'empty') {
+        setCanvasContent({ type: 'text-result' });
+      }
+    }
+  }, [canvasContent.type]);
 
   const updateCanvas = useCallback((newContent: CanvasContent) => {
-    const newHistory = history.slice(0, historyIndex + 1)
-    newHistory.push(newContent)
-    setHistory(newHistory)
-    setHistoryIndex(newHistory.length - 1)
-    setCanvasContent(newContent)
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newContent);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+    setCanvasContent(newContent);
 
-    // Add to gallery if it's an image
     if (newContent.type === 'image' && !sessionGallery.some(item => item.src === newContent.src)) {
       setSessionGallery(prev => [
-        { 
-          src: newContent.src, 
-          mimeType: newContent.mimeType,
-          prompt: newContent.prompt,
-          timestamp: Date.now()
-        },
+        { src: newContent.src, mimeType: newContent.mimeType },
         ...prev
-      ])
+      ]);
     }
-  }, [history, historyIndex, sessionGallery])
+  }, [history, historyIndex, sessionGallery]);
 
   const handleContentUpdate = useCallback((content: CanvasContent) => {
-    updateCanvas(content)
-  }, [updateCanvas])
+    updateCanvas(content);
+    const nonSwitchingTools: ToolId[] = [
+      'color-palette',
+      'generate-variations',
+      'analyze-image',
+      'design-trends',
+      'design-assistant',
+      'export-project'
+    ];
+    if (content.type === 'image' && activeTool && !nonSwitchingTools.includes(activeTool)) {
+      setActiveTool('edit-image');
+    }
+  }, [activeTool, updateCanvas]);
 
   const handleUndo = useCallback(() => {
     if (historyIndex > 0) {
-      const newIndex = historyIndex - 1
-      setHistoryIndex(newIndex)
-      setCanvasContent(history[newIndex])
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setCanvasContent(history[newIndex]);
     }
-  }, [historyIndex, history])
+  }, [historyIndex, history]);
 
   const handleRedo = useCallback(() => {
     if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1
-      setHistoryIndex(newIndex)
-      setCanvasContent(history[newIndex])
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setCanvasContent(history[newIndex]);
     }
-  }, [historyIndex, history])
+  }, [historyIndex, history]);
+
+  const handleSelectHistory = useCallback((content: CanvasContent) => {
+    updateCanvas(content);
+  }, [updateCanvas]);
 
   const handleClearSession = useCallback(() => {
-    const initialContent: CanvasContent = { type: 'empty' }
-    setCanvasContent(initialContent)
-    setHistory([initialContent])
-    setHistoryIndex(0)
-    setSessionGallery([])
-    setActiveTool(null)
-  }, [])
-
-  const handleGenerationStart = useCallback(() => {
-    setIsGenerating(true)
-  }, [])
-
-  const handleGenerationEnd = useCallback(() => {
-    setIsGenerating(false)
-  }, [])
+    const initialContent: CanvasContent = { type: 'empty' };
+    setCanvasContent(initialContent);
+    setHistory([initialContent]);
+    setHistoryIndex(0);
+    setSessionGallery([]);
+    setActiveTool(null);
+  }, []);
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-neutral-950 text-white overflow-hidden">
+    <>
       <PremiumNavbar />
-      
-      <div className="flex-1 flex overflow-hidden relative">
-        <BeamsBackground className="absolute inset-0 opacity-30" />
-        
-        {/* Toolbar lateral esquerda */}
-        <DesignToolbar 
-          activeTool={activeTool}
-          onToolSelect={handleToolSelect}
-        />
+      <div className="fixed inset-0 top-16">
+        <BeamsBackground />
+        <div className="relative h-full flex bg-black/40 backdrop-blur-sm">
+          <DesignToolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
+          
+          <main className="flex-1 flex items-center justify-center p-4 md:p-8">
+            <DesignCanvas 
+              content={canvasContent}
+              isLoading={api.isLoading}
+              loadingMessage={api.loadingMessage}
+              canUndo={historyIndex > 0}
+              canRedo={historyIndex < history.length - 1}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+            />
+          </main>
 
-        {/* Canvas central */}
-        <main className="flex-1 flex items-center justify-center p-4 md:p-8 relative z-10">
-          <DesignCanvas
-            content={canvasContent}
-            isGenerating={isGenerating}
+          <DesignSidePanel
+            activeTool={activeTool}
+            canvasContent={canvasContent}
+            onContentUpdate={handleContentUpdate}
+            api={api}
+            isLoading={api.isLoading}
+            error={api.error}
+            history={history}
+            historyIndex={historyIndex}
+            sessionGallery={sessionGallery}
             onUndo={handleUndo}
             onRedo={handleRedo}
-            canUndo={historyIndex > 0}
-            canRedo={historyIndex < history.length - 1}
+            onSelectHistory={handleSelectHistory}
+            onClearSession={handleClearSession}
           />
-        </main>
-
-        {/* Panel lateral direita */}
-        <DesignSidePanel
-          activeTool={activeTool}
-          canvasContent={canvasContent}
-          sessionGallery={sessionGallery}
-          onContentUpdate={handleContentUpdate}
-          onGenerationStart={handleGenerationStart}
-          onGenerationEnd={handleGenerationEnd}
-          onClearSession={handleClearSession}
-        />
+        </div>
       </div>
-    </div>
-  )
+    </>
+  );
 }
