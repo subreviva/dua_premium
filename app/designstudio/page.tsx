@@ -1,34 +1,35 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { ToolId, CanvasContent, ImageObject } from '@/types/designstudio-full';
-import { useGoogleApi } from '@/hooks/useGoogleApi';
-import DesignToolbar from '@/components/designstudio/Toolbar';
-import DesignCanvas from '@/components/designstudio/Canvas';
-import DesignSidePanel from '@/components/designstudio/SidePanel';
+import { ToolId, CanvasContent, ImageObject } from '@/types/designstudio';
+import Toolbar from '@/components/designstudio-original/Toolbar';
+import Canvas from '@/components/designstudio-original/Canvas';
+import { useDuaApi } from '@/hooks/useDuaApi';
+import { ToastProvider } from '@/hooks/useToast';
+import ToastContainer from '@/components/designstudio-original/ui/ToastContainer';
+import SidePanelTabs from '@/components/designstudio-original/SidePanelTabs';
 import { PremiumNavbar } from '@/components/ui/premium-navbar';
-import { BeamsBackground } from '@/components/ui/beams-background';
 
 export default function DesignStudioPage() {
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
   const [canvasContent, setCanvasContent] = useState<CanvasContent>({ type: 'empty' });
-  const [history, setHistory] = useState<CanvasContent[]>([{ type: 'empty' }]);
+  const [history, setHistory] = useState<CanvasContent[]>([canvasContent]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [sessionGallery, setSessionGallery] = useState<ImageObject[]>([]);
   
-  const api = useGoogleApi();
+  const api = useDuaApi();
 
   const handleToolSelect = useCallback((toolId: ToolId) => {
     setActiveTool(toolId);
     const textTools: ToolId[] = ['design-trends', 'analyze-image', 'design-assistant', 'export-project'];
     if (textTools.includes(toolId) && canvasContent.type !== 'text-result') {
-      if (canvasContent.type === 'empty') {
-        setCanvasContent({ type: 'text-result' });
-      }
+        if (canvasContent.type === 'empty') {
+            setCanvasContent({ type: 'text-result' });
+        }
     }
   }, [canvasContent.type]);
 
-  const updateCanvas = useCallback((newContent: CanvasContent) => {
+  const updateCanvas = (newContent: CanvasContent) => {
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(newContent);
     setHistory(newHistory);
@@ -36,94 +37,85 @@ export default function DesignStudioPage() {
     setCanvasContent(newContent);
 
     if (newContent.type === 'image' && !sessionGallery.some(item => item.src === newContent.src)) {
-      setSessionGallery(prev => [
-        { src: newContent.src, mimeType: newContent.mimeType },
-        ...prev
-      ]);
+        setSessionGallery(prev => [
+            { src: newContent.src, mimeType: newContent.mimeType },
+            ...prev
+        ]);
     }
-  }, [history, historyIndex, sessionGallery]);
+  };
 
-  const handleContentUpdate = useCallback((content: CanvasContent) => {
+  const handleContentUpdate = (content: CanvasContent) => {
     updateCanvas(content);
-    const nonSwitchingTools: ToolId[] = [
-      'color-palette',
-      'generate-variations',
-      'analyze-image',
-      'design-trends',
-      'design-assistant',
-      'export-project'
-    ];
+    const nonSwitchingTools: ToolId[] = ['color-palette', 'generate-variations', 'analyze-image', 'design-trends', 'design-assistant', 'export-project'];
     if (content.type === 'image' && activeTool && !nonSwitchingTools.includes(activeTool)) {
       setActiveTool('edit-image');
     }
-  }, [activeTool, updateCanvas]);
+  };
 
-  const handleUndo = useCallback(() => {
+  const handleUndo = () => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
       setCanvasContent(history[newIndex]);
     }
-  }, [historyIndex, history]);
+  };
 
-  const handleRedo = useCallback(() => {
+  const handleRedo = () => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
       setCanvasContent(history[newIndex]);
     }
-  }, [historyIndex, history]);
+  };
 
-  const handleSelectHistory = useCallback((content: CanvasContent) => {
+  const setCanvasFromHistoryOrGallery = (content: CanvasContent) => {
     updateCanvas(content);
-  }, [updateCanvas]);
+  };
 
-  const handleClearSession = useCallback(() => {
+  const handleClearSession = () => {
     const initialContent: CanvasContent = { type: 'empty' };
     setCanvasContent(initialContent);
     setHistory([initialContent]);
     setHistoryIndex(0);
     setSessionGallery([]);
     setActiveTool(null);
-  }, []);
+  };
 
   return (
-    <>
-      <PremiumNavbar />
-      <div className="fixed inset-0 top-16">
-        <BeamsBackground />
-        <div className="relative h-full flex bg-black/40 backdrop-blur-sm">
-          <DesignToolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
+    <ToastProvider>
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        <PremiumNavbar />
+        <div className="flex flex-1 bg-gray-900 text-gray-100 overflow-hidden">
+          <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
           
-          <main className="flex-1 flex items-center justify-center p-4 md:p-8">
-            <DesignCanvas 
-              content={canvasContent}
-              isLoading={api.isLoading}
-              loadingMessage={api.loadingMessage}
-              canUndo={historyIndex > 0}
-              canRedo={historyIndex < history.length - 1}
-              onUndo={handleUndo}
-              onRedo={handleRedo}
+          <main className="flex-1 flex items-center justify-center p-4 md:p-8 transition-all duration-300 relative">
+            <Canvas 
+              content={canvasContent} 
+              isLoading={api.isLoading} 
+              loadingMessage={api.loadingMessage} 
             />
           </main>
 
-          <DesignSidePanel
-            activeTool={activeTool}
-            canvasContent={canvasContent}
-            onContentUpdate={handleContentUpdate}
-            api={api}
-            isLoading={api.isLoading}
-            error={api.error}
-            history={history}
-            historyIndex={historyIndex}
-            sessionGallery={sessionGallery}
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            onSelectHistory={handleSelectHistory}
-            onClearSession={handleClearSession}
-          />
+          <aside className="w-full md:w-96 bg-gray-800/50 border-l border-gray-700/50 flex flex-col">
+            <SidePanelTabs
+              activeTool={activeTool}
+              canvasContent={canvasContent}
+              onContentUpdate={handleContentUpdate}
+              api={api}
+              isLoading={api.isLoading}
+              error={api.error}
+              history={history}
+              historyIndex={historyIndex}
+              sessionGallery={sessionGallery}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onSelectHistory={setCanvasFromHistoryOrGallery}
+              onClearSession={handleClearSession}
+            />
+          </aside>
+          <ToastContainer />
         </div>
       </div>
-    </>
+    </ToastProvider>
   );
 }

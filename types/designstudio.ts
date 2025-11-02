@@ -1,36 +1,20 @@
-/**
- * Design Studio Types
- * Tipos TypeScript para o Design Studio
- */
 
-export type ToolId = 
-  | 'generate-image'
-  | 'edit-image'
-  | 'generate-logo'
-  | 'generate-icon'
-  | 'color-palette'
-  | 'product-mockup'
-  | 'generate-pattern'
-  | 'generate-variations'
-  | 'generate-svg'
-  | 'analyze-image'
-  | 'design-trends'
-  | 'design-assistant'
-  | 'export-project';
+import { Chat } from '@google/genai';
+
+export type ToolId = 'generate-image' | 'edit-image' | 'generate-logo' | 'generate-icon' | 'color-palette' | 'product-mockup' | 'generate-pattern' | 'generate-variations' | 'generate-svg' | 'analyze-image' | 'design-trends' | 'design-assistant' | 'export-project';
 
 export interface Tool {
   id: ToolId;
   name: string;
-  icon: React.ReactNode;
+  icon: JSX.Element;
   description: string;
-  category: 'create' | 'edit' | 'analyze' | 'export';
 }
 
 export type CanvasContent = 
   | { type: 'empty' }
   | { type: 'image'; src: string; mimeType: string; prompt: string; }
   | { type: 'svg'; code: string; prompt: string; }
-  | { type: 'text-result'; content: string; };
+  | { type: 'text-result' };
 
 export type AspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
 
@@ -42,30 +26,41 @@ export type Color = {
 export type ImageObject = {
   src: string;
   mimeType: string;
-  prompt?: string;
-  timestamp: number;
 };
 
-export type GenerationStyle = 
-  | 'realistic'
-  | 'artistic'
-  | 'minimalist'
-  | 'abstract'
-  | 'cartoon'
-  | 'professional';
-
-export interface GenerationParams {
-  prompt: string;
-  aspectRatio: AspectRatio;
-  style?: GenerationStyle;
-  negativePrompt?: string;
-  seed?: number;
+export type GroundingChunk = {
+  web: {
+    uri: string;
+    title: string;
+  }
 }
 
-export interface DesignSession {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  gallery: ImageObject[];
-  history: CanvasContent[];
+export type TrendResult = {
+  text: string;
+  sources: GroundingChunk[];
 }
+
+export type ChatMessage = {
+    id: number;
+    role: 'user' | 'model';
+    text: string;
+};
+
+export type GenerationConfig = {
+    temperature?: number;
+    seed?: number;
+    negativePrompt?: string;
+}
+
+export type ApiFunctions = {
+  generateImage: (prompt: string, aspectRatio: AspectRatio, config?: GenerationConfig) => Promise<ImageObject | null>;
+  editImage: (base64ImageData: string, mimeType: string, prompt: string) => Promise<ImageObject | null>;
+  extractColorPalette: (base64ImageData: string, mimeType: string) => Promise<Color[] | null>;
+  generateVariations: (base64ImageData: string, mimeType: string) => Promise<ImageObject[] | null>;
+  enhancePrompt: (idea: string) => Promise<string | null>;
+  generateSvgCode: (prompt: string) => Promise<string | null>;
+  analyzeImage: (base64ImageData: string, mimeType: string) => Promise<string | null>;
+  researchTrends: (query: string) => Promise<TrendResult | null>;
+  startChat: () => Chat;
+  sendMessageStream: (chat: Chat, message: string, onChunk: (chunk: string) => void) => Promise<void>;
+};
