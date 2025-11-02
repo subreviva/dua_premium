@@ -28,11 +28,13 @@ import {
   MessageCircle,
   Eye,
   Share2,
+  Loader2,
 } from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { ImageModal } from "@/components/ui/image-modal"
 import { RevealText } from "@/components/ui/reveal-text"
+import { useImagenApi, type ImagenModel, type ImagenConfig } from "@/hooks/useImagenApi"
 
 interface AutoResizeProps {
   minHeight: number
@@ -84,13 +86,16 @@ interface GalleryImage {
 
 export default function ImageStudioPage() {
   const isMobile = useIsMobile()
+  const imagenApi = useImagenApi()
+  
   const [prompt, setPrompt] = useState("")
-  const [selectedModel, setSelectedModel] = useState("image-4.0")
+  const [selectedModel, setSelectedModel] = useState<ImagenModel>("standard")
   const [selectedStyle, setSelectedStyle] = useState("photorealistic")
-  const [aspectRatio, setAspectRatio] = useState("2:3")
-  const [resolution, setResolution] = useState("alta-2k")
-  const [numVariations, setNumVariations] = useState(3)
+  const [aspectRatio, setAspectRatio] = useState<'1:1' | '3:4' | '4:3' | '9:16' | '16:9'>("1:1")
+  const [resolution, setResolution] = useState<'1K' | '2K'>("2K")
+  const [numVariations, setNumVariations] = useState(4)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [generatedImages, setGeneratedImages] = useState<any[]>([])
   const [generatedImage, setGeneratedImage] = useState<{
     url: string
     prompt: string
@@ -273,27 +278,53 @@ export default function ImageStudioPage() {
     adjustHeight()
   }
 
-  const handleGenerate = () => {
-    if (prompt.trim()) {
-      console.log(`[v0] Generating image with prompt: ${prompt}`)
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      return
+    }
 
-      const mockImage = {
-        url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1024&h=1536&fit=crop",
-        prompt: prompt,
-        width: 1024,
-        height: 1536,
-        settings: {
-          model: selectedModel,
-          style: styles.find((s) => s.id === selectedStyle)?.name || selectedStyle,
-          aspectRatio: aspectRatio,
-          resolution: resolution,
-        },
-        seed: Math.random().toString(36).substring(2, 15),
-        timestamp: new Date().toLocaleString("pt-PT"),
+    try {
+      console.log(`🎨 Gerando imagens com Imagen API...`)
+
+      const config: ImagenConfig = {
+        numberOfImages: numVariations,
+        aspectRatio,
+        personGeneration: 'allow_adult',
       }
 
-      setGeneratedImage(mockImage)
-      setIsModalOpen(true)
+      // Adicionar imageSize apenas para Standard e Ultra
+      if (selectedModel === 'standard' || selectedModel === 'ultra') {
+        config.imageSize = resolution
+      }
+
+      const images = await imagenApi.generateImages(prompt, selectedModel, config)
+      
+      setGeneratedImages(images)
+
+      // Abrir modal com primeira imagem
+      if (images.length > 0) {
+        const firstImage = images[0]
+        setGeneratedImage({
+          url: firstImage.url,
+          prompt: firstImage.prompt,
+          width: 1024,
+          height: 1024,
+          settings: {
+            model: selectedModel,
+            style: styles.find((s) => s.id === selectedStyle)?.name || selectedStyle,
+            aspectRatio,
+            resolution,
+          },
+          seed: Math.random().toString(36).substring(2, 15),
+          timestamp: new Date().toLocaleString("pt-PT"),
+        })
+        setIsModalOpen(true)
+      }
+
+      console.log(`✅ ${images.length} imagens geradas com sucesso`)
+    } catch (error: any) {
+      console.error('❌ Erro ao gerar imagens:', error)
+      alert(`Erro: ${error.message}`)
     }
   }
 
@@ -423,18 +454,19 @@ export default function ImageStudioPage() {
                       </DropdownMenu>
 
                       <div className="flex flex-col gap-3">
-                        <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
                           <SelectTrigger className="h-14 px-5 text-base bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-2xl transition-all">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="image-4.0">Image 4.0</SelectItem>
-                            <SelectItem value="image-3.5">Image 3.5</SelectItem>
-                            <SelectItem value="image-3.0">Image 3.0</SelectItem>
+                            <SelectItem value="ultra">Imagen 4 Ultra</SelectItem>
+                            <SelectItem value="standard">Imagen 4 Standard</SelectItem>
+                            <SelectItem value="fast">Imagen 4 Fast</SelectItem>
+                            <SelectItem value="imagen3">Imagen 3</SelectItem>
                           </SelectContent>
                         </Select>
 
-                        <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                        <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
                           <SelectTrigger className="h-14 px-5 text-base bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-2xl transition-all">
                             <SelectValue />
                           </SelectTrigger>
@@ -451,14 +483,13 @@ export default function ImageStudioPage() {
                       </div>
 
                       <div className="flex flex-col gap-3">
-                        <Select value={resolution} onValueChange={setResolution}>
+                        <Select value={resolution} onValueChange={(v) => setResolution(v as '1K' | '2K')}>
                           <SelectTrigger className="h-14 px-5 text-base bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-2xl transition-all">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="padrao">Padrão</SelectItem>
-                            <SelectItem value="alta-2k">Alta (2K)</SelectItem>
-                            <SelectItem value="ultra-4k">Ultra (4K)</SelectItem>
+                            <SelectItem value="1K">1K (1024×1024)</SelectItem>
+                            <SelectItem value="2K">2K (2048×2048)</SelectItem>
                           </SelectContent>
                         </Select>
 
@@ -542,18 +573,27 @@ export default function ImageStudioPage() {
                       </div>
 
                       <Button
-                        disabled={!prompt.trim()}
+                        disabled={!prompt.trim() || imagenApi.isLoading}
                         size="sm"
                         className={cn(
                           "h-16 px-8 text-lg rounded-2xl transition-all font-semibold active:scale-[0.98]",
-                          prompt.trim()
+                          prompt.trim() && !imagenApi.isLoading
                             ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-xl shadow-purple-500/30"
                             : "bg-white/5 text-white/30 cursor-not-allowed",
                         )}
                         onClick={handleGenerate}
                       >
-                        <Send className="w-6 h-6 mr-2" />
-                        Gerar
+                        {imagenApi.isLoading ? (
+                          <>
+                            <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                            Gerando...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-6 h-6 mr-2" />
+                            Gerar
+                          </>
+                        )}
                       </Button>
                     </div>
                   </>
@@ -604,7 +644,7 @@ export default function ImageStudioPage() {
                           </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
                           <SelectTrigger
                             className={cn(
                               "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all flex-shrink-0",
@@ -616,15 +656,16 @@ export default function ImageStudioPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="image-4.0">Image 4.0</SelectItem>
-                            <SelectItem value="image-3.5">Image 3.5</SelectItem>
-                            <SelectItem value="image-3.0">Image 3.0</SelectItem>
+                            <SelectItem value="ultra">Imagen 4 Ultra</SelectItem>
+                            <SelectItem value="standard">Imagen 4 Standard</SelectItem>
+                            <SelectItem value="fast">Imagen 4 Fast</SelectItem>
+                            <SelectItem value="imagen3">Imagen 3</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
-                        <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                        <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
                           <SelectTrigger
                             className={cn(
                               "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all flex-shrink-0",
@@ -641,12 +682,10 @@ export default function ImageStudioPage() {
                             <SelectItem value="9:16">9:16</SelectItem>
                             <SelectItem value="4:3">4:3</SelectItem>
                             <SelectItem value="3:4">3:4</SelectItem>
-                            <SelectItem value="2:3">2:3</SelectItem>
-                            <SelectItem value="3:2">3:2</SelectItem>
                           </SelectContent>
                         </Select>
 
-                        <Select value={resolution} onValueChange={setResolution}>
+                        <Select value={resolution} onValueChange={(v) => setResolution(v as '1K' | '2K')}>
                           <SelectTrigger
                             className={cn(
                               "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg transition-all flex-shrink-0",
@@ -658,9 +697,8 @@ export default function ImageStudioPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                            <SelectItem value="padrao">Padrão</SelectItem>
-                            <SelectItem value="alta-2k">Alta (2K)</SelectItem>
-                            <SelectItem value="ultra-4k">Ultra (4K)</SelectItem>
+                            <SelectItem value="1K">1K (1024×1024)</SelectItem>
+                            <SelectItem value="2K">2K (2048×2048)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -765,19 +803,28 @@ export default function ImageStudioPage() {
                       </div>
 
                       <Button
-                        disabled={!prompt.trim()}
+                        disabled={!prompt.trim() || imagenApi.isLoading}
                         size="sm"
                         className={cn(
                           "rounded-lg transition-all font-medium active:scale-95",
                           isMobile ? "px-6 h-12 text-base flex-1" : "px-5 sm:px-6 h-10 sm:h-9 text-sm",
-                          prompt.trim()
+                          prompt.trim() && !imagenApi.isLoading
                             ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
                             : "bg-white/5 text-white/30 cursor-not-allowed",
                         )}
                         onClick={handleGenerate}
                       >
-                        <Send className="w-4 h-4 mr-2" />
-                        Gerar
+                        {imagenApi.isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            {isMobile ? 'Gerando...' : 'Gerando'}
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            Gerar
+                          </>
+                        )}
                       </Button>
                     </div>
                   </>
