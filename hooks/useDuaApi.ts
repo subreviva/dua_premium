@@ -12,8 +12,9 @@ if (API_KEY) {
     GoogleGenAI = genai.GoogleGenAI;
     Modality = genai.Modality;
     Type = genai.Type;
-    ai = new GoogleGenAI({ apiKey: API_KEY, vertexai: true });
-    console.log("✅ Google Gemini API configurada!");
+    // IMPORTANTE: vertexai: false para usar API Key diretamente (não OAuth2)
+    ai = new GoogleGenAI({ apiKey: API_KEY, vertexai: false });
+    console.log("✅ Google Gemini API configurada (API Key mode)!");
   } catch (e) {
     console.warn("⚠️ @google/genai não instalado. Instale com: npm install @google/genai");
   }
