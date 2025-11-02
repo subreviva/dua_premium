@@ -1,8 +1,11 @@
+'use client';
 
 import React from 'react';
 import { CanvasContent } from '@/types/designstudio';
 import Spinner from './ui/Spinner';
 import { useToast } from '@/hooks/useToast';
+import { Download, Sparkles, FileText } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CanvasProps {
   content: CanvasContent;
@@ -38,22 +41,43 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) =
     switch (content.type) {
       case 'empty':
         return (
-          <div className="text-center text-gray-500 p-4">
-            <h2 className="text-2xl font-semibold">DUA Design</h2>
-            <p className="mt-2">Selecione uma ferramenta à esquerda para começar a sua criação.</p>
+          <div className="text-center space-y-6 p-8">
+            <div className="relative inline-block">
+              <Sparkles className="w-16 h-16 text-white/40 animate-pulse" />
+              <div className="absolute inset-0 blur-xl bg-blue-500/20 animate-pulse" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-3xl font-semibold text-white/90">DUA Design Studio</h2>
+              <p className="text-white/50 max-w-md mx-auto">
+                Selecione uma ferramenta na barra lateral para começar a criar designs profissionais com IA
+              </p>
+            </div>
           </div>
         );
       case 'image':
-        return <img src={content.src} alt={content.prompt || 'Imagem gerada'} className="object-contain w-full h-full" />;
+        return (
+          <img 
+            src={content.src} 
+            alt={content.prompt || 'Imagem gerada'} 
+            className="object-contain w-full h-full rounded-lg shadow-2xl shadow-blue-500/20" 
+          />
+        );
       case 'svg':
-        return <div className="w-full h-full p-4 bg-white rounded-md" dangerouslySetInnerHTML={{ __html: content.code }} />;
+        return (
+          <div 
+            className="w-full h-full p-8 bg-white/95 backdrop-blur-sm rounded-lg shadow-2xl" 
+            dangerouslySetInnerHTML={{ __html: content.code }} 
+          />
+        );
       case 'text-result':
         return (
-            <div className="text-center text-gray-400 p-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <h2 className="text-xl font-semibold">Resultado no Painel</h2>
-                <p className="mt-2">O resultado desta ferramenta é exibido no painel à direita.</p>
-            </div>
+          <div className="text-center space-y-4 p-8">
+            <FileText className="w-12 h-12 text-white/40 mx-auto" />
+            <h2 className="text-xl font-semibold text-white/80">Resultado no Painel</h2>
+            <p className="text-white/50 max-w-md mx-auto">
+              O resultado desta ferramenta é exibido no painel lateral direito
+            </p>
+          </div>
         );
       default:
         return null;
@@ -61,17 +85,26 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) =
   };
 
   return (
-    <div className="w-full h-full bg-gray-800/30 rounded-lg flex items-center justify-center relative aspect-square max-w-full max-h-full overflow-hidden border-2 border-dashed border-gray-600">
+    <div className={cn(
+      "w-full h-full rounded-2xl flex items-center justify-center relative aspect-square max-w-full max-h-full overflow-hidden transition-all duration-300",
+      content.type === 'empty' 
+        ? "bg-black/20 backdrop-blur-sm border-2 border-dashed border-white/10" 
+        : "bg-black/30 backdrop-blur-lg border border-white/10 shadow-2xl"
+    )}>
       {isLoading && (
-        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center z-20 rounded-2xl">
           <Spinner />
-          <p className="mt-4 text-lg text-gray-300 animate-pulse">{loadingMessage}</p>
+          <p className="mt-6 text-lg text-white/80 animate-pulse font-medium">{loadingMessage}</p>
         </div>
       )}
       {renderContent()}
       {(content.type === 'image' || content.type === 'svg') && !isLoading && (
-        <button onClick={handleDownload} title="Descarregar" className="absolute top-3 right-3 z-10 p-2 bg-gray-900/50 rounded-full text-gray-300 hover:bg-blue-600 hover:text-white transition-all backdrop-blur-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+        <button 
+          onClick={handleDownload} 
+          title="Descarregar" 
+          className="absolute top-4 right-4 z-10 p-3 bg-black/60 backdrop-blur-md rounded-xl text-white/80 hover:text-white hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-purple-500/20 transition-all duration-300 border border-white/10 hover:border-white/20 hover:scale-110 active:scale-95 group"
+        >
+          <Download className="w-5 h-5 group-hover:animate-bounce" />
         </button>
       )}
     </div>

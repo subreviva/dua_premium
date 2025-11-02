@@ -1,9 +1,12 @@
+'use client';
 
 import React, { useState } from 'react';
 import ControlPanel from './ControlPanel';
 import HistoryPanel from './HistoryPanel';
 import SessionGallery from './SessionGallery';
 import { ToolId, CanvasContent, ApiFunctions, ImageObject } from '@/types/designstudio';
+import { Wrench, History } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SidePanelTabsProps {
   activeTool: ToolId | null;
@@ -28,27 +31,31 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-gray-700">
-        <nav className="-mb-px flex space-x-4 px-6" aria-label="Tabs">
+      <div className="border-b border-white/10 bg-black/20">
+        <nav className="-mb-px flex space-x-1 px-4 pt-4" aria-label="Tabs">
           <button
             onClick={() => setActiveTab('tools')}
-            className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+            className={cn(
+              'flex items-center gap-2 px-4 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-300',
               activeTab === 'tools'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-            }`}
+                ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-white border-b-2 border-blue-400 shadow-lg'
+                : 'text-white/50 hover:text-white hover:bg-white/5'
+            )}
           >
+            <Wrench className="w-4 h-4" />
             Ferramentas
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+            className={cn(
+              'flex items-center gap-2 px-4 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-300',
               activeTab === 'history'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-            }`}
+                ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-white border-b-2 border-blue-400 shadow-lg'
+                : 'text-white/50 hover:text-white hover:bg-white/5'
+            )}
           >
-            Histórico & Galeria
+            <History className="w-4 h-4" />
+            Histórico
           </button>
         </nav>
       </div>

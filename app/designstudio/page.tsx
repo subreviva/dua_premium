@@ -8,7 +8,6 @@ import { useDuaApi } from '@/hooks/useDuaApi';
 import { ToastProvider } from '@/hooks/useToast';
 import ToastContainer from '@/components/designstudio-original/ui/ToastContainer';
 import SidePanelTabs from '@/components/designstudio-original/SidePanelTabs';
-import { PremiumNavbar } from '@/components/ui/premium-navbar';
 
 export default function DesignStudioPage() {
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
@@ -83,38 +82,35 @@ export default function DesignStudioPage() {
 
   return (
     <ToastProvider>
-      <div className="flex flex-col h-screen w-screen overflow-hidden">
-        <PremiumNavbar />
-        <div className="flex flex-1 bg-gray-900 text-gray-100 overflow-hidden">
-          <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
-          
-          <main className="flex-1 flex items-center justify-center p-4 md:p-8 transition-all duration-300 relative">
-            <Canvas 
-              content={canvasContent} 
-              isLoading={api.isLoading} 
-              loadingMessage={api.loadingMessage} 
-            />
-          </main>
+      <div className="flex h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
+        
+        <main className="flex-1 flex items-center justify-center p-4 md:p-8 transition-all duration-300 relative">
+          <Canvas 
+            content={canvasContent} 
+            isLoading={api.isLoading} 
+            loadingMessage={api.loadingMessage} 
+          />
+        </main>
 
-          <aside className="w-full md:w-96 bg-gray-800/50 border-l border-gray-700/50 flex flex-col">
-            <SidePanelTabs
-              activeTool={activeTool}
-              canvasContent={canvasContent}
-              onContentUpdate={handleContentUpdate}
-              api={api}
-              isLoading={api.isLoading}
-              error={api.error}
-              history={history}
-              historyIndex={historyIndex}
-              sessionGallery={sessionGallery}
-              onUndo={handleUndo}
-              onRedo={handleRedo}
-              onSelectHistory={setCanvasFromHistoryOrGallery}
-              onClearSession={handleClearSession}
-            />
-          </aside>
-          <ToastContainer />
-        </div>
+        <aside className="w-full md:w-96 bg-black/40 backdrop-blur-xl border-l border-white/5 flex flex-col">
+          <SidePanelTabs
+            activeTool={activeTool}
+            canvasContent={canvasContent}
+            onContentUpdate={handleContentUpdate}
+            api={api}
+            isLoading={api.isLoading}
+            error={api.error}
+            history={history}
+            historyIndex={historyIndex}
+            sessionGallery={sessionGallery}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            onSelectHistory={setCanvasFromHistoryOrGallery}
+            onClearSession={handleClearSession}
+          />
+        </aside>
+        <ToastContainer />
       </div>
     </ToastProvider>
   );
