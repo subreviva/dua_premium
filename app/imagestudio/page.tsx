@@ -374,7 +374,7 @@ export default function ImageStudioPage() {
                   : "text-sm sm:text-base md:text-lg lg:text-xl px-4 mb-4 sm:mb-6 lg:mb-8",
               )}
             >
-              Estúdio de geração e fotografia ultra premium. Crie imagens profissionais com IA.
+              Geração pura de imagens com IA Google Imagen. Para edição de imagens, use o <a href="/designstudio" className="text-cyan-400 hover:text-cyan-300 underline">Design Studio</a>.
             </p>
           </div>
         </section>
@@ -400,7 +400,7 @@ export default function ImageStudioPage() {
                     setPrompt(e.target.value)
                     adjustHeight()
                   }}
-                  placeholder="Descreva a imagem que você está imaginando..."
+                  placeholder="Descreva a imagem que deseja criar do zero com IA... (somente geração, não edição)"
                   className={cn(
                     "w-full px-0 py-0 resize-none border-0 bg-transparent text-white leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-white/30 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent",
                     isMobile ? "text-base min-h-[160px]" : "text-base sm:text-lg min-h-[150px] sm:min-h-[200px]",
@@ -418,40 +418,11 @@ export default function ImageStudioPage() {
                 {isMobile ? (
                   <>
                     <div className="flex flex-col gap-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-14 px-6 text-base bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 rounded-2xl font-medium transition-all active:scale-[0.98] justify-start"
-                          >
-                            <Sparkles className="w-5 h-5 mr-3" />
-                            Imagem de IA
-                            <ChevronDown className="w-4 h-4 ml-auto" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          className="w-56 bg-black/95 backdrop-blur-xl border-white/20"
-                          align="start"
-                        >
-                          <DropdownMenuLabel className="text-white/50 text-xs uppercase tracking-wider">
-                            Modo de Geração
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-white/10" />
-                          <DropdownMenuItem className="text-white focus:bg-white/10 cursor-pointer">
-                            <Sparkles className="w-4 h-4 mr-2 text-cyan-400" />
-                            Imagem de IA
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-white/50 focus:bg-white/10 cursor-pointer">
-                            <Wand2 className="w-4 h-4 mr-2" />
-                            Editar Imagem
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-white/50 focus:bg-white/10 cursor-pointer">
-                            <Layers className="w-4 h-4 mr-2" />
-                            Composição
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {/* Header: Geração de Imagem */}
+                      <div className="flex items-center gap-3 px-4 py-3 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl">
+                        <Sparkles className="w-5 h-5 text-cyan-400" />
+                        <span className="text-base font-medium text-cyan-400">Geração de Imagem com IA</span>
+                      </div>
 
                       <div className="flex flex-col gap-3">
                         <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
@@ -606,43 +577,16 @@ export default function ImageStudioPage() {
                       )}
                     >
                       <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 rounded-lg font-medium transition-all flex-shrink-0 active:scale-95",
-                                isMobile ? "h-11 px-4 text-sm flex-1" : "px-3 h-9 text-xs sm:text-sm",
-                              )}
-                            >
-                              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                              Imagem de IA
-                              <ChevronDown className="w-3.5 h-3.5 ml-1.5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            className="w-56 bg-black/95 backdrop-blur-xl border-white/20"
-                            align="start"
-                          >
-                            <DropdownMenuLabel className="text-white/50 text-xs uppercase tracking-wider">
-                              Modo de Geração
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-white/10" />
-                            <DropdownMenuItem className="text-white focus:bg-white/10 cursor-pointer">
-                              <Sparkles className="w-4 h-4 mr-2 text-cyan-400" />
-                              Imagem de IA
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-white/50 focus:bg-white/10 cursor-pointer">
-                              <Wand2 className="w-4 h-4 mr-2" />
-                              Editar Imagem
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-white/50 focus:bg-white/10 cursor-pointer">
-                              <Layers className="w-4 h-4 mr-2" />
-                              Composição
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {/* Badge: Geração de Imagem */}
+                        <div
+                          className={cn(
+                            "flex items-center gap-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg font-medium flex-shrink-0",
+                            isMobile ? "h-11 px-4 text-sm flex-1" : "px-3 h-9 text-xs sm:text-sm",
+                          )}
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Geração de Imagem</span>
+                        </div>
 
                         <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ImagenModel)}>
                           <SelectTrigger
