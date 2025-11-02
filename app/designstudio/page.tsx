@@ -82,18 +82,51 @@ export default function DesignStudioPage() {
 
   return (
     <ToastProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900">
-        <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
+      <div className="design-studio-container flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        {/* Mobile: Toolbar horizontal fixo no topo */}
+        <div className="md:hidden fixed top-0 left-0 right-0 z-50">
+          <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
+        </div>
+
+        {/* Desktop: Toolbar vertical lateral */}
+        <div className="hidden md:block">
+          <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
+        </div>
         
-        <main className="flex-1 flex items-center justify-center p-4 md:p-8 transition-all duration-300 relative">
-          <Canvas 
-            content={canvasContent} 
-            isLoading={api.isLoading} 
-            loadingMessage={api.loadingMessage} 
-          />
+        {/* Canvas - área principal com scroll otimizado */}
+        <main className="flex-1 flex items-start md:items-center justify-center p-4 md:p-8 transition-all duration-300 relative overflow-y-auto overflow-x-hidden smooth-scroll mt-20 md:mt-0 mb-16 md:mb-0">
+          <div className="w-full max-w-7xl">
+            <Canvas 
+              content={canvasContent} 
+              isLoading={api.isLoading} 
+              loadingMessage={api.loadingMessage} 
+            />
+          </div>
         </main>
 
-        <aside className="w-full md:w-96 bg-black/40 backdrop-blur-xl border-l border-white/5 flex flex-col">
+        {/* Mobile: Painel fixo no bottom */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 max-h-[60vh]">
+          <aside className="w-full bg-black/95 backdrop-blur-xl border-t border-white/10 flex flex-col overflow-hidden shadow-2xl shadow-black/50">
+            <SidePanelTabs
+              activeTool={activeTool}
+              canvasContent={canvasContent}
+              onContentUpdate={handleContentUpdate}
+              api={api}
+              isLoading={api.isLoading}
+              error={api.error}
+              history={history}
+              historyIndex={historyIndex}
+              sessionGallery={sessionGallery}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onSelectHistory={setCanvasFromHistoryOrGallery}
+              onClearSession={handleClearSession}
+            />
+          </aside>
+        </div>
+
+        {/* Desktop: Painel lateral direito */}
+        <aside className="hidden md:flex w-96 bg-black/40 backdrop-blur-xl border-l border-white/5 flex-col overflow-hidden">
           <SidePanelTabs
             activeTool={activeTool}
             canvasContent={canvasContent}
@@ -110,6 +143,7 @@ export default function DesignStudioPage() {
             onClearSession={handleClearSession}
           />
         </aside>
+        
         <ToastContainer />
       </div>
     </ToastProvider>
