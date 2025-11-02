@@ -12,9 +12,12 @@ export async function POST(request: NextRequest) {
     const model = formData.get("model") as string
     const mode = formData.get("mode") as string
     const prompt = formData.get("prompt") as string
+    const negativePrompt = formData.get("negativePrompt") as string | null
     const resolution = formData.get("resolution") as string | null
     const aspectRatio = formData.get("aspectRatio") as string | null
-    const duration = formData.get("duration") as string | null
+    const durationSeconds = formData.get("durationSeconds") as string | null
+    const personGeneration = formData.get("personGeneration") as string | null
+    const seed = formData.get("seed") as string | null
     const numberOfVideos = formData.get("numberOfVideos") as string | null
 
     // Validate required fields
@@ -25,6 +28,25 @@ export async function POST(request: NextRequest) {
     // Validate prompt length
     if (prompt.length > 1024) {
       return NextResponse.json({ error: "Prompt deve ter no máximo 1024 caracteres" }, { status: 400 })
+    }
+
+    // Validate duration based on mode
+    const duration = durationSeconds ? parseInt(durationSeconds) : 4
+    if (mode === "extension" || mode === "interpolation") {
+      if (duration !== 8) {
+        return NextResponse.json(
+          { error: "Extensão e interpolação requerem duração de 8 segundos" },
+          { status: 400 },
+        )
+      }
+    }
+
+    // Validate resolution for interpolation/extension
+    if ((mode === "extension" || mode === "interpolation") && resolution === "1080p") {
+      return NextResponse.json(
+        { error: "Extensão e interpolação suportam apenas 720p" },
+        { status: 400 },
+      )
     }
 
     // Initialize Google GenAI client (placeholder for now)
@@ -38,7 +60,21 @@ export async function POST(request: NextRequest) {
     // Build config based on mode
     const config: any = {
       resolution: resolution || "720p",
+      aspectRatio: aspectRatio || "16:9",
+      durationSeconds: duration,
       number_of_videos: numberOfVideos ? parseInt(numberOfVideos) : 1,
+    }
+
+    if (negativePrompt) {
+      config.negative_prompt = negativePrompt
+    }
+
+    if (personGeneration) {
+      config.person_generation = personGeneration
+    }
+
+    if (seed) {
+      config.seed = parseInt(seed)
     }
 
     // Create operation ID
@@ -100,6 +136,57 @@ async function generateVideoAsync(
       }
     }, 5000)
 
+    /* 
+    // REAL IMPLEMENTATION (when @google/generative-ai is installed):
+    
+    import time from 'time'
+    import { genai } from '@google/generative-ai'
+    
+    const client = new genai.Client({ apiKey: process.env.GOOGLE_API_KEY })
+    
+    // Start video generation operation
+    let operation = await client.models.generate_videos({
+      model: model,
+      prompt: prompt,
+      config: {
+        negative_prompt: config.negative_prompt,
+        aspect_ratio: config.aspectRatio,
+        resolution: config.resolution,
+        duration_seconds: config.durationSeconds,
+        person_generation: config.person_generation,
+        seed: config.seed,
+        // Add image/video inputs based on mode
+        ...(mode === 'image-to-video' && { image: firstFrameImage }),
+        ...(mode === 'interpolation' && { image: firstFrameImage, last_frame: lastFrameImage }),
+        ...(mode === 'reference-images' && { reference_images: referenceImages }),
+        ...(mode === 'extension' && { video: inputVideo }),
+      }
+    })
+    
+    // Poll operation status every 10 seconds (as per Google documentation)
+    while (!operation.done) {
+      await new Promise(resolve => setTimeout(resolve, 10000)) // 10 seconds
+      
+      // Refresh operation to get latest status
+      operation = await client.operations.get(operation)
+      
+      // Update progress in our store
+      const op = operations.get(operationId)
+      if (op) {
+        op.progress = Math.min(90, op.progress + 5)
+        operations.set(operationId, op)
+      }
+    }
+    
+    // Once done, download the video
+    const generatedVideo = operation.response.generated_videos[0]
+    await client.files.download(generatedVideo.video)
+    
+    // Save video and get URL
+    const videoUrl = await saveVideoToStorage(generatedVideo.video)
+    const thumbnailUrl = await generateThumbnail(videoUrl)
+    */
+
     // TODO: Implement actual Google Veo API call
     // For now, simulate video generation
     await new Promise((resolve) => setTimeout(resolve, 30000)) // 30 seconds simulation
@@ -114,7 +201,7 @@ async function generateVideoAsync(
       finalOperation.video = {
         url: `/api/veo/download?id=${operationId}`,
         thumbnailUrl: `/api/veo/thumbnail?id=${operationId}`,
-        duration: 7,
+        duration: config.durationSeconds || 7,
         resolution: config.resolution || "720p",
         aspectRatio: config.aspectRatio || "16:9",
       }

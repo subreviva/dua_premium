@@ -49,21 +49,36 @@ export interface VeoConfig {
   model: VeoModel
   mode: VeoMode
   prompt: string
-  // Image-to-video
+  
+  // Negative prompt - o que NÃO incluir no vídeo
+  negativePrompt?: string
+  
+  // Image-to-video (first frame)
   firstFrameImage?: File | string
-  // Reference images (up to 3)
+  
+  // Reference images (up to 3) - Veo 3.1 only
   referenceImages?: Array<{
     image: File | string
     referenceType: "asset" | "style"
   }>
-  // Interpolation (first + last frame)
+  
+  // Interpolation (first + last frame) - Veo 3.1 only
   lastFrameImage?: File | string
-  // Extension (extend existing video)
+  
+  // Extension (extend existing video) - Veo 3.1 only
   inputVideo?: File | string
-  // Config
+  
+  // Video settings
   resolution?: "720p" | "1080p"
   aspectRatio?: "16:9" | "9:16"
-  duration?: number // seconds
+  durationSeconds?: 4 | 5 | 6 | 8 // Veo 3.1: 4,6,8 | Veo 3: 4,6,8 | Veo 2: 5,6,8
+  
+  // Person generation control
+  personGeneration?: "allow_all" | "allow_adult" | "dont_allow"
+  
+  // Seed for improved determinism (Veo 3 only)
+  seed?: number
+  
   numberOfVideos?: number
 }
 
@@ -138,7 +153,10 @@ export function useVeoApi() {
       // Add optional config
       if (config.resolution) formData.append("resolution", config.resolution)
       if (config.aspectRatio) formData.append("aspectRatio", config.aspectRatio)
-      if (config.duration) formData.append("duration", config.duration.toString())
+      if (config.durationSeconds) formData.append("durationSeconds", config.durationSeconds.toString())
+      if (config.negativePrompt) formData.append("negativePrompt", config.negativePrompt)
+      if (config.personGeneration) formData.append("personGeneration", config.personGeneration)
+      if (config.seed) formData.append("seed", config.seed.toString())
       if (config.numberOfVideos) formData.append("numberOfVideos", config.numberOfVideos.toString())
 
       // Add files based on mode
@@ -222,7 +240,10 @@ export function useVeoApi() {
         setIsLoading(false)
         setError(err instanceof Error ? err.message : "Erro ao verificar status")
       }
-    }, 10000) // Poll every 10 seconds
+    }, 10000) // Poll every 10 seconds (as per Google documentation)
+
+    // Store interval ID to allow cleanup
+    return pollInterval
   }
 
   const cancelOperation = async (operationId: string) => {

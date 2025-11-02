@@ -14,6 +14,7 @@ import {
   Image as ImageIcon,
   Film,
   X,
+  Settings,
 } from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
@@ -26,11 +27,14 @@ export default function VideoStudioPage() {
 
   // Form state
   const [prompt, setPrompt] = useState("")
+  const [negativePrompt, setNegativePrompt] = useState("")
   const [selectedModel, setSelectedModel] = useState<VeoModel>("veo-3.1-preview")
   const [mode, setMode] = useState<VeoMode>("text-to-video")
   const [resolution, setResolution] = useState<"720p" | "1080p">("720p")
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("16:9")
-  const [duration, setDuration] = useState(5)
+  const [duration, setDuration] = useState<4 | 5 | 6 | 8>(5)
+  const [personGeneration, setPersonGeneration] = useState<"allow_all" | "allow_adult" | "dont_allow">("allow_all")
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   // File inputs
   const [firstFrameImage, setFirstFrameImage] = useState<File | null>(null)
@@ -51,6 +55,7 @@ export default function VideoStudioPage() {
         model: selectedModel,
         mode,
         prompt,
+        negativePrompt: negativePrompt || undefined,
         firstFrameImage: firstFrameImage || undefined,
         lastFrameImage: lastFrameImage || undefined,
         inputVideo: inputVideo || undefined,
@@ -60,7 +65,8 @@ export default function VideoStudioPage() {
             : undefined,
         resolution,
         aspectRatio,
-        duration,
+        durationSeconds: duration,
+        personGeneration,
         numberOfVideos: 1,
       })
     } catch (error) {
@@ -143,6 +149,26 @@ export default function VideoStudioPage() {
                 <span className="text-xs text-white/40">{prompt.length}/1024 caracteres</span>
               </div>
             </div>
+
+            {/* Negative Prompt (Advanced) */}
+            {showAdvanced && (
+              <div className="mb-4">
+                <Textarea
+                  value={negativePrompt}
+                  onChange={(e) => setNegativePrompt(e.target.value)}
+                  placeholder="O que NÃO incluir no vídeo (cartoon, drawing, low quality...)..."
+                  className={cn(
+                    "bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-2xl resize-none focus:ring-2 focus:ring-orange-500/50",
+                    isMobile ? "min-h-[80px] text-base p-4" : "min-h-[60px] text-sm p-4",
+                  )}
+                  maxLength={512}
+                />
+                <div className="flex justify-between items-center mt-2 px-1">
+                  <span className="text-xs text-orange-400/60">Negative Prompt (opcional)</span>
+                  <span className="text-xs text-white/40">{negativePrompt.length}/512</span>
+                </div>
+              </div>
+            )}
 
             {/* Controls */}
             <div className="space-y-4">
@@ -243,14 +269,15 @@ export default function VideoStudioPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v))}>
+                  <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v) as 4 | 5 | 6 | 8)}>
                     <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-sm transition-all">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="3">3s</SelectItem>
+                      <SelectItem value="4">4s</SelectItem>
                       <SelectItem value="5">5s</SelectItem>
-                      <SelectItem value="7">7s</SelectItem>
+                      <SelectItem value="6">6s</SelectItem>
+                      <SelectItem value="8">8s</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -276,14 +303,15 @@ export default function VideoStudioPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v))}>
+                  <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v) as 4 | 5 | 6 | 8)}>
                     <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-3 text-xs sm:text-sm transition-all flex-shrink-0 w-[70px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="3">3s</SelectItem>
+                      <SelectItem value="4">4s</SelectItem>
                       <SelectItem value="5">5s</SelectItem>
-                      <SelectItem value="7">7s</SelectItem>
+                      <SelectItem value="6">6s</SelectItem>
+                      <SelectItem value="8">8s</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -407,16 +435,32 @@ export default function VideoStudioPage() {
 
               {/* Generate Button */}
               <div className="flex items-center justify-between gap-3 pt-2">
-                {veoApi.operation && (
-                  <div className="flex items-center gap-2 text-white/70 text-xs sm:text-sm">
-                    <Clock className="w-3.5 h-3.5 animate-pulse" />
-                    <span>
-                      {veoApi.operation.status === "processing"
-                        ? `Gerando... ${veoApi.operation.progress}%`
-                        : veoApi.operation.status}
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  {veoApi.operation && (
+                    <div className="flex items-center gap-2 text-white/70 text-xs sm:text-sm">
+                      <Clock className="w-3.5 h-3.5 animate-pulse" />
+                      <span>
+                        {veoApi.operation.status === "processing"
+                          ? `Gerando... ${veoApi.operation.progress}%`
+                          : veoApi.operation.status}
+                      </span>
+                    </div>
+                  )}
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className={cn(
+                      "rounded-lg transition-all active:scale-95",
+                      isMobile ? "h-10 w-10 p-0" : "h-9 w-9 p-0",
+                      showAdvanced && "bg-purple-500/20 text-purple-400",
+                    )}
+                    title="Opções Avançadas"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </div>
 
                 <Button
                   disabled={!prompt.trim() || veoApi.isLoading || !canUseMode}
