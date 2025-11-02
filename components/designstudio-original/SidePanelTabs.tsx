@@ -31,38 +31,46 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
 
   return (
     <div className="flex flex-col h-full max-h-full">
-      {/* Tabs */}
-      <div className="border-b border-white/10 bg-black/30 backdrop-blur-sm flex-shrink-0">
-        <nav className="-mb-px flex space-x-1 px-3 md:px-4 pt-3 md:pt-4 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+      {/* Tabs - iOS Premium Style */}
+      <div className="border-b border-white/5 bg-black/20 backdrop-blur-xl flex-shrink-0">
+        <nav className="-mb-px flex gap-2 px-4 md:px-4 pt-4 md:pt-4 overflow-x-auto scrollbar-hide" aria-label="Tabs">
           <button
             onClick={() => setActiveTab('tools')}
             className={cn(
-              'flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-t-lg font-medium text-xs md:text-sm transition-all duration-300 flex-shrink-0',
+              'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
+              'active:scale-95 active:transition-transform active:duration-100',
               activeTab === 'tools'
-                ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-white border-b-2 border-blue-400 shadow-lg'
-                : 'text-white/50 active:text-white active:bg-white/10'
+                ? 'bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 text-white border-blue-400/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
             )}
           >
-            <Wrench className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <Wrench className={cn(
+              "w-4 h-4 transition-transform duration-200",
+              activeTab === 'tools' ? "scale-110" : "scale-100"
+            )} />
             <span className="whitespace-nowrap">Ferramentas</span>
           </button>
           <button
             onClick={() => setActiveTab('history')}
             className={cn(
-              'flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-t-lg font-medium text-xs md:text-sm transition-all duration-300 flex-shrink-0',
+              'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
+              'active:scale-95 active:transition-transform active:duration-100',
               activeTab === 'history'
-                ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-white border-b-2 border-blue-400 shadow-lg'
-                : 'text-white/50 active:text-white active:bg-white/10'
+                ? 'bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 text-white border-blue-400/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
             )}
           >
-            <History className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <History className={cn(
+              "w-4 h-4 transition-transform duration-200",
+              activeTab === 'history' ? "scale-110" : "scale-100"
+            )} />
             <span className="whitespace-nowrap">Histórico</span>
           </button>
         </nav>
       </div>
       
-      {/* Content with perfect scroll */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overscroll-contain">
+      {/* Content with iOS smooth scroll */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="p-4 md:p-6">
           {activeTab === 'tools' ? (
             <ControlPanel {...props} />
@@ -85,9 +93,9 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
         </div>
       </div>
       
-      {/* Error message - fixed at bottom */}
+      {/* Error message - iOS Premium Style */}
       {props.error && (
-        <div className="flex-shrink-0 p-2.5 md:p-3 bg-red-500/20 border-t border-red-500 text-red-300 text-xs md:text-sm mx-3 md:mx-6 mb-3 md:mb-4 rounded-lg">
+        <div className="flex-shrink-0 p-3 md:p-3 bg-gradient-to-r from-red-500/20 to-red-600/20 backdrop-blur-xl border-t border-red-500/40 text-red-200 text-xs md:text-sm mx-3 md:mx-6 mb-3 md:mb-4 rounded-2xl shadow-lg">
           <p><span className="font-semibold">Erro:</span> {props.error}</p>
         </div>
       )}

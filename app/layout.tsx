@@ -16,6 +16,15 @@ export const metadata: Metadata = {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
+    viewportFit: "cover", // iOS Safe Area Support
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "DUA MUSIC",
+  },
+  formatDetection: {
+    telephone: false,
   },
 }
 

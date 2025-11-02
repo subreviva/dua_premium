@@ -41,16 +41,26 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) =
     switch (content.type) {
       case 'empty':
         return (
-          <div className="text-center space-y-4 md:space-y-6 p-4 md:p-8">
+          <div className="text-center space-y-6 md:space-y-8 p-6 md:p-8">
             <div className="relative inline-block">
-              <Sparkles className="w-12 h-12 md:w-16 md:h-16 text-white/40 animate-pulse" />
-              <div className="absolute inset-0 blur-xl bg-blue-500/20 animate-pulse" />
+              {/* iOS Premium Sparkles */}
+              <div className="relative">
+                <Sparkles className="w-16 h-16 md:w-20 md:h-20 text-white/40 animate-pulse" />
+                <div className="absolute inset-0 blur-2xl bg-blue-500/30 animate-pulse"></div>
+                <div className="absolute inset-0 blur-3xl bg-purple-500/20 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl md:text-3xl font-semibold text-white/90">DUA Design Studio</h2>
-              <p className="text-sm md:text-base text-white/50 max-w-md mx-auto px-4">
+            <div className="space-y-3">
+              <h2 className="text-3xl md:text-4xl font-bold text-white/95 tracking-tight">DUA Design Studio</h2>
+              <p className="text-base md:text-lg text-white/60 max-w-md mx-auto px-4 leading-relaxed">
                 Selecione uma ferramenta para começar a criar designs profissionais com IA
               </p>
+            </div>
+            {/* iOS Premium Indicator Dots */}
+            <div className="flex justify-center gap-2 pt-4">
+              <div className="w-2 h-2 rounded-full bg-blue-400/50 animate-pulse"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400/50 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400/50 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
             </div>
           </div>
         );
@@ -95,9 +105,19 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) =
         : "bg-black/30 backdrop-blur-lg border border-white/10 shadow-2xl"
     )}>
       {isLoading && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center z-20 rounded-2xl">
-          <Spinner />
-          <p className="mt-6 text-base md:text-lg text-white/80 animate-pulse font-medium px-4 text-center">{loadingMessage}</p>
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center z-20 rounded-2xl animate-ios-spring">
+          {/* iOS Premium Loading Spinner */}
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-blue-400/80 animate-spin shadow-[0_0_20px_rgba(59,130,246,0.4)]"></div>
+            <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-purple-400/60 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+          </div>
+          {/* Loading Message - iOS Style */}
+          <p className="mt-6 text-base md:text-lg text-white/90 animate-pulse font-medium px-4 text-center tracking-wide">{loadingMessage}</p>
+          <div className="mt-3 flex gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-blue-400/60 animate-bounce" style={{ animationDelay: '0s' }}></div>
+            <div className="w-2 h-2 rounded-full bg-blue-400/60 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 rounded-full bg-blue-400/60 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+          </div>
         </div>
       )}
       {renderContent()}
@@ -105,9 +125,9 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) =
         <button 
           onClick={handleDownload} 
           title="Descarregar" 
-          className="absolute top-3 right-3 md:top-4 md:right-4 z-10 p-2.5 md:p-3 bg-black/60 backdrop-blur-md rounded-xl text-white/80 hover:text-white hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-purple-500/20 transition-all duration-300 border border-white/10 hover:border-white/20 hover:scale-110 active:scale-95 group"
+          className="absolute top-3 right-3 md:top-4 md:right-4 z-10 p-2.5 md:p-3 bg-black/70 backdrop-blur-xl rounded-2xl text-white/80 hover:text-white hover:bg-gradient-to-br hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-300 border border-white/20 hover:border-blue-400/40 hover:scale-110 active:scale-90 group shadow-lg shadow-black/40"
         >
-          <Download className="w-4 h-4 md:w-5 md:h-5 group-hover:animate-bounce" />
+          <Download className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-y-0.5" />
         </button>
       )}
     </div>

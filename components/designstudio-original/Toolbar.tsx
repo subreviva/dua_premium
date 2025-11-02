@@ -60,38 +60,69 @@ const TOOL_NAMES: Record<ToolId, string> = {
 const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolSelect }) => {
   return (
     <>
-      {/* Mobile: Horizontal Toolbar */}
-      <nav className="md:hidden flex items-center bg-black/95 backdrop-blur-xl border-b border-white/10 px-2 py-2 overflow-x-auto overflow-y-hidden scrollbar-hide shadow-lg shadow-black/50">
-        {/* Logo Mobile */}
-        <div className="flex-shrink-0 mr-3 pl-1">
-          <Image
-            src="/dua-logo.png"
-            alt="DUA"
-            width={40}
-            height={40}
-            className="h-10 w-auto object-contain opacity-90"
-          />
+      {/* Mobile: iOS Premium Horizontal Toolbar */}
+      <nav className="md:hidden flex items-center bg-black/80 backdrop-blur-3xl border-b border-white/5 px-4 py-3 overflow-x-auto overflow-y-hidden scrollbar-hide shadow-2xl shadow-black/60">
+        {/* Logo Mobile - iOS Style */}
+        <div className="flex-shrink-0 mr-4">
+          <div className="relative">
+            <Image
+              src="/dua-logo.png"
+              alt="DUA"
+              width={44}
+              height={44}
+              className="h-11 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+            />
+          </div>
         </div>
 
-        {/* Divider */}
-        <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent flex-shrink-0 mr-3" />
+        {/* Divider - iOS Style */}
+        <div className="h-10 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent flex-shrink-0 mr-4" />
 
-        {/* Tools Horizontal Scroll */}
-        <div className="flex items-center space-x-2 flex-1 overflow-x-auto scrollbar-hide">
+        {/* Tools Horizontal Scroll - iOS Premium */}
+        <div className="flex items-center gap-2 flex-1 overflow-x-auto scrollbar-hide">
           {(Object.keys(TOOL_ICONS) as ToolId[]).map((toolId) => (
             <button
               key={toolId}
               onClick={() => onToolSelect(toolId)}
               aria-label={TOOL_NAMES[toolId]}
               className={cn(
-                'flex-shrink-0 p-2.5 rounded-xl transition-all duration-300',
-                'active:scale-95',
-                activeTool === toolId
-                  ? 'bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-white shadow-lg shadow-blue-500/30 border-2 border-blue-400/50'
-                  : 'text-white/60 active:text-white bg-white/5 border border-white/10'
+                'relative flex-shrink-0 group',
+                'transition-all duration-300 ease-out',
+                'active:scale-90 active:transition-transform active:duration-100'
               )}
             >
-              {TOOL_ICONS[toolId]}
+              {/* iOS Premium Button */}
+              <div className={cn(
+                'relative p-3.5 rounded-2xl',
+                'transition-all duration-300',
+                'border shadow-lg',
+                activeTool === toolId
+                  ? [
+                      'bg-gradient-to-br from-blue-500/40 via-blue-600/30 to-purple-500/40',
+                      'border-blue-400/40',
+                      'shadow-[0_0_20px_rgba(59,130,246,0.4)]',
+                      'text-white',
+                    ]
+                  : [
+                      'bg-white/5 backdrop-blur-xl',
+                      'border-white/10',
+                      'hover:bg-white/10 hover:border-white/20',
+                      'text-white/70 hover:text-white',
+                      'shadow-black/20',
+                    ]
+              )}>
+                <div className={cn(
+                  'transition-transform duration-200',
+                  activeTool === toolId ? 'scale-110' : 'scale-100'
+                )}>
+                  {TOOL_ICONS[toolId]}
+                </div>
+              </div>
+
+              {/* Active Indicator - iOS Style Dot */}
+              {activeTool === toolId && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />
+              )}
             </button>
           ))}
         </div>
