@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste API Google Gemini</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px; cursor: pointer; }
+        #result { margin-top: 20px; white-space: pre-wrap; }
+        img { max-width: 500px; margin-top: 20px; border: 2px solid #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste Direto da API Google Gemini</h1>
+    <button onclick="testAPI()">Gerar Imagem REAL</button>
+    <div id="result"></div>
+    <div id="imageContainer"></div>
+
+    <script type="module">
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            const imageContainer = document.getElementById('imageContainer');
+            
+            resultDiv.innerHTML = '⏳ Carregando API key...\n';
+            
+            // Buscar API key do .env.local via servidor
+            const response = await fetch('/api/test-api-key');
+            const data = await response.json();
+            
+            if (!data.hasKey) {
+                resultDiv.innerHTML = '❌ API Key não encontrada!\n';
+                return;
+            }
+            
+            resultDiv.innerHTML += '✅ API Key encontrada\n';
+            resultDiv.innerHTML += '⏳ Importando @google/genai...\n';
+            
+            try {
+                // Importar dinamicamente
+                const { GoogleGenAI } = await import('https://cdn.jsdelivr.net/npm/@google/genai@1.28.0/+esm');
+                
+                resultDiv.innerHTML += '✅ Biblioteca carregada\n';
+                resultDiv.innerHTML += '⏳ Inicializando API...\n';
+                
+                const ai = new GoogleGenAI({ apiKey: data.key, vertexai: false });
+                
+                resultDiv.innerHTML += '✅ API inicializada\n';
+                resultDiv.innerHTML += '🎨 Gerando imagem "a red apple"...\n';
+                resultDiv.innerHTML += '⏳ Aguarde 10-15 segundos...\n\n';
+                
+                const startTime = Date.now();
+                
+                const genResponse = await ai.models.generateImages({
+                    model: 'imagen-4.0-generate-001',
+                    prompt: 'a red apple on a wooden table',
+                    config: {
+                        numberOfImages: 1,
+                        outputMimeType: 'image/png',
+                        aspectRatio: '1:1'
+                    }
+                });
+                
+                const endTime = Date.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(2);
+                
+                const base64 = genResponse.generatedImages[0].image.imageBytes;
+                const size = (base64.length / 1024).toFixed(2);
+                
+                resultDiv.innerHTML += `\n🎉 SUCESSO! Imagem gerada!\n`;
+                resultDiv.innerHTML += `⏱️  Tempo: ${duration}s\n`;
+                resultDiv.innerHTML += `📦 Tamanho: ${size} KB\n`;
+                resultDiv.innerHTML += `✅ Formato: PNG\n`;
+                resultDiv.innerHTML += `🚀 Status: API REAL FUNCIONANDO!\n\n`;
+                
+                // Mostrar imagem
+                const img = document.createElement('img');
+                img.src = `data:image/png;base64,${base64}`;
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(img);
+                
+            } catch (error) {
+                resultDiv.innerHTML += `\n❌ ERRO: ${error.message}\n`;
+                console.error(error);
+            }
+        }
+        
+        window.testAPI = testAPI;
+    </script>
+</body>
+</html>

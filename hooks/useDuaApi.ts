@@ -32,18 +32,39 @@ export const useDuaApi = () => {
 
   const generateImage = useCallback(async (prompt: string, aspectRatio: AspectRatio, config?: GenerationConfig) => {
     startLoading('A gerar a sua obra-prima...');
+    
+    // DEBUG: Log do estado da API
+    console.log('🔍 DEBUG generateImage:', {
+      hasAI: !!ai,
+      hasAPIKey: !!API_KEY,
+      apiKeyLength: API_KEY?.length,
+      prompt: prompt.substring(0, 50)
+    });
+    
     try {
       // MOCK MODE se API não configurada
       if (!ai) {
+        console.warn('⚠️ MODO MOCK ATIVO - API não inicializada!');
         await new Promise(resolve => setTimeout(resolve, 2000));
         const mockImage = `https://picsum.photos/seed/${Date.now()}/1024/1024`;
         return { src: mockImage, mimeType: 'image/jpeg' };
       }
+      
+      console.log('✅ Usando API REAL - Google Imagen 4.0');
 
+      // Melhorar prompt automaticamente para qualidade profissional
       let finalPrompt = prompt;
+      
+      // Adicionar instruções para evitar texto indesejado
+      const enhancedPrompt = `${prompt}, photorealistic, high quality, professional photography, no text, no words, no letters, no watermarks`;
+      
       if (config?.negativePrompt) {
-        finalPrompt = `${prompt}. Avoid the following: ${config.negativePrompt}.`;
+        finalPrompt = `${enhancedPrompt}. Avoid the following: ${config.negativePrompt}, text, words, letters, typography, captions, watermarks.`;
+      } else {
+        finalPrompt = enhancedPrompt;
       }
+      
+      console.log('📝 Prompt final:', finalPrompt);
 
       const response = await ai.models.generateImages({
         model: 'imagen-4.0-generate-001',
