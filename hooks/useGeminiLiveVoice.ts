@@ -1,259 +1,358 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { GoogleGenAI, Modality } from "@google/genai";
 
-// --- Tipos e Constantes ---
+interface UseGeminiLiveVoiceProps {
+  onMessage?: (message: string) => void;
+  onAudio?: (audioData: Blob) => void;
+  systemInstruction?: string;
+  language?: string;
+  voiceName?: string;
+}
 
-const AUDIO_SAMPLE_RATE = 16000; // Taxa de amostragem exigida pelo Gemini
-const VAD_THRESHOLD = 0.1; // Limiar de Volume para Detecção de Atividade de Voz (VAD)
-const VAD_SILENCE_TIMEOUT_MS = 2000; // Tempo em silêncio antes de parar de gravar
-const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
-
-type GeminiLiveRequest = {
-  audio: string; // Base64-encoded audio
-};
-
-type GeminiLiveResponse = {
-  // Define a estrutura da resposta da API conforme a documentação
-  // Exemplo:
-  text?: string;
-  audio?: string; // Resposta de áudio em Base64
-};
-
-type SessionState = 'idle' | 'listening' | 'processing' | 'speaking' | 'error';
-
-type UseGeminiLiveVoiceOptions = {
-  projectId: string;
-  model?: string; // Ex: 'gemini-2.5-flash-native-audio-preview-09-2025'
-  voice?: string; // Ex: 'Aoede'
-  languageCode?: string; // Ex: 'pt-PT'
-  onTranscript?: (transcript: string, isFinal: boolean) => void;
-  onError?: (error: Error) => void;
-};
-
-// --- O Hook Principal ---
+interface SessionMetrics {
+  totalTokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  audioInputTokens: number;
+  audioOutputTokens: number;
+  estimatedCost: number;
+}
 
 export function useGeminiLiveVoice({
-  projectId,
-  model = 'gemini-2.5-flash-native-audio-preview-09-2025',
-  voice = 'Aoede',
-  languageCode = 'pt-PT',
-  onTranscript,
-  onError,
-}: UseGeminiLiveVoiceOptions) {
-  const [sessionState, setSessionState] = useState<SessionState>('idle');
-  const [error, setError] = useState<Error | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
-
-  // Refs para espelhar o estado e evitar closures estagnadas em callbacks não-React
-  const sessionStateRef = useRef(sessionState);
-  useEffect(() => {
-    sessionStateRef.current = sessionState;
-  }, [sessionState]);
-
-  const isMutedRef = useRef(isMuted);
-  useEffect(() => {
-    isMutedRef.current = isMuted;
-  }, [isMuted]);
-
-  // Refs para gerenciar áudio e estado da sessão
+  onMessage,
+  onAudio,
+  systemInstruction = "Você é um assistente português amigável e útil.",
+  language = "pt-PT",
+  voiceName = "Aoede",
+}: UseGeminiLiveVoiceProps) {
+  const sessionRef = useRef<any>(null);
+  const aiRef = useRef<GoogleGenAI | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Refs para áudio
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const audioProcessorRef = useRef<ScriptProcessorNode | null>(null);
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const authTokenRef = useRef<string | null>(null);
-  const audioQueueRef = useRef<Float32Array[]>([]);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
-  // --- Funções de Autenticação ---
+  // Métricas de custo e uso
+  const metricsRef = useRef<SessionMetrics>({
+    totalTokens: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    audioInputTokens: 0,
+    audioOutputTokens: 0,
+    estimatedCost: 0,
+  });
 
-  const fetchAuthToken = useCallback(async () => {
+  // 1. INICIALIZAR SESSÃO
+  const initializeSession = useCallback(async () => {
     try {
-      const response = await fetch('/api/auth/ephemeral-token');
-      if (!response.ok) {
-        throw new Error(`Falha na autenticação: ${response.statusText}`);
-      }
-      const { token } = await response.json();
-      authTokenRef.current = token;
-      return token;
-    } catch (err) {
-      const e = err instanceof Error ? err : new Error('Erro de autenticação desconhecido');
-      setError(e);
-      setSessionState('error');
-      onError?.(e);
-      return null;
-    }
-  }, [onError]);
+      setIsLoading(true);
+      setError(null);
 
-  // --- Funções de Gerenciamento de Áudio ---
-
-  const processAudio = useCallback(async (audioData: Float32Array) => {
-    // Implementação da Detecção de Atividade de Voz (VAD)
-    const volume = Math.sqrt(audioData.reduce((sum, val) => sum + val * val, 0) / audioData.length);
-    
-    if (volume > VAD_THRESHOLD) {
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
-      audioQueueRef.current.push(audioData);
-    } else if (!silenceTimerRef.current) {
-      silenceTimerRef.current = setTimeout(() => {
-        if (audioQueueRef.current.length > 0) {
-          sendAudioToServer();
-        }
-        silenceTimerRef.current = null;
-      }, VAD_SILENCE_TIMEOUT_MS);
-    }
-  }, []);
-
-  const sendAudioToServer = useCallback(async () => {
-    if (audioQueueRef.current.length === 0 || !authTokenRef.current) return;
-
-    setSessionState('processing');
-    
-    // Concatena e converte o áudio para Base64
-    const audioBuffer = new Float32Array(audioQueueRef.current.reduce((len, arr) => len + arr.length, 0));
-    let offset = 0;
-    for (const arr of audioQueueRef.current) {
-      audioBuffer.set(arr, offset);
-      offset += arr.length;
-    }
-    audioQueueRef.current = []; // Limpa a fila
-
-    const pcm16 = new Int16Array(audioBuffer.length);
-    for (let i = 0; i < audioBuffer.length; i++) {
-      pcm16[i] = Math.max(-32768, Math.min(32767, audioBuffer[i] * 32767));
-    }
-    
-    const base64Audio = Buffer.from(pcm16.buffer).toString('base64');
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/projects/${projectId}/locations/global/models/${model}:streamGenerateContent`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${authTokenRef.current}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          audio: base64Audio,
-          // Adicionar outros parâmetros da API aqui
-        }),
+      // Obtém token do backend
+      const tokenResponse = await fetch("/api/auth/ephemeral-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (!response.ok) {
-        throw new Error(`Erro da API: ${response.statusText}`);
+      if (!tokenResponse.ok) {
+        throw new Error("Falha ao obter token de autenticação");
       }
 
-      const data: GeminiLiveResponse = await response.json();
-      
-      // Processar a resposta (transcrição e áudio de volta)
-      if (data.text) {
-        onTranscript?.(data.text, true); // Assumindo que a resposta é final
-      }
-      if (data.audio) {
-        playResponseAudio(data.audio);
-      }
-      setSessionState('listening');
+      const { token, model } = await tokenResponse.json();
 
+      // Cria cliente com token
+      aiRef.current = new GoogleGenAI({
+        apiKey: token,
+        httpOptions: { apiVersion: "v1alpha" },
+      });
+
+      // Configuração otimizada para português
+      const config: any = {
+        responseModalities: [Modality.AUDIO], // Apenas áudio (economiza custos)
+        systemInstruction,
+        speechConfig: {
+          languageCode: language,
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: voiceName,
+            },
+          },
+        },
+        
+        // OTIMIZAÇÃO: Reduz contexto a 32k tokens para economizar
+        // (suficiente para conversa típica)
+        contextWindow: 32000,
+
+        // OTIMIZAÇÃO: Ativa VAD automático (reduz processamento)
+        realtimeInputConfig: {
+          automaticActivityDetection: {
+            disabled: false,
+            startOfSpeechSensitivity: "START_SENSITIVITY_LOW",
+            endOfSpeechSensitivity: "END_SENSITIVITY_LOW",
+            silenceDurationMs: 500, // Aguarda 500ms de silêncio
+          },
+        },
+
+        // OTIMIZAÇÃO: Ativa diálogo afetivo (melhor qualidade)
+        enableAffectiveDialog: true,
+      };
+
+      // Conecta à API
+      sessionRef.current = await aiRef.current.live.connect({
+        model: model,
+        config: config,
+        callbacks: {
+          onopen: () => {
+            console.log("✅ Conexão de voz ao vivo estabelecida");
+            setIsConnected(true);
+            setError(null);
+          },
+          onmessage: (message: any) => {
+            // Processa mensagens do servidor
+            if (message.text) {
+              onMessage?.(message.text);
+            }
+
+            if (message.data) {
+              // Áudio em base64
+              try {
+                const audioBlob = new Blob(
+                  [Buffer.from(message.data, "base64")],
+                  { type: "audio/pcm;rate=24000" }
+                );
+                onAudio?.(audioBlob);
+              } catch (e) {
+                console.error("Erro ao processar áudio:", e);
+              }
+            }
+
+            // Rastreia uso de tokens
+            if (message.usageMetadata) {
+              updateMetrics(message.usageMetadata);
+            }
+          },
+          onerror: (error: any) => {
+            console.error("Erro na sessão de voz:", error);
+            setError(error.message || "Erro desconhecido");
+            setIsConnected(false);
+          },
+          onclose: () => {
+            console.log("❌ Conexão de voz fechada");
+            setIsConnected(false);
+          },
+        },
+      });
+
+      setIsLoading(false);
     } catch (err) {
-      const e = err instanceof Error ? err : new Error('Erro ao enviar áudio');
-      setError(e);
-      setSessionState('error');
-      onError?.(e);
+      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
+      console.error("Erro ao inicializar sessão:", errorMsg);
+      setError(errorMsg);
+      setIsLoading(false);
     }
-  }, [projectId, model, onTranscript, onError]);
+  }, [onMessage, onAudio, systemInstruction, language, voiceName]);
 
-  const playResponseAudio = (base64Audio: string) => {
-    setSessionState('speaking');
-    const audioBlob = new Blob([Buffer.from(base64Audio, 'base64')], { type: 'audio/mpeg' }); // Ajuste o tipo MIME se necessário
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-    audio.play();
-    audio.onended = () => {
-      setSessionState('listening');
-      URL.revokeObjectURL(audioUrl);
-    };
-  };
-
-  // --- Funções de Controle da Sessão ---
-
-  const startSession = useCallback(async () => {
-    if (sessionStateRef.current !== 'idle' && sessionStateRef.current !== 'error') return;
-    
-    setError(null);
-    setSessionState('listening');
-
-    if (!authTokenRef.current) {
-      const token = await fetchAuthToken();
-      if (!token) return; // A autenticação falhou
+  // 2. ENVIAR TEXTO
+  const sendText = useCallback(async (text: string) => {
+    if (!sessionRef.current || !isConnected) {
+      setError("Conexão não estabelecida");
+      return;
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      await sessionRef.current.sendClientContent({
+        turns: {
+          role: "user",
+          parts: [{ text }],
+        },
+        turnComplete: true,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Erro ao enviar";
+      console.error("Erro ao enviar texto:", errorMsg);
+      setError(errorMsg);
+    }
+  }, [isConnected]);
+
+  // 3. INICIAR GRAVAÇÃO DE ÁUDIO
+  const startAudioCapture = useCallback(async () => {
+    try {
+      if (!isConnected) {
+        setError("Conexão não estabelecida. Inicialize primeiro.");
+        return;
+      }
+
+      // Solicita permissão de microfone
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+
       mediaStreamRef.current = stream;
       
-      const context = new AudioContext({ sampleRate: AUDIO_SAMPLE_RATE });
-      audioContextRef.current = context;
-      
-      const source = context.createMediaStreamSource(stream);
-      const processor = context.createScriptProcessor(4096, 1, 1); // bufferSize, inputChannels, outputChannels
+      // Cria contexto de áudio
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
 
-      processor.onaudioprocess = (e) => {
-        // Usa refs para obter o estado mais recente dentro do callback
-        if (sessionStateRef.current === 'listening' && !isMutedRef.current) {
-          const inputData = e.inputBuffer.getChannelData(0);
-          processAudio(new Float32Array(inputData));
+      // Configura pipeline de processamento
+      const source = audioContext.createMediaStreamSource(stream);
+      sourceRef.current = source;
+
+      // Processador de áudio (ScriptProcessorNode - deprecated mas ainda funciona)
+      const bufferSize = 4096;
+      const processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+      processorRef.current = processor;
+
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+
+      // Converte áudio para PCM 16-bit a 16kHz (formato obrigatório)
+      processor.onaudioprocess = async (event) => {
+        const audioData = event.inputBuffer.getChannelData(0);
+        
+        // Reamostra para 16kHz se necessário
+        const resampledData = resampleAudio(audioData, audioContext.sampleRate, 16000);
+
+        // Converte para PCM 16-bit
+        const pcmData = new Int16Array(resampledData.length);
+        for (let i = 0; i < resampledData.length; i++) {
+          pcmData[i] = Math.max(-1, Math.min(1, resampledData[i])) * 0x7FFF;
+        }
+
+        // Envia para Gemini
+        if (sessionRef.current) {
+          try {
+            await sessionRef.current.sendRealtimeInput({
+              audio: {
+                data: Buffer.from(pcmData).toString("base64"),
+                mimeType: "audio/pcm;rate=16000",
+              },
+            });
+          } catch (e) {
+            console.error("Erro ao enviar áudio:", e);
+          }
         }
       };
 
-      source.connect(processor);
-      processor.connect(context.destination); // Conectar ao destino para evitar problemas em alguns navegadores
-      audioProcessorRef.current = processor;
-
+      setIsRecording(true);
+      setError(null);
     } catch (err) {
-      const e = err instanceof Error ? err : new Error('Erro ao iniciar a captura de áudio');
-      setError(e);
-      setSessionState('error');
-      onError?.(e);
+      const errorMsg = err instanceof Error ? err.message : "Erro ao aceder ao microfone";
+      console.error("Erro ao iniciar áudio:", errorMsg);
+      setError(errorMsg);
     }
-  }, [fetchAuthToken, processAudio, onError]);
+  }, [isConnected]);
 
-  const stopSession = useCallback(() => {
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      mediaStreamRef.current = null;
+  // 4. PARAR GRAVAÇÃO
+  const stopAudioCapture = useCallback(() => {
+    // Desconecta processador
+    if (processorRef.current && audioContextRef.current) {
+      processorRef.current.disconnect();
+      sourceRef.current?.disconnect();
     }
+
+    // Fecha contexto de áudio
     if (audioContextRef.current) {
       audioContextRef.current.close();
-      audioContextRef.current = null;
     }
-    if (audioProcessorRef.current) {
-      audioProcessorRef.current.disconnect();
-      audioProcessorRef.current = null;
+
+    // Para stream
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
     }
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
+
+    // Sinaliza fim do stream
+    if (sessionRef.current) {
+      try {
+        sessionRef.current.sendRealtimeInput({ audioStreamEnd: true });
+      } catch (e) {
+        console.error("Erro ao sinalizar fim:", e);
+      }
     }
-    audioQueueRef.current = [];
-    setSessionState('idle');
+
+    setIsRecording(false);
   }, []);
 
-  const toggleMute = () => {
-    setIsMuted(prev => !prev);
+  // 5. FECHAR SESSÃO
+  const closeSession = useCallback(() => {
+    stopAudioCapture();
+    
+    if (sessionRef.current) {
+      try {
+        sessionRef.current.close();
+      } catch (e) {
+        console.error("Erro ao fechar sessão:", e);
+      }
+      sessionRef.current = null;
+    }
+
+    setIsConnected(false);
+  }, [stopAudioCapture]);
+
+  // Função auxiliar: reamostragem de áudio
+  const resampleAudio = (data: Float32Array, originalRate: number, targetRate: number) => {
+    if (originalRate === targetRate) return data;
+
+    const ratio = originalRate / targetRate;
+    const newLength = Math.round(data.length / ratio);
+    const result = new Float32Array(newLength);
+
+    for (let i = 0; i < newLength; i++) {
+      const idx = i * ratio;
+      const lower = Math.floor(idx);
+      const upper = Math.ceil(idx);
+      const fraction = idx - lower;
+
+      result[i] = data[lower] * (1 - fraction) + data[upper] * fraction;
+    }
+
+    return result;
   };
 
-  // Efeito para limpar a sessão ao desmontar o componente
+  // Atualiza métricas de custo
+  const updateMetrics = (usageMetadata: any) => {
+    if (!usageMetadata) return;
+
+    metricsRef.current.totalTokens = usageMetadata.totalTokenCount || 0;
+    
+    // Calcula custo (native audio rates)
+    const inputAudioCost = (usageMetadata.inputTokenCount || 0) * (3.0 / 1_000_000); // $3/M tokens
+    const outputAudioCost = (usageMetadata.outputTokenCount || 0) * (12.0 / 1_000_000); // $12/M tokens
+    
+    metricsRef.current.estimatedCost = inputAudioCost + outputAudioCost;
+  };
+
+  // Cleanup na desmontagem
   useEffect(() => {
     return () => {
-      stopSession();
+      closeSession();
     };
-  }, [stopSession]);
+  }, [closeSession]);
 
   return {
-    sessionState,
+    // Ações
+    initializeSession,
+    sendText,
+    startAudioCapture,
+    stopAudioCapture,
+    closeSession,
+
+    // Estados
+    isConnected,
+    isRecording,
+    isLoading,
     error,
-    isMuted,
-    startSession,
-    stopSession,
-    toggleMute,
+
+    // Métricas
+    metrics: metricsRef.current,
   };
 }
