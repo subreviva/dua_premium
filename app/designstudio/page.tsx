@@ -83,8 +83,8 @@ export default function DesignStudioPage() {
   return (
     <ToastProvider>
       <div className="design-studio-container flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900">
-        {/* Mobile: iOS Premium Toolbar - Fixed top com blur e shadow */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-50 safe-top">
+        {/* Mobile: iOS Premium Toolbar - Fixed top */}
+        <div className="md:hidden fixed top-0 left-0 right-0 z-30" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
           <div className="bg-black/90 backdrop-blur-3xl border-b border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
             <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
           </div>
@@ -96,43 +96,20 @@ export default function DesignStudioPage() {
         </div>
         
         {/* Canvas - iOS Premium Scroll com bounce */}
-        <main className="flex-1 flex items-start md:items-center justify-center transition-all duration-300 relative overflow-y-auto overflow-x-hidden md:p-8 safe-top safe-bottom">
+        <main className="flex-1 flex items-start md:items-center justify-center transition-all duration-300 relative overflow-y-auto overflow-x-hidden md:p-8">
           <style jsx>{`
-            /* iOS Bounce Scroll & Safe Areas */
-            .safe-top {
-              padding-top: env(safe-area-inset-top);
-            }
-            .safe-bottom {
-              padding-bottom: env(safe-area-inset-bottom);
-            }
+            /* iOS Bounce Scroll */
             main {
               -webkit-overflow-scrolling: touch;
               overscroll-behavior-y: contain;
             }
             @media (max-width: 768px) {
               main {
-                padding-top: calc(env(safe-area-inset-top) + 4.5rem);
-                padding-bottom: calc(env(safe-area-inset-bottom) + 24rem);
+                padding-top: calc(env(safe-area-inset-top) + 4rem);
+                padding-bottom: calc(env(safe-area-inset-bottom) + 20rem);
                 padding-left: 1rem;
                 padding-right: 1rem;
               }
-            }
-            /* iOS Spring Animation */
-            @keyframes ios-spring {
-              0% { transform: translateY(100%); }
-              60% { transform: translateY(-2%); }
-              80% { transform: translateY(1%); }
-              100% { transform: translateY(0); }
-            }
-            .animate-ios-spring {
-              animation: ios-spring 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-            /* Drag Handle Glow */
-            .drag-handle {
-              box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-            }
-            .drag-handle:active {
-              box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
             }
           `}</style>
           <div className="w-full max-w-7xl">
@@ -144,33 +121,28 @@ export default function DesignStudioPage() {
           </div>
         </main>
 
-        {/* Mobile: iOS Bottom Sheet Premium - Glassmorphism Elite */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 safe-bottom animate-ios-spring">
-          <div className="relative">
-            {/* iOS Drag Handle - Interactive */}
-            <div className="absolute -top-6 left-0 right-0 flex justify-center py-2 pointer-events-none">
-              <div className="drag-handle w-10 h-1 bg-white/30 rounded-full backdrop-blur-xl transition-all duration-200 active:w-12 active:h-1.5 active:bg-white/50"></div>
-            </div>
-            
-            {/* Bottom Sheet - Ultra Premium Glassmorphism */}
-            <aside className="w-full bg-gradient-to-b from-black/96 via-black/98 to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-15px_50px_rgba(0,0,0,0.95)] rounded-t-3xl max-h-[70vh] transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-              <SidePanelTabs
-                activeTool={activeTool}
-                canvasContent={canvasContent}
-                onContentUpdate={handleContentUpdate}
-                api={api}
-                isLoading={api.isLoading}
-                error={api.error}
-                history={history}
-                historyIndex={historyIndex}
-                sessionGallery={sessionGallery}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                onSelectHistory={setCanvasFromHistoryOrGallery}
-                onClearSession={handleClearSession}
-              />
-            </aside>
-          </div>
+        {/* Mobile: iOS Bottom Sheet Premium - Fixed Position */}
+        <div 
+          className="md:hidden fixed bottom-0 left-0 right-0 z-20"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          <aside className="w-full bg-gradient-to-b from-black/96 via-black/98 to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-15px_50px_rgba(0,0,0,0.95)] rounded-t-3xl max-h-[65vh]">
+            <SidePanelTabs
+              activeTool={activeTool}
+              canvasContent={canvasContent}
+              onContentUpdate={handleContentUpdate}
+              api={api}
+              isLoading={api.isLoading}
+              error={api.error}
+              history={history}
+              historyIndex={historyIndex}
+              sessionGallery={sessionGallery}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onSelectHistory={setCanvasFromHistoryOrGallery}
+              onClearSession={handleClearSession}
+            />
+          </aside>
         </div>
 
         {/* Desktop: Painel lateral direito */}
