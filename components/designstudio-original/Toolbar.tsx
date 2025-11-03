@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ToolId } from '@/types/designstudio';
 import { 
   ImagePlus, 
@@ -15,10 +15,14 @@ import {
   Copy, 
   ScanEye, 
   TrendingUp, 
-  Bot 
+  Bot,
+  Menu,
+  X,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ToolbarProps {
   activeTool: ToolId | null;
@@ -57,76 +61,200 @@ const TOOL_NAMES: Record<ToolId, string> = {
   'export-project': 'Exportar',
 };
 
+// Categorias iOS - Agrupamento inteligente
+const TOOL_CATEGORIES = [
+  {
+    id: 'create',
+    name: 'Criar',
+    icon: <Sparkles className="w-5 h-5" />,
+    tools: ['generate-image', 'generate-logo', 'generate-icon', 'generate-svg', 'generate-pattern'] as ToolId[],
+  },
+  {
+    id: 'edit',
+    name: 'Editar',
+    icon: <Wand2 className="w-5 h-5" />,
+    tools: ['edit-image', 'generate-variations', 'color-palette'] as ToolId[],
+  },
+  {
+    id: 'tools',
+    name: 'Ferramentas',
+    icon: <Package className="w-5 h-5" />,
+    tools: ['product-mockup', 'analyze-image', 'export-project'] as ToolId[],
+  },
+  {
+    id: 'ai',
+    name: 'IA',
+    icon: <Bot className="w-5 h-5" />,
+    tools: ['design-trends', 'design-assistant'] as ToolId[],
+  },
+];
+
 const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolSelect }) => {
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+
+  const handleToolSelect = (toolId: ToolId) => {
+    onToolSelect(toolId);
+    setShowMobileMenu(false);
+    setExpandedCategory(null);
+  };
+
   return (
     <>
-      {/* Mobile: iOS Premium Horizontal Toolbar */}
-      <nav className="md:hidden flex items-center bg-black/80 backdrop-blur-3xl border-b border-white/5 px-4 py-3 overflow-x-auto overflow-y-hidden scrollbar-hide shadow-2xl shadow-black/60">
-        {/* Logo Mobile - iOS Style */}
-        <div className="flex-shrink-0 mr-4">
-          <div className="relative">
-            <Image
-              src="/dua-logo.png"
-              alt="DUA"
-              width={44}
-              height={44}
-              className="h-11 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
-            />
+      {/* Mobile: iOS ULTRA Premium Compact Toolbar */}
+      <nav className="md:hidden flex items-center justify-between bg-black/90 backdrop-blur-3xl border-b border-white/10 px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+        {/* Logo + Title - iOS Style */}
+        <div className="flex items-center gap-3">
+          <Image
+            src="/dua-logo.png"
+            alt="DUA"
+            width={40}
+            height={40}
+            className="h-10 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+          />
+          <div className="flex flex-col">
+            <h1 className="text-white font-semibold text-base leading-tight">Design Studio</h1>
+            {activeTool && (
+              <span className="text-white/50 text-xs">{TOOL_NAMES[activeTool]}</span>
+            )}
           </div>
         </div>
 
-        {/* Divider - iOS Style */}
-        <div className="h-10 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent flex-shrink-0 mr-4" />
+        {/* Menu Button - iOS Premium */}
+        <button
+          onClick={() => setShowMobileMenu(true)}
+          className={cn(
+            "relative p-2.5 rounded-xl transition-all active:scale-90",
+            "bg-white/10 hover:bg-white/20 backdrop-blur-xl",
+            "border border-white/20 shadow-lg"
+          )}
+        >
+          <Menu className="w-5 h-5 text-white" />
+          {activeTool && (
+            <div className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+          )}
+        </button>
+      </nav>
 
-        {/* Tools Horizontal Scroll - iOS Premium */}
-        <div className="flex items-center gap-2 flex-1 overflow-x-auto scrollbar-hide">
-          {(Object.keys(TOOL_ICONS) as ToolId[]).map((toolId) => (
-            <button
-              key={toolId}
-              onClick={() => onToolSelect(toolId)}
-              aria-label={TOOL_NAMES[toolId]}
-              className={cn(
-                'relative flex-shrink-0 group',
-                'transition-all duration-300 ease-out',
-                'active:scale-90 active:transition-transform active:duration-100'
-              )}
+      {/* Mobile: Full Screen Menu - iOS Modal Style */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl"
+            onClick={() => setShowMobileMenu(false)}
+          >
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="h-full flex flex-col"
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* iOS Premium Button */}
-              <div className={cn(
-                'relative p-3.5 rounded-2xl',
-                'transition-all duration-300',
-                'border shadow-lg',
-                activeTool === toolId
-                  ? [
-                      'bg-gradient-to-br from-blue-500/40 via-blue-600/30 to-purple-500/40',
-                      'border-blue-400/40',
-                      'shadow-[0_0_20px_rgba(59,130,246,0.4)]',
-                      'text-white',
-                    ]
-                  : [
-                      'bg-white/5 backdrop-blur-xl',
-                      'border-white/10',
-                      'hover:bg-white/10 hover:border-white/20',
-                      'text-white/70 hover:text-white',
-                      'shadow-black/20',
-                    ]
-              )}>
-                <div className={cn(
-                  'transition-transform duration-200',
-                  activeTool === toolId ? 'scale-110' : 'scale-100'
-                )}>
-                  {TOOL_ICONS[toolId]}
+              {/* Header - iOS Style */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <h2 className="text-white font-semibold text-lg">Ferramentas</h2>
+                <button
+                  onClick={() => setShowMobileMenu(false)}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 transition-all"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+
+              {/* Categories - iOS Premium List */}
+              <div className="flex-1 overflow-y-auto px-4 py-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="space-y-3">
+                  {TOOL_CATEGORIES.map((category) => (
+                    <div key={category.id} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
+                      {/* Category Header */}
+                      <button
+                        onClick={() => setExpandedCategory(expandedCategory === category.id ? null : category.id)}
+                        className="w-full flex items-center justify-between p-4 hover:bg-white/5 active:bg-white/10 transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl border border-blue-400/30">
+                            {category.icon}
+                          </div>
+                          <span className="text-white font-medium">{category.name}</span>
+                          <span className="text-white/40 text-sm">({category.tools.length})</span>
+                        </div>
+                        <ChevronRight 
+                          className={cn(
+                            "w-5 h-5 text-white/50 transition-transform",
+                            expandedCategory === category.id && "rotate-90"
+                          )} 
+                        />
+                      </button>
+
+                      {/* Category Tools - Expanded */}
+                      <AnimatePresence>
+                        {expandedCategory === category.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="border-t border-white/10"
+                          >
+                            <div className="p-2 space-y-1">
+                              {category.tools.map((toolId) => (
+                                <button
+                                  key={toolId}
+                                  onClick={() => handleToolSelect(toolId)}
+                                  className={cn(
+                                    "w-full flex items-center gap-3 p-3 rounded-xl transition-all",
+                                    "active:scale-95",
+                                    activeTool === toolId
+                                      ? "bg-gradient-to-r from-blue-500/30 to-purple-500/30 border border-blue-400/40"
+                                      : "bg-white/5 hover:bg-white/10 border border-transparent"
+                                  )}
+                                >
+                                  <div className={cn(
+                                    "p-2 rounded-lg",
+                                    activeTool === toolId
+                                      ? "bg-blue-500/20"
+                                      : "bg-white/5"
+                                  )}>
+                                    {TOOL_ICONS[toolId]}
+                                  </div>
+                                  <span className={cn(
+                                    "font-medium",
+                                    activeTool === toolId ? "text-white" : "text-white/80"
+                                  )}>
+                                    {TOOL_NAMES[toolId]}
+                                  </span>
+                                  {activeTool === toolId && (
+                                    <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Active Indicator - iOS Style Dot */}
-              {activeTool === toolId && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />
-              )}
-            </button>
-          ))}
-        </div>
-      </nav>
+              {/* Footer - iOS Safe Area */}
+              <div className="px-5 py-4 border-t border-white/10" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+                <button
+                  onClick={() => setShowMobileMenu(false)}
+                  className="w-full py-3.5 bg-white/10 hover:bg-white/20 rounded-xl text-white font-medium transition-all active:scale-95"
+                >
+                  Fechar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Desktop: Vertical Toolbar */}
       <nav className="hidden md:flex flex-col items-center bg-black/40 backdrop-blur-xl border-r border-white/5 p-3 space-y-2 min-w-[80px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
