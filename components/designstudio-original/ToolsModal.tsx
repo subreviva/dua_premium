@@ -45,17 +45,17 @@ const TOOL_ICONS: Record<ToolId, React.ReactNode> = {
 
 const TOOL_NAMES: Record<ToolId, string> = {
   'generate-image': 'Gerar Imagem',
-  'edit-image': 'Editar Imagem',
-  'generate-logo': 'Gerar Logo',
-  'generate-icon': 'Gerar Ícone',
-  'generate-svg': 'Gerar SVG',
-  'generate-pattern': 'Gerar Padrão',
-  'product-mockup': 'Mockup Produto',
-  'color-palette': 'Paleta Cores',
+  'edit-image': 'Editar',
+  'generate-logo': 'Logo',
+  'generate-icon': 'Ícone',
+  'generate-svg': 'SVG',
+  'generate-pattern': 'Padrão',
+  'product-mockup': 'Mockup',
+  'color-palette': 'Cores',
   'generate-variations': 'Variações',
-  'analyze-image': 'Analisar Imagem',
-  'design-trends': 'Tendências',
-  'design-assistant': 'Assistente',
+  'analyze-image': 'Analisar',
+  'design-trends': 'Trends',
+  'design-assistant': 'Assistente IA',
   'export-project': 'Exportar',
 };
 
@@ -99,107 +99,112 @@ const ToolsModal: React.FC<ToolsModalProps> = ({ isOpen, onClose, activeTool, on
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-2xl"
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 z-[9999] bg-black/96 backdrop-blur-3xl"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="h-full flex flex-col"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+            transition={{ type: "spring", damping: 35, stiffness: 400 }}
+            className="h-full flex flex-col max-w-lg mx-auto"
             style={{ 
-              paddingTop: 'env(safe-area-inset-top)',
-              paddingBottom: 'env(safe-area-inset-bottom)'
+              paddingTop: 'calc(env(safe-area-inset-top) + 1rem)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)',
+              paddingLeft: '1rem',
+              paddingRight: '1rem'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl flex-shrink-0">
-              <h2 className="text-white font-semibold text-xl">Ferramentas</h2>
+            {/* Header - iOS Clean */}
+            <div className="flex items-center justify-between mb-6 flex-shrink-0">
+              <h2 className="text-white font-bold text-2xl tracking-tight">Ferramentas</h2>
               <button
                 onClick={onClose}
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 transition-all flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center border border-white/10"
               >
-                <X className="w-5 h-5 text-white" />
+                <X className="w-5 h-5 text-white/90" />
               </button>
             </div>
 
-            {/* Tools List - iOS Premium Flat List */}
-            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-              <div className="px-4 py-4">
-                {TOOL_CATEGORIES.map((category, idx) => (
-                  <div key={category.id} className={cn("mb-6", idx === TOOL_CATEGORIES.length - 1 && "mb-4")}>
-                    <div className="flex items-center gap-2 px-2 mb-3">
-                      {category.icon}
-                      <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider">{category.name}</h3>
-                    </div>
-                    <div className="space-y-1.5">
-                      {category.tools.map((toolId) => {
-                        const isActive = activeTool === toolId;
-                        const gradientColors = {
-                          create: isActive ? "from-blue-500/20 to-purple-500/20 border-blue-400/40 shadow-blue-500/20" : "",
-                          edit: isActive ? "from-purple-500/20 to-pink-500/20 border-purple-400/40 shadow-purple-500/20" : "",
-                          tools: isActive ? "from-cyan-500/20 to-blue-500/20 border-cyan-400/40 shadow-cyan-500/20" : "",
-                          ai: isActive ? "from-pink-500/20 to-rose-500/20 border-pink-400/40 shadow-pink-500/20" : "",
-                        }[category.id];
+            {/* Tools Grid - iOS Premium Card Style */}
+            <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <div className="grid grid-cols-3 gap-3 pb-6">
+                {TOOL_CATEGORIES.map((category) => (
+                  category.tools.map((toolId) => {
+                    const isActive = activeTool === toolId;
+                    
+                    const categoryColors = {
+                      create: {
+                        active: "from-blue-500/25 to-purple-500/25 border-blue-400/50",
+                        icon: "from-blue-500/40 to-purple-500/40",
+                        glow: "shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                      },
+                      edit: {
+                        active: "from-purple-500/25 to-pink-500/25 border-purple-400/50",
+                        icon: "from-purple-500/40 to-pink-500/40",
+                        glow: "shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+                      },
+                      tools: {
+                        active: "from-cyan-500/25 to-blue-500/25 border-cyan-400/50",
+                        icon: "from-cyan-500/40 to-blue-500/40",
+                        glow: "shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                      },
+                      ai: {
+                        active: "from-pink-500/25 to-rose-500/25 border-pink-400/50",
+                        icon: "from-pink-500/40 to-rose-500/40",
+                        glow: "shadow-[0_0_20px_rgba(244,114,182,0.3)]"
+                      }
+                    }[category.id] || {
+                      active: "from-gray-500/25 to-gray-600/25 border-gray-400/50",
+                      icon: "from-gray-500/40 to-gray-600/40",
+                      glow: "shadow-[0_0_20px_rgba(128,128,128,0.3)]"
+                    };
 
-                        const iconGradient = {
-                          create: isActive ? "from-blue-500/30 to-purple-500/30" : "",
-                          edit: isActive ? "from-purple-500/30 to-pink-500/30" : "",
-                          tools: isActive ? "from-cyan-500/30 to-blue-500/30" : "",
-                          ai: isActive ? "from-pink-500/30 to-rose-500/30" : "",
-                        }[category.id];
-
-                        const dotColor = {
-                          create: "bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)]",
-                          edit: "bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]",
-                          tools: "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]",
-                          ai: "bg-pink-400 shadow-[0_0_8px_rgba(244,114,182,0.8)]",
-                        }[category.id];
-
-                        return (
-                          <button
-                            key={toolId}
-                            onClick={() => handleToolSelect(toolId)}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all",
-                              "active:scale-98",
-                              isActive
-                                ? `bg-gradient-to-r ${gradientColors} border shadow-lg`
-                                : "bg-white/5 hover:bg-white/8 border border-white/10"
-                            )}
-                          >
-                            <div className={cn(
-                              "w-10 h-10 rounded-xl flex items-center justify-center",
-                              isActive ? `bg-gradient-to-br ${iconGradient}` : "bg-white/10"
-                            )}>
-                              {TOOL_ICONS[toolId]}
-                            </div>
-                            <span className={cn(
-                              "font-medium text-base flex-1 text-left",
-                              isActive ? "text-white" : "text-white/80"
-                            )}>
-                              {TOOL_NAMES[toolId]}
-                            </span>
-                            {isActive && (
-                              <div className={cn("w-2 h-2 rounded-full", dotColor)} />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                    return (
+                      <button
+                        key={toolId}
+                        onClick={() => handleToolSelect(toolId)}
+                        className={cn(
+                          "flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all",
+                          "active:scale-95 min-h-[110px]",
+                          isActive
+                            ? `bg-gradient-to-br ${categoryColors.active} border-2 ${categoryColors.glow}`
+                            : "bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-white/20"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
+                          isActive 
+                            ? `bg-gradient-to-br ${categoryColors.icon} scale-110` 
+                            : "bg-white/10"
+                        )}>
+                          <div className={cn(
+                            "transition-all",
+                            isActive ? "text-white" : "text-white/70"
+                          )}>
+                            {TOOL_ICONS[toolId]}
+                          </div>
+                        </div>
+                        <span className={cn(
+                          "text-xs font-semibold text-center leading-tight px-1",
+                          isActive ? "text-white" : "text-white/70"
+                        )}>
+                          {TOOL_NAMES[toolId]}
+                        </span>
+                      </button>
+                    );
+                  })
                 ))}
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="px-5 py-4 border-t border-white/10 bg-black/40 backdrop-blur-xl flex-shrink-0">
+            {/* Footer - iOS Native */}
+            <div className="pt-4 flex-shrink-0">
               <button
                 onClick={onClose}
-                className="w-full py-3.5 bg-white/10 hover:bg-white/15 rounded-xl text-white font-medium transition-all active:scale-95"
+                className="w-full py-4 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-2xl text-white font-semibold text-base transition-all active:scale-98 border border-white/10"
               >
                 Fechar
               </button>
