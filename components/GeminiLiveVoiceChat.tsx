@@ -2,11 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useGeminiLiveVoice } from "@/hooks/useGeminiLiveVoice";
-import { X, Mic } from "lucide-react";
+import { X } from "lucide-react";
 
 export default function GeminiLiveVoiceChat({ onClose }: { onClose: () => void }) {
-  const [transcript, setTranscript] = useState<string>("");
-  const [aiResponse, setAiResponse] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const {
@@ -16,7 +14,6 @@ export default function GeminiLiveVoiceChat({ onClose }: { onClose: () => void }
     closeSession,
     isConnected,
     isRecording,
-    isLoading,
     error,
   } = useGeminiLiveVoice({
     systemInstruction: `Você é o DUA, um assistente de IA premium e sofisticado. 
@@ -24,9 +21,8 @@ export default function GeminiLiveVoiceChat({ onClose }: { onClose: () => void }
     Mantenha as respostas breves (1-2 frases) para uma experiência fluida em tempo real.`,
     language: "pt-PT",
     voiceName: "Aoede",
-    onMessage: (message) => {
-      setAiResponse(message);
-      setTranscript("");
+    onMessage: () => {
+      // Apenas recebe a mensagem, sem exibir texto
     },
     onAudio: (audioBlob) => {
       if (audioRef.current) {
@@ -59,117 +55,90 @@ export default function GeminiLiveVoiceChat({ onClose }: { onClose: () => void }
     onClose();
   };
 
-  // Determina o estado visual
-  const getStatus = () => {
-    if (error) return { text: "Erro na conexão", color: "text-red-400" };
-    if (!isConnected) return { text: "A conectar...", color: "text-yellow-400" };
-    if (isRecording && transcript) return { text: transcript, color: "text-blue-400" };
-    if (aiResponse) return { text: aiResponse, color: "text-purple-400" };
-    return { text: "A ouvir...", color: "text-green-400" };
-  };
-
-  const status = getStatus();
-
   return (
-    <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
+    <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center touch-none">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950/20 to-black" />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950/10 to-black" />
       
-      {/* Ambient glow */}
+      {/* Ambient glow - adapta ao estado */}
       <div className="absolute inset-0 overflow-hidden">
         <div 
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] transition-all duration-1000 ${
-            isRecording ? "bg-blue-500/20" : "bg-purple-500/20"
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[150px] transition-all duration-1000 ${
+            !isConnected 
+              ? "w-[400px] h-[400px] bg-yellow-500/10"
+              : isRecording 
+                ? "w-[600px] h-[600px] bg-blue-500/15 animate-pulse" 
+                : "w-[500px] h-[500px] bg-purple-500/15"
           }`}
         />
       </div>
 
-      {/* Close button */}
+      {/* Close button - minimal */}
       <button
         onClick={handleClose}
-        className="absolute top-8 right-8 z-50 p-3 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 transition-all duration-300 group"
+        className="absolute top-6 right-6 z-50 p-2.5 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 transition-all duration-300 active:scale-95"
       >
-        <X className="w-6 h-6 text-white/70 group-hover:text-white transition-colors" />
+        <X className="w-5 h-5 text-white/60" />
       </button>
 
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center justify-center gap-12 px-8 max-w-4xl mx-auto">
+      {/* Main orb */}
+      <div className="relative">
+        {/* Outer pulse ring - só quando conectado e gravando */}
+        {isConnected && isRecording && (
+          <div className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping" />
+        )}
         
-        {/* Orb container */}
-        <div className="relative">
-          {/* Outer ring - pulses when listening */}
-          <div 
-            className={`absolute inset-0 rounded-full transition-all duration-700 ${
-              isRecording 
-                ? "scale-150 opacity-0 animate-ping bg-blue-500/30" 
-                : "scale-100 opacity-0"
-            }`}
-          />
+        {/* Middle glow ring */}
+        <div 
+          className={`absolute -inset-8 md:-inset-12 rounded-full transition-all duration-700 ${
+            !isConnected
+              ? "bg-yellow-500/10 blur-2xl"
+              : isRecording 
+                ? "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 blur-3xl animate-pulse" 
+                : "bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-3xl"
+          }`}
+        />
+        
+        {/* Main orb - responsive */}
+        <div 
+          className={`relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center transition-all duration-700 ${
+            !isConnected
+              ? "bg-gradient-to-br from-yellow-600 to-yellow-800 shadow-[0_0_100px_rgba(234,179,8,0.4)]"
+              : isRecording
+                ? "bg-gradient-to-br from-blue-600 to-blue-900 shadow-[0_0_120px_rgba(59,130,246,0.5)] scale-105"
+                : "bg-gradient-to-br from-purple-600 to-purple-900 shadow-[0_0_100px_rgba(168,85,247,0.5)]"
+          }`}
+        >
+          {/* Inner glow */}
+          <div className={`absolute inset-8 md:inset-12 rounded-full transition-all duration-700 ${
+            !isConnected
+              ? "bg-gradient-to-br from-yellow-400 to-yellow-600 blur-3xl opacity-50"
+              : isRecording 
+                ? "bg-gradient-to-br from-blue-400 to-blue-600 blur-3xl opacity-60 animate-pulse"
+                : "bg-gradient-to-br from-purple-400 to-purple-600 blur-3xl opacity-50"
+          }`} />
           
-          {/* Middle ring */}
-          <div 
-            className={`absolute -inset-4 rounded-full transition-all duration-500 ${
-              isRecording 
-                ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-xl animate-pulse" 
-                : "bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl"
-            }`}
-          />
-          
-          {/* Main orb */}
-          <div 
-            className={`relative w-64 h-64 rounded-full flex items-center justify-center transition-all duration-700 ${
-              isRecording
-                ? "bg-gradient-to-br from-blue-600 to-blue-800 shadow-[0_0_80px_rgba(59,130,246,0.5)]"
-                : "bg-gradient-to-br from-purple-600 to-purple-900 shadow-[0_0_80px_rgba(168,85,247,0.5)]"
-            }`}
-          >
-            {/* Inner glow */}
-            <div className={`absolute inset-8 rounded-full transition-all duration-700 ${
-              isRecording 
-                ? "bg-gradient-to-br from-blue-400 to-blue-600 blur-2xl opacity-60 animate-pulse"
-                : "bg-gradient-to-br from-purple-400 to-purple-600 blur-2xl opacity-60"
-            }`} />
-            
-            {/* Logo text */}
-            <span className="relative text-7xl font-bold text-white tracking-wider drop-shadow-2xl">
-              DUA
-            </span>
-          </div>
+          {/* Logo text - responsive */}
+          <span className="relative text-6xl sm:text-7xl md:text-8xl font-bold text-white tracking-wider drop-shadow-2xl">
+            DUA
+          </span>
 
-          {/* Microphone indicator */}
-          {isRecording && (
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/20 backdrop-blur-xl border border-blue-500/30 animate-in fade-in slide-in-from-bottom-4">
-              <Mic className="w-4 h-4 text-blue-400 animate-pulse" />
-              <span className="text-sm text-blue-300 font-medium">A ouvir</span>
+          {/* Connection status indicator - minimal dot */}
+          {!isConnected && (
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 animate-pulse">
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animation-delay-150" />
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animation-delay-300" />
+            </div>
+          )}
+
+          {/* Error indicator */}
+          {error && (
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             </div>
           )}
         </div>
-
-        {/* Status text */}
-        <div className="text-center space-y-3 max-w-2xl">
-          <p className={`text-2xl font-medium transition-all duration-500 ${status.color} min-h-[32px]`}>
-            {status.text}
-          </p>
-          
-          {!isConnected && !error && (
-            <p className="text-sm text-white/40 animate-pulse">
-              A estabelecer conexão...
-            </p>
-          )}
-          
-          {error && (
-            <p className="text-sm text-red-400/80">
-              {error}
-            </p>
-          )}
-        </div>
-
-        {/* Subtle hint */}
-        {isConnected && !error && (
-          <p className="text-sm text-white/30 text-center animate-in fade-in duration-1000 delay-500">
-            Fale naturalmente, o DUA está a ouvir
-          </p>
-        )}
       </div>
 
       {/* Audio element */}
