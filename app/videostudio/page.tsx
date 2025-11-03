@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { Video, Loader2, PlayCircle, Clock, Image as ImageIcon, Film, Settings, Sparkles } from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
+import { VideoModal } from "@/components/ui/video-modal"
 import { useIsMobile } from "@/lib/hooks"
 import { useVeoApi, VEO_MODELS, type VeoModel, type VeoMode } from "@/hooks/useVeoApi"
 
@@ -24,6 +25,7 @@ export default function VideoStudioPage() {
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("16:9")
   const [duration, setDuration] = useState<4 | 5 | 6 | 8>(5)
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showVideoModal, setShowVideoModal] = useState(false)
 
   // File inputs
   const [firstFrameImage, setFirstFrameImage] = useState<File | null>(null)
@@ -454,27 +456,71 @@ export default function VideoStudioPage() {
                 </div>
               )}
 
-              {/* Success */}
+              {/* Success - Agora com Modal iOS Premium */}
               {veoApi.operation?.status === "completed" && veoApi.operation.video && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 space-y-2">
-                  <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Vídeo pronto!</span>
-                  </div>
-                  <video src={veoApi.operation.video.url} controls className="w-full rounded-lg" poster={veoApi.operation.video.thumbnailUrl} />
-                  <div className="flex gap-2 text-[10px] text-white/40">
-                    <span>{veoApi.operation.video.resolution}</span>
-                    <span>•</span>
-                    <span>{veoApi.operation.video.aspectRatio}</span>
-                    <span>•</span>
-                    <span>{veoApi.operation.video.duration}s</span>
-                  </div>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
+                  <button
+                    onClick={() => setShowVideoModal(true)}
+                    className="w-full group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Vídeo pronto! Toque para visualizar</span>
+                      </div>
+                      <PlayCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="relative rounded-lg overflow-hidden">
+                      {veoApi.operation.video.thumbnailUrl ? (
+                        <img 
+                          src={veoApi.operation.video.thumbnailUrl} 
+                          alt="Video thumbnail"
+                          className="w-full aspect-video object-cover"
+                        />
+                      ) : (
+                        <div className="w-full aspect-video bg-black/40 flex items-center justify-center">
+                          <Film className="w-8 h-8 text-white/40" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <PlayCircle className="w-12 h-12 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 text-[10px] text-white/40 mt-2">
+                      <span>{veoApi.operation.video.resolution}</span>
+                      <span>•</span>
+                      <span>{veoApi.operation.video.aspectRatio}</span>
+                      <span>•</span>
+                      <span>{veoApi.operation.video.duration}s</span>
+                    </div>
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </main>
       </div>
+
+      {/* Video Modal iOS Premium */}
+      {veoApi.operation?.video && (
+        <VideoModal
+          isOpen={showVideoModal}
+          onClose={() => setShowVideoModal(false)}
+          video={{
+            url: veoApi.operation.video.url,
+            thumbnailUrl: veoApi.operation.video.thumbnailUrl,
+            prompt: prompt,
+            resolution: veoApi.operation.video.resolution,
+            aspectRatio: veoApi.operation.video.aspectRatio,
+            duration: veoApi.operation.video.duration,
+            model: selectedModel,
+            settings: {
+              mode: mode,
+              negativePrompt: negativePrompt || undefined,
+            },
+          }}
+        />
+      )}
     </BeamsBackground>
   )
 }
