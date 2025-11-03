@@ -9,6 +9,7 @@ import { ToastProvider } from '@/hooks/useToast';
 import ToastContainer from '@/components/designstudio-original/ui/ToastContainer';
 import SidePanelTabs from '@/components/designstudio-original/SidePanelTabs';
 import ToolsModal from '@/components/designstudio-original/ToolsModal';
+import ToolsBar from '@/components/designstudio-original/ToolsBar';
 
 export default function DesignStudioPage() {
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
@@ -112,7 +113,7 @@ export default function DesignStudioPage() {
             @media (max-width: 768px) {
               main {
                 padding-top: calc(env(safe-area-inset-top) + 4rem);
-                padding-bottom: calc(env(safe-area-inset-bottom) + 20rem);
+                padding-bottom: calc(env(safe-area-inset-bottom) + 4.5rem);
                 padding-left: 1rem;
                 padding-right: 1rem;
               }
@@ -127,10 +128,20 @@ export default function DesignStudioPage() {
           </div>
         </main>
 
-        {/* Mobile: iOS Bottom Sheet Premium - Fixed Position */}
+        {/* Mobile: iOS Tools Bar - Fixed Bottom with Scroll */}
         <div 
           className="md:hidden fixed bottom-0 left-0 right-0 z-20"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          <ToolsBar
+            activeTool={activeTool}
+            onToolSelect={handleToolSelect}
+          />
+        </div>
+
+        {/* Mobile: iOS Bottom Sheet Premium - Hidden by default, opens via modal */}
+        <div 
+          className="hidden"
         >
           <aside className="w-full bg-gradient-to-b from-black/96 via-black/98 to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-15px_50px_rgba(0,0,0,0.95)] rounded-t-3xl max-h-[65vh]">
             <SidePanelTabs
