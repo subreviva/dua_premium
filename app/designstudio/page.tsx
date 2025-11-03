@@ -18,11 +18,13 @@ export default function DesignStudioPage() {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [sessionGallery, setSessionGallery] = useState<ImageObject[]>([]);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showToolPanel, setShowToolPanel] = useState(false);
   
   const api = useDuaApi();
 
   const handleToolSelect = useCallback((toolId: ToolId) => {
     setActiveTool(toolId);
+    setShowToolPanel(true); // Abre o painel quando seleciona ferramenta
     const textTools: ToolId[] = ['design-trends', 'analyze-image', 'design-assistant', 'export-project'];
     if (textTools.includes(toolId) && canvasContent.type !== 'text-result') {
         if (canvasContent.type === 'empty') {
@@ -113,9 +115,10 @@ export default function DesignStudioPage() {
             @media (max-width: 768px) {
               main {
                 padding-top: calc(env(safe-area-inset-top) + 4rem);
-                padding-bottom: calc(env(safe-area-inset-bottom) + 4.5rem);
+                padding-bottom: calc(env(safe-area-inset-bottom) + 4.5rem + ${showToolPanel ? '45vh' : '0px'});
                 padding-left: 1rem;
                 padding-right: 1rem;
+                transition: padding-bottom 0.3s ease-out;
               }
             }
           `}</style>
@@ -130,8 +133,10 @@ export default function DesignStudioPage() {
 
         {/* Mobile: iOS Tools Bar - Fixed Bottom with Scroll */}
         <div 
-          className="md:hidden fixed bottom-0 left-0 right-0 z-20"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          className="md:hidden fixed left-0 right-0 z-20 transition-all duration-300"
+          style={{ 
+            bottom: showToolPanel ? 'calc(45vh + env(safe-area-inset-bottom))' : 'env(safe-area-inset-bottom)'
+          }}
         >
           <ToolsBar
             activeTool={activeTool}
@@ -139,11 +144,32 @@ export default function DesignStudioPage() {
           />
         </div>
 
-        {/* Mobile: iOS Bottom Sheet Premium - Hidden by default, opens via modal */}
+        {/* Mobile: iOS Bottom Sheet Premium - Slide Up quando tool ativa */}
         <div 
-          className="hidden"
+          className={`md:hidden fixed left-0 right-0 z-10 transition-all duration-300 ${
+            showToolPanel ? 'translate-y-0' : 'translate-y-full'
+          }`}
+          style={{ 
+            bottom: 'env(safe-area-inset-bottom)',
+            height: '45vh'
+          }}
         >
-          <aside className="w-full bg-gradient-to-b from-black/96 via-black/98 to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-15px_50px_rgba(0,0,0,0.95)] rounded-t-3xl max-h-[65vh]">
+          <aside className="h-full w-full bg-gradient-to-b from-black/96 via-black/98 to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-15px_50px_rgba(0,0,0,0.95)] rounded-t-3xl">
+            {/* Close Button */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0">
+              <h3 className="text-white font-semibold text-sm">
+                {activeTool ? 'Ferramenta / Histórico' : 'Painel'}
+              </h3>
+              <button
+                onClick={() => setShowToolPanel(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+            
             <SidePanelTabs
               activeTool={activeTool}
               canvasContent={canvasContent}
