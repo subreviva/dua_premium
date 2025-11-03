@@ -5,7 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { Video, Loader2, PlayCircle, Clock, Image as ImageIcon, Film, Settings, Sparkles } from "lucide-react"
+import {
+  Video,
+  Upload,
+  Loader2,
+  PlayCircle,
+  Clock,
+  Image as ImageIcon,
+  Film,
+  X,
+  Settings,
+} from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { useIsMobile } from "@/lib/hooks"
@@ -23,6 +33,7 @@ export default function VideoStudioPage() {
   const [resolution, setResolution] = useState<"720p" | "1080p">("720p")
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("16:9")
   const [duration, setDuration] = useState<4 | 5 | 6 | 8>(5)
+  const [personGeneration, setPersonGeneration] = useState<"allow_all" | "allow_adult" | "dont_allow">("allow_all")
   const [showAdvanced, setShowAdvanced] = useState(false)
 
   // File inputs
@@ -55,7 +66,7 @@ export default function VideoStudioPage() {
         resolution,
         aspectRatio,
         durationSeconds: duration,
-        personGeneration: "allow_all",
+        personGeneration,
         numberOfVideos: 1,
       })
     } catch (error) {
@@ -64,15 +75,21 @@ export default function VideoStudioPage() {
   }
 
   const handleFirstFrameSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setFirstFrameImage(e.target.files[0])
+    if (e.target.files?.[0]) {
+      setFirstFrameImage(e.target.files[0])
+    }
   }
 
   const handleLastFrameSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setLastFrameImage(e.target.files[0])
+    if (e.target.files?.[0]) {
+      setLastFrameImage(e.target.files[0])
+    }
   }
 
   const handleInputVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setInputVideo(e.target.files[0])
+    if (e.target.files?.[0]) {
+      setInputVideo(e.target.files[0])
+    }
   }
 
   const handleReferenceImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,100 +109,80 @@ export default function VideoStudioPage() {
     <BeamsBackground>
       <PremiumNavbar />
 
-      <div className={cn("relative z-10 w-full", isMobile ? "px-4 pt-24 pb-20" : "px-6 pt-28 pb-16")}>
-        {/* Header - Ultra Elegante */}
-        <div className={cn("text-center", isMobile ? "mb-6" : "mb-10")}>
-          <h1 className={cn("font-bold text-white mb-2", isMobile ? "text-2xl" : "text-3xl sm:text-4xl")}>
+      <div className={cn("relative z-10 w-full", isMobile ? "px-4 pt-24 pb-20" : "px-6 pt-32 pb-16")}>
+        {/* Header */}
+        <div className={cn("text-center", isMobile ? "mb-8" : "mb-12")}>
+          <h1
+            className={cn(
+              "font-bold text-white mb-3",
+              isMobile ? "text-3xl" : "text-4xl sm:text-5xl lg:text-6xl",
+            )}
+          >
             Video Studio
           </h1>
-          <p className={cn("text-white/50", isMobile ? "text-xs" : "text-sm")}>
-            Geração cinematográfica com Veo 3.1
+          <p className={cn("text-white/60", isMobile ? "text-sm" : "text-base sm:text-lg")}>
+            Gere vídeos cinematográficos com Veo 3.1
           </p>
         </div>
 
-        {/* Main Card - Compacto e Elegante */}
+        {/* Main Card */}
         <main className="w-full max-w-4xl mx-auto">
           <div
             className={cn(
-              "bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden",
-              isMobile ? "p-4" : "p-5 sm:p-6",
+              "bg-black/40 backdrop-blur-3xl border border-white/10 rounded-3xl overflow-hidden",
+              isMobile ? "p-5" : "p-6 sm:p-8",
             )}
           >
-            {/* Prompt - Compacto */}
-            <div className="mb-3">
+            {/* Prompt Textarea */}
+            <div className="mb-4">
               <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Descreva seu vídeo cinematográfico..."
+                placeholder="Descreva o vídeo que deseja gerar (máx. 1024 caracteres)..."
                 className={cn(
-                  "bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl resize-none focus:ring-1 focus:ring-purple-500/50 transition-all",
-                  isMobile ? "min-h-[100px] text-sm p-3" : "min-h-[80px] text-sm p-3",
+                  "bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-2xl resize-none focus:ring-2 focus:ring-purple-500/50",
+                  isMobile ? "min-h-[120px] text-base p-4" : "min-h-[100px] text-sm p-4",
                 )}
                 maxLength={1024}
               />
-              <div className="flex justify-end mt-1 px-1">
-                <span className="text-[10px] text-white/30">{prompt.length}/1024</span>
+              <div className="flex justify-between items-center mt-2 px-1">
+                <span className="text-xs text-white/40">{prompt.length}/1024 caracteres</span>
               </div>
             </div>
 
-            {/* Negative Prompt - Só quando Advanced */}
+            {/* Negative Prompt (Advanced) */}
             {showAdvanced && (
-              <div className="mb-3">
+              <div className="mb-4">
                 <Textarea
                   value={negativePrompt}
                   onChange={(e) => setNegativePrompt(e.target.value)}
-                  placeholder="O que evitar (cartoon, drawing, low quality...)"
+                  placeholder="O que NÃO incluir no vídeo (cartoon, drawing, low quality...)..."
                   className={cn(
-                    "bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl resize-none focus:ring-1 focus:ring-orange-500/50 transition-all",
-                    isMobile ? "min-h-[60px] text-sm p-3" : "min-h-[50px] text-xs p-3",
+                    "bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-2xl resize-none focus:ring-2 focus:ring-orange-500/50",
+                    isMobile ? "min-h-[80px] text-base p-4" : "min-h-[60px] text-sm p-4",
                   )}
                   maxLength={512}
                 />
-                <div className="flex justify-between items-center mt-1 px-1">
-                  <span className="text-[10px] text-orange-400/50">Negative Prompt</span>
-                  <span className="text-[10px] text-white/30">{negativePrompt.length}/512</span>
+                <div className="flex justify-between items-center mt-2 px-1">
+                  <span className="text-xs text-orange-400/60">Negative Prompt (opcional)</span>
+                  <span className="text-xs text-white/40">{negativePrompt.length}/512</span>
                 </div>
               </div>
             )}
 
-            {/* Controls - Ultra Compacto */}
-            <div className="space-y-3">
-              {/* Row 1: Mode & Model - Desktop horizontal, Mobile 2 col grid */}
+            {/* Controls */}
+            <div className="space-y-4">
+              {/* Mode & Model Selection */}
               {isMobile ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl px-3 h-11 flex items-center justify-center text-xs font-medium">
-                    <Video className="w-3.5 h-3.5 mr-1.5" />
-                    <span>Vídeo</span>
-                  </div>
-
+                <div className="grid grid-cols-2 gap-3">
                   <Select value={mode} onValueChange={(v) => setMode(v as VeoMode)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-xs">
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-4 text-sm transition-all">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
                       <SelectItem value="text-to-video">Texto → Vídeo</SelectItem>
                       <SelectItem value="image-to-video">Imagem → Vídeo</SelectItem>
-                      <SelectItem value="reference-images">Refs</SelectItem>
-                      <SelectItem value="interpolation">Interpolação</SelectItem>
-                      <SelectItem value="extension">Extensão</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-lg px-2.5 h-9 flex items-center text-xs font-medium flex-shrink-0">
-                    <Video className="w-3.5 h-3.5 mr-1.5" />
-                    <span>Vídeo</span>
-                  </div>
-
-                  <Select value={mode} onValueChange={(v) => setMode(v as VeoMode)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[130px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="text-to-video">Texto → Vídeo</SelectItem>
-                      <SelectItem value="image-to-video">Imagem → Vídeo</SelectItem>
-                      <SelectItem value="reference-images">Refs</SelectItem>
+                      <SelectItem value="reference-images">Imagens Ref</SelectItem>
                       <SelectItem value="interpolation">Interpolação</SelectItem>
                       <SelectItem value="extension">Extensão</SelectItem>
                     </SelectContent>
@@ -194,14 +191,52 @@ export default function VideoStudioPage() {
                   <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as VeoModel)}>
                     <SelectTrigger
                       className={cn(
-                        "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[130px]",
-                        !canUseMode && "opacity-40",
+                        "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-4 text-sm transition-all",
+                        !canUseMode && "opacity-50",
                       )}
                     >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="veo-3.1-preview">Veo 3.1</SelectItem>
+                      <SelectItem value="veo-3.1-preview">Veo 3.1 Preview</SelectItem>
+                      <SelectItem value="veo-3.1-fast">Veo 3.1 Fast</SelectItem>
+                      <SelectItem value="veo-3.0">Veo 3.0</SelectItem>
+                      <SelectItem value="veo-3.0-fast">Veo 3.0 Fast</SelectItem>
+                      <SelectItem value="veo-2.0">Veo 2.0</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-lg px-3 h-9 text-xs sm:text-sm font-medium flex-shrink-0">
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Geração de Vídeo</span>
+                  </div>
+
+                  <Select value={mode} onValueChange={(v) => setMode(v as VeoMode)}>
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-3 text-xs sm:text-sm transition-all flex-shrink-0 w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                      <SelectItem value="text-to-video">Texto → Vídeo</SelectItem>
+                      <SelectItem value="image-to-video">Imagem → Vídeo</SelectItem>
+                      <SelectItem value="reference-images">Imagens Ref</SelectItem>
+                      <SelectItem value="interpolation">Interpolação</SelectItem>
+                      <SelectItem value="extension">Extensão</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as VeoModel)}>
+                    <SelectTrigger
+                      className={cn(
+                        "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-3 text-xs sm:text-sm transition-all flex-shrink-0 w-[140px]",
+                        !canUseMode && "opacity-50",
+                      )}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                      <SelectItem value="veo-3.1-preview">Veo 3.1 Preview</SelectItem>
                       <SelectItem value="veo-3.1-fast">Veo 3.1 Fast</SelectItem>
                       <SelectItem value="veo-3.0">Veo 3.0</SelectItem>
                       <SelectItem value="veo-3.0-fast">Veo 3.0 Fast</SelectItem>
@@ -211,32 +246,11 @@ export default function VideoStudioPage() {
                 </div>
               )}
 
-              {/* Row 2: Model (mobile only) */}
-              {isMobile && (
-                <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as VeoModel)}>
-                  <SelectTrigger
-                    className={cn(
-                      "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-xs w-full",
-                      !canUseMode && "opacity-40",
-                    )}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                    <SelectItem value="veo-3.1-preview">Veo 3.1 Preview</SelectItem>
-                    <SelectItem value="veo-3.1-fast">Veo 3.1 Fast</SelectItem>
-                    <SelectItem value="veo-3.0">Veo 3.0</SelectItem>
-                    <SelectItem value="veo-3.0-fast">Veo 3.0 Fast</SelectItem>
-                    <SelectItem value="veo-2.0">Veo 2.0</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-
-              {/* Row 3: Settings - Desktop horizontal, Mobile 3 col grid */}
+              {/* Video Settings */}
               {isMobile ? (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-3">
                   <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-2 text-xs">
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-sm transition-all">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
@@ -246,7 +260,7 @@ export default function VideoStudioPage() {
                   </Select>
 
                   <Select value={resolution} onValueChange={(v) => setResolution(v as typeof resolution)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-2 text-xs">
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-sm transition-all">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
@@ -256,7 +270,7 @@ export default function VideoStudioPage() {
                   </Select>
 
                   <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v) as 4 | 5 | 6 | 8)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-2 text-xs">
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-sm transition-all">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
@@ -270,7 +284,7 @@ export default function VideoStudioPage() {
               ) : (
                 <div className="flex items-center gap-2">
                   <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[75px]">
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-3 text-xs sm:text-sm transition-all flex-shrink-0 w-[80px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
@@ -280,7 +294,7 @@ export default function VideoStudioPage() {
                   </Select>
 
                   <Select value={resolution} onValueChange={(v) => setResolution(v as typeof resolution)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[85px]">
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-3 text-xs sm:text-sm transition-all flex-shrink-0 w-[90px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
@@ -290,7 +304,7 @@ export default function VideoStudioPage() {
                   </Select>
 
                   <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v) as 4 | 5 | 6 | 8)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[65px]">
+                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-3 text-xs sm:text-sm transition-all flex-shrink-0 w-[70px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
@@ -303,23 +317,28 @@ export default function VideoStudioPage() {
                 </div>
               )}
 
-              {/* File Uploads - Baseado no modo */}
+              {/* File Uploads based on mode */}
               {(mode === "image-to-video" || mode === "interpolation") && (
-                <div className={cn("flex gap-2", isMobile ? "flex-col" : "flex-row")}>
+                <div className={cn("flex gap-3", isMobile ? "flex-col" : "flex-row")}>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => firstFrameRef.current?.click()}
                     className={cn(
-                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95",
-                      isMobile ? "h-11 text-xs" : "h-9 px-3 text-xs",
-                      firstFrameImage && "border-purple-500/30 bg-purple-500/10 text-purple-400",
+                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all active:scale-95",
+                      isMobile ? "h-11 flex-1" : "h-9 px-4",
                     )}
                   >
-                    <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                    {firstFrameImage ? "Primeiro ✓" : "Primeiro Frame"}
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    {firstFrameImage ? "Primeiro Frame ✓" : "Primeiro Frame"}
                   </Button>
-                  <input ref={firstFrameRef} type="file" accept="image/*" onChange={handleFirstFrameSelect} className="hidden" />
+                  <input
+                    ref={firstFrameRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFirstFrameSelect}
+                    className="hidden"
+                  />
 
                   {mode === "interpolation" && (
                     <>
@@ -328,15 +347,20 @@ export default function VideoStudioPage() {
                         size="sm"
                         onClick={() => lastFrameRef.current?.click()}
                         className={cn(
-                          "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95",
-                          isMobile ? "h-11 text-xs" : "h-9 px-3 text-xs",
-                          lastFrameImage && "border-purple-500/30 bg-purple-500/10 text-purple-400",
+                          "bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all active:scale-95",
+                          isMobile ? "h-11 flex-1" : "h-9 px-4",
                         )}
                       >
-                        <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                        {lastFrameImage ? "Último ✓" : "Último Frame"}
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        {lastFrameImage ? "Último Frame ✓" : "Último Frame"}
                       </Button>
-                      <input ref={lastFrameRef} type="file" accept="image/*" onChange={handleLastFrameSelect} className="hidden" />
+                      <input
+                        ref={lastFrameRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLastFrameSelect}
+                        className="hidden"
+                      />
                     </>
                   )}
                 </div>
@@ -350,20 +374,32 @@ export default function VideoStudioPage() {
                     onClick={() => referenceImageRef.current?.click()}
                     disabled={referenceImages.length >= 3}
                     className={cn(
-                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95 w-full",
-                      isMobile ? "h-11 text-xs" : "h-9 text-xs",
+                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all active:scale-95 w-full",
+                      isMobile ? "h-11" : "h-9",
                     )}
                   >
-                    <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                    Refs ({referenceImages.length}/3)
+                    <Upload className="w-4 h-4 mr-2" />
+                    Adicionar Imagem de Referência ({referenceImages.length}/3)
                   </Button>
-                  <input ref={referenceImageRef} type="file" accept="image/*" onChange={handleReferenceImageSelect} className="hidden" />
+                  <input
+                    ref={referenceImageRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleReferenceImageSelect}
+                    className="hidden"
+                  />
                   {referenceImages.length > 0 && (
                     <div className="flex gap-2 flex-wrap">
                       {referenceImages.map((ref, index) => (
-                        <div key={index} className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-2.5 py-1.5 text-[10px] text-purple-400 flex items-center gap-1.5">
-                          <span className="truncate max-w-[80px]">{ref.file.name}</span>
-                          <button onClick={() => removeReferenceImage(index)} className="text-purple-400 hover:text-purple-300">
+                        <div
+                          key={index}
+                          className="relative group bg-white/5 rounded-lg px-3 py-2 text-xs text-white/70"
+                        >
+                          {ref.file.name}
+                          <button
+                            onClick={() => removeReferenceImage(index)}
+                            className="ml-2 text-red-400 hover:text-red-300"
+                          >
                             ×
                           </button>
                         </div>
@@ -380,27 +416,32 @@ export default function VideoStudioPage() {
                     size="sm"
                     onClick={() => inputVideoRef.current?.click()}
                     className={cn(
-                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95 w-full",
-                      isMobile ? "h-11 text-xs" : "h-9 text-xs",
-                      inputVideo && "border-purple-500/30 bg-purple-500/10 text-purple-400",
+                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all active:scale-95 w-full",
+                      isMobile ? "h-11" : "h-9",
                     )}
                   >
-                    <Film className="w-3.5 h-3.5 mr-1.5" />
-                    {inputVideo ? `${inputVideo.name}` : "Selecionar Vídeo"}
+                    <Film className="w-4 h-4 mr-2" />
+                    {inputVideo ? `Vídeo: ${inputVideo.name}` : "Selecionar Vídeo para Estender"}
                   </Button>
-                  <input ref={inputVideoRef} type="file" accept="video/*" onChange={handleInputVideoSelect} className="hidden" />
+                  <input
+                    ref={inputVideoRef}
+                    type="file"
+                    accept="video/*"
+                    onChange={handleInputVideoSelect}
+                    className="hidden"
+                  />
                 </div>
               )}
 
-              {/* Generate Button - Premium */}
-              <div className="flex items-center justify-between gap-2 pt-1">
+              {/* Generate Button */}
+              <div className="flex items-center justify-between gap-3 pt-2">
                 <div className="flex items-center gap-2">
                   {veoApi.operation && (
-                    <div className="flex items-center gap-1.5 text-white/60 text-[10px]">
-                      <Clock className="w-3 h-3 animate-pulse" />
+                    <div className="flex items-center gap-2 text-white/70 text-xs sm:text-sm">
+                      <Clock className="w-3.5 h-3.5 animate-pulse" />
                       <span>
                         {veoApi.operation.status === "processing"
-                          ? `${veoApi.operation.progress}%`
+                          ? `Gerando... ${veoApi.operation.progress}%`
                           : veoApi.operation.status}
                       </span>
                     </div>
@@ -415,9 +456,9 @@ export default function VideoStudioPage() {
                       isMobile ? "h-10 w-10 p-0" : "h-9 w-9 p-0",
                       showAdvanced && "bg-purple-500/20 text-purple-400",
                     )}
-                    title="Avançado"
+                    title="Opções Avançadas"
                   >
-                    <Settings className="w-3.5 h-3.5" />
+                    <Settings className="w-4 h-4" />
                   </Button>
                 </div>
 
@@ -426,43 +467,45 @@ export default function VideoStudioPage() {
                   size="sm"
                   className={cn(
                     "rounded-xl transition-all font-medium active:scale-95",
-                    isMobile ? "px-5 h-11 text-sm flex-1" : "px-4 h-9 text-xs ml-auto",
+                    isMobile ? "px-6 h-12 text-base flex-1" : "px-5 sm:px-6 h-10 sm:h-9 text-sm ml-auto",
                     prompt.trim() && !veoApi.isLoading && canUseMode
-                      ? "bg-gradient-to-r from-purple-500 via-purple-600 to-pink-500 hover:from-purple-600 hover:via-purple-700 hover:to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
                       : "bg-white/5 text-white/30 cursor-not-allowed",
                   )}
                   onClick={handleGenerate}
                 >
                   {veoApi.isLoading ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                      {isMobile ? "Gerando..." : "..."}
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {isMobile ? "Gerando..." : "Gerando"}
                     </>
                   ) : (
                     <>
-                      <PlayCircle className="w-3.5 h-3.5 mr-1.5" />
-                      Gerar
+                      <PlayCircle className="w-4 h-4 mr-2" />
+                      Gerar Vídeo
                     </>
                   )}
                 </Button>
               </div>
 
-              {/* Error */}
+              {/* Error Display */}
               {veoApi.error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-2.5 text-red-400 text-xs">
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-400 text-sm">
                   {veoApi.error}
                 </div>
               )}
 
-              {/* Success */}
+              {/* Success Display */}
               {veoApi.operation?.status === "completed" && veoApi.operation.video && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 space-y-2">
-                  <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Vídeo pronto!</span>
-                  </div>
-                  <video src={veoApi.operation.video.url} controls className="w-full rounded-lg" poster={veoApi.operation.video.thumbnailUrl} />
-                  <div className="flex gap-2 text-[10px] text-white/40">
+                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 space-y-3">
+                  <div className="text-green-400 text-sm font-medium">✓ Vídeo gerado com sucesso!</div>
+                  <video
+                    src={veoApi.operation.video.url}
+                    controls
+                    className="w-full rounded-lg"
+                    poster={veoApi.operation.video.thumbnailUrl}
+                  />
+                  <div className="flex gap-2 text-xs text-white/50">
                     <span>{veoApi.operation.video.resolution}</span>
                     <span>•</span>
                     <span>{veoApi.operation.video.aspectRatio}</span>
