@@ -319,7 +319,7 @@ export default function VideoStudioPage() {
                     )}
                   >
                     <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                    {firstFrameImage ? "Primeiro ✓" : "Primeiro Frame"}
+                    {firstFrameImage ? "Primeiro Frame" : "Primeiro Frame"}
                   </Button>
                   <input ref={firstFrameRef} type="file" accept="image/*" onChange={handleFirstFrameSelect} className="hidden" />
 
@@ -336,7 +336,7 @@ export default function VideoStudioPage() {
                         )}
                       >
                         <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                        {lastFrameImage ? "Último ✓" : "Último Frame"}
+                        {lastFrameImage ? "Último Frame" : "Último Frame"}
                       </Button>
                       <input ref={lastFrameRef} type="file" accept="image/*" onChange={handleLastFrameSelect} className="hidden" />
                     </>
