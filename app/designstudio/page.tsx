@@ -8,6 +8,7 @@ import { useDuaApi } from '@/hooks/useDuaApi';
 import { ToastProvider } from '@/hooks/useToast';
 import ToastContainer from '@/components/designstudio-original/ui/ToastContainer';
 import SidePanelTabs from '@/components/designstudio-original/SidePanelTabs';
+import ToolsModal from '@/components/designstudio-original/ToolsModal';
 
 export default function DesignStudioPage() {
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
@@ -15,6 +16,7 @@ export default function DesignStudioPage() {
   const [history, setHistory] = useState<CanvasContent[]>([canvasContent]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [sessionGallery, setSessionGallery] = useState<ImageObject[]>([]);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   
   const api = useDuaApi();
 
@@ -86,7 +88,11 @@ export default function DesignStudioPage() {
         {/* Mobile: iOS Premium Toolbar - Fixed top */}
         <div className="md:hidden fixed top-0 left-0 right-0 z-30" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
           <div className="bg-black/90 backdrop-blur-3xl border-b border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
+            <Toolbar 
+              activeTool={activeTool} 
+              onToolSelect={handleToolSelect}
+              onMenuClick={() => setShowMobileMenu(true)}
+            />
           </div>
         </div>
 
@@ -163,6 +169,14 @@ export default function DesignStudioPage() {
             onClearSession={handleClearSession}
           />
         </aside>
+        
+        {/* Mobile: Tools Modal - iOS Premium z-[9999] */}
+        <ToolsModal
+          isOpen={showMobileMenu}
+          onClose={() => setShowMobileMenu(false)}
+          activeTool={activeTool}
+          onToolSelect={handleToolSelect}
+        />
         
         <ToastContainer />
       </div>

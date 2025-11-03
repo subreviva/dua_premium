@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ToolId } from '@/types/designstudio';
 import { 
   ImagePlus, 
@@ -16,17 +16,15 @@ import {
   ScanEye, 
   TrendingUp, 
   Bot,
-  Menu,
-  X,
-  ChevronRight
+  Menu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface ToolbarProps {
   activeTool: ToolId | null;
   onToolSelect: (toolId: ToolId) => void;
+  onMenuClick?: () => void;
 }
 
 const TOOL_ICONS: Record<ToolId, React.ReactNode> = {
@@ -89,14 +87,7 @@ const TOOL_CATEGORIES = [
   },
 ];
 
-const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolSelect }) => {
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-
-  const handleToolSelect = (toolId: ToolId) => {
-    onToolSelect(toolId);
-    setShowMobileMenu(false);
-  };
-
+const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolSelect, onMenuClick }) => {
   return (
     <>
       {/* Mobile: iOS ULTRA Premium Compact Toolbar */}
@@ -120,7 +111,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolSelect }) => {
 
         {/* Menu Button - iOS Premium */}
         <button
-          onClick={() => setShowMobileMenu(true)}
+          onClick={onMenuClick}
           className={cn(
             "relative p-2.5 rounded-xl transition-all active:scale-90",
             "bg-white/10 hover:bg-white/20 backdrop-blur-xl",
@@ -133,223 +124,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolSelect }) => {
           )}
         </button>
       </nav>
-
-      {/* Mobile: iOS Premium Modal - Redesigned ULTRA CLEAN */}
-      <AnimatePresence>
-        {showMobileMenu && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl"
-            onClick={() => setShowMobileMenu(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="h-full flex flex-col safe-area"
-              style={{ 
-                paddingTop: 'env(safe-area-inset-top)',
-                paddingBottom: 'env(safe-area-inset-bottom)'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header - iOS Minimal */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl">
-                <h2 className="text-white font-semibold text-xl">Ferramentas</h2>
-                <button
-                  onClick={() => setShowMobileMenu(false)}
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 transition-all flex items-center justify-center"
-                >
-                  <X className="w-5 h-5 text-white" />
-                </button>
-              </div>
-
-              {/* Tools List - iOS Premium Flat List (NO accordion!) */}
-              <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                <div className="px-4 py-4">
-                  {/* Criar Section */}
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 px-2 mb-3">
-                      <Sparkles className="w-4 h-4 text-blue-400" />
-                      <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider">Criar</h3>
-                    </div>
-                    <div className="space-y-1.5">
-                      {TOOL_CATEGORIES[0].tools.map((toolId) => (
-                        <button
-                          key={toolId}
-                          onClick={() => handleToolSelect(toolId)}
-                          className={cn(
-                            "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all",
-                            "active:scale-98",
-                            activeTool === toolId
-                              ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/40 shadow-lg shadow-blue-500/20"
-                              : "bg-white/5 hover:bg-white/8 border border-white/10"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center",
-                            activeTool === toolId
-                              ? "bg-gradient-to-br from-blue-500/30 to-purple-500/30"
-                              : "bg-white/10"
-                          )}>
-                            {TOOL_ICONS[toolId]}
-                          </div>
-                          <span className={cn(
-                            "font-medium text-base flex-1 text-left",
-                            activeTool === toolId ? "text-white" : "text-white/80"
-                          )}>
-                            {TOOL_NAMES[toolId]}
-                          </span>
-                          {activeTool === toolId && (
-                            <div className="w-2 h-2 bg-blue-400 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Editar Section */}
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 px-2 mb-3">
-                      <Wand2 className="w-4 h-4 text-purple-400" />
-                      <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider">Editar</h3>
-                    </div>
-                    <div className="space-y-1.5">
-                      {TOOL_CATEGORIES[1].tools.map((toolId) => (
-                        <button
-                          key={toolId}
-                          onClick={() => handleToolSelect(toolId)}
-                          className={cn(
-                            "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all",
-                            "active:scale-98",
-                            activeTool === toolId
-                              ? "bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/40 shadow-lg shadow-purple-500/20"
-                              : "bg-white/5 hover:bg-white/8 border border-white/10"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center",
-                            activeTool === toolId
-                              ? "bg-gradient-to-br from-purple-500/30 to-pink-500/30"
-                              : "bg-white/10"
-                          )}>
-                            {TOOL_ICONS[toolId]}
-                          </div>
-                          <span className={cn(
-                            "font-medium text-base flex-1 text-left",
-                            activeTool === toolId ? "text-white" : "text-white/80"
-                          )}>
-                            {TOOL_NAMES[toolId]}
-                          </span>
-                          {activeTool === toolId && (
-                            <div className="w-2 h-2 bg-purple-400 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Ferramentas Section */}
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 px-2 mb-3">
-                      <Package className="w-4 h-4 text-cyan-400" />
-                      <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider">Ferramentas</h3>
-                    </div>
-                    <div className="space-y-1.5">
-                      {TOOL_CATEGORIES[2].tools.map((toolId) => (
-                        <button
-                          key={toolId}
-                          onClick={() => handleToolSelect(toolId)}
-                          className={cn(
-                            "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all",
-                            "active:scale-98",
-                            activeTool === toolId
-                              ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 shadow-lg shadow-cyan-500/20"
-                              : "bg-white/5 hover:bg-white/8 border border-white/10"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center",
-                            activeTool === toolId
-                              ? "bg-gradient-to-br from-cyan-500/30 to-blue-500/30"
-                              : "bg-white/10"
-                          )}>
-                            {TOOL_ICONS[toolId]}
-                          </div>
-                          <span className={cn(
-                            "font-medium text-base flex-1 text-left",
-                            activeTool === toolId ? "text-white" : "text-white/80"
-                          )}>
-                            {TOOL_NAMES[toolId]}
-                          </span>
-                          {activeTool === toolId && (
-                            <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* IA Section */}
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 px-2 mb-3">
-                      <Bot className="w-4 h-4 text-pink-400" />
-                      <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider">IA</h3>
-                    </div>
-                    <div className="space-y-1.5">
-                      {TOOL_CATEGORIES[3].tools.map((toolId) => (
-                        <button
-                          key={toolId}
-                          onClick={() => handleToolSelect(toolId)}
-                          className={cn(
-                            "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all",
-                            "active:scale-98",
-                            activeTool === toolId
-                              ? "bg-gradient-to-r from-pink-500/20 to-rose-500/20 border border-pink-400/40 shadow-lg shadow-pink-500/20"
-                              : "bg-white/5 hover:bg-white/8 border border-white/10"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center",
-                            activeTool === toolId
-                              ? "bg-gradient-to-br from-pink-500/30 to-rose-500/30"
-                              : "bg-white/10"
-                          )}>
-                            {TOOL_ICONS[toolId]}
-                          </div>
-                          <span className={cn(
-                            "font-medium text-base flex-1 text-left",
-                            activeTool === toolId ? "text-white" : "text-white/80"
-                          )}>
-                            {TOOL_NAMES[toolId]}
-                          </span>
-                          {activeTool === toolId && (
-                            <div className="w-2 h-2 bg-pink-400 rounded-full shadow-[0_0_8px_rgba(244,114,182,0.8)]" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer - iOS Safe Area */}
-              <div className="px-5 py-4 border-t border-white/10 bg-black/40 backdrop-blur-xl">
-                <button
-                  onClick={() => setShowMobileMenu(false)}
-                  className="w-full py-3.5 bg-white/10 hover:bg-white/15 rounded-xl text-white font-medium transition-all active:scale-95"
-                >
-                  Fechar
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Desktop: Vertical Toolbar */}
       <nav className="hidden md:flex flex-col items-center bg-black/40 backdrop-blur-xl border-r border-white/5 p-3 space-y-2 min-w-[80px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
