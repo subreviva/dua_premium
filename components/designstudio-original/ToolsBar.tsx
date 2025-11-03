@@ -73,9 +73,9 @@ const ALL_TOOLS: ToolId[] = [
 
 const ToolsBar: React.FC<ToolsBarProps> = ({ activeTool, onToolSelect }) => {
   return (
-    <div className="w-full bg-black/95 backdrop-blur-3xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+    <div className="w-full bg-black/98 backdrop-blur-3xl border-t border-white/10 shadow-[0_-2px_15px_rgba(0,0,0,0.6)]">
       <div 
-        className="flex gap-2 px-3 py-3 overflow-x-auto scrollbar-hide scroll-smooth"
+        className="flex gap-2 px-2.5 py-2 overflow-x-auto scrollbar-hide scroll-smooth"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {ALL_TOOLS.map((toolId) => {
@@ -86,30 +86,27 @@ const ToolsBar: React.FC<ToolsBarProps> = ({ activeTool, onToolSelect }) => {
               key={toolId}
               onClick={() => onToolSelect(toolId)}
               className={cn(
-                "flex flex-col items-center justify-center gap-1.5 min-w-[70px] p-2.5 rounded-xl transition-all flex-shrink-0",
+                "flex flex-col items-center justify-center gap-1 min-w-[64px] p-2 rounded-xl transition-all flex-shrink-0",
                 "active:scale-95",
                 isActive
-                  ? "bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 border border-blue-400/40 shadow-lg shadow-blue-500/20"
-                  : "bg-white/5 hover:bg-white/10 border border-white/10"
+                  ? "bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 border border-blue-400/50 shadow-lg shadow-blue-500/25"
+                  : "bg-white/5 hover:bg-white/8 border border-white/10"
               )}
             >
               <div className={cn(
-                "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+                "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
                 isActive 
-                  ? "bg-gradient-to-br from-blue-500/40 to-purple-500/40 text-white scale-110" 
+                  ? "bg-gradient-to-br from-blue-500/40 to-purple-500/40 text-white scale-105" 
                   : "bg-white/10 text-white/70"
               )}>
                 {TOOL_ICONS[toolId]}
               </div>
               <span className={cn(
-                "text-[10px] font-medium leading-tight text-center",
+                "text-[9px] font-semibold leading-tight text-center tracking-tight",
                 isActive ? "text-white" : "text-white/60"
               )}>
                 {TOOL_NAMES[toolId]}
               </span>
-              {isActive && (
-                <div className="w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_6px_rgba(59,130,246,0.8)]" />
-              )}
             </button>
           );
         })}

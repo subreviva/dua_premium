@@ -91,36 +91,36 @@ const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolSelect, onMenuClick
   return (
     <>
       {/* Mobile: iOS ULTRA Premium Compact Toolbar */}
-      <nav className="md:hidden flex items-center justify-between bg-black/90 backdrop-blur-3xl border-b border-white/10 px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-        {/* Logo + Title - iOS Style */}
-        <div className="flex items-center gap-3">
+      <nav className="md:hidden flex items-center justify-between bg-black/95 backdrop-blur-3xl border-b border-white/10 px-3 py-2 shadow-[0_2px_15px_rgba(0,0,0,0.7)]">
+        {/* Logo + Title - iOS Style Compact */}
+        <div className="flex items-center gap-2.5">
           <Image
             src="/dua-logo.png"
             alt="DUA"
-            width={40}
-            height={40}
-            className="h-10 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+            width={32}
+            height={32}
+            className="h-8 w-auto object-contain drop-shadow-[0_0_6px_rgba(59,130,246,0.4)]"
           />
           <div className="flex flex-col">
-            <h1 className="text-white font-semibold text-base leading-tight">Design Studio</h1>
+            <h1 className="text-white font-semibold text-sm leading-tight tracking-tight">Design Studio</h1>
             {activeTool && (
-              <span className="text-white/50 text-xs">{TOOL_NAMES[activeTool]}</span>
+              <span className="text-white/40 text-[10px] leading-tight">{TOOL_NAMES[activeTool]}</span>
             )}
           </div>
         </div>
 
-        {/* Menu Button - iOS Premium */}
+        {/* Menu Button - iOS Premium Compact */}
         <button
           onClick={onMenuClick}
           className={cn(
-            "relative p-2.5 rounded-xl transition-all active:scale-90",
-            "bg-white/10 hover:bg-white/20 backdrop-blur-xl",
-            "border border-white/20 shadow-lg"
+            "relative p-2 rounded-xl transition-all active:scale-90",
+            "bg-white/10 hover:bg-white/15 backdrop-blur-xl",
+            "border border-white/10 shadow-md"
           )}
         >
-          <Menu className="w-5 h-5 text-white" />
+          <Menu className="w-4.5 h-4.5 text-white/90" />
           {activeTool && (
-            <div className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+            <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_6px_rgba(59,130,246,0.8)]" />
           )}
         </button>
       </nav>

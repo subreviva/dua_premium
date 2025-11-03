@@ -114,11 +114,11 @@ export default function DesignStudioPage() {
             }
             @media (max-width: 768px) {
               main {
-                padding-top: calc(env(safe-area-inset-top) + 4rem);
-                padding-bottom: calc(env(safe-area-inset-bottom) + 4.5rem + ${showToolPanel ? '45vh' : '0px'});
-                padding-left: 1rem;
-                padding-right: 1rem;
-                transition: padding-bottom 0.3s ease-out;
+                padding-top: calc(env(safe-area-inset-top) + 3.5rem);
+                padding-bottom: calc(env(safe-area-inset-bottom) + ${showToolPanel ? '48vh' : '4rem'});
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+                transition: padding-bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
               }
             }
           `}</style>
@@ -133,39 +133,47 @@ export default function DesignStudioPage() {
 
         {/* Mobile: iOS Tools Bar - Fixed Bottom with Scroll */}
         <div 
-          className="md:hidden fixed left-0 right-0 z-20 transition-all duration-300"
+          className="md:hidden fixed left-0 right-0 z-20 transition-all duration-300 ease-out"
           style={{ 
-            bottom: showToolPanel ? 'calc(45vh + env(safe-area-inset-bottom))' : 'env(safe-area-inset-bottom)'
+            bottom: showToolPanel ? 'calc(48vh)' : '0'
           }}
         >
-          <ToolsBar
-            activeTool={activeTool}
-            onToolSelect={handleToolSelect}
-          />
+          <div style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+            <ToolsBar
+              activeTool={activeTool}
+              onToolSelect={handleToolSelect}
+            />
+          </div>
         </div>
 
         {/* Mobile: iOS Bottom Sheet Premium - Slide Up quando tool ativa */}
         <div 
-          className={`md:hidden fixed left-0 right-0 z-10 transition-all duration-300 ${
+          className={`md:hidden fixed left-0 right-0 z-10 transition-all duration-300 ease-out ${
             showToolPanel ? 'translate-y-0' : 'translate-y-full'
           }`}
           style={{ 
-            bottom: 'env(safe-area-inset-bottom)',
-            height: '45vh'
+            bottom: '0',
+            height: '48vh',
+            paddingBottom: 'env(safe-area-inset-bottom)'
           }}
         >
-          <aside className="h-full w-full bg-gradient-to-b from-black/96 via-black/98 to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-15px_50px_rgba(0,0,0,0.95)] rounded-t-3xl">
-            {/* Close Button */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0">
-              <h3 className="text-white font-semibold text-sm">
-                {activeTool ? 'Ferramenta / Histórico' : 'Painel'}
+          <aside className="h-full w-full bg-gradient-to-b from-black/98 via-black to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-20px_60px_rgba(0,0,0,0.9)] rounded-t-[24px]">
+            {/* Drag Handle - iOS Style */}
+            <div className="flex items-center justify-center py-2 flex-shrink-0">
+              <div className="w-10 h-1 bg-white/20 rounded-full"></div>
+            </div>
+            
+            {/* Close Button Header */}
+            <div className="flex items-center justify-between px-4 pb-2 flex-shrink-0">
+              <h3 className="text-white/90 font-semibold text-sm tracking-wide">
+                {activeTool ? 'Ferramenta & Histórico' : 'Painel'}
               </h3>
               <button
                 onClick={() => setShowToolPanel(false)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center"
+                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center border border-white/5"
               >
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
             </div>
