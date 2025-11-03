@@ -272,11 +272,12 @@ export default function ChatPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={toggleRecording}
+                    onClick={() => setShowRealTimeChat(true)}
                     className={cn(
                       "h-10 w-10 rounded-lg transition-colors active:scale-95",
-                      isRecording ? "text-red-500 hover:bg-red-500/10 bg-red-500/20" : "text-white hover:bg-white/10",
+                      "text-white hover:bg-white/10 hover:text-purple-400",
                     )}
+                    title="Chat de Voz em Tempo Real"
                   >
                     <Mic className="w-5 h-5" />
                   </Button>
