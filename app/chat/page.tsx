@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft } from "lucide-react"
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
+import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
 
 interface Message {
   id: string
@@ -57,6 +58,7 @@ export default function ChatPage() {
   const [isRecording, setIsRecording] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [showRealTimeChat, setShowRealTimeChat] = useState(false); // Novo estado
   const isMobile = useIsMobile()
 
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -463,6 +465,7 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
+      {showRealTimeChat && <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />}
     </div>
   )
 }
