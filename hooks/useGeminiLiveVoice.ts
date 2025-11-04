@@ -192,13 +192,19 @@ export function useGeminiLiveVoice({
     if (isRecording) return;
     
     try {
+      // 1. GARANTIR CONEXÃO PRIMEIRO
       // A conexão deve ser pré-estabelecida, mas verificamos por segurança.
       if (!isConnected) {
         setError("A conexão não está pronta. A tentar reconectar...");
         await connect(); // Tenta conectar novamente se algo falhou.
       }
 
-      // 1. Solicita permissão de microfone
+      // 2. CRIAR AudioContext APENAS AGORA (APÓS INTERAÇÃO)
+      // Esta é a correção crítica. O AudioContext só pode ser criado de forma fiável após um gesto do utilizador.
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+
+      // 3. SOLICITAR PERMISSÃO DE MICROFONE
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -206,22 +212,21 @@ export function useGeminiLiveVoice({
           autoGainControl: true,
         },
       });
-
       mediaStreamRef.current = stream;
       
-      // 2. Cria AudioContext e carrega o AudioWorklet
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      audioContextRef.current = audioContext;
-
+      // 4. CARREGAR O AudioWorklet DE FORMA ROBUSTA
       try {
         await audioContext.audioWorklet.addModule('/audio-processor.js');
       } catch (e) {
-        console.error('Failed to load audio worklet', e);
-        setError('Falha ao carregar o processador de áudio. O seu navegador pode não ser compatível.');
+        console.error('Falha crítica ao carregar o processador de áudio (AudioWorklet).', e);
+        setError('Falha ao carregar o processador de áudio. O seu navegador pode não ser compatível ou estar numa página insegura (não-HTTPS).');
+        // Limpeza imediata se o worklet falhar
+        stream.getTracks().forEach(track => track.stop());
+        audioContext.close();
         return;
       }
 
-      // 3. Cria o nó do worklet e conecta
+      // 5. CRIAR O NÓ DO WORKLET E CONECTAR
       const workletNode = new AudioWorkletNode(audioContext, 'resampling-processor', {
         processorOptions: {
           targetSampleRate: 16000,
@@ -229,34 +234,37 @@ export function useGeminiLiveVoice({
       });
       workletNodeRef.current = workletNode;
 
-      // 4. Configura o manipulador de mensagens do worklet
+      // 6. CONFIGURAR O MANIPULADOR DE MENSAGENS DO WORKLET
       workletNode.port.onmessage = (event: MessageEvent<Int16Array>) => {
-        if (sessionRef.current && isRecording) {
+        if (sessionRef.current) {
           try {
             sessionRef.current.sendClientContent({
               audio: event.data,
             });
           } catch (err) {
-            console.error("Error sending audio data:", err);
-            setError("Erro ao enviar áudio.");
-            stopAudioCapture();
+            // Este erro pode acontecer se a sessão fechar enquanto o áudio ainda está a ser enviado
+            // Não é crítico, o erro é registado mas não para a captura
+            console.error("Erro ao enviar áudio:", err);
           }
         }
       };
 
-      // 5. Conecta o microfone ao worklet
+      // 7. CONECTAR O MICROFONE AO WORKLET
       sourceRef.current = audioContext.createMediaStreamSource(stream);
       sourceRef.current.connect(workletNode);
-      workletNode.connect(audioContext.destination); // Conectar à saída para evitar que o processamento pare
+      workletNode.connect(audioContext.destination); // Conectar à saída para evitar que o processamento pare em alguns navegadores
 
       setIsRecording(true);
+      setError(null); // Limpa erros anteriores se tudo correu bem
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Erro ao iniciar captura de áudio";
       if (errorMsg.includes('permission denied')) {
-        setError("Permissão para o microfone foi negada.");
+        setError("Permissão para o microfone foi negada. Por favor, autorize o acesso nas definições do seu navegador.");
       } else {
-        setError(errorMsg);
+        setError(`Erro ao iniciar áudio: ${errorMsg}`);
       }
+      // Garante que o estado de gravação fica falso se houver um erro
+      setIsRecording(false);
     }
   }, [isConnected, isRecording, connect]);
 
