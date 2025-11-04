@@ -210,17 +210,17 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gradient-to-br from-slate-950 via-purple-950/20 to-black flex flex-col items-center justify-center z-50 overflow-hidden"
+      className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50 overflow-hidden"
     >
       {/* Efeito de fundo com gradiente dinâmico */}
       <motion.div
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-20"
         animate={{
           background: chatState === "listening" 
-            ? "radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15), transparent 70%)"
+            ? "radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 70%)"
             : chatState === "speaking"
-            ? "radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.15), transparent 70%)"
-            : "radial-gradient(circle at 50% 50%, rgba(100, 100, 100, 0.05), transparent 70%)",
+            ? "radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.3), transparent 70%)"
+            : "radial-gradient(circle at 50% 50%, rgba(100, 100, 100, 0.1), transparent 70%)",
         }}
         transition={{ duration: 0.8 }}
       />
