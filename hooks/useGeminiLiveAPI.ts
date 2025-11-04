@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GoogleGenAI, LiveServerMessage, Session, Modality } from "@google/genai";
+import { GoogleGenAI, LiveServerMessage, Session, Modality, MediaResolution } from "@google/genai";
 
 // --- Constantes ---
 const SEND_SAMPLE_RATE = 16000;
 const CHUNK_SIZE = 1024;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const TOKEN_EXPIRATION_MINUTES = 25;
-const MODEL_NAME = "models/gemini-2.0-flash-exp"; // Modelo que suporta Live API. Alternativa oficial: "models/gemini-2.5-flash-native-audio-preview-09-2025"
+const MODEL_NAME = "models/gemini-2.5-flash-native-audio-preview-09-2025"; // ATUALIZADO: Modelo exato do código oficial.
 
 // --- Tipos ---
 interface UseGeminiLiveAPIProps {
@@ -99,9 +99,21 @@ export function useGeminiLiveAPI({
       const connectionConfig = {
         model: MODEL_NAME,
         config: {
-          responseModalities: [Modality.AUDIO, Modality.TEXT],
-          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } },
-          // systemInstruction: { parts: [{ text: systemInstruction }] }, // REMOVIDO: Simplificando a requisição para evitar Policy Violation (1008).
+            responseModalities: [
+                Modality.AUDIO,
+            ],
+            mediaResolution: MediaResolution.MEDIA_RESOLUTION_MEDIUM,
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: {
+                  voiceName: 'Puck',
+                }
+              }
+            },
+            contextWindowCompression: {
+                triggerTokens: '25600',
+                slidingWindow: { targetTokens: '12800' },
+            },
         },
         callbacks: {
           onopen: () => {
