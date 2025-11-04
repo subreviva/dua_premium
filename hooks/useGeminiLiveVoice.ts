@@ -14,6 +14,10 @@ interface SessionMetrics {
   estimatedCost: number;
 }
 
+// Token cache para evitar requisições repetidas
+let cachedToken: string | null = null;
+let tokenExpiresAt: number = 0;
+
 export function useGeminiLiveVoice({
   onMessage,
   onAudio,
@@ -104,14 +108,37 @@ export function useGeminiLiveVoice({
     setError(null);
     
     try {
-      const response = await fetch("/api/auth/ephemeral-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      // Usar token em cache se ainda for válido
+      let token = cachedToken;
+      const now = Date.now();
       
-      if (!response.ok) throw new Error("Falha ao obter token");
+      if (!token || now >= tokenExpiresAt) {
+        console.log("🔑 Buscando novo token da API...");
+        const response = await fetch("/api/auth/ephemeral-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Falha ao obter token");
+        }
+        
+        const data = await response.json();
+        token = data.token;
+        cachedToken = token;
+        // Token válido por 25 minutos (API dá 30, usamos margem de segurança)
+        tokenExpiresAt = now + (25 * 60 * 1000);
+        console.log("✅ Token obtido e cacheado com sucesso!");
+      } else {
+        console.log("♻️ Usando token em cache (válido por mais " + 
+                    Math.round((tokenExpiresAt - now) / 60000) + " minutos)");
+      }
       
-      const { token } = await response.json();
+      if (!token) {
+        throw new Error("Não foi possível obter token de autenticação");
+      }
+      
       const genAI = new GoogleGenerativeAI(token);
       
       modelRef.current = genAI.getGenerativeModel({

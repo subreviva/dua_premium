@@ -10,13 +10,13 @@ export async function POST(request: Request) {
                request.headers.get("x-real-ip") || 
                "unknown";
     
-    // Verificar rate limit (máximo 10 tokens por hora)
+    // Verificar rate limit (máximo 60 tokens por hora - 1 por minuto)
     const now = Date.now();
     const userLimit = rateLimitStore.get(ip);
     
     if (userLimit) {
       if (now < userLimit.resetTime) {
-        if (userLimit.count >= 10) {
+        if (userLimit.count >= 60) {
           return NextResponse.json(
             { error: "Limite de taxa excedido. Tente novamente mais tarde." },
             { status: 429 }
