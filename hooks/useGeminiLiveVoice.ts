@@ -74,6 +74,11 @@ export function useGeminiLiveVoice({
         return tokenResponse.json();
       })
       .then(async ({ token, model }) => {
+        // VALIDAÇÃO RIGOROSA DO MODELO
+        if (!model || typeof model !== 'string' || model.trim() === '') {
+          throw new Error("O nome do modelo recebido da API é inválido.");
+        }
+
         aiRef.current = new GoogleGenAI({
           apiKey: token,
           httpOptions: { apiVersion: "v1alpha" },

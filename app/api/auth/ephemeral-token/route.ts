@@ -82,12 +82,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. RESPOSTA
+    // Definição explícita do modelo para garantir 100% de funcionalidade.
+    // Isto remove a dependência de variáveis de ambiente que podem não estar carregadas.
+    const modelName = "models/gemini-1.5-flash-latest";
+
     return NextResponse.json({
       token: tokenString,
       expiresAt: expireTime,
-      model: process.env.NEXT_PUBLIC_MODEL_NATIVE_AUDIO,
-      voiceName: process.env.NEXT_PUBLIC_VOICE_NAME,
-      languageCode: process.env.NEXT_PUBLIC_LANGUAGE_CODE,
+      model: modelName,
+      voiceName: process.env.NEXT_PUBLIC_VOICE_NAME || "Aoede",
+      languageCode: process.env.NEXT_PUBLIC_LANGUAGE_CODE || "pt-PT",
     });
 
   } catch (error) {
