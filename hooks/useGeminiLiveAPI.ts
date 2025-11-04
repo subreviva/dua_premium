@@ -6,7 +6,7 @@ const SEND_SAMPLE_RATE = 16000;
 const CHUNK_SIZE = 1024;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const TOKEN_EXPIRATION_MINUTES = 25;
-const MODEL_NAME = "models/gemini-1.5-flash-latest"; // REVERTIDO: Modelo padrão e otimizado.
+const MODEL_NAME = "models/gemini-2.0-flash-exp"; // CORRIGIDO: Modelo que suporta bidiGenerateContent (Live API).
 
 // --- Tipos ---
 interface UseGeminiLiveAPIProps {
