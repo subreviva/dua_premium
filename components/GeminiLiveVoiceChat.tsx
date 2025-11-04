@@ -192,9 +192,15 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   }, [isRecording, isLoading, isConnected, error, chatState]);
 
   const handleInteraction = () => {
-    // MELHORIA: Feedback tátil em dispositivos móveis que suportam
+    // ULTRA-PREMIUM: Feedback tátil sofisticado (padrões diferentes por estado)
     if ('vibrate' in navigator) {
-      navigator.vibrate(50); // Vibração curta de 50ms
+      if (chatState === "idle") {
+        navigator.vibrate([30, 20, 30]); // Padrão de "início" elegante
+      } else if (chatState === "speaking") {
+        navigator.vibrate(50); // Vibração única para interrupção
+      } else {
+        navigator.vibrate(30); // Vibração suave padrão
+      }
     }
 
     // MELHORIA: Permitir interromper a DUA
@@ -237,97 +243,130 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50 overflow-hidden"
     >
-      {/* Efeito de fundo com gradiente dinâmico */}
+      {/* Efeito de fundo com gradiente dinâmico ULTRA-PREMIUM */}
       <motion.div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-30"
         animate={{
           background: chatState === "listening" 
-            ? "radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 70%)"
+            ? "radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.4), rgba(147, 51, 234, 0.2), transparent 70%)"
             : chatState === "speaking"
-            ? "radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.3), transparent 70%)"
-            : "radial-gradient(circle at 50% 50%, rgba(100, 100, 100, 0.1), transparent 70%)",
+            ? "radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.2), transparent 70%)"
+            : "radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), transparent 70%)",
         }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
       />
 
-      {/* Botão de Fechar */}
+      {/* Glassmorphism overlay para profundidade */}
+      <div className="absolute inset-0 backdrop-blur-3xl opacity-5" />
+
+      {/* Botão de Fechar - ULTRA-PREMIUM */}
       <motion.button
         onClick={onClose}
-        className="absolute top-6 right-6 text-gray-400 hover:text-white transition-all duration-300 p-2 rounded-full hover:bg-white/5 backdrop-blur-sm"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.3 }}
+        className="absolute top-4 sm:top-6 right-4 sm:right-6 text-gray-400 hover:text-white transition-all duration-300 p-2.5 sm:p-3 rounded-full hover:bg-white/10 backdrop-blur-md border border-white/5 shadow-xl touch-manipulation active:scale-90"
+        initial={{ opacity: 0, scale: 0.8, y: -20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ delay: 0.3, type: "spring", stiffness: 300, damping: 25 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
-        <X size={32} />
+        <X size={24} className="sm:w-8 sm:h-8" />
       </motion.button>
 
-      {/* Erro Display */}
+      {/* Erro Display - ULTRA-PREMIUM */}
       <AnimatePresence>
         {error && (
           <motion.div
-            className="absolute top-20 left-1/2 -translate-x-1/2 px-6 py-3 bg-red-500/10 border border-red-500/30 rounded-full text-red-300 text-sm backdrop-blur-xl"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-16 sm:top-20 left-1/2 -translate-x-1/2 px-6 py-3.5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-300 text-sm backdrop-blur-xl shadow-2xl"
+            initial={{ opacity: 0, y: -30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -30, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
-            {error}
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+              <span className="font-medium">{error}</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Conteúdo Principal */}
-      <div className="text-center z-10 px-4">
-        {/* Título DUA */}
+      <div className="text-center z-10 px-4 sm:px-6">
+        {/* Título DUA - ULTRA-PREMIUM */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="mb-2"
+          transition={{ delay: 0.2, duration: 0.8, type: "spring", stiffness: 150 }}
+          className="mb-3 sm:mb-4"
         >
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-2 tracking-tight">
+          <motion.h1 
+            className="text-6xl sm:text-7xl md:text-8xl font-bold text-white mb-2 sm:mb-3 tracking-tight"
+            animate={{
+              textShadow: chatState === "listening" 
+                ? "0 0 40px rgba(59, 130, 246, 0.6), 0 0 80px rgba(59, 130, 246, 0.3)"
+                : chatState === "speaking"
+                ? "0 0 40px rgba(168, 85, 247, 0.6), 0 0 80px rgba(168, 85, 247, 0.3)"
+                : "0 0 20px rgba(139, 92, 246, 0.2)",
+            }}
+            transition={{ duration: 0.8 }}
+          >
             DUA
-          </h1>
-          <p className="text-gray-400 text-xs sm:text-sm font-light tracking-wider uppercase">
+          </motion.h1>
+          <motion.p 
+            className="text-gray-400 text-xs sm:text-sm font-light tracking-[0.2em] uppercase"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
             {getStatusSubtext()}
-          </p>
+          </motion.p>
         </motion.div>
 
-        {/* Status Text */}
+        {/* Status Text - ULTRA-PREMIUM */}
         <motion.p
           key={chatState}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-gray-300 text-base sm:text-lg mb-8 sm:mb-12 font-light px-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="text-gray-300 text-base sm:text-lg mb-10 sm:mb-14 font-light px-4"
         >
           {getStatusText()}
         </motion.p>
 
-        {/* Botão Principal com Siri Orb - RESPONSIVO */}
+        {/* Botão Principal com Siri Orb - ULTRA-PREMIUM RESPONSIVO */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.4, type: "spring", stiffness: 200, damping: 20 }}
+          transition={{ delay: 0.4, type: "spring", stiffness: 250, damping: 20 }}
           className="relative flex justify-center items-center"
         >
           <button
             onClick={handleInteraction}
             disabled={chatState === "connecting"}
-            className="relative focus:outline-none focus:ring-4 focus:ring-purple-500/50 rounded-full transition-all duration-300 touch-manipulation active:scale-95"
+            className="relative focus:outline-none focus:ring-4 focus:ring-purple-500/50 rounded-full transition-all duration-500 touch-manipulation active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label={getStatusText()}
           >
             {/* Siri Orb com Estados Visuais - TAMANHO RESPONSIVO */}
-            <div className="relative">
+            <motion.div 
+              className="relative"
+              animate={{
+                filter: chatState === "listening" 
+                  ? "drop-shadow(0 0 40px rgba(59, 130, 246, 0.6))"
+                  : chatState === "speaking"
+                  ? "drop-shadow(0 0 40px rgba(168, 85, 247, 0.6))"
+                  : "drop-shadow(0 0 20px rgba(139, 92, 246, 0.3))",
+              }}
+              transition={{ duration: 0.8 }}
+            >
               <SiriOrb
-                size={typeof window !== 'undefined' && window.innerWidth < 640 ? "180px" : "256px"}
-                className="drop-shadow-2xl"
+                size={typeof window !== 'undefined' && window.innerWidth < 640 ? "200px" : "280px"}
+                className="transition-all duration-500"
                 isListening={chatState === "listening"}
-                animationDuration={chatState === "listening" ? 8 : 20}
+                animationDuration={chatState === "listening" ? 6 : chatState === "speaking" ? 10 : 20}
                 colors={{
-                  c1: chatState === "listening" ? "oklch(75% 0.2 250)" : "oklch(75% 0.15 300)",
-                  c2: chatState === "listening" ? "oklch(80% 0.18 220)" : "oklch(80% 0.12 280)",
-                  c3: chatState === "speaking" ? "oklch(78% 0.16 320)" : "oklch(78% 0.14 290)",
+                  c1: chatState === "listening" ? "oklch(78% 0.22 250)" : chatState === "speaking" ? "oklch(76% 0.20 280)" : "oklch(75% 0.15 300)",
+                  c2: chatState === "listening" ? "oklch(82% 0.20 220)" : chatState === "speaking" ? "oklch(80% 0.18 260)" : "oklch(80% 0.12 280)",
+                  c3: chatState === "listening" ? "oklch(80% 0.18 240)" : chatState === "speaking" ? "oklch(78% 0.19 300)" : "oklch(78% 0.14 290)",
                 }}
               />
               
@@ -335,11 +374,11 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
               <motion.div
                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
                 animate={{
-                  scale: chatState === "listening" ? [1, 1.1, 1] : 1,
+                  scale: chatState === "listening" ? [1, 1.08, 1] : chatState === "speaking" ? [1, 1.05, 1] : 1,
                 }}
                 transition={{
-                  duration: 1.5,
-                  repeat: chatState === "listening" ? Infinity : 0,
+                  duration: chatState === "listening" ? 1.2 : 2,
+                  repeat: chatState === "listening" || chatState === "speaking" ? Infinity : 0,
                   ease: "easeInOut",
                 }}
               >
@@ -347,53 +386,58 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
                   {chatState === "connecting" ? (
                     <motion.div
                       key="connecting"
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 360 }}
                       exit={{ opacity: 0, scale: 0.5 }}
-                      className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"
+                      transition={{ rotate: { duration: 1, repeat: Infinity, ease: "linear" } }}
+                      className="w-14 h-14 sm:w-20 sm:h-20 border-[3px] border-white/20 border-t-white/80 rounded-full"
                     />
                   ) : (
                     <motion.div
                       key="mic"
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.5 }}
+                      initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 0.5, rotate: 10 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     >
                       <Mic
-                        size={chatState === "listening" ? (typeof window !== 'undefined' && window.innerWidth < 640 ? 56 : 80) : (typeof window !== 'undefined' && window.innerWidth < 640 ? 48 : 64)}
-                        className={`transition-all duration-300 ${
+                        size={chatState === "listening" ? (typeof window !== 'undefined' && window.innerWidth < 640 ? 64 : 88) : (typeof window !== 'undefined' && window.innerWidth < 640 ? 56 : 72)}
+                        className={`transition-all duration-500 ${
                           chatState === "listening"
-                            ? "text-blue-300 drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
-                            : "text-white/90"
+                            ? "text-blue-200 drop-shadow-[0_0_25px_rgba(59,130,246,0.9)]"
+                            : chatState === "speaking"
+                            ? "text-purple-200 drop-shadow-[0_0_25px_rgba(168,85,247,0.9)]"
+                            : "text-white/95 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
                         }`}
                       />
                     </motion.div>
                   )}
                 </AnimatePresence>
               </motion.div>
-            </div>
+            </motion.div>
           </button>
 
-          {/* Indicador de Áudio (Visualização de Ondas) - RESPONSIVO */}
+          {/* Indicador de Áudio (Visualização de Ondas) - ULTRA-PREMIUM RESPONSIVO */}
           <AnimatePresence>
             {chatState === "speaking" && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute -bottom-12 sm:-bottom-16 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-1.5"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="absolute -bottom-14 sm:-bottom-20 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2"
               >
-                {[...Array(5)].map((_, i) => (
+                {[...Array(7)].map((_, i) => (
                   <motion.div
                     key={i}
-                    className="w-1 sm:w-1.5 bg-purple-400 rounded-full"
+                    className="w-1 sm:w-1.5 rounded-full bg-gradient-to-t from-purple-500 via-pink-400 to-purple-300 shadow-lg shadow-purple-500/50"
                     animate={{
-                      height: ["16px", "32px", "16px"],
+                      height: i === 3 ? ["20px", "48px", "20px"] : ["16px", "40px", "16px"],
+                      opacity: [0.6, 1, 0.6],
                     }}
                     transition={{
-                      duration: 0.8,
+                      duration: 0.6,
                       repeat: Infinity,
-                      delay: i * 0.1,
+                      delay: i * 0.08,
                       ease: "easeInOut",
                     }}
                   />
@@ -403,16 +447,22 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           </AnimatePresence>
         </motion.div>
 
-        {/* Hint Text - RESPONSIVO */}
+        {/* Hint Text - ULTRA-PREMIUM RESPONSIVO */}
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-gray-500 text-xs sm:text-sm mt-12 sm:mt-16 max-w-md mx-auto px-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
+          className="text-gray-500 text-xs sm:text-sm mt-16 sm:mt-20 max-w-md mx-auto px-6 font-light leading-relaxed"
         >
-          {chatState === "idle" && "Toca no orbe para começar uma conversa por voz"}
-          {chatState === "listening" && "Fala naturalmente, a DUA está a ouvir"}
-          {chatState === "speaking" && "A DUA está a responder"}
+          <motion.span
+            animate={{ opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            {chatState === "idle" && "Toca no orbe para começar uma conversa por voz com a DUA"}
+            {chatState === "listening" && "Fala naturalmente, a DUA está a ouvir com atenção"}
+            {chatState === "speaking" && "A DUA está a responder, aguarda ou toca para interromper"}
+            {chatState === "connecting" && "A estabelecer ligação segura com a DUA..."}
+          </motion.span>
         </motion.p>
       </div>
     </motion.div>
