@@ -117,7 +117,7 @@ export function useGeminiLiveAPI({
             speechConfig: {
               voiceConfig: {
                 prebuiltVoiceConfig: {
-                  voiceName: 'Puck',
+                  voiceName: 'Aoede', // Voz feminina suave e profissional para a DUA
                 }
               }
             },
