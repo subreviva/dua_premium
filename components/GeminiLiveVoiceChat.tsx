@@ -14,6 +14,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   const [isPlaying, setIsPlaying] = useState(false);
   const [messages, setMessages] = useState<Array<{role: "user" | "assistant", content: string, timestamp: Date}>>([]);
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
+  const isMountedRef = useRef(true);
 
   const handleNewMessage = useCallback((text: string) => {
     setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
@@ -43,6 +44,8 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   // -- OTIMIZAÇÃO: Pré-aquecimento da Conexão --
   // Inicia a conexão com a API assim que o componente é montado para uma resposta instantânea ao clique.
   useEffect(() => {
+    isMountedRef.current = true;
+    
     connect().catch(e => {
       // O erro já é tratado no hook e exposto no estado `error`.
       console.error("Falha na pré-conexão automática:", e);
@@ -50,6 +53,8 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
 
     // Garante que a sessão é fechada ao desmontar o componente.
     return () => {
+      isMountedRef.current = false;
+      console.log("🧹 Componente desmontado. Encerrando sessão...");
       stopAudioCapture();
       closeSession();
     };

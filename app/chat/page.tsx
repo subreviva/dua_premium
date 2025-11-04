@@ -490,7 +490,9 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
-      {showRealTimeChat && <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />}
+      <AnimatePresence>
+        {showRealTimeChat && <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />}
+      </AnimatePresence>
     </div>
   )
 }

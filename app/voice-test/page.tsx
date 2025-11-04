@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import GeminiLiveVoiceChat from "@/components/GeminiLiveVoiceChat";
 import { Button } from "@/components/ui/button";
 
@@ -69,11 +70,13 @@ export default function VoiceTestPage() {
           )}
         </div>
 
-        {showVoiceChat && (
-          <div className="mt-8">
-            <GeminiLiveVoiceChat onClose={() => setShowVoiceChat(false)} />
-          </div>
-        )}
+        <AnimatePresence>
+          {showVoiceChat && (
+            <div className="mt-8">
+              <GeminiLiveVoiceChat onClose={() => setShowVoiceChat(false)} />
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
