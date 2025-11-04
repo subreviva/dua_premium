@@ -109,7 +109,7 @@ export function useGeminiLiveVoice({
         config: config,
         callbacks: {
           onopen: () => {
-            console.log("✅ Conexão de voz ao vivo estabelecida");
+            // Conexão estabelecida com sucesso
             setIsConnected(true);
             setError(null);
           },
@@ -128,7 +128,7 @@ export function useGeminiLiveVoice({
                 );
                 onAudio?.(audioBlob);
               } catch (e) {
-                console.error("Erro ao processar áudio:", e);
+                // Erro ao processar áudio - silently ignore
               }
             }
 
@@ -138,12 +138,11 @@ export function useGeminiLiveVoice({
             }
           },
           onerror: (error: any) => {
-            console.error("Erro na sessão de voz:", error);
-            setError(error.message || "Erro desconhecido");
+            const errorMsg = error?.message || error?.toString() || "Erro desconhecido na sessão de voz";
+            setError(errorMsg);
             setIsConnected(false);
           },
           onclose: () => {
-            console.log("❌ Conexão de voz fechada");
             setIsConnected(false);
           },
         },
@@ -152,7 +151,6 @@ export function useGeminiLiveVoice({
       setIsLoading(false);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
-      console.error("Erro ao inicializar sessão:", errorMsg);
       setError(errorMsg);
       setIsLoading(false);
     }
@@ -175,7 +173,6 @@ export function useGeminiLiveVoice({
       });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Erro ao enviar";
-      console.error("Erro ao enviar texto:", errorMsg);
       setError(errorMsg);
     }
   }, [isConnected]);
@@ -238,7 +235,7 @@ export function useGeminiLiveVoice({
               },
             });
           } catch (e) {
-            console.error("Erro ao enviar áudio:", e);
+            // Erro silencioso ao enviar áudio
           }
         }
       };
@@ -247,7 +244,6 @@ export function useGeminiLiveVoice({
       setError(null);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Erro ao aceder ao microfone";
-      console.error("Erro ao iniciar áudio:", errorMsg);
       setError(errorMsg);
     }
   }, [isConnected]);
@@ -275,7 +271,7 @@ export function useGeminiLiveVoice({
       try {
         sessionRef.current.sendRealtimeInput({ audioStreamEnd: true });
       } catch (e) {
-        console.error("Erro ao sinalizar fim:", e);
+        // Erro silencioso ao sinalizar fim
       }
     }
 
@@ -290,7 +286,7 @@ export function useGeminiLiveVoice({
       try {
         sessionRef.current.close();
       } catch (e) {
-        console.error("Erro ao fechar sessão:", e);
+        // Erro silencioso ao fechar sessão
       }
       sessionRef.current = null;
     }

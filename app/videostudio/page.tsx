@@ -23,7 +23,9 @@ export default function VideoStudioPage() {
   const [mode, setMode] = useState<VeoMode>("text-to-video")
   const [resolution, setResolution] = useState<"720p" | "1080p">("720p")
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("16:9")
-  const [duration, setDuration] = useState<4 | 5 | 6 | 8>(5)
+  const [duration, setDuration] = useState<4 | 5 | 6 | 8>(8)
+  const [seed, setSeed] = useState<number | undefined>(undefined)
+  const [personGeneration, setPersonGeneration] = useState<"allow_all" | "allow_adult" | "dont_allow">("allow_all")
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [showVideoModal, setShowVideoModal] = useState(false)
 
@@ -57,7 +59,8 @@ export default function VideoStudioPage() {
         resolution,
         aspectRatio,
         durationSeconds: duration,
-        personGeneration: "allow_all",
+        personGeneration,
+        seed,
         numberOfVideos: 1,
       })
     } catch (error) {
@@ -132,20 +135,55 @@ export default function VideoStudioPage() {
 
             {/* Negative Prompt - Só quando Advanced */}
             {showAdvanced && (
-              <div className="mb-3">
-                <Textarea
-                  value={negativePrompt}
-                  onChange={(e) => setNegativePrompt(e.target.value)}
-                  placeholder="O que evitar (cartoon, drawing, low quality...)"
-                  className={cn(
-                    "bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl resize-none focus:ring-1 focus:ring-orange-500/50 transition-all",
-                    isMobile ? "min-h-[60px] text-sm p-3" : "min-h-[50px] text-xs p-3",
-                  )}
-                  maxLength={512}
-                />
-                <div className="flex justify-between items-center mt-1 px-1">
-                  <span className="text-[10px] text-orange-400/50">Negative Prompt</span>
-                  <span className="text-[10px] text-white/30">{negativePrompt.length}/512</span>
+              <div className="mb-3 space-y-3">
+                <div>
+                  <Textarea
+                    value={negativePrompt}
+                    onChange={(e) => setNegativePrompt(e.target.value)}
+                    placeholder="O que evitar (cartoon, drawing, low quality...)"
+                    className={cn(
+                      "bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl resize-none focus:ring-1 focus:ring-orange-500/50 transition-all",
+                      isMobile ? "min-h-[60px] text-sm p-3" : "min-h-[50px] text-xs p-3",
+                    )}
+                    maxLength={512}
+                  />
+                  <div className="flex justify-between items-center mt-1 px-1">
+                    <span className="text-[10px] text-orange-400/50">Negative Prompt</span>
+                    <span className="text-[10px] text-white/30">{negativePrompt.length}/512</span>
+                  </div>
+                </div>
+
+                {/* Google Veo 3 New Parameters */}
+                <div className={cn("grid gap-2", isMobile ? "grid-cols-1" : "grid-cols-2")}>
+                  <div>
+                    <label className="text-[10px] text-gray-400 mb-1 block px-1">Seed (Determinismo)</label>
+                    <input
+                      type="number"
+                      value={seed || ""}
+                      onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : undefined)}
+                      placeholder="Ex: 42"
+                      className={cn(
+                        "w-full bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-xl focus:ring-1 focus:ring-purple-500/50 transition-all",
+                        isMobile ? "h-11 text-sm px-3" : "h-9 text-xs px-3"
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-400 mb-1 block px-1">Geração de Pessoas</label>
+                    <Select value={personGeneration} onValueChange={(v) => setPersonGeneration(v as typeof personGeneration)}>
+                      <SelectTrigger className={cn(
+                        "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl",
+                        isMobile ? "h-11 px-3 text-sm" : "h-9 px-3 text-xs"
+                      )}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
+                        <SelectItem value="allow_all">Permitir Todos</SelectItem>
+                        <SelectItem value="allow_adult">Apenas Adultos</SelectItem>
+                        <SelectItem value="dont_allow">Não Permitir</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             )}

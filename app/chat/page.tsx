@@ -293,10 +293,15 @@ export default function ChatPage() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-neutral-400 hover:text-white"
+                className={cn(
+                  "text-neutral-400 hover:text-white transition-all duration-200",
+                  "hover:bg-blue-500/20 hover:text-blue-400",
+                  "active:scale-95 group"
+                )}
                 onClick={() => setShowRealTimeChat(true)}
+                title="Conversar por Voz (Premium)"
               >
-                <Mic className="w-5 h-5" />
+                <Mic className="w-5 h-5 group-hover:animate-pulse" />
               </Button>
               <Button 
                 size="icon" 
@@ -459,12 +464,13 @@ export default function ChatPage() {
                   size="icon"
                   onClick={() => setShowRealTimeChat(true)}
                   className={cn(
-                    "h-9 w-9 sm:h-8 sm:w-8 rounded-lg transition-colors active:scale-95",
-                    "text-white hover:bg-white/10 hover:text-purple-400",
+                    "h-9 w-9 sm:h-8 sm:w-8 rounded-lg transition-all duration-200 group",
+                    "text-white hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-purple-500/20",
+                    "hover:text-blue-400 active:scale-95 hover:shadow-lg hover:shadow-blue-500/25"
                   )}
-                  title="Chat de Voz em Tempo Real"
+                  title="🎙️ Modo Voz Premium - Como ChatGPT"
                 >
-                  <Mic className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <Mic className="w-4 h-4 sm:w-4 sm:h-4 group-hover:animate-pulse" />
                 </Button>
               </div>
 

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
+import { useVideoGeneration } from "@/contexts/video-generation-context"
 
 // Veo Models
 export const VEO_MODELS = {
@@ -102,11 +103,19 @@ export function useVeoApi() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [operation, setOperation] = useState<VeoOperation | null>(null)
+  
+  // Try to get video generation context, fallback to null if not available
+  let videoGeneration: any = null
+  try {
+    videoGeneration = useVideoGeneration()
+  } catch {
+    // Context not available, will work without background jobs
+  }
 
-  const generateVideo = async (config: VeoConfig): Promise<VeoOperation> => {
+  const generateVideo = useCallback(async (config: VeoConfig): Promise<VeoOperation> => {
     setIsLoading(true)
     setError(null)
-    setOperation(null)
+    let jobId: string | null = null
 
     try {
       // Validate prompt length
@@ -142,6 +151,16 @@ export function useVeoApi() {
         if (!config.inputVideo) {
           throw new Error("Modo extension requer vídeo de entrada")
         }
+      }
+
+      // Add job to background system if context available
+      if (videoGeneration) {
+        jobId = videoGeneration.addJob({
+          prompt: config.prompt,
+          status: "processing",
+          progress: 0,
+          model: model.name,
+        })
       }
 
       // Create FormData for file uploads
@@ -197,26 +216,94 @@ export function useVeoApi() {
 
       if (!response.ok) {
         const errorData = await response.json()
+        if (videoGeneration && jobId) {
+          videoGeneration.updateJob(jobId, { status: "error" })
+        }
         throw new Error(errorData.error || "Erro ao gerar vídeo")
       }
 
-      const operationData: VeoOperation = await response.json()
+      // Google-compliant response: { name, metadata, done }
+      const googleResponse = await response.json()
+      const operationId = googleResponse.name.replace('operations/', '')
+      
+      const operationData: VeoOperation = {
+        id: operationId,
+        status: "processing",
+        progress: 0,
+      }
+      
       setOperation(operationData)
-
-      // Start polling if operation is pending/processing
-      if (operationData.status === "pending" || operationData.status === "processing") {
-        pollOperation(operationData.id)
+      
+      // Start background polling if context available, otherwise use regular polling
+      if (videoGeneration && jobId) {
+        pollOperationInBackground(operationId, jobId)
+      } else {
+        pollOperation(operationId)
       }
 
       return operationData
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro desconhecido"
       setError(errorMessage)
+      if (videoGeneration && jobId) {
+        videoGeneration.updateJob(jobId, { status: "error" })
+      }
       throw err
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  const pollOperationInBackground = useCallback(async (operationId: string, jobId: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/veo/operation?id=${operationId}`)
+        if (!response.ok) throw new Error("Erro ao verificar status")
+
+        // Google-compliant response: { name, metadata, done, response?, error?, progress }
+        const googleData = await response.json()
+        
+        const operationData: VeoOperation = {
+          id: operationId,
+          status: googleData.done 
+            ? (googleData.error ? "failed" : "completed")
+            : "processing",
+          progress: googleData.progress || 0,
+          video: googleData.response?.video ? {
+            url: googleData.response.video.videoUrl,
+            thumbnailUrl: googleData.response.video.thumbnailUrl,
+            duration: 8,
+            resolution: googleData.metadata?.resolution || "720p",
+            aspectRatio: googleData.metadata?.aspectRatio || "16:9",
+          } : undefined,
+          error: googleData.error?.message,
+        }
+        
+        // Update job progress if context is available
+        if (videoGeneration) {
+          videoGeneration.updateJob(jobId, {
+            progress: operationData.progress,
+            status: operationData.status === "completed" ? "completed" : 
+                    operationData.status === "failed" ? "error" : "processing",
+            videoUrl: operationData.video?.url,
+            thumbnailUrl: operationData.video?.thumbnailUrl,
+          })
+        }
+
+        // Stop polling if completed or failed
+        if (operationData.status === "completed" || operationData.status === "failed") {
+          clearInterval(pollInterval)
+        }
+      } catch (err) {
+        clearInterval(pollInterval)
+        if (videoGeneration) {
+          videoGeneration.updateJob(jobId, { status: "error" })
+        }
+      }
+    }, 10000) // Poll every 10 seconds
+
+    return pollInterval
+  }, [])
 
   const pollOperation = async (operationId: string) => {
     const pollInterval = setInterval(async () => {
@@ -224,7 +311,25 @@ export function useVeoApi() {
         const response = await fetch(`/api/veo/operation?id=${operationId}`)
         if (!response.ok) throw new Error("Erro ao verificar status")
 
-        const operationData: VeoOperation = await response.json()
+        // Google-compliant response
+        const googleData = await response.json()
+        
+        const operationData: VeoOperation = {
+          id: operationId,
+          status: googleData.done 
+            ? (googleData.error ? "failed" : "completed")
+            : "processing",
+          progress: googleData.progress || 0,
+          video: googleData.response?.video ? {
+            url: googleData.response.video.videoUrl,
+            thumbnailUrl: googleData.response.video.thumbnailUrl,
+            duration: 8,
+            resolution: googleData.metadata?.resolution || "720p",
+            aspectRatio: googleData.metadata?.aspectRatio || "16:9",
+          } : undefined,
+          error: googleData.error?.message,
+        }
+        
         setOperation(operationData)
 
         // Stop polling if completed or failed

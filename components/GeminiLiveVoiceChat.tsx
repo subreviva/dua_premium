@@ -12,6 +12,8 @@ interface GeminiLiveVoiceChatProps {
 const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) => {
   const [audioQueue, setAudioQueue] = useState<Blob[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [messages, setMessages] = useState<Array<{role: "user" | "assistant", content: string, timestamp: Date}>>([]);
+  const [autoStarted, setAutoStarted] = useState(false);
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
 
   const handleClose = () => {
@@ -30,10 +32,31 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     isLoading,
     error,
   } = useGeminiLiveVoice({
+    systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
+    Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
+    Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
+    onMessage: (text) => {
+      setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
+    },
     onAudio: (audioBlob) => {
       setAudioQueue((prev) => [...prev, audioBlob]);
     },
   });
+
+  // Auto-iniciar sessão quando componente carrega (UX como ChatGPT)
+  useEffect(() => {
+    if (!autoStarted && !isLoading && !isConnected) {
+      setAutoStarted(true);
+      initializeSession().then(() => {
+        // Auto-iniciar captura após conectar (mais fluido)
+        setTimeout(() => {
+          if (!isRecording) {
+            startAudioCapture();
+          }
+        }, 1000);
+      });
+    }
+  }, [autoStarted, isLoading, isConnected, initializeSession, startAudioCapture, isRecording]);
 
   // Handle audio playback queue
   useEffect(() => {

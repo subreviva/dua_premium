@@ -2,14 +2,13 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { PremiumVideoPlayer } from "@/components/ui/premium-video-player"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks"
 import {
   X,
   Download,
   Share2,
-  Maximize2,
-  PlayCircle,
   Info,
   Sparkles,
   FileText,
@@ -38,7 +37,6 @@ interface VideoModalProps {
 export function VideoModal({ isOpen, onClose, video }: VideoModalProps) {
   const isMobile = useIsMobile()
   const [showInfo, setShowInfo] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
 
   const handleDownload = () => {
     const link = document.createElement("a")
@@ -135,23 +133,16 @@ export function VideoModal({ isOpen, onClose, video }: VideoModalProps) {
               )}
             </div>
 
-            {/* Video Player - Full Screen iOS */}
+            {/* Video Player - Full Screen iOS Premium */}
             <div className={cn(
               "flex-1 relative bg-black flex items-center justify-center",
               isMobile ? "min-h-0" : "p-8"
             )}>
-              <video
+              <PremiumVideoPlayer
                 src={video.url}
-                controls
-                autoPlay
-                playsInline
                 poster={video.thumbnailUrl}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                className={cn(
-                  "w-full h-full object-contain rounded-xl shadow-2xl",
-                  isMobile && "rounded-none"
-                )}
+                title={video.prompt}
+                isMobile={isMobile}
               />
 
               {/* Desktop Info Overlay */}
