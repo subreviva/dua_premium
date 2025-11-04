@@ -2,7 +2,7 @@
 
 import { useGeminiLiveAPI } from "@/hooks/useGeminiLiveAPI";
 import { X } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface GeminiLiveVoiceChatProps {
@@ -14,6 +14,14 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   const [isPlaying, setIsPlaying] = useState(false);
   const [messages, setMessages] = useState<Array<{role: "user" | "assistant", content: string, timestamp: Date}>>([]);
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
+
+  const handleNewMessage = useCallback((text: string) => {
+    setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
+  }, []);
+
+  const handleNewAudio = useCallback((audioBlob: Blob) => {
+    setAudioQueue(prev => [...prev, audioBlob]);
+  }, []);
 
   const {
     connect,
@@ -28,12 +36,8 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
     Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
     Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
-    onMessage: (text) => {
-      setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
-    },
-    onAudio: (audioBlob) => {
-      setAudioQueue(prev => [...prev, audioBlob]);
-    },
+    onMessage: handleNewMessage,
+    onAudio: handleNewAudio,
   });
 
   // -- OTIMIZAÇÃO: Pré-aquecimento da Conexão --

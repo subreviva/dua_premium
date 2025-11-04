@@ -248,6 +248,8 @@ export function useGeminiLiveAPI({
   return {
     connect,
     toggleRecording,
+    closeSession, // Adicionado
+    stopAudioCapture, // Adicionado
     isConnected,
     isRecording,
     isLoading,
