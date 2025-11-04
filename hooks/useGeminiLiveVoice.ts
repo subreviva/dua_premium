@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 interface UseGeminiLiveVoiceProps {
   onMessage?: (message: string) => void;
@@ -11,10 +11,6 @@ interface UseGeminiLiveVoiceProps {
 
 interface SessionMetrics {
   totalTokens: number;
-  inputTokens: number;
-  outputTokens: number;
-  audioInputTokens: number;
-  audioOutputTokens: number;
   estimatedCost: number;
 }
 
@@ -25,377 +21,184 @@ export function useGeminiLiveVoice({
   language = "pt-PT",
   voiceName = "Aoede",
 }: UseGeminiLiveVoiceProps) {
-  const sessionRef = useRef<any>(null);
-  const aiRef = useRef<GoogleGenAI | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Promise resolvers for connection
-  const connectionPromiseRef = useRef<{ resolve: () => void; reject: (reason?: any) => void } | null>(null);
-
-  // Refs para áudio
   const mediaStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
-  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-
-  // Métricas de custo e uso
+  const recognitionRef = useRef<any>(null);
+  const modelRef = useRef<any>(null);
+  const chatRef = useRef<any>(null);
+  
   const metricsRef = useRef<SessionMetrics>({
     totalTokens: 0,
-    inputTokens: 0,
-    outputTokens: 0,
-    audioInputTokens: 0,
-    audioOutputTokens: 0,
     estimatedCost: 0,
   });
-
-  // 1. CONECTAR SESSÃO (NOVA FUNÇÃO)
-  const connect = useCallback(async () => {
-    if (isConnected) {
-      return;
+  
+  const sendToGemini = useCallback(async (text: string) => {
+    if (!chatRef.current) return;
+    
+    try {
+      const result = await chatRef.current.sendMessageStream(text);
+      let fullResponse = '';
+      
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        fullResponse += chunkText;
+        onMessage?.(fullResponse);
+      }
+      
+      if ('speechSynthesis' in window && fullResponse) {
+        const utterance = new SpeechSynthesisUtterance(fullResponse);
+        utterance.lang = language;
+        const voices = speechSynthesis.getVoices();
+        const ptVoice = voices.find(voice => voice.lang.startsWith('pt'));
+        if (ptVoice) utterance.voice = ptVoice;
+        speechSynthesis.speak(utterance);
+      }
+      
+      metricsRef.current.totalTokens += Math.ceil((text.length + fullResponse.length) / 4);
+    } catch (err) {
+      console.error('Erro ao enviar para Gemini:', err);
+      setError('Erro ao processar resposta');
     }
-
+  }, [language, onMessage]);
+  
+  const initializeSpeechRecognition = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      setError("O seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.");
+      return false;
+    }
+    
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = language;
+    
+    recognition.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          const transcript = event.results[i][0].transcript;
+          sendToGemini(transcript);
+        }
+      }
+    };
+    
+    recognition.onerror = (event: any) => {
+      if (event.error === 'not-allowed') {
+        setError("Permissão de microfone negada.");
+      }
+    };
+    
+    recognitionRef.current = recognition;
+    return true;
+  }, [language, sendToGemini]);
+  
+  const connect = useCallback(async () => {
+    if (isConnected) return;
+    
     setIsLoading(true);
     setError(null);
-
-    return new Promise<void>((resolve, reject) => {
-      connectionPromiseRef.current = { resolve, reject };
-
-      fetch("/api/auth/ephemeral-token", {
+    
+    try {
+      const response = await fetch("/api/auth/ephemeral-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-      })
-      .then(tokenResponse => {
-        if (!tokenResponse.ok) {
-          throw new Error("Falha ao obter token de autenticação");
-        }
-        return tokenResponse.json();
-      })
-      .then(async ({ token, model }) => {
-        // VALIDAÇÃO RIGOROSA DO MODELO
-        if (!model || typeof model !== 'string' || model.trim() === '') {
-          throw new Error("O nome do modelo recebido da API é inválido.");
-        }
-
-        aiRef.current = new GoogleGenAI({
-          apiKey: token,
-          httpOptions: { apiVersion: "v1alpha" },
-        });
-
-        const config: any = {
-          responseModalities: [Modality.AUDIO],
-          systemInstruction,
-          speechConfig: {
-            languageCode: language,
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName: voiceName,
-              },
-            },
-          },
-          contextWindow: 32000,
-          realtimeInputConfig: {
-            automaticActivityDetection: {
-              disabled: false,
-              startOfSpeechSensitivity: "START_SENSITIVITY_LOW",
-              endOfSpeechSensitivity: "END_SENSITIVITY_LOW",
-              silenceDurationMs: 500,
-            },
-          },
-          enableAffectiveDialog: true,
-        };
-
-        sessionRef.current = await aiRef.current.live.connect({
-          model: model,
-          config: config,
-          callbacks: {
-            onopen: () => {
-              setIsConnected(true);
-              setIsLoading(false);
-              setError(null);
-              connectionPromiseRef.current?.resolve();
-            },
-            onmessage: (message: any) => {
-              if (message.text) {
-                onMessage?.(message.text);
-              }
-              if (message.data) {
-                try {
-                  const audioBlob = new Blob(
-                    [Buffer.from(message.data, "base64")],
-                    { type: "audio/pcm;rate=24000" }
-                  );
-                  onAudio?.(audioBlob);
-                } catch (e) {
-                  // Silently ignore audio processing errors
-                }
-              }
-              if (message.usageMetadata) {
-                updateMetrics(message.usageMetadata);
-              }
-            },
-            onerror: (error: any) => {
-              const errorMsg = error?.message || error?.toString() || "Erro desconhecido na sessão de voz";
-              setError(errorMsg);
-              setIsConnected(false);
-              setIsLoading(false);
-              connectionPromiseRef.current?.reject(new Error(errorMsg));
-            },
-            onclose: () => {
-              setIsConnected(false);
-            },
-          },
-        });
-      })
-      .catch(err => {
-        const errorMsg = err instanceof Error ? err.message : "Erro desconhecido ao conectar";
-        setError(errorMsg);
-        setIsLoading(false);
-        connectionPromiseRef.current?.reject(new Error(errorMsg));
       });
-    });
-  }, [isConnected, systemInstruction, language, voiceName, onMessage, onAudio]);
-
-
-  // DEPRECATED: initializeSession será substituído por `connect`
-  const initializeSession = useCallback(async () => {
-    console.warn("initializeSession is deprecated. Use connect() instead.");
-    return connect();
-  }, [connect]);
-
-
-  // 2. ENVIAR TEXTO
-  const sendText = useCallback(async (text: string) => {
-    if (!sessionRef.current || !isConnected) {
-      setError("Conexão não estabelecida");
-      return;
-    }
-
-    try {
-      await sessionRef.current.sendClientContent({
-        turns: {
-          role: "user",
-          parts: [{ text }],
-        },
-        turnComplete: true,
+      
+      if (!response.ok) throw new Error("Falha ao obter token");
+      
+      const { token } = await response.json();
+      const genAI = new GoogleGenerativeAI(token);
+      
+      modelRef.current = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: systemInstruction,
       });
+      
+      chatRef.current = modelRef.current.startChat({ history: [] });
+      
+      if (!initializeSpeechRecognition()) {
+        throw new Error("Reconhecimento de voz não disponível");
+      }
+      
+      setIsConnected(true);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Erro ao enviar";
-      setError(errorMsg);
+      setError(err instanceof Error ? err.message : "Erro ao conectar");
+      setIsConnected(false);
+    } finally {
+      setIsLoading(false);
     }
-  }, [isConnected]);
-
-  // 3. INICIAR GRAVAÇÃO DE ÁUDIO
+  }, [isConnected, systemInstruction, initializeSpeechRecognition]);
+  
   const startAudioCapture = useCallback(async () => {
     if (isRecording) return;
+    if (!isConnected) await connect();
+    if (!recognitionRef.current) return;
     
     try {
-      // 1. GARANTIR CONEXÃO PRIMEIRO
-      // A conexão deve ser pré-estabelecida, mas verificamos por segurança.
-      if (!isConnected) {
-        setError("A conexão não está pronta. A tentar reconectar...");
-        await connect(); // Tenta conectar novamente se algo falhou.
-      }
-
-      // 2. CRIAR AudioContext APENAS AGORA (APÓS INTERAÇÃO)
-      // Esta é a correção crítica. O AudioContext só pode ser criado de forma fiável após um gesto do utilizador.
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      audioContextRef.current = audioContext;
-
-      // 3. SOLICITAR PERMISSÃO DE MICROFONE
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { echoCancellation: true, noiseSuppression: true }
       });
-      mediaStreamRef.current = stream;
       
-      // 4. CARREGAR O AudioWorklet DE FORMA ROBUSTA
-      try {
-        await audioContext.audioWorklet.addModule('/audio-processor.js');
-      } catch (e) {
-        console.error('Falha crítica ao carregar o processador de áudio (AudioWorklet).', e);
-        setError('Falha ao carregar o processador de áudio. O seu navegador pode não ser compatível ou estar numa página insegura (não-HTTPS).');
-        // Limpeza imediata se o worklet falhar
-        stream.getTracks().forEach(track => track.stop());
-        audioContext.close();
-        return;
-      }
-
-      // 5. CRIAR O NÓ DO WORKLET E CONECTAR
-      const workletNode = new AudioWorkletNode(audioContext, 'resampling-processor', {
-        processorOptions: {
-          targetSampleRate: 16000,
-        },
-      });
-      workletNodeRef.current = workletNode;
-
-      // 6. CONFIGURAR O MANIPULADOR DE MENSAGENS DO WORKLET
-      workletNode.port.onmessage = (event: MessageEvent<Int16Array>) => {
-        if (sessionRef.current) {
-          try {
-            sessionRef.current.sendClientContent({
-              audio: event.data,
-            });
-          } catch (err) {
-            // Este erro pode acontecer se a sessão fechar enquanto o áudio ainda está a ser enviado
-            // Não é crítico, o erro é registado mas não para a captura
-            console.error("Erro ao enviar áudio:", err);
-          }
-        }
-      };
-
-      // 7. CONECTAR O MICROFONE AO WORKLET
-      sourceRef.current = audioContext.createMediaStreamSource(stream);
-      sourceRef.current.connect(workletNode);
-      workletNode.connect(audioContext.destination); // Conectar à saída para evitar que o processamento pare em alguns navegadores
-
+      mediaStreamRef.current = stream;
+      recognitionRef.current.start();
       setIsRecording(true);
-      setError(null); // Limpa erros anteriores se tudo correu bem
+      setError(null);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Erro ao iniciar captura de áudio";
-      if (errorMsg.includes('permission denied')) {
-        setError("Permissão para o microfone foi negada. Por favor, autorize o acesso nas definições do seu navegador.");
-      } else {
-        setError(`Erro ao iniciar áudio: ${errorMsg}`);
-      }
-      // Garante que o estado de gravação fica falso se houver um erro
-      setIsRecording(false);
+      setError("Erro ao acessar microfone");
     }
-  }, [isConnected, isRecording, connect]);
-
-  // 4. PARAR GRAVAÇÃO DE ÁUDIO
+  }, [isRecording, isConnected, connect]);
+  
   const stopAudioCapture = useCallback(() => {
     if (!isRecording) return;
-    setIsRecording(false);
-
-    // Desconecta e para o worklet
-    if (workletNodeRef.current) {
-      workletNodeRef.current.port.onmessage = null;
-      workletNodeRef.current.disconnect();
-      workletNodeRef.current = null;
+    
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
     }
-    if (sourceRef.current) {
-      sourceRef.current.disconnect();
-      sourceRef.current = null;
-    }
-
-    // Fecha o AudioContext
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-
-    // Para as faixas do microfone
+    
     if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current.getTracks().forEach(track => track.stop());
       mediaStreamRef.current = null;
     }
-
-    // Sinaliza fim do stream para a API (CORREÇÃO CRÍTICA)
-    if (sessionRef.current) {
-      try {
-        // A forma correta de sinalizar o fim do áudio é com sendClientContent
-        sessionRef.current.sendClientContent({ audioStreamEnd: true });
-      } catch (e) {
-        // Erro silencioso ao sinalizar fim
-      }
-    }
+    
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    setIsRecording(false);
   }, [isRecording]);
-
-  // NOVA FUNÇÃO: Alterna a gravação
+  
   const toggleRecording = useCallback(async () => {
-    if (isRecording) {
-      stopAudioCapture();
-    } else {
-      await startAudioCapture();
-    }
+    if (isRecording) stopAudioCapture();
+    else await startAudioCapture();
   }, [isRecording, startAudioCapture, stopAudioCapture]);
-
-  // 5. FECHAR SESSÃO
+  
   const closeSession = useCallback(() => {
     stopAudioCapture();
-    
-    if (sessionRef.current) {
-      try {
-        sessionRef.current.close();
-      } catch (e) {
-        // Erro silencioso ao fechar sessão
-      }
-      sessionRef.current = null;
-    }
-
+    recognitionRef.current = null;
+    modelRef.current = null;
+    chatRef.current = null;
     setIsConnected(false);
   }, [stopAudioCapture]);
-
-  // Atualiza métricas de custo
-  const updateMetrics = (usageMetadata: any) => {
-    if (!usageMetadata) return;
-
-    metricsRef.current.totalTokens = usageMetadata.totalTokenCount || 0;
-    
-    // Calcula custo (native audio rates)
-    const inputAudioCost = (usageMetadata.inputTokenCount || 0) * (3.0 / 1_000_000); // $3/M tokens
-    const outputAudioCost = (usageMetadata.outputTokenCount || 0) * (12.0 / 1_000_000); // $12/M tokens
-    
-    metricsRef.current.estimatedCost = inputAudioCost + outputAudioCost;
-  };
-
-  // Cleanup na desmontagem
-  useEffect(() => {
-    return () => {
-      closeSession();
-    };
-  }, [closeSession]);
-
+  
+  useEffect(() => () => closeSession(), [closeSession]);
+  
   const getMetrics = useCallback(() => ({
     totalTokens: metricsRef.current.totalTokens,
-    estimatedCost: metricsRef.current.estimatedCost,
-  }), [metricsRef.current.totalTokens, metricsRef.current.estimatedCost]);
-
+    estimatedCost: metricsRef.current.totalTokens * (0.00015 / 1000),
+  }), []);
+  
   return {
     connect,
-    toggleRecording, // Exporta a nova função
+    toggleRecording,
     startAudioCapture,
     stopAudioCapture,
     closeSession,
-
-    // Estados
     isConnected,
     isRecording,
     isLoading,
     error,
     getMetrics,
   };
-}
-
-// Funções auxiliares (resampleAudio, toPCM16, updateMetrics)
-// ...
-function resampleAudio(input: Float32Array, fromRate: number, toRate: number): Float32Array {
-  if (fromRate === toRate) {
-    return input;
-  }
-
-  const ratio = fromRate / toRate;
-  const outputLength = Math.floor(input.length / ratio);
-  const output = new Float32Array(outputLength);
-
-  for (let i = 0; i < outputLength; i++) {
-    output[i] = input[Math.floor(i * ratio)];
-  }
-
-  return output;
-}
-
-function toPCM16(input: Float32Array): Int16Array {
-  const output = new Int16Array(input.length);
-  for (let i = 0; i < input.length; i++) {
-    const s = Math.max(-1, Math.min(1, input[i]));
-    output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-  }
-  return output;
 }
