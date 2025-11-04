@@ -6,23 +6,91 @@ import { X } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// --- STREAMING AUDIO PLAYER: Alta Performance em Tempo Real ---
+// Esta classe implementa o padrão recomendado pela Google para playback de áudio
+// em tempo real usando a Web Audio API. Em vez de esperar pelo áudio completo,
+// toca os chunks à medida que chegam, eliminando o atraso.
+class StreamingAudioPlayer {
+  private audioContext: AudioContext;
+  private audioQueue: Int16Array[] = [];
+  private isPlaying = false;
+  private nextPlayTime = 0;
+  private sampleRate: number;
+
+  constructor(sampleRate = 24000) { // API Gemini retorna 24kHz
+    this.sampleRate = sampleRate;
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
+      sampleRate: this.sampleRate,
+    });
+  }
+
+  public addChunk(chunk: Int16Array) {
+    this.audioQueue.push(chunk);
+    if (!this.isPlaying) {
+      this.play();
+    }
+  }
+
+  private play() {
+    if (this.audioQueue.length === 0) {
+      this.isPlaying = false;
+      return;
+    }
+    this.isPlaying = true;
+
+    const chunk = this.audioQueue.shift()!;
+    
+    // Converter Int16Array para Float32Array (formato da Web Audio API)
+    const float32Array = new Float32Array(chunk.length);
+    for (let i = 0; i < chunk.length; i++) {
+      float32Array[i] = chunk[i] / 32768.0; // Normalizar de [-32768, 32767] para [-1, 1]
+    }
+
+    // Criar buffer de áudio
+    const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, this.sampleRate);
+    audioBuffer.copyToChannel(float32Array, 0);
+
+    // Criar source e conectar ao destino
+    const source = this.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(this.audioContext.destination);
+
+    // Agendar playback sem gaps (seamless)
+    const currentTime = this.audioContext.currentTime;
+    const startTime = Math.max(currentTime, this.nextPlayTime);
+    
+    source.start(startTime);
+    
+    // Calcular o tempo do próximo chunk para não haver gaps
+    this.nextPlayTime = startTime + audioBuffer.duration;
+    
+    // Quando terminar, tocar o próximo chunk
+    source.onended = () => this.play();
+  }
+
+  public close() {
+    this.audioContext.close();
+  }
+}
+
 interface GeminiLiveVoiceChatProps {
   onClose: () => void;
 }
 
 const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) => {
-  const [audioQueue, setAudioQueue] = useState<Blob[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [messages, setMessages] = useState<Array<{role: "user" | "assistant", content: string, timestamp: Date}>>([]);
-  const audioPlayerRef = useRef<HTMLAudioElement>(null);
+  const streamingPlayerRef = useRef<StreamingAudioPlayer | null>(null);
   const isMountedRef = useRef(true);
 
   const handleNewMessage = useCallback((text: string) => {
     setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
   }, []);
 
-  const handleNewAudio = useCallback((audioBlob: Blob) => {
-    setAudioQueue(prev => [...prev, audioBlob]);
+  const handleNewAudio = useCallback((audioChunk: Int16Array) => {
+    if (streamingPlayerRef.current) {
+      console.log(`🎵 Adicionando chunk ao stream (${audioChunk.length} samples)`);
+      streamingPlayerRef.current.addChunk(audioChunk);
+    }
   }, []);
 
   const {
@@ -40,51 +108,30 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     onAudio: handleNewAudio,
   });
 
-  // -- OTIMIZAÇÃO: Pré-aquecimento da Conexão --
-  // Inicia a conexão com a API assim que o componente é montado para uma resposta instantânea ao clique.
+  // -- OTIMIZAÇÃO: Pré-aquecimento e Inicialização do Streaming Player --
   useEffect(() => {
     isMountedRef.current = true;
     
+    // Inicializar o player de streaming (24kHz conforme API Gemini)
+    streamingPlayerRef.current = new StreamingAudioPlayer(24000);
+    console.log("✅ StreamingAudioPlayer inicializado");
+    
     connect().catch(e => {
-      // O erro já é tratado no hook e exposto no estado `error`.
       console.error("Falha na pré-conexão automática:", e);
     });
 
-    // Garante que a sessão é fechada ao desmontar o componente.
+    // Limpeza ao desmontar o componente
     return () => {
       isMountedRef.current = false;
       console.log("🧹 Componente desmontado. Encerrando sessão...");
+      streamingPlayerRef.current?.close();
       stopAudioCapture();
       closeSession();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // -- REMOVIDA A LÓGICA "ALWAYS-ON" --
-  // A ativação automática foi removida para cumprir as políticas de segurança dos navegadores,
-  // que exigem um gesto do utilizador (clique) para iniciar a captura de áudio.
-  // A conexão permanece pré-aquecida para garantir uma resposta instantânea quando o utilizador clicar.
-
-
-  // Handle audio playback queue
-  useEffect(() => {
-    if (audioQueue.length > 0 && !isPlaying) {
-      setIsPlaying(true);
-      const nextAudio = audioQueue[0];
-      const audioUrl = URL.createObjectURL(nextAudio);
-      if (audioPlayerRef.current) {
-        audioPlayerRef.current.src = audioUrl;
-        audioPlayerRef.current.play().catch(e => console.error("Audio play failed:", e));
-      }
-    }
-  }, [audioQueue, isPlaying]);
-
-  const handleAudioEnded = () => {
-    URL.revokeObjectURL(audioPlayerRef.current?.src || "");
-    setIsPlaying(false);
-    setAudioQueue((prev) => prev.slice(1));
-  };
-
   const handleClose = () => {
+    streamingPlayerRef.current?.close();
     stopAudioCapture();
     closeSession();
     onClose();
@@ -273,9 +320,6 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           {/* We can map messages here if we want to show a transcript */}
         </div>
       </div>
-
-      {/* Audio player */}
-      <audio ref={audioPlayerRef} onEnded={handleAudioEnded} className="hidden" />
     </motion.div>
   );
 };
