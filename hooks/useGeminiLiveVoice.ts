@@ -40,21 +40,50 @@ export function useGeminiLiveVoice({
     estimatedCost: 0,
   });
   
-  const sendToGemini = useCallback(async (text: string) => {
+    const sendToGemini = useCallback(async (text: string) => {
     if (!chatRef.current) return;
     
     try {
+      // Cancela qualquer fala anterior para não sobrepor respostas.
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+      }
+
       const result = await chatRef.current.sendMessageStream(text);
       let fullResponse = '';
-      
+      let sentenceBuffer = '';
+      const sentenceEndRegex = /[.!?]/;
+
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
         fullResponse += chunkText;
-        onMessage?.(fullResponse);
+        sentenceBuffer += chunkText;
+        onMessage?.(fullResponse); // Atualiza o texto na UI em tempo real
+
+        // Verifica se temos uma ou mais frases completas no buffer
+        if (sentenceEndRegex.test(sentenceBuffer)) {
+          const sentences = sentenceBuffer.split(sentenceEndRegex);
+          
+          // A última parte pode ser um fragmento de frase, então guardamo-la para o próximo chunk.
+          const sentencesToSpeak = sentences.slice(0, -1);
+          sentenceBuffer = sentences[sentences.length - 1];
+
+          for (const sentence of sentencesToSpeak) {
+            if (sentence.trim()) {
+              const utterance = new SpeechSynthesisUtterance(sentence.trim());
+              utterance.lang = language;
+              const voices = speechSynthesis.getVoices();
+              const ptVoice = voices.find(voice => voice.lang.startsWith('pt'));
+              if (ptVoice) utterance.voice = ptVoice;
+              speechSynthesis.speak(utterance);
+            }
+          }
+        }
       }
       
-      if ('speechSynthesis' in window && fullResponse) {
-        const utterance = new SpeechSynthesisUtterance(fullResponse);
+      // Fala a última frase que possa ter ficado no buffer
+      if ('speechSynthesis' in window && sentenceBuffer.trim()) {
+        const utterance = new SpeechSynthesisUtterance(sentenceBuffer.trim());
         utterance.lang = language;
         const voices = speechSynthesis.getVoices();
         const ptVoice = voices.find(voice => voice.lang.startsWith('pt'));
@@ -64,10 +93,14 @@ export function useGeminiLiveVoice({
       
       metricsRef.current.totalTokens += Math.ceil((text.length + fullResponse.length) / 4);
     } catch (err) {
-      console.error('Erro ao enviar para Gemini:', err);
-      setError('Erro ao processar resposta');
+      console.error("Erro ao enviar para o Gemini:", err);
+      const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
+      setError(errorMessage);
+      onMessage?.(`Erro: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
     }
-  }, [language, onMessage]);
+  }, [language, onMessage, systemInstruction]);
   
   const initializeSpeechRecognition = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
