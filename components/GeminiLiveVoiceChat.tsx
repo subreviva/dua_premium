@@ -381,17 +381,20 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.4, type: "spring", stiffness: 250, damping: 20 }}
-          className="relative flex justify-center items-center"
+          className="relative flex justify-center items-center py-8 sm:py-12"
+          style={{ minHeight: '300px' }} // Garante espaço mínimo para a esfera + glow
         >
           <button
             onClick={handleInteraction}
             disabled={chatState === "connecting"}
-            className="relative focus:outline-none focus:ring-4 focus:ring-purple-500/50 rounded-full transition-all duration-500 touch-manipulation active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="relative focus:outline-none focus:ring-4 focus:ring-purple-500/50 rounded-full transition-all duration-500 touch-manipulation active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed p-8 sm:p-12"
             aria-label={getStatusText()}
+            style={{ overflow: 'visible' }} // CRÍTICO: Permite que o glow extrapole o botão
           >
             {/* Siri Orb com Estados Visuais - TAMANHO RESPONSIVO */}
             <motion.div 
               className="relative"
+              style={{ overflow: 'visible' }} // CRÍTICO: Permite que o glow seja visível
               animate={{
                 filter: chatState === "listening" 
                   ? "drop-shadow(0 0 40px rgba(59, 130, 246, 0.6))"
