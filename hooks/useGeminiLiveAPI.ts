@@ -38,7 +38,6 @@ export function useGeminiLiveAPI({
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const reconnectAttemptsRef = useRef(0);
-  const sentAudioConfig = useRef(false); // Flag para controlar o envio da configuração de áudio
 
   // --- 1. Processamento de Respostas do Servidor ---
   const handleServerMessage = useCallback(
@@ -174,7 +173,6 @@ export function useGeminiLiveAPI({
     }
 
     console.log("🎤 Iniciando captura de áudio...");
-    sentAudioConfig.current = false; // Resetar a flag ao iniciar a captura
     try {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SEND_SAMPLE_RATE });
       console.log(`🎧 AudioContext criado com sampleRate: ${audioContextRef.current.sampleRate}Hz`);
@@ -199,30 +197,18 @@ export function useGeminiLiveAPI({
         }
         const base64Audio = window.btoa(binary);
 
-        const payload: any = {
-          turns: [{
-            role: "user",
-            parts: [{
-              inlineData: {
-                mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
-                data: base64Audio,
-              },
-            }],
-          }],
-        };
-
-        // CRÍTICO: Enviar a configuração de áudio no primeiro pacote
-        if (!sentAudioConfig.current) {
-          payload.config = {
-            audioEncoding: 'LINEAR16',
-            sampleRateHertz: SEND_SAMPLE_RATE,
-          };
-          console.log("📡 Enviando configuração de áudio inicial...");
-          sentAudioConfig.current = true;
-        }
-
         try {
-          sessionRef.current.sendClientContent(payload);
+          sessionRef.current.sendClientContent({
+            turns: [{
+              role: "user",
+              parts: [{
+                inlineData: {
+                  mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
+                  data: base64Audio,
+                },
+              }],
+            }],
+          });
         } catch (e) {
           console.error("❌ Erro ao enviar áudio (a sessão pode ter fechado):", e);
         }
