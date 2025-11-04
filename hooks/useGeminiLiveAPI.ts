@@ -45,46 +45,20 @@ export function useGeminiLiveAPI({
     return buffer;
   };
 
-  // Aguarda mensagem da fila
+  // Aguarda mensagem da fila (padrão oficial)
   const waitMessage = useCallback(async (): Promise<LiveServerMessage> => {
-    while (responseQueueRef.current.length === 0) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    return responseQueueRef.current.shift()!;
-  }, []);
-
-  // Processa turn completo
-  const handleTurn = useCallback(async (): Promise<LiveServerMessage[]> => {
-    const turn: LiveServerMessage[] = [];
     let done = false;
-    
+    let message: LiveServerMessage | undefined = undefined;
     while (!done) {
-      const message = await waitMessage();
-      turn.push(message);
-      
-      // Processar áudio recebido
-      if (message.serverContent?.modelTurn?.parts) {
-        for (const part of message.serverContent.modelTurn.parts) {
-          if (part.inlineData && part.inlineData.mimeType?.startsWith('audio/') && part.inlineData.data) {
-            const audioData = Uint8Array.from(atob(part.inlineData.data), c => c.charCodeAt(0));
-            audioQueueRef.current.push(audioData.buffer);
-            playAudioQueue();
-          }
-          if (part.text) {
-            console.log("💬", part.text);
-            onMessage?.(part.text);
-          }
-        }
-      }
-      
-      if (message.serverContent?.turnComplete) {
+      message = responseQueueRef.current.shift();
+      if (message) {
         done = true;
-        console.log("🔄 Turn complete");
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
-    
-    return turn;
-  }, [waitMessage, onMessage]);
+    return message!;
+  }, []);
 
   // Reproduz fila de áudio
   const playAudioQueue = useCallback(async () => {
@@ -122,6 +96,39 @@ export function useGeminiLiveAPI({
     
     isPlayingRef.current = false;
   }, []);
+
+  // Processa turn completo (padrão oficial)
+  const handleTurn = useCallback(async (): Promise<LiveServerMessage[]> => {
+    const turn: LiveServerMessage[] = [];
+    let done = false;
+    
+    while (!done) {
+      const message = await waitMessage();
+      turn.push(message);
+      
+      // Processar áudio e texto
+      if (message.serverContent?.modelTurn?.parts) {
+        for (const part of message.serverContent.modelTurn.parts) {
+          if (part.inlineData && part.inlineData.mimeType?.startsWith('audio/') && part.inlineData.data) {
+            const audioData = Uint8Array.from(atob(part.inlineData.data), c => c.charCodeAt(0));
+            audioQueueRef.current.push(audioData.buffer);
+            playAudioQueue();
+          }
+          if (part.text) {
+            console.log("💬", part.text);
+            onMessage?.(part.text);
+          }
+        }
+      }
+      
+      if (message.serverContent && message.serverContent.turnComplete) {
+        done = true;
+        console.log("🔄 Turn complete");
+      }
+    }
+    
+    return turn;
+  }, [waitMessage, onMessage, playAudioQueue]);
 
   // Conectar à Live API
   const connect = useCallback(async () => {
@@ -186,26 +193,8 @@ export function useGeminiLiveAPI({
           },
           onmessage: (message: LiveServerMessage) => {
             try {
+              // APENAS adiciona à fila - processamento em handleTurn()
               responseQueueRef.current.push(message);
-              
-              // Processar mensagem imediatamente
-              if (message.serverContent?.modelTurn?.parts) {
-                for (const part of message.serverContent.modelTurn.parts) {
-                  if (part.inlineData && part.inlineData.mimeType?.startsWith('audio/') && part.inlineData.data) {
-                    const audioData = Uint8Array.from(atob(part.inlineData.data), c => c.charCodeAt(0));
-                    audioQueueRef.current.push(audioData.buffer);
-                    playAudioQueue();
-                  }
-                  if (part.text) {
-                    console.log("💬", part.text);
-                    onMessage?.(part.text);
-                  }
-                }
-              }
-              
-              if (message.serverContent?.turnComplete) {
-                console.log("🔄 Turn complete");
-              }
             } catch (err) {
               console.error("Erro em onmessage:", err);
             }
@@ -317,11 +306,16 @@ export function useGeminiLiveAPI({
       setIsRecording(true);
       console.log("🎤 Gravação iniciada");
       
+      // Iniciar processamento de turns (padrão oficial)
+      handleTurn().catch(err => {
+        console.error("Erro ao processar turn:", err);
+      });
+      
     } catch (err) {
       setError("Erro ao acessar microfone");
       console.error(err);
     }
-  }, [isRecording, isConnected]);
+  }, [isRecording, isConnected, handleTurn]);
 
   // Parar captura
   const stopAudioCapture = useCallback(() => {
