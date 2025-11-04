@@ -16,36 +16,6 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   const [autoStarted, setAutoStarted] = useState(false);
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
 
-  const handleClose = () => {
-    stopAudioCapture();
-    closeSession();
-    onClose();
-  };
-
-  const {
-    initializeSession,
-    startAudioCapture,
-    stopAudioCapture,
-    closeSession,
-    isConnected,
-    isRecording,
-    isLoading,
-    error,
-  } = useGeminiLiveVoice({
-    systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
-    Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
-    Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
-    onMessage: (text) => {
-      setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
-    },
-    onAudio: (audioBlob) => {
-      setAudioQueue((prev) => [...prev, audioBlob]);
-    },
-  });
-
-  // Removido auto-início — para produção devemos pedir permissão em gesto do utilizador.
-  // O utilizador deve clicar na Orb para iniciar a sessão e a gravação.
-
   // Handle audio playback queue
   useEffect(() => {
     if (audioQueue.length > 0 && !isPlaying) {
@@ -65,40 +35,64 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     setAudioQueue((prev) => prev.slice(1));
   };
 
-  // Core logic fix: Separate initialization and recording start
-  // 1. Initialize session on component mount
+  const handleClose = () => {
+    stopAudioCapture();
+    closeSession();
+    onClose();
+  };
+
+  const {
+    toggleRecording,
+    stopAudioCapture,
+    closeSession,
+    isConnected,
+    isRecording,
+    isLoading,
+    error,
+  } = useGeminiLiveVoice({
+    systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
+    Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
+    Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
+    onMessage: (text) => {
+      setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
+    },
+    onAudio: (audioBlob) => {
+      setAudioQueue((prev) => [...prev, audioBlob]);
+    },
+  });
+
+  // Cleanup function to close session on unmount
   useEffect(() => {
-    // Apenas guarda a possibilidade de inicializar; não dispara automaticamente.
-    // Cleanup function to close session on unmount
     return () => {
       stopAudioCapture();
       closeSession();
     };
-  }, [initializeSession, closeSession, stopAudioCapture]);
+  }, [closeSession, stopAudioCapture]);
 
-  // 2. Start audio capture only when connected
-  // NOTE: Não iniciar automaticamente. A captura só começa por gesto do utilizador.
 
-  // Inicia sessão e captura quando o utilizador clica na orb
+  // Inicia/para a sessão de voz quando o utilizador clica na orb
   const handleOrbClick = async () => {
     try {
-      if (!isConnected) {
-        await initializeSession();
-      }
-
-      if (!isRecording) {
-        await startAudioCapture();
-      } else {
-        stopAudioCapture();
-      }
+      await toggleRecording();
     } catch (e) {
-      // Mostra erro - o hook tem estado `error`
+      // O hook `useGeminiLiveVoice` já define o estado de erro,
+      // que será exibido na UI.
+      console.error("Falha ao alternar a gravação:", e);
     }
   };
 
 
   // Determine orb state based on hook states
   const getOrbState = () => {
+    if (isLoading) { // Adicionado estado de loading
+      return {
+        outerRing: "animate-spin",
+        middleRing: "bg-yellow-500/10 blur-2xl",
+        mainOrb: "bg-gradient-to-br from-yellow-600 to-yellow-800 shadow-[0_0_100px_rgba(234,179,8,0.4)]",
+        innerGlow: "bg-gradient-to-br from-yellow-400 to-yellow-600 blur-3xl opacity-50",
+      };
+    }
+
     if (!isConnected) {
       return {
         outerRing: "animate-pulse",
@@ -147,9 +141,9 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           animate={{ 
             scale: 1, 
             opacity: 1,
-            width: !isConnected ? "400px" : isRecording ? "600px" : "500px",
-            height: !isConnected ? "400px" : isRecording ? "600px" : "500px",
-            backgroundColor: !isConnected ? "rgba(234, 179, 8, 0.1)" : isRecording ? "rgba(59, 130, 246, 0.15)" : "rgba(168, 85, 247, 0.15)",
+            width: isLoading ? "450px" : !isConnected ? "400px" : isRecording ? "600px" : "500px",
+            height: isLoading ? "450px" : !isConnected ? "400px" : isRecording ? "600px" : "500px",
+            backgroundColor: isLoading ? "rgba(234, 179, 8, 0.12)" : !isConnected ? "rgba(234, 179, 8, 0.1)" : isRecording ? "rgba(59, 130, 246, 0.15)" : "rgba(168, 85, 247, 0.15)",
           }}
           exit={{ scale: 0.8, opacity: 0 }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -166,6 +160,21 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
       >
         <X className="w-5 h-5 text-white/60" />
       </motion.button>
+
+      {/* Error Display */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            className="absolute top-24 left-1/2 -translate-x-1/2 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white text-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <p className="font-semibold">Erro na Voz em Tempo Real</p>
+            <p className="text-sm text-white/80">{error}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main orb */}
       <motion.div 
@@ -196,45 +205,52 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           onClick={handleOrbClick}
           role="button"
           tabIndex={0}
-          aria-label="Iniciar / Parar escuta"
-          className={`relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center transition-all duration-700 cursor-pointer ${mainOrb}`}
+          aria-label={isLoading ? "A conectar..." : isRecording ? "Parar escuta" : "Iniciar escuta"}
+          className={`relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center transition-all duration-700 cursor-pointer ${mainOrb} ${isLoading ? 'cursor-wait' : ''}`}
         >
           {/* Inner glow */}
           <motion.div 
             className={`absolute inset-0 rounded-full transition-all duration-700 ${innerGlow}`}
           />
           
-          {/* DUA logo */}
+          {/* Icon */}
           <motion.div 
-            className="relative text-white/80 font-bold text-6xl md:text-7xl tracking-widest"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
+            className="relative z-10"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.3 }}
           >
-            DUA
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isLoading ? "loading" : isRecording ? "recording" : "idle"}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isLoading ? (
+                  <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+                ) : isRecording ? (
+                  <div className="w-16 h-16 bg-red-500 rounded-full shadow-lg shadow-red-500/50" />
+                ) : (
+                  <svg className="w-16 h-16 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75-11.25a3.75 3.75 0 017.5 0v1.5a3.75 3.75 0 01-7.5 0v-1.5z" />
+                  </svg>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       </motion.div>
 
-      {/* Status Dots */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center space-x-3">
-        <motion.div
-          className="w-2 h-2 rounded-full"
-          animate={{ backgroundColor: isLoading ? "#eab308" : isConnected ? "#8b5cf6" : "#4b5563" }}
-          transition={{ duration: 0.3 }}
-        />
-        <motion.div
-          className="w-2 h-2 rounded-full"
-          animate={{ backgroundColor: isRecording ? "#3b82f6" : "#4b5563" }}
-          transition={{ duration: 0.3 }}
-        />
-        <motion.div
-          className="w-2 h-2 rounded-full"
-          animate={{ backgroundColor: error ? "#ef4444" : "#4b5563" }}
-          transition={{ duration: 0.3 }}
-        />
+      {/* Transcript display */}
+      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 p-8 overflow-y-auto h-full">
+          {/* We can map messages here if we want to show a transcript */}
+        </div>
       </div>
 
+      {/* Audio player */}
       <audio ref={audioPlayerRef} onEnded={handleAudioEnded} className="hidden" />
     </motion.div>
   );
