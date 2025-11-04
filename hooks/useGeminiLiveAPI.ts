@@ -38,6 +38,7 @@ export function useGeminiLiveAPI({
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  const audioChunksRef = useRef<string[]>([]); // Buffer para chunks de áudio PCM
 
   // --- 1. Processamento de Respostas do Servidor ---
   const handleServerMessage = useCallback(
@@ -52,20 +53,44 @@ export function useGeminiLiveAPI({
           if (part.inlineData?.data && part.inlineData.mimeType) {
             const audioData = part.inlineData.data;
             const mimeType = part.inlineData.mimeType;
-            console.log(`🔊 Áudio recebido (${mimeType}, ${audioData.length} bytes)`);
+            console.log(`🔊 Chunk de áudio recebido (${mimeType}, ${audioData.length} bytes)`);
             
-            const byteCharacters = atob(audioData);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-              byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const audioBlob = new Blob([byteArray], { type: mimeType });
-            onAudio?.(audioBlob);
+            // Acumular chunks em vez de processar individualmente
+            audioChunksRef.current.push(audioData);
           }
         }
         if (message.serverContent?.turnComplete) {
           console.log("✅ Turno do modelo completo.");
+          
+          // Quando o turno estiver completo, processar todos os chunks acumulados
+          if (audioChunksRef.current.length > 0) {
+            console.log(`🎵 Processando ${audioChunksRef.current.length} chunks de áudio...`);
+            
+            // Concatenar todos os chunks
+            const totalLength = audioChunksRef.current.reduce((acc, chunk) => {
+              return acc + atob(chunk).length;
+            }, 0);
+            
+            const concatenated = new Uint8Array(totalLength);
+            let offset = 0;
+            
+            for (const chunk of audioChunksRef.current) {
+              const decoded = atob(chunk);
+              for (let i = 0; i < decoded.length; i++) {
+                concatenated[offset++] = decoded.charCodeAt(i);
+              }
+            }
+            
+            // Criar WAV header para PCM 24kHz (formato da API)
+            const wavHeader = createWavHeader(concatenated.length, 24000, 1, 16);
+            const wavBlob = new Blob([wavHeader, concatenated], { type: 'audio/wav' });
+            
+            console.log(`✅ Áudio WAV criado (${wavBlob.size} bytes)`);
+            onAudio?.(wavBlob);
+            
+            // Limpar buffer
+            audioChunksRef.current = [];
+          }
         }
       } catch (e) {
         console.error("❌ Erro ao processar mensagem do servidor:", e);
@@ -73,6 +98,43 @@ export function useGeminiLiveAPI({
     },
     [onMessage, onAudio]
   );
+
+  // Função auxiliar para criar WAV header
+  const createWavHeader = (dataLength: number, sampleRate: number, numChannels: number, bitsPerSample: number) => {
+    const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+    const blockAlign = numChannels * bitsPerSample / 8;
+    const buffer = new ArrayBuffer(44);
+    const view = new DataView(buffer);
+
+    // ChunkID "RIFF"
+    view.setUint32(0, 0x52494646, false);
+    // ChunkSize
+    view.setUint32(4, 36 + dataLength, true);
+    // Format "WAVE"
+    view.setUint32(8, 0x57415645, false);
+    // Subchunk1ID "fmt "
+    view.setUint32(12, 0x666d7420, false);
+    // Subchunk1Size (16 for PCM)
+    view.setUint32(16, 16, true);
+    // AudioFormat (1 = PCM)
+    view.setUint16(20, 1, true);
+    // NumChannels
+    view.setUint16(22, numChannels, true);
+    // SampleRate
+    view.setUint32(24, sampleRate, true);
+    // ByteRate
+    view.setUint32(28, byteRate, true);
+    // BlockAlign
+    view.setUint16(32, blockAlign, true);
+    // BitsPerSample
+    view.setUint16(34, bitsPerSample, true);
+    // Subchunk2ID "data"
+    view.setUint32(36, 0x64617461, false);
+    // Subchunk2Size
+    view.setUint32(40, dataLength, true);
+
+    return new Uint8Array(buffer);
+  };
 
   // --- 2. Conexão com a API ---
   const connect = useCallback(async () => {
