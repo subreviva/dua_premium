@@ -6,7 +6,7 @@ const SEND_SAMPLE_RATE = 16000;
 const CHUNK_SIZE = 1024;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const TOKEN_EXPIRATION_MINUTES = 25;
-const MODEL_NAME = "models/gemini-2.0-flash-exp"; // CORRIGIDO: Modelo que suporta bidiGenerateContent (Live API).
+const MODEL_NAME = "models/gemini-2.0-flash-exp"; // Modelo que suporta Live API. Alternativa oficial: "models/gemini-2.5-flash-native-audio-preview-09-2025"
 
 // --- Tipos ---
 interface UseGeminiLiveAPIProps {
