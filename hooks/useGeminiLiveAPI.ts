@@ -11,7 +11,7 @@ const MODEL_NAME = "models/gemini-2.5-flash-native-audio-preview-09-2025"; // AT
 interface UseGeminiLiveAPIProps {
   systemInstruction?: string;
   onMessage?: (text: string) => void;
-  onAudio?: (audioChunk: Int16Array) => void; // ATUALIZADO: Streaming de chunks PCM
+  onAudio?: (audio: { chunk: Int16Array; sampleRate: number }) => void; // MODIFICADO: Objeto com chunk e frequência
   onTurnComplete?: () => void; // ADICIONADO: Callback para fim de turno
 }
 
@@ -55,7 +55,13 @@ export function useGeminiLiveAPI({
             // STREAMING: Enviar áudio imediatamente ao receber
             if (part.inlineData?.data && part.inlineData.mimeType) {
               const audioData = part.inlineData.data;
-              console.log(`🔊 Chunk de áudio recebido (${audioData.length} bytes) - enviando para stream`);
+              
+              // Extrair a frequência da string mimeType (ex: "audio/pcm;rate=24000")
+              const mimeType = part.inlineData.mimeType;
+              const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+              const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000; // Default para 24kHz
+              
+              console.log(`🔊 Chunk de áudio recebido (${audioData.length} bytes, ${sampleRate}Hz) - enviando para stream`);
               
               // Decodificar base64 para bytes
               const rawData = atob(audioData);
@@ -73,8 +79,8 @@ export function useGeminiLiveAPI({
                 pcmData[i] = dataView.getInt16(i * 2, true);
               }
               
-              // Enviar imediatamente para o player de streaming
-              onAudio?.(pcmData);
+              // Enviar o objeto completo para o player de streaming
+              onAudio?.({ chunk: pcmData, sampleRate });
             }
           }
         }

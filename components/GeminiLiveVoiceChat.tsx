@@ -7,41 +7,56 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SiriOrb } from "@/components/ui/siri-orb";
 
-// --- STREAMING AUDIO PLAYER: Alta Performance em Tempo Real ---
+// --- STREAMING AUDIO PLAYER: Alta Performance em Tempo Real (ADAPTATIVO) ---
 // Esta classe implementa o padrão recomendado pela Google para playback de áudio
-// em tempo real usando a Web Audio API. Em vez de esperar pelo áudio completo,
-// toca os chunks à medida que chegam, eliminando o atraso.
+// em tempo real usando a Web Audio API. NOVO: Adapta-se dinamicamente à frequência
+// de amostragem da API, eliminando interferências causadas por sample rate mismatch.
 class StreamingAudioPlayer {
-  private audioContext: AudioContext;
-  private audioQueue: Int16Array[] = [];
-  private activeSource: AudioBufferSourceNode | null = null; // Rastrear a fonte ativa
+  private audioContext: AudioContext | null = null; // Inicializado sob demanda
+  private audioQueue: { chunk: Int16Array; sampleRate: number }[] = [];
+  private activeSource: AudioBufferSourceNode | null = null;
   private isPlaying = false;
   private nextPlayTime = 0;
-  private sampleRate: number;
 
-  constructor(sampleRate = 24000) { // API Gemini retorna 24kHz
-    this.sampleRate = sampleRate;
-    this.audioContext = new AudioContext({
-      sampleRate: this.sampleRate,
-    });
-  }
+  // O construtor agora está vazio - AudioContext criado ao receber primeiro chunk
+  constructor() {}
 
-  public addChunk(chunk: Int16Array) {
-    this.audioQueue.push(chunk);
+  // O método `addChunk` agora recebe o objeto completo com chunk e frequência
+  public addChunk(audio: { chunk: Int16Array; sampleRate: number }) {
+    // Se o AudioContext ainda não foi criado, cria-o com a frequência correta da API
+    if (!this.audioContext) {
+      console.log(`🎧 Criando AudioContext adaptativo com frequência da API: ${audio.sampleRate}Hz`);
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
+        sampleRate: audio.sampleRate,
+      });
+    }
+    
+    // Validação: Se um chunk com frequência diferente chegar, reinicia o contexto (edge case)
+    if (this.audioContext.sampleRate !== audio.sampleRate) {
+      console.warn(`⚠️ Frequência mudou! Reiniciando AudioContext: ${this.audioContext.sampleRate}Hz → ${audio.sampleRate}Hz`);
+      this.stop();
+      this.audioContext.close();
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
+        sampleRate: audio.sampleRate,
+      });
+    }
+
+    this.audioQueue.push(audio);
     if (!this.isPlaying) {
       this.play();
     }
   }
 
   private play() {
-    if (this.audioQueue.length === 0) {
+    if (this.audioQueue.length === 0 || !this.audioContext) {
       this.isPlaying = false;
       this.activeSource = null;
       return;
     }
     this.isPlaying = true;
 
-    const chunk = this.audioQueue.shift()!;
+    const audio = this.audioQueue.shift()!;
+    const { chunk, sampleRate } = audio;
     
     // Converter Int16Array para Float32Array (formato da Web Audio API)
     const float32Array = new Float32Array(chunk.length);
@@ -49,15 +64,15 @@ class StreamingAudioPlayer {
       float32Array[i] = chunk[i] / 32768.0; // Normalizar de [-32768, 32767] para [-1, 1]
     }
 
-    // Criar buffer de áudio
-    const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, this.sampleRate);
+    // Criar buffer de áudio com a frequência correta do chunk
+    const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, sampleRate);
     audioBuffer.copyToChannel(float32Array, 0);
 
     // Criar source e conectar ao destino
     const source = this.audioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(this.audioContext.destination);
-    this.activeSource = source; // Guardar a referência
+    this.activeSource = source;
 
     // Agendar playback sem gaps (seamless)
     const currentTime = this.audioContext.currentTime;
@@ -76,7 +91,6 @@ class StreamingAudioPlayer {
     };
   }
 
-  // MELHORIA: Método para parar o áudio imediatamente
   public stop() {
     if (this.activeSource) {
       try {
@@ -94,7 +108,7 @@ class StreamingAudioPlayer {
 
   public close() {
     this.stop(); // Garantir que para tudo antes de fechar
-    this.audioContext.close();
+    this.audioContext?.close(); // Null-safe
   }
 }
 
@@ -102,8 +116,8 @@ class StreamingAudioPlayer {
 let playerInstance: StreamingAudioPlayer | null = null;
 const getPlayerInstance = () => {
   if (!playerInstance) {
-    playerInstance = new StreamingAudioPlayer(24000);
-    console.log("✅ DUA StreamingAudioPlayer singleton criado");
+    playerInstance = new StreamingAudioPlayer(); // Sem argumentos - adaptativo
+    console.log("✅ DUA StreamingAudioPlayer adaptativo criado (singleton)");
   }
   return playerInstance;
 };
@@ -120,10 +134,11 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   // Usar singleton para performance otimizada
   const streamingPlayerRef = useRef<StreamingAudioPlayer>(getPlayerInstance());
 
-  const handleNewAudio = useCallback((audioChunk: Int16Array) => {
-    console.log(`🎵 DUA a falar - chunk recebido (${audioChunk.length} samples)`);
+  // MODIFICADO: A callback agora recebe o objeto de áudio com chunk e frequência
+  const handleNewAudio = useCallback((audio: { chunk: Int16Array; sampleRate: number }) => {
+    console.log(`🎵 DUA a falar - chunk recebido (${audio.chunk.length} samples @ ${audio.sampleRate}Hz)`);
     setChatState("speaking");
-    streamingPlayerRef.current.addChunk(audioChunk);
+    streamingPlayerRef.current.addChunk(audio);
   }, []);
 
   // CORREÇÃO: Nova callback para saber quando a DUA termina de falar
