@@ -98,6 +98,16 @@ class StreamingAudioPlayer {
   }
 }
 
+// MELHORIA: Singleton do AudioContext para poupar recursos (recomendação Google)
+let playerInstance: StreamingAudioPlayer | null = null;
+const getPlayerInstance = () => {
+  if (!playerInstance) {
+    playerInstance = new StreamingAudioPlayer(24000);
+    console.log("✅ DUA StreamingAudioPlayer singleton criado");
+  }
+  return playerInstance;
+};
+
 interface GeminiLiveVoiceChatProps {
   onClose: () => void;
 }
@@ -107,12 +117,13 @@ type ChatState = "idle" | "connecting" | "listening" | "speaking" | "error";
 
 const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) => {
   const [chatState, setChatState] = useState<ChatState>("idle");
-  const streamingPlayerRef = useRef<StreamingAudioPlayer | null>(null);
+  // Usar singleton para performance otimizada
+  const streamingPlayerRef = useRef<StreamingAudioPlayer>(getPlayerInstance());
 
   const handleNewAudio = useCallback((audioChunk: Int16Array) => {
     console.log(`🎵 DUA a falar - chunk recebido (${audioChunk.length} samples)`);
     setChatState("speaking");
-    streamingPlayerRef.current?.addChunk(audioChunk);
+    streamingPlayerRef.current.addChunk(audioChunk);
   }, []);
 
   // CORREÇÃO: Nova callback para saber quando a DUA termina de falar
@@ -135,12 +146,10 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   });
 
   useEffect(() => {
-    streamingPlayerRef.current = new StreamingAudioPlayer(24000);
-    console.log("✅ DUA StreamingAudioPlayer inicializado");
-    
+    // A instância do player agora é gerida pelo singleton
+    // Apenas garantir que a sessão da API é fechada ao desmontar
     return () => {
-      console.log("🧹 DUA a encerrar...");
-      streamingPlayerRef.current?.close();
+      console.log("🧹 DUA a encerrar sessão...");
       closeSession();
     };
   }, [closeSession]);
@@ -158,10 +167,15 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   }, [isRecording, isLoading, isConnected, error]);
 
   const handleInteraction = () => {
+    // MELHORIA: Feedback tátil em dispositivos móveis que suportam
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50); // Vibração curta de 50ms
+    }
+
     // MELHORIA: Permitir interromper a DUA
     if (chatState === "speaking") {
       console.log("🛑 Utilizador interrompeu a DUA");
-      streamingPlayerRef.current?.stop();
+      streamingPlayerRef.current.stop();
     }
     
     if (chatState === "idle" || chatState === "speaking" || chatState === "error") {
