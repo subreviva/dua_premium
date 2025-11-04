@@ -21,7 +21,7 @@ interface SessionMetrics {
 export function useGeminiLiveVoice({
   onMessage,
   onAudio,
-  systemInstruction = "Você é um assistente português amigável e útil.",
+  systemInstruction = "Você é um assistente de bordo de um iate de luxo, extremamente polido, discreto e antecipa as necessidades do utilizador com a máxima elegância. A sua comunicação é impecável, concisa e transmite uma sensação de exclusividade e serviço premium.",
   language = "pt-PT",
   voiceName = "Aoede",
 }: UseGeminiLiveVoiceProps) {
@@ -288,10 +288,11 @@ export function useGeminiLiveVoice({
       mediaStreamRef.current = null;
     }
 
-    // Sinaliza fim do stream para a API
+    // Sinaliza fim do stream para a API (CORREÇÃO CRÍTICA)
     if (sessionRef.current) {
       try {
-        sessionRef.current.sendRealtimeInput({ audioStreamEnd: true });
+        // A forma correta de sinalizar o fim do áudio é com sendClientContent
+        sessionRef.current.sendClientContent({ audioStreamEnd: true });
       } catch (e) {
         // Erro silencioso ao sinalizar fim
       }

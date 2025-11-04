@@ -51,6 +51,24 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     };
   }, [connect, closeSession, stopAudioCapture]);
 
+  // -- EXPERIÊNCIA "ALWAYS-ON" ULTRA PREMIUM --
+  // Assim que a conexão for estabelecida, inicia automaticamente a gravação.
+  // Isto cria uma experiência fluida e sem esforço onde o utilizador não precisa
+  // de carregar em nenhum botão - o assistente começa a ouvir automaticamente.
+  const hasAutoStartedRef = useRef(false);
+  useEffect(() => {
+    if (isConnected && !isRecording && !hasAutoStartedRef.current) {
+      hasAutoStartedRef.current = true;
+      // Pequeno delay para garantir que tudo está preparado
+      setTimeout(() => {
+        toggleRecording().catch(e => {
+          console.error("Falha ao iniciar gravação automática:", e);
+          hasAutoStartedRef.current = false; // Permite nova tentativa se falhar
+        });
+      }, 500);
+    }
+  }, [isConnected, isRecording, toggleRecording]);
+
 
   // Handle audio playback queue
   useEffect(() => {
