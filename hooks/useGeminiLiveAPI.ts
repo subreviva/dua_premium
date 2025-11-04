@@ -6,7 +6,7 @@ const SEND_SAMPLE_RATE = 16000;
 const CHUNK_SIZE = 1024;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const TOKEN_EXPIRATION_MINUTES = 25;
-const MODEL_NAME = "models/gemini-1.5-flash-latest"; // Modelo robusto e atualizado
+const MODEL_NAME = "models/gemini-1.5-flash-latest"; // REVERTIDO: Modelo padrão e otimizado.
 
 // --- Tipos ---
 interface UseGeminiLiveAPIProps {
@@ -84,21 +84,24 @@ export function useGeminiLiveAPI({
 
     try {
       if (!cachedToken || Date.now() > cachedToken.expiresAt) {
+        console.log("🔑 Obtendo novo token ephemeral...");
         const response = await fetch("/api/auth/ephemeral-token", { method: "POST" });
         if (!response.ok) throw new Error(`Falha ao obter token: ${response.statusText}`);
         const data = await response.json();
         cachedToken = { token: data.token, expiresAt: Date.now() + TOKEN_EXPIRATION_MINUTES * 60 * 1000 };
         console.log("🔑 Token obtido com sucesso.");
+      } else {
+        console.log("🔑 Usando token em cache.");
       }
 
       const ai = new GoogleGenAI({ apiKey: cachedToken.token });
 
-      sessionRef.current = await ai.live.connect({
+      const connectionConfig = {
         model: MODEL_NAME,
         config: {
           responseModalities: [Modality.AUDIO, Modality.TEXT],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } },
-          systemInstruction: { parts: [{ text: systemInstruction }] },
+          // systemInstruction: { parts: [{ text: systemInstruction }] }, // REMOVIDO: Simplificando a requisição para evitar Policy Violation (1008).
         },
         callbacks: {
           onopen: () => {
@@ -115,7 +118,7 @@ export function useGeminiLiveAPI({
             setIsConnected(false);
           },
           onclose: (e: CloseEvent) => {
-            console.log(`🔌 Live API desconectada (Code: ${e.code}, Clean: ${e.wasClean})`);
+            console.log(`🔌 Live API desconectada (Code: ${e.code}, Reason: ${e.reason}, Clean: ${e.wasClean})`);
             setIsConnected(false);
             setIsLoading(false);
             sessionRef.current = null;
@@ -126,7 +129,11 @@ export function useGeminiLiveAPI({
             }
           },
         },
-      });
+      };
+
+      console.log("📡 Configuração da conexão:", JSON.stringify(connectionConfig.config, null, 2));
+      sessionRef.current = await ai.live.connect(connectionConfig);
+
     } catch (e) {
       const err = e as Error;
       console.error("❌ Falha fatal ao conectar:", err);
@@ -156,6 +163,7 @@ export function useGeminiLiveAPI({
     console.log("🎤 Iniciando captura de áudio...");
     try {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SEND_SAMPLE_RATE });
+      console.log(`🎧 AudioContext criado com sampleRate: ${audioContextRef.current.sampleRate}Hz`);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
       const source = audioContextRef.current.createMediaStreamSource(stream);
