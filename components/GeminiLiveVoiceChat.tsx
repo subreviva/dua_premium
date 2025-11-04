@@ -7,12 +7,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SiriOrb } from "@/components/ui/siri-orb";
 
-// --- STREAMING AUDIO PLAYER: Arquitetura Robusta com Agendamento Absoluto ---
-// Esta classe implementa o padrão recomendado pela Google para playback de áudio
-// sem gaps ou interrupções. CORREÇÃO CRÍTICA: Usa agendamento absoluto em vez de
-// onended, eliminando erro acumulativo que causava interrupções.
+// --- STREAMING AUDIO PLAYER: Arquitetura Final com Gestão de Estado ---
+// Esta classe implementa a solução oficial da Google para Web Audio API.
+// CORREÇÃO DEFINITIVA: Gestão ativa do AudioContext para prevenir suspensão
+// pelo navegador (política de economia de bateria em mobile/desktop).
 class StreamingAudioPlayer {
-  private audioContext: AudioContext | null = null; // Inicializado sob demanda
+  private audioContext: AudioContext | null = null;
   private audioQueue: { chunk: Int16Array; sampleRate: number }[] = [];
   private isPlaying = false;
   private nextPlayTime = 0; // Relógio absoluto e preciso
@@ -21,14 +21,24 @@ class StreamingAudioPlayer {
 
   constructor() {}
 
+  // CORREÇÃO CRÍTICA 1: Garantir que o AudioContext está "acordado"
+  private async ensureAudioContextIsRunning(): Promise<void> {
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      console.warn("⚠️ AudioContext estava suspenso. Tentando retomar...");
+      await this.audioContext.resume();
+      console.log("✅ AudioContext retomado com sucesso!");
+    }
+  }
+
   public addChunk(audio: { chunk: Int16Array; sampleRate: number }) {
     // Se o AudioContext ainda não foi criado, cria-o com a frequência correta da API
     if (!this.audioContext) {
       console.log(`🎧 Criando AudioContext adaptativo com frequência da API: ${audio.sampleRate}Hz`);
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
         sampleRate: audio.sampleRate,
+        latencyHint: 'interactive', // CRÍTICO: Baixa latência para conversação em tempo real
       });
-      // CRÍTICO: Inicia o relógio absoluto quando o contexto é criado
+      // Inicia o relógio absoluto quando o contexto é criado
       this.nextPlayTime = this.audioContext.currentTime;
     }
     
@@ -38,6 +48,7 @@ class StreamingAudioPlayer {
       this.close(); // Fecha e limpa tudo
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
         sampleRate: audio.sampleRate,
+        latencyHint: 'interactive',
       });
       this.nextPlayTime = this.audioContext.currentTime;
     }
@@ -49,58 +60,71 @@ class StreamingAudioPlayer {
     }
   }
 
-  private scheduleNextChunk() {
+  private async scheduleNextChunk() {
+    // CORREÇÃO CRÍTICA 2: Antes de qualquer agendamento, garantir que o contexto está ativo
+    await this.ensureAudioContextIsRunning();
+
     if (this.audioQueue.length === 0 || !this.audioContext) {
       this.isPlaying = false;
       return;
     }
 
-    const audio = this.audioQueue.shift()!;
-    const { chunk, sampleRate } = audio;
+    const currentTime = this.audioContext.currentTime;
     
-    // Converter Int16Array para Float32Array (formato da Web Audio API)
-    const float32Array = new Float32Array(chunk.length);
-    for (let i = 0; i < chunk.length; i++) {
-      float32Array[i] = chunk[i] / 32767; // Normalizar de [-32768, 32767] para [-1, 1]
+    // CORREÇÃO CRÍTICA 3: Loop de processamento robusto
+    // Processa todos os chunks que já deveriam ter sido agendados (lida com "saltos" de tempo)
+    while (this.audioQueue.length > 0 && this.nextPlayTime <= currentTime + 0.1) { // 100ms de margem
+      const audio = this.audioQueue.shift()!;
+      const { chunk, sampleRate } = audio;
+
+      // Converter Int16Array para Float32Array (formato da Web Audio API)
+      const float32Array = new Float32Array(chunk.length);
+      for (let i = 0; i < chunk.length; i++) {
+        float32Array[i] = chunk[i] / 32767; // Normalizar de [-32768, 32767] para [-1, 1]
+      }
+
+      // Criar buffer de áudio com a frequência correta do chunk
+      const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, sampleRate);
+      audioBuffer.copyToChannel(float32Array, 0);
+
+      // Criar source e conectar ao destino
+      const source = this.audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(this.audioContext.destination);
+
+      // CORREÇÃO CRÍTICA 4: Detecção e reajuste de dessincronização
+      // Se o relógio está no passado, reinicia para o presente
+      if (this.nextPlayTime < currentTime) {
+        console.warn(`⚠️ Relógio de áudio dessincronizado (${(currentTime - this.nextPlayTime).toFixed(2)}s atrás). Ajustando para o presente.`);
+        this.nextPlayTime = currentTime;
+      }
+
+      // Agenda o áudio para tocar no tempo absoluto e preciso
+      source.start(this.nextPlayTime);
+      (source as any).stopTime = this.nextPlayTime + audioBuffer.duration; // Guardar tempo de paragem
+      this.activeSources.push(source);
+
+      // Avança o relógio absoluto para o final deste pedaço de áudio
+      this.nextPlayTime += audioBuffer.duration;
     }
 
-    // Criar buffer de áudio com a frequência correta do chunk
-    const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, sampleRate);
-    audioBuffer.copyToChannel(float32Array, 0);
-
-    // Criar source e conectar ao destino
-    const source = this.audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(this.audioContext.destination);
-
     // Limpa fontes antigas que já terminaram
-    const currentTime = this.audioContext.currentTime;
     this.activeSources = this.activeSources.filter(s => {
       const stopTime = (s as any).stopTime;
       return stopTime && currentTime < stopTime;
     });
 
-    // CORREÇÃO CRÍTICA: Se o relógio está no passado, reinicia para o presente
-    // Isto evita que o áudio tente "apanhar" o tempo perdido, causando distorção
-    if (this.nextPlayTime < currentTime) {
-      console.warn(`⚠️ Relógio de áudio dessincronizado (${(currentTime - this.nextPlayTime).toFixed(3)}s). Reiniciando.`);
-      this.nextPlayTime = currentTime;
+    // CORREÇÃO: Limpa o timeout anterior antes de agendar um novo
+    if (this.schedulerTimeout) {
+      clearTimeout(this.schedulerTimeout);
     }
-
-    // Agenda o áudio para tocar no tempo absoluto e preciso
-    source.start(this.nextPlayTime);
-    (source as any).stopTime = this.nextPlayTime + audioBuffer.duration; // Guardar tempo de paragem
-    this.activeSources.push(source);
-
-    // Avança o relógio absoluto para o final deste pedaço de áudio
-    this.nextPlayTime += audioBuffer.duration;
-
-    // CORREÇÃO: Em vez de onended, usa setTimeout para continuar o agendamento
-    // Isto desacopla a lógica da execução do áudio, imune a latências
-    this.schedulerTimeout = setTimeout(() => this.scheduleNextChunk(), 50);
+    
+    // Scheduler desacoplado - continua o ciclo após 100ms
+    this.schedulerTimeout = setTimeout(() => this.scheduleNextChunk(), 100);
   }
 
   public stop() {
+    // CORREÇÃO CRÍTICA 5: Cleanup completo e robusto
     // Limpar o scheduler
     if (this.schedulerTimeout) {
       clearTimeout(this.schedulerTimeout);
@@ -124,7 +148,7 @@ class StreamingAudioPlayer {
   public close() {
     this.stop();
     if (this.audioContext && this.audioContext.state !== 'closed') {
-      this.audioContext.close();
+      this.audioContext.close().catch(console.error);
     }
     this.audioContext = null;
   }
