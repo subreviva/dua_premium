@@ -53,7 +53,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
       stopAudioCapture();
       closeSession();
     };
-  }, [connect, closeSession, stopAudioCapture]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // -- REMOVIDA A LÓGICA "ALWAYS-ON" --
   // A ativação automática foi removida para cumprir as políticas de segurança dos navegadores,
