@@ -1,6 +1,7 @@
 "use client";
 
 import { useGeminiLiveAPI } from "@/hooks/useGeminiLiveAPI";
+import { DUA_SYSTEM_INSTRUCTION } from "@/lib/dua-system-instruction";
 import { X } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,9 +35,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     isLoading,
     error,
   } = useGeminiLiveAPI({
-    systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
-    Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
-    Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
+    systemInstruction: DUA_SYSTEM_INSTRUCTION,
     onMessage: handleNewMessage,
     onAudio: handleNewAudio,
   });

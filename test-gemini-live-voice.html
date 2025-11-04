@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Gemini Live Voice API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .status.connecting {
+            background: rgba(255, 193, 7, 0.3);
+        }
+        .status.connected {
+            background: rgba(76, 175, 80, 0.3);
+        }
+        .status.error {
+            background: rgba(244, 67, 54, 0.3);
+        }
+        .status.recording {
+            background: rgba(33, 150, 243, 0.3);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-connect {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-record {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .btn-stop {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid;
+        }
+        .log-entry.info { border-color: #2196F3; }
+        .log-entry.success { border-color: #4CAF50; }
+        .log-entry.error { border-color: #f44336; }
+        .log-entry.warning { border-color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ Teste Gemini Live Voice API</h1>
+        
+        <div id="status" class="status connecting">
+            Aguardando conexão...
+        </div>
+
+        <button id="connectBtn" class="btn-connect">🔌 Conectar à API</button>
+        <button id="recordBtn" class="btn-record" disabled>🎤 Iniciar Gravação</button>
+        <button id="stopBtn" class="btn-stop" disabled>⏹️ Parar Gravação</button>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const logEl = document.getElementById('log');
+
+        let isConnected = false;
+        let isRecording = false;
+
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function updateStatus(text, className) {
+            statusEl.textContent = text;
+            statusEl.className = `status ${className}`;
+        }
+
+        connectBtn.addEventListener('click', async () => {
+            try {
+                updateStatus('🔄 Conectando...', 'connecting');
+                addLog('Iniciando conexão...', 'info');
+
+                // Teste de conexão ao endpoint de token
+                const response = await fetch('http://localhost:3000/api/auth/ephemeral-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                addLog('✅ Token obtido com sucesso', 'success');
+                addLog(`Token: ${data.token.substring(0, 20)}...`, 'info');
+
+                isConnected = true;
+                updateStatus('✅ Conectado! Pronto para gravar', 'connected');
+                connectBtn.disabled = true;
+                recordBtn.disabled = false;
+
+            } catch (error) {
+                addLog(`❌ Erro: ${error.message}`, 'error');
+                updateStatus('❌ Erro na conexão', 'error');
+            }
+        });
+
+        recordBtn.addEventListener('click', async () => {
+            try {
+                addLog('🎤 Solicitando permissão do microfone...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                addLog('✅ Microfone autorizado', 'success');
+                
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)({ 
+                    sampleRate: 16000 
+                });
+                
+                addLog(`🎧 AudioContext criado (${audioContext.sampleRate}Hz)`, 'success');
+
+                isRecording = true;
+                updateStatus('🔴 A GRAVAR... Fale agora!', 'recording');
+                recordBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                // Simular envio de áudio
+                const source = audioContext.createMediaStreamSource(stream);
+                const processor = audioContext.createScriptProcessor(1024, 1, 1);
+
+                let packetsCount = 0;
+
+                processor.onaudioprocess = (event) => {
+                    packetsCount++;
+                    if (packetsCount % 50 === 0) {
+                        addLog(`📦 Enviados ${packetsCount} pacotes de áudio`, 'info');
+                    }
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+
+                // Guardar referências para limpar depois
+                window.testAudioContext = audioContext;
+                window.testStream = stream;
+                window.testProcessor = processor;
+
+            } catch (error) {
+                addLog(`❌ Erro ao aceder ao microfone: ${error.message}`, 'error');
+                updateStatus('❌ Erro no microfone', 'error');
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (window.testStream) {
+                window.testStream.getTracks().forEach(track => track.stop());
+                addLog('🛑 Stream de áudio parado', 'warning');
+            }
+            if (window.testProcessor) {
+                window.testProcessor.disconnect();
+            }
+            if (window.testAudioContext) {
+                window.testAudioContext.close();
+            }
+
+            isRecording = false;
+            updateStatus('⏸️ Gravação parada', 'connected');
+            stopBtn.disabled = true;
+            recordBtn.disabled = false;
+
+            addLog('🏁 Fim de stream enviado', 'success');
+        });
+
+        // Log inicial
+        addLog('Sistema inicializado', 'success');
+        addLog('Clique em "Conectar à API" para começar', 'info');
+    </script>
+</body>
+</html>

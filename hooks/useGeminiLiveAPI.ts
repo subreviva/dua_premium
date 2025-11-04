@@ -100,12 +100,22 @@ export function useGeminiLiveAPI({
         model: MODEL_NAME,
         config: {
             responseModalities: [Modality.AUDIO],
+            mediaResolution: MediaResolution.MEDIA_RESOLUTION_MEDIUM,
             speechConfig: {
               voiceConfig: {
                 prebuiltVoiceConfig: {
                   voiceName: 'Puck',
                 }
               }
+            },
+            contextWindowCompression: {
+              triggerTokens: '25600',
+              slidingWindow: { targetTokens: '12800' },
+            },
+            systemInstruction: {
+              parts: [{
+                text: systemInstruction,
+              }]
             },
         },
         callbacks: {
