@@ -13,6 +13,7 @@ let tokenExpiresAt: number = 0;
 const SEND_SAMPLE_RATE = 16000;
 const CHUNK_SIZE = 1024;
 const MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025";
+const MAX_RETRIES = 3;
 
 export function useGeminiLiveAPI({
   onMessage,
@@ -28,6 +29,7 @@ export function useGeminiLiveAPI({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const audioQueueRef = useRef<ArrayBuffer[]>([]);
+  const retriesRef = useRef<number>(0);
   const isPlayingRef = useRef(false);
   const responseQueueRef = useRef<LiveServerMessage[]>([]);
 
@@ -174,22 +176,59 @@ export function useGeminiLiveAPI({
         model: MODEL,
         callbacks: {
           onopen: () => {
-            console.log("✅ Live API conectada!");
-            setIsConnected(true);
-            setIsLoading(false);
+            try {
+              console.log("✅ Live API conectada!");
+              setIsConnected(true);
+              setIsLoading(false);
+            } catch (err) {
+              console.error("Erro em onopen:", err);
+            }
           },
           onmessage: (message: LiveServerMessage) => {
-            responseQueueRef.current.push(message);
+            try {
+              responseQueueRef.current.push(message);
+            } catch (err) {
+              console.error("Erro em onmessage:", err);
+            }
           },
           onerror: (e: ErrorEvent) => {
-            console.error("❌ Erro Live API:", e.message);
-            setError(`Erro: ${e.message}`);
+            try {
+              console.error("❌ Erro Live API:", {
+                message: e?.message,
+                error: e?.error,
+                type: e?.type,
+                full: e
+              });
+              const errorMsg = e?.message || e?.error?.message || JSON.stringify(e);
+              setError(`Erro: ${errorMsg}`);
+            } catch (err) {
+              console.error("Erro ao processar onerror:", err);
+            }
           },
           onclose: (e: CloseEvent) => {
-            console.log("🔌 Live API desconectada:", e.reason);
-            setIsConnected(false);
-            if (e.code !== 1000) {
-              setError(`Conexão fechada: ${e.reason || e.code}`);
+            try {
+              console.log("🔌 Live API desconectada:", {
+                code: e?.code,
+                reason: e?.reason,
+                wasClean: e?.wasClean,
+                full: e
+              });
+              setIsConnected(false);
+              if (e.code !== 1000 && e.code !== 1005) {
+                setError(`Conexão fechada: ${e.reason || e.code}`);
+                
+                // Tentar reconectar apenas se for erro genuíno
+                if (retriesRef.current < MAX_RETRIES) {
+                  retriesRef.current++;
+                  console.log(`🔄 Tentativa de reconexão ${retriesRef.current}/${MAX_RETRIES}...`);
+                  setTimeout(() => connect(), 2000);
+                } else {
+                  console.error("❌ Máximo de tentativas de reconexão atingido");
+                  setError("Falha ao conectar após várias tentativas");
+                }
+              }
+            } catch (err) {
+              console.error("Erro ao processar onclose:", err);
             }
           },
         },
@@ -197,6 +236,7 @@ export function useGeminiLiveAPI({
       });
       
       sessionRef.current = session;
+      retriesRef.current = 0; // Reset retries on successful connection
       
       // Iniciar processamento de turns em background
       handleTurn().catch(err => {
