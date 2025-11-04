@@ -12,6 +12,7 @@ interface UseGeminiLiveAPIProps {
   systemInstruction?: string;
   onMessage?: (text: string) => void;
   onAudio?: (audioChunk: Int16Array) => void; // ATUALIZADO: Streaming de chunks PCM
+  onTurnComplete?: () => void; // ADICIONADO: Callback para fim de turno
 }
 
 // --- Cache de Token ---
@@ -26,6 +27,7 @@ export function useGeminiLiveAPI({
   systemInstruction = "Seja um assistente de IA conversacional.",
   onMessage,
   onAudio,
+  onTurnComplete, // ADICIONADO
 }: UseGeminiLiveAPIProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -79,12 +81,13 @@ export function useGeminiLiveAPI({
         
         if (message.serverContent?.turnComplete) {
           console.log("✅ Turno do modelo completo.");
+          onTurnComplete?.(); // ADICIONADO: Chamar a callback
         }
       } catch (e) {
         console.error("❌ Erro ao processar mensagem do servidor:", e);
       }
     },
-    [onMessage, onAudio]
+    [onMessage, onAudio, onTurnComplete] // ADICIONADO onTurnComplete
   );
 
   // --- 2. Conexão com a API ---

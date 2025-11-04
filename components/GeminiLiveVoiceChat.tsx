@@ -14,6 +14,7 @@ import { SiriOrb } from "@/components/ui/siri-orb";
 class StreamingAudioPlayer {
   private audioContext: AudioContext;
   private audioQueue: Int16Array[] = [];
+  private activeSource: AudioBufferSourceNode | null = null; // Rastrear a fonte ativa
   private isPlaying = false;
   private nextPlayTime = 0;
   private sampleRate: number;
@@ -35,6 +36,7 @@ class StreamingAudioPlayer {
   private play() {
     if (this.audioQueue.length === 0) {
       this.isPlaying = false;
+      this.activeSource = null;
       return;
     }
     this.isPlaying = true;
@@ -55,6 +57,7 @@ class StreamingAudioPlayer {
     const source = this.audioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(this.audioContext.destination);
+    this.activeSource = source; // Guardar a referência
 
     // Agendar playback sem gaps (seamless)
     const currentTime = this.audioContext.currentTime;
@@ -66,10 +69,31 @@ class StreamingAudioPlayer {
     this.nextPlayTime = startTime + audioBuffer.duration;
     
     // Quando terminar, tocar o próximo chunk
-    source.onended = () => this.play();
+    source.onended = () => {
+      if (this.activeSource === source) {
+        this.play();
+      }
+    };
+  }
+
+  // MELHORIA: Método para parar o áudio imediatamente
+  public stop() {
+    if (this.activeSource) {
+      try {
+        this.activeSource.onended = null; // Evitar que o próximo chunk toque
+        this.activeSource.stop();
+      } catch (e) {
+        // Ignorar erros se já parou
+      }
+      this.activeSource = null;
+    }
+    this.audioQueue = []; // Limpar a fila
+    this.isPlaying = false;
+    this.nextPlayTime = 0;
   }
 
   public close() {
+    this.stop(); // Garantir que para tudo antes de fechar
     this.audioContext.close();
   }
 }
@@ -91,6 +115,12 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     streamingPlayerRef.current?.addChunk(audioChunk);
   }, []);
 
+  // CORREÇÃO: Nova callback para saber quando a DUA termina de falar
+  const handleTurnComplete = useCallback(() => {
+    console.log("✅ DUA terminou de falar - voltando ao estado idle");
+    setChatState("idle");
+  }, []);
+
   const {
     toggleRecording,
     closeSession,
@@ -101,6 +131,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   } = useGeminiLiveAPI({
     systemInstruction: DUA_SYSTEM_INSTRUCTION,
     onAudio: handleNewAudio,
+    onTurnComplete: handleTurnComplete, // Passar a nova callback
   });
 
   useEffect(() => {
@@ -114,15 +145,25 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     };
   }, [closeSession]);
 
-  // Atualizar o estado da UI com base nos estados do hook
+  // CORREÇÃO: Atualizar o estado da UI com base nos estados do hook (SEM chatState nas dependências)
   useEffect(() => {
-    if (error) setChatState("error");
-    else if (isLoading && !isConnected) setChatState("connecting");
-    else if (isRecording) setChatState("listening");
-    else if (isConnected && !isRecording && chatState !== "speaking") setChatState("idle");
-  }, [isRecording, isLoading, isConnected, error, chatState]);
+    if (error) {
+      setChatState("error");
+    } else if (isLoading && !isConnected) {
+      setChatState("connecting");
+    } else if (isRecording) {
+      setChatState("listening");
+    }
+    // O estado 'idle' e 'speaking' são agora controlados pelas callbacks
+  }, [isRecording, isLoading, isConnected, error]);
 
   const handleInteraction = () => {
+    // MELHORIA: Permitir interromper a DUA
+    if (chatState === "speaking") {
+      console.log("🛑 Utilizador interrompeu a DUA");
+      streamingPlayerRef.current?.stop();
+    }
+    
     if (chatState === "idle" || chatState === "speaking" || chatState === "error") {
       toggleRecording();
     }
