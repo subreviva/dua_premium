@@ -133,6 +133,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   }, []);
 
   const {
+    connect, // EXPOR A FUNÇÃO CONNECT DO HOOK
     toggleRecording,
     closeSession,
     isConnected,
@@ -145,26 +146,35 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     onTurnComplete: handleTurnComplete, // Passar a nova callback
   });
 
+  // CORREÇÃO: Pré-aquecer a conexão assim que o componente é montado
   useEffect(() => {
-    // A instância do player agora é gerida pelo singleton
-    // Apenas garantir que a sessão da API é fechada ao desmontar
+    console.log("🔥 Iniciando pré-aquecimento da conexão com a DUA...");
+    connect().catch(e => {
+      console.error("❌ Falha ao pré-aquecer a conexão:", e);
+      // O erro já é tratado e exposto no estado `error` do hook
+    });
+
+    // Garante que a sessão da API é fechada ao desmontar o componente
     return () => {
       console.log("🧹 DUA a encerrar sessão...");
       closeSession();
     };
-  }, [closeSession]);
+  }, [connect, closeSession]);
 
-  // CORREÇÃO: Atualizar o estado da UI com base nos estados do hook (SEM chatState nas dependências)
+  // CORREÇÃO: Atualizar o estado da UI com base nos estados do hook
   useEffect(() => {
     if (error) {
       setChatState("error");
-    } else if (isLoading && !isConnected) {
+    } else if (isLoading) {
+      // Simplificado: se está a carregar, mostra "A conectar"
       setChatState("connecting");
     } else if (isRecording) {
       setChatState("listening");
+    } else if (isConnected && chatState !== 'speaking') {
+      // Se conectado e não a falar, fica idle
+      setChatState("idle");
     }
-    // O estado 'idle' e 'speaking' são agora controlados pelas callbacks
-  }, [isRecording, isLoading, isConnected, error]);
+  }, [isRecording, isLoading, isConnected, error, chatState]);
 
   const handleInteraction = () => {
     // MELHORIA: Feedback tátil em dispositivos móveis que suportam
