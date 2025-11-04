@@ -263,7 +263,7 @@ export function useGeminiLiveAPI({
     return () => {
       closeSession();
     };
-  }, [closeSession]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     connect,
