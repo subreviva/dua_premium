@@ -57,16 +57,22 @@ export function useGeminiLiveAPI({
               
               // Decodificar base64 para bytes
               const rawData = atob(audioData);
+              const buffer = new ArrayBuffer(rawData.length);
+              const view = new Uint8Array(buffer);
+              for (let i = 0; i < rawData.length; i++) {
+                view[i] = rawData.charCodeAt(i);
+              }
               
-              // Converter para Int16Array (PCM 16-bit)
-              const pcmData = new Int16Array(rawData.length / 2);
+              // OTIMIZAÇÃO: Usar DataView para uma conversão nativa e mais rápida
+              const dataView = new DataView(buffer);
+              const pcmData = new Int16Array(buffer.byteLength / 2);
               for (let i = 0; i < pcmData.length; i++) {
-                // Little-endian: byte baixo primeiro, byte alto depois
-                pcmData[i] = (rawData.charCodeAt(i * 2)) | (rawData.charCodeAt(i * 2 + 1) << 8);
+                // O 'true' no final indica little-endian, o formato padrão para WAV/PCM.
+                pcmData[i] = dataView.getInt16(i * 2, true);
               }
               
               // Enviar imediatamente para o player de streaming
-              onAudio?.(pcmData as any);
+              onAudio?.(pcmData);
             }
           }
         }
@@ -184,7 +190,8 @@ export function useGeminiLiveAPI({
 
     console.log("🎤 Iniciando captura de áudio com AudioWorklet (alta performance)...");
     try {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SEND_SAMPLE_RATE });
+      // MELHORIA: Simplificar a criação do AudioContext (webkit prefix obsoleto)
+      audioContextRef.current = new AudioContext({ sampleRate: SEND_SAMPLE_RATE });
       console.log(`🎧 AudioContext criado com sampleRate: ${audioContextRef.current.sampleRate}Hz`);
       
       // Carregar o módulo AudioWorklet (processamento em thread separada)
