@@ -37,7 +37,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   });
 
   // -- OTIMIZAÇÃO: Pré-aquecimento da Conexão --
-  // Inicia a conexão com a API assim que o componente é montado.
+  // Inicia a conexão com a API assim que o componente é montado para uma resposta instantânea ao clique.
   useEffect(() => {
     connect().catch(e => {
       // O erro já é tratado no hook e exposto no estado `error`.
@@ -51,23 +51,10 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     };
   }, [connect, closeSession, stopAudioCapture]);
 
-  // -- EXPERIÊNCIA "ALWAYS-ON" ULTRA PREMIUM --
-  // Assim que a conexão for estabelecida, inicia automaticamente a gravação.
-  // Isto cria uma experiência fluida e sem esforço onde o utilizador não precisa
-  // de carregar em nenhum botão - o assistente começa a ouvir automaticamente.
-  const hasAutoStartedRef = useRef(false);
-  useEffect(() => {
-    if (isConnected && !isRecording && !hasAutoStartedRef.current) {
-      hasAutoStartedRef.current = true;
-      // Pequeno delay para garantir que tudo está preparado
-      setTimeout(() => {
-        toggleRecording().catch(e => {
-          console.error("Falha ao iniciar gravação automática:", e);
-          hasAutoStartedRef.current = false; // Permite nova tentativa se falhar
-        });
-      }, 500);
-    }
-  }, [isConnected, isRecording, toggleRecording]);
+  // -- REMOVIDA A LÓGICA "ALWAYS-ON" --
+  // A ativação automática foi removida para cumprir as políticas de segurança dos navegadores,
+  // que exigem um gesto do utilizador (clique) para iniciar a captura de áudio.
+  // A conexão permanece pré-aquecida para garantir uma resposta instantânea quando o utilizador clicar.
 
 
   // Handle audio playback queue
@@ -98,8 +85,8 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   // Inicia/para a sessão de voz quando o utilizador clica na orb
   const handleOrbClick = async () => {
     // A conexão já foi (ou está a ser) estabelecida em segundo plano.
-    // O botão só fica ativo quando `isConnected` é verdadeiro.
-    // A única responsabilidade do clique é alternar a gravação.
+    // A única responsabilidade do clique é alternar a gravação de áudio.
+    // Esta é a abordagem correta e segura, cumprindo as políticas de segurança dos navegadores.
     try {
       await toggleRecording();
     } catch (e) {
