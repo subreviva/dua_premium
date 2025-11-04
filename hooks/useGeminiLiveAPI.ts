@@ -187,6 +187,25 @@ export function useGeminiLiveAPI({
           onmessage: (message: LiveServerMessage) => {
             try {
               responseQueueRef.current.push(message);
+              
+              // Processar mensagem imediatamente
+              if (message.serverContent?.modelTurn?.parts) {
+                for (const part of message.serverContent.modelTurn.parts) {
+                  if (part.inlineData && part.inlineData.mimeType?.startsWith('audio/') && part.inlineData.data) {
+                    const audioData = Uint8Array.from(atob(part.inlineData.data), c => c.charCodeAt(0));
+                    audioQueueRef.current.push(audioData.buffer);
+                    playAudioQueue();
+                  }
+                  if (part.text) {
+                    console.log("💬", part.text);
+                    onMessage?.(part.text);
+                  }
+                }
+              }
+              
+              if (message.serverContent?.turnComplete) {
+                console.log("🔄 Turn complete");
+              }
             } catch (err) {
               console.error("Erro em onmessage:", err);
             }
@@ -238,10 +257,7 @@ export function useGeminiLiveAPI({
       sessionRef.current = session;
       retriesRef.current = 0; // Reset retries on successful connection
       
-      // Iniciar processamento de turns em background
-      handleTurn().catch(err => {
-        console.error("Erro ao processar turn:", err);
-      });
+      // NÃO chamar handleTurn aqui - só processar mensagens quando houver áudio sendo enviado
       
     } catch (err) {
       console.error("❌ Erro ao conectar:", err);
@@ -279,13 +295,13 @@ export function useGeminiLiveAPI({
         const inputData = e.inputBuffer.getChannelData(0);
         const pcmData = floatTo16BitPCM(inputData);
         
-        // Enviar áudio usando o formato do SDK oficial
+        // Enviar áudio usando o formato correto com rate
         sessionRef.current.sendClientContent({
           turns: [{
             role: "user",
             parts: [{
               inlineData: {
-                mimeType: "audio/pcm",
+                mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
                 data: btoa(String.fromCharCode(...new Uint8Array(pcmData)))
               }
             }]
