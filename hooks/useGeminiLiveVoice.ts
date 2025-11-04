@@ -187,9 +187,10 @@ export function useGeminiLiveVoice({
     if (isRecording) return;
     
     try {
-      // GARANTE QUE ESTÁ CONECTADO ANTES DE CONTINUAR
+      // A conexão deve ser pré-estabelecida, mas verificamos por segurança.
       if (!isConnected) {
-        await connect();
+        setError("A conexão não está pronta. A tentar reconectar...");
+        await connect(); // Tenta conectar novamente se algo falhou.
       }
 
       // 1. Solicita permissão de microfone

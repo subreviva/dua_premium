@@ -13,8 +13,44 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   const [audioQueue, setAudioQueue] = useState<Blob[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [messages, setMessages] = useState<Array<{role: "user" | "assistant", content: string, timestamp: Date}>>([]);
-  const [autoStarted, setAutoStarted] = useState(false);
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
+
+  const {
+    connect,
+    toggleRecording,
+    stopAudioCapture,
+    closeSession,
+    isConnected,
+    isRecording,
+    isLoading,
+    error,
+  } = useGeminiLiveVoice({
+    systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
+    Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
+    Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
+    onMessage: (text) => {
+      setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
+    },
+    onAudio: (audioBlob) => {
+      setAudioQueue((prev) => [...prev, audioBlob]);
+    },
+  });
+
+  // -- OTIMIZAÇÃO: Pré-aquecimento da Conexão --
+  // Inicia a conexão com a API assim que o componente é montado.
+  useEffect(() => {
+    connect().catch(e => {
+      // O erro já é tratado no hook e exposto no estado `error`.
+      console.error("Falha na pré-conexão automática:", e);
+    });
+
+    // Garante que a sessão é fechada ao desmontar o componente.
+    return () => {
+      stopAudioCapture();
+      closeSession();
+    };
+  }, [connect, closeSession, stopAudioCapture]);
+
 
   // Handle audio playback queue
   useEffect(() => {
@@ -41,37 +77,11 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     onClose();
   };
 
-  const {
-    toggleRecording,
-    stopAudioCapture,
-    closeSession,
-    isConnected,
-    isRecording,
-    isLoading,
-    error,
-  } = useGeminiLiveVoice({
-    systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
-    Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
-    Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
-    onMessage: (text) => {
-      setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
-    },
-    onAudio: (audioBlob) => {
-      setAudioQueue((prev) => [...prev, audioBlob]);
-    },
-  });
-
-  // Cleanup function to close session on unmount
-  useEffect(() => {
-    return () => {
-      stopAudioCapture();
-      closeSession();
-    };
-  }, [closeSession, stopAudioCapture]);
-
-
   // Inicia/para a sessão de voz quando o utilizador clica na orb
   const handleOrbClick = async () => {
+    // A conexão já foi (ou está a ser) estabelecida em segundo plano.
+    // O botão só fica ativo quando `isConnected` é verdadeiro.
+    // A única responsabilidade do clique é alternar a gravação.
     try {
       await toggleRecording();
     } catch (e) {
@@ -111,8 +121,9 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
       };
     }
 
+    // Estado "Pronto" - Conectado mas não a gravar
     return {
-      outerRing: "",
+      outerRing: "animate-pulse",
       middleRing: "bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-3xl",
       mainOrb: "bg-gradient-to-br from-purple-600 to-purple-900 shadow-[0_0_100px_rgba(168,85,247,0.5)]",
       innerGlow: "bg-gradient-to-br from-purple-400 to-purple-600 blur-3xl opacity-50",
@@ -141,9 +152,9 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           animate={{ 
             scale: 1, 
             opacity: 1,
-            width: isLoading ? "450px" : !isConnected ? "400px" : isRecording ? "600px" : "500px",
-            height: isLoading ? "450px" : !isConnected ? "400px" : isRecording ? "600px" : "500px",
-            backgroundColor: isLoading ? "rgba(234, 179, 8, 0.12)" : !isConnected ? "rgba(234, 179, 8, 0.1)" : isRecording ? "rgba(59, 130, 246, 0.15)" : "rgba(168, 85, 247, 0.15)",
+            width: isLoading ? "450px" : isRecording ? "600px" : "500px",
+            height: isLoading ? "450px" : isRecording ? "600px" : "500px",
+            backgroundColor: isLoading ? "rgba(234, 179, 8, 0.12)" : isRecording ? "rgba(59, 130, 246, 0.15)" : "rgba(168, 85, 247, 0.15)",
           }}
           exit={{ scale: 0.8, opacity: 0 }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -202,11 +213,11 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
         
         {/* Main orb - responsive */}
         <motion.div 
-          onClick={handleOrbClick}
+          onClick={!isLoading ? handleOrbClick : undefined}
           role="button"
           tabIndex={0}
           aria-label={isLoading ? "A conectar..." : isRecording ? "Parar escuta" : "Iniciar escuta"}
-          className={`relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center transition-all duration-700 cursor-pointer ${mainOrb} ${isLoading ? 'cursor-wait' : ''}`}
+          className={`relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center transition-all duration-700 ${mainOrb} ${isLoading ? 'cursor-wait' : 'cursor-pointer'}`}
         >
           {/* Inner glow */}
           <motion.div 
