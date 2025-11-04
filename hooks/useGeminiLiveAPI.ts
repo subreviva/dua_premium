@@ -92,7 +92,7 @@ export function useGeminiLiveAPI({
     }
   }, []);
 
-  // Estabelece conexão WebSocket com Live API
+  // Estabelece conexão WebSocket com Live API usando o SDK Python como referência
   const connect = useCallback(async () => {
     if (isConnected) return;
     
@@ -128,16 +128,18 @@ export function useGeminiLiveAPI({
       // Criar AudioContext
       audioContextRef.current = new AudioContext({ sampleRate: RECEIVE_SAMPLE_RATE });
       
-      // Conectar à Live API via WebSocket
+      // URL correto baseado no SDK Python: usa v1alpha e BidiGenerateContent
+      // Formato: wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent
       const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${token}`;
       
+      console.log("🔌 Conectando ao WebSocket...");
       wsRef.current = new WebSocket(wsUrl);
       wsRef.current.binaryType = 'arraybuffer';
       
       wsRef.current.onopen = () => {
-        console.log("🔗 Conectado à Live API");
+        console.log("🔗 WebSocket conectado! Enviando setup...");
         
-        // Enviar configuração inicial
+        // Mensagem de setup baseada no CONFIG do Python
         const setupMessage = {
           setup: {
             model: "models/gemini-2.0-flash-exp",
@@ -146,7 +148,7 @@ export function useGeminiLiveAPI({
               speech_config: {
                 voice_config: {
                   prebuilt_voice_config: {
-                    voice_name: "Aoede"
+                    voice_name: "Puck"  // Mesma voz do exemplo Python
                   }
                 }
               }
@@ -157,15 +159,22 @@ export function useGeminiLiveAPI({
           }
         };
         
+        console.log("📤 Enviando setup:", JSON.stringify(setupMessage, null, 2));
         wsRef.current?.send(JSON.stringify(setupMessage));
-        setIsConnected(true);
       };
       
       wsRef.current.onmessage = async (event) => {
         try {
           const response = JSON.parse(event.data);
+          console.log("📥 Mensagem recebida:", response);
           
-          // Áudio recebido
+          // Setup completo - equivalente ao client.aio.live.connect estabelecido
+          if (response.setupComplete) {
+            console.log("✅ Setup completo! Pronto para streaming de áudio.");
+            setIsConnected(true);
+          }
+          
+          // Áudio recebido - response.data no Python
           if (response.serverContent?.modelTurn?.parts) {
             for (const part of response.serverContent.modelTurn.parts) {
               if (part.inlineData?.mimeType === "audio/pcm") {
@@ -173,32 +182,40 @@ export function useGeminiLiveAPI({
                 await playAudioChunk(audioData.buffer);
               }
               if (part.text) {
+                console.log("💬 Texto:", part.text);
                 onMessage?.(part.text);
               }
             }
           }
           
-          // Setup completo
-          if (response.setupComplete) {
-            console.log("✅ Setup completo, pronto para uso!");
+          // Turn complete - limpa fila de áudio para permitir interrupções
+          if (response.serverContent?.turnComplete) {
+            console.log("🔄 Turn complete - limpando fila de áudio");
+            audioQueueRef.current = [];
+            isPlayingRef.current = false;
           }
           
         } catch (err) {
-          console.error("Erro ao processar mensagem:", err);
+          console.error("❌ Erro ao processar mensagem:", err, event.data);
         }
       };
       
       wsRef.current.onerror = (err) => {
         console.error("❌ Erro WebSocket:", err);
-        setError("Erro de conexão");
+        setError("Erro de conexão WebSocket");
       };
       
-      wsRef.current.onclose = () => {
-        console.log("🔌 Desconectado");
+      wsRef.current.onclose = (event) => {
+        console.log(`🔌 WebSocket fechado (código: ${event.code}, razão: ${event.reason})`);
         setIsConnected(false);
+        
+        if (event.code !== 1000) {  // 1000 = fechamento normal
+          setError(`Conexão fechada inesperadamente (${event.code})`);
+        }
       };
       
     } catch (err) {
+      console.error("❌ Erro ao conectar:", err);
       setError(err instanceof Error ? err.message : "Erro ao conectar");
       setIsConnected(false);
     } finally {
@@ -236,13 +253,20 @@ export function useGeminiLiveAPI({
         const inputData = e.inputBuffer.getChannelData(0);
         const pcmData = floatTo16BitPCM(inputData);
         
-        // Enviar áudio para a API
+        // Enviar áudio no formato correto: { "data": base64, "mime_type": "audio/pcm" }
+        // Equivalente ao Python: await self.out_queue.put({"data": data, "mime_type": "audio/pcm"})
         const message = {
-          realtimeInput: {
-            mediaChunks: [{
-              mimeType: "audio/pcm",
-              data: btoa(String.fromCharCode(...new Uint8Array(pcmData)))
-            }]
+          client_content: {
+            turns: [{
+              role: "user",
+              parts: [{
+                inline_data: {
+                  mime_type: "audio/pcm",
+                  data: btoa(String.fromCharCode(...new Uint8Array(pcmData)))
+                }
+              }]
+            }],
+            turn_complete: false  // Streaming contínuo
           }
         };
         
