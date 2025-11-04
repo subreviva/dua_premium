@@ -31,6 +31,9 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     onMessage: (text) => {
       setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
     },
+    onAudio: (audioBlob) => {
+      setAudioQueue(prev => [...prev, audioBlob]);
+    },
   });
 
   // -- OTIMIZAÇÃO: Pré-aquecimento da Conexão --
@@ -87,7 +90,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     try {
       await toggleRecording();
     } catch (e) {
-      // O hook `useGeminiLiveVoice` já define o estado de erro,
+      // O hook `useGeminiLive` já define o estado de erro,
       // que será exibido na UI.
       console.error("Falha ao alternar a gravação:", e);
     }
