@@ -1,6 +1,6 @@
 "use client";
 
-import { useGeminiLiveVoice } from "@/hooks/useGeminiLiveVoice";
+import { useGeminiLiveAPI } from "@/hooks/useGeminiLiveAPI";
 import { X } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,15 +24,12 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     isRecording,
     isLoading,
     error,
-  } = useGeminiLiveVoice({
+  } = useGeminiLiveAPI({
     systemInstruction: `Você é um assistente de IA premium em português de Portugal. 
     Responda de forma natural, conversacional e concisa (máximo 2-3 frases).
     Mantenha o tom profissional mas amigável, similar ao ChatGPT.`,
     onMessage: (text) => {
       setMessages(prev => [...prev, {role: "assistant", content: text, timestamp: new Date()}]);
-    },
-    onAudio: (audioBlob) => {
-      setAudioQueue((prev) => [...prev, audioBlob]);
     },
   });
 
