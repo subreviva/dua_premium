@@ -151,6 +151,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     connect, // EXPOR A FUNÇÃO CONNECT DO HOOK
     toggleRecording,
     closeSession,
+    mediaStream, // NOVO: Stream de áudio para análise em tempo real
     isConnected,
     isRecording,
     isLoading,
@@ -362,6 +363,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
                 size={typeof window !== 'undefined' && window.innerWidth < 640 ? "200px" : "280px"}
                 className="transition-all duration-500"
                 isListening={chatState === "listening"}
+                audioStream={chatState === "listening" ? mediaStream : null} // NOVO: Passar stream apenas quando a ouvir
                 animationDuration={chatState === "listening" ? 6 : chatState === "speaking" ? 10 : 20}
                 colors={{
                   c1: chatState === "listening" ? "oklch(78% 0.22 250)" : chatState === "speaking" ? "oklch(76% 0.20 280)" : "oklch(75% 0.15 300)",

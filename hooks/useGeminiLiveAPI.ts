@@ -331,6 +331,7 @@ export function useGeminiLiveAPI({
     toggleRecording,
     closeSession, // Adicionado
     stopAudioCapture, // Adicionado
+    mediaStream: mediaStreamRef.current, // NOVO: Expor o stream de áudio para análise em tempo real
     isConnected,
     isRecording,
     isLoading,
