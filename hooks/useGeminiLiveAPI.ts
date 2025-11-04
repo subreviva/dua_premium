@@ -3,7 +3,6 @@ import { GoogleGenAI, LiveServerMessage, Session, Modality, MediaResolution } fr
 
 // --- Constantes ---
 const SEND_SAMPLE_RATE = 16000;
-const CHUNK_SIZE = 1024;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const TOKEN_EXPIRATION_MINUTES = 25;
 const MODEL_NAME = "models/gemini-2.5-flash-native-audio-preview-09-2025"; // ATUALIZADO: Modelo exato do código oficial.
@@ -35,7 +34,7 @@ export function useGeminiLiveAPI({
 
   const sessionRef = useRef<Session | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const audioWorkletNodeRef = useRef<AudioWorkletNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const audioChunksRef = useRef<string[]>([]); // Buffer para chunks de áudio PCM
@@ -219,7 +218,7 @@ export function useGeminiLiveAPI({
     }
   }, [handleServerMessage, systemInstruction]);
 
-  // --- 3. Captura e Envio de Áudio ---
+  // --- 3. Captura e Envio de Áudio (MODERNIZADO COM AUDIOWORKLET) ---
   const startAudioCapture = useCallback(async () => {
     if (isRecording) return;
     
@@ -237,35 +236,49 @@ export function useGeminiLiveAPI({
       });
     }
 
-    console.log("🎤 Iniciando captura de áudio...");
+    console.log("🎤 Iniciando captura de áudio com AudioWorklet (alta performance)...");
     try {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SEND_SAMPLE_RATE });
       console.log(`🎧 AudioContext criado com sampleRate: ${audioContextRef.current.sampleRate}Hz`);
+      
+      // Carregar o módulo AudioWorklet (processamento em thread separada)
+      await audioContextRef.current.audioWorklet.addModule('/audio-processor.js');
+      console.log("✅ AudioWorklet módulo carregado");
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
       const source = audioContextRef.current.createMediaStreamSource(stream);
-      scriptProcessorRef.current = audioContextRef.current.createScriptProcessor(CHUNK_SIZE, 1, 1);
-
-      scriptProcessorRef.current.onaudioprocess = (event) => {
-        if (!sessionRef.current || !isConnected) return;
-        
-        const inputData = event.inputBuffer.getChannelData(0);
-        const pcmData = new Int16Array(inputData.length);
-        for (let i = 0; i < inputData.length; i++) {
-          pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 32767;
+      
+      // Criar AudioWorkletNode com configuração de resampling
+      audioWorkletNodeRef.current = new AudioWorkletNode(
+        audioContextRef.current, 
+        'resampling-processor',
+        {
+          processorOptions: {
+            targetSampleRate: SEND_SAMPLE_RATE
+          }
         }
-        
-        // Converter para base64 (esperado pela API)
+      );
+      console.log("✅ AudioWorkletNode criado");
+
+      // O worklet processa áudio numa thread separada e envia os dados PCM de volta
+      audioWorkletNodeRef.current.port.onmessage = (event) => {
+        if (!sessionRef.current || !isConnected) return;
+
+        // Receber o buffer PCM processado (já em Int16)
+        const pcmData = new Int16Array(event.data);
+
+        // Converter para base64 de forma otimizada
         let binary = '';
         const bytes = new Uint8Array(pcmData.buffer);
-        for (let i = 0; i < bytes.byteLength; i++) {
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
           binary += String.fromCharCode(bytes[i]);
         }
         const base64Audio = window.btoa(binary);
 
         try {
-          // CORREÇÃO CRÍTICA: Usar sendRealtimeInput para áudio em tempo real
-          // Isto ativa VAD automático e processamento otimizado
+          // Enviar para a API Gemini em tempo real
           sessionRef.current.sendRealtimeInput({
             audio: {
               mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
@@ -277,9 +290,12 @@ export function useGeminiLiveAPI({
         }
       };
 
-      source.connect(scriptProcessorRef.current);
-      scriptProcessorRef.current.connect(audioContextRef.current.destination);
+      // Conectar o pipeline de áudio
+      source.connect(audioWorkletNodeRef.current);
+      // Não conectar ao destination para evitar feedback do microfone
+      
       setIsRecording(true);
+      console.log("✅ Captura de áudio iniciada com sucesso");
     } catch (e) {
       const err = e as Error;
       console.error("❌ Falha ao iniciar captura de áudio:", err);
@@ -292,12 +308,21 @@ export function useGeminiLiveAPI({
     if (!isRecording) return;
     console.log("🛑 Parando captura de áudio...");
 
+    // Parar todas as tracks do stream de mídia
     mediaStreamRef.current?.getTracks().forEach(track => track.stop());
-    scriptProcessorRef.current?.disconnect();
+    
+    // Fechar e limpar o AudioWorkletNode
+    if (audioWorkletNodeRef.current) {
+      audioWorkletNodeRef.current.port.close();
+      audioWorkletNodeRef.current.disconnect();
+      audioWorkletNodeRef.current = null;
+      console.log("✅ AudioWorkletNode desconectado e limpo");
+    }
+    
+    // Fechar o AudioContext
     audioContextRef.current?.close();
     
     mediaStreamRef.current = null;
-    scriptProcessorRef.current = null;
     audioContextRef.current = null;
 
     // CORREÇÃO: Enviar sinal de fim de stream de áudio
