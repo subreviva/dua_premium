@@ -43,20 +43,8 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
     },
   });
 
-  // Auto-iniciar sessão quando componente carrega (UX como ChatGPT)
-  useEffect(() => {
-    if (!autoStarted && !isLoading && !isConnected) {
-      setAutoStarted(true);
-      initializeSession().then(() => {
-        // Auto-iniciar captura após conectar (mais fluido)
-        setTimeout(() => {
-          if (!isRecording) {
-            startAudioCapture();
-          }
-        }, 1000);
-      });
-    }
-  }, [autoStarted, isLoading, isConnected, initializeSession, startAudioCapture, isRecording]);
+  // Removido auto-início — para produção devemos pedir permissão em gesto do utilizador.
+  // O utilizador deve clicar na Orb para iniciar a sessão e a gravação.
 
   // Handle audio playback queue
   useEffect(() => {
@@ -80,8 +68,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   // Core logic fix: Separate initialization and recording start
   // 1. Initialize session on component mount
   useEffect(() => {
-    initializeSession();
-
+    // Apenas guarda a possibilidade de inicializar; não dispara automaticamente.
     // Cleanup function to close session on unmount
     return () => {
       stopAudioCapture();
@@ -90,15 +77,24 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
   }, [initializeSession, closeSession, stopAudioCapture]);
 
   // 2. Start audio capture only when connected
-  useEffect(() => {
-    if (isConnected) {
-      // Short delay to ensure everything is ready
-      const timer = setTimeout(() => {
-        startAudioCapture();
-      }, 500);
-      return () => clearTimeout(timer);
+  // NOTE: Não iniciar automaticamente. A captura só começa por gesto do utilizador.
+
+  // Inicia sessão e captura quando o utilizador clica na orb
+  const handleOrbClick = async () => {
+    try {
+      if (!isConnected) {
+        await initializeSession();
+      }
+
+      if (!isRecording) {
+        await startAudioCapture();
+      } else {
+        stopAudioCapture();
+      }
+    } catch (e) {
+      // Mostra erro - o hook tem estado `error`
     }
-  }, [isConnected, startAudioCapture]);
+  };
 
 
   // Determine orb state based on hook states
@@ -197,7 +193,11 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
         
         {/* Main orb - responsive */}
         <motion.div 
-          className={`relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center transition-all duration-700 ${mainOrb}`}
+          onClick={handleOrbClick}
+          role="button"
+          tabIndex={0}
+          aria-label="Iniciar / Parar escuta"
+          className={`relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center transition-all duration-700 cursor-pointer ${mainOrb}`}
         >
           {/* Inner glow */}
           <motion.div 
