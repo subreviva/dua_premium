@@ -99,20 +99,13 @@ export function useGeminiLiveAPI({
       const connectionConfig = {
         model: MODEL_NAME,
         config: {
-            responseModalities: [
-                Modality.AUDIO,
-            ],
-            mediaResolution: MediaResolution.MEDIA_RESOLUTION_MEDIUM,
+            responseModalities: [Modality.AUDIO],
             speechConfig: {
               voiceConfig: {
                 prebuiltVoiceConfig: {
                   voiceName: 'Puck',
                 }
               }
-            },
-            contextWindowCompression: {
-                triggerTokens: '25600',
-                slidingWindow: { targetTokens: '12800' },
             },
         },
         callbacks: {
@@ -198,19 +191,24 @@ export function useGeminiLiveAPI({
         const base64Audio = window.btoa(binary);
 
         try {
+          // Estrutura correta alinhada com a API oficial
           sessionRef.current.sendClientContent({
-            turns: [{
-              role: "user",
-              parts: [{
-                inlineData: {
-                  mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
-                  data: base64Audio,
-                },
-              }],
-            }],
+            turns: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
+                      data: base64Audio,
+                    },
+                  },
+                ],
+              },
+            ],
           });
         } catch (e) {
-          console.error("❌ Erro ao enviar áudio (a sessão pode ter fechado):", e);
+          console.error("❌ Erro ao enviar áudio:", e);
         }
       };
 
