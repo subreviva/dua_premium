@@ -183,6 +183,7 @@ export function useGeminiLiveAPI({
           pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 32767;
         }
         
+        // Converter para base64 (esperado pela API)
         let binary = '';
         const bytes = new Uint8Array(pcmData.buffer);
         for (let i = 0; i < bytes.byteLength; i++) {
@@ -191,21 +192,13 @@ export function useGeminiLiveAPI({
         const base64Audio = window.btoa(binary);
 
         try {
-          // Estrutura correta alinhada com a API oficial
-          sessionRef.current.sendClientContent({
-            turns: [
-              {
-                role: "user",
-                parts: [
-                  {
-                    inlineData: {
-                      mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
-                      data: base64Audio,
-                    },
-                  },
-                ],
-              },
-            ],
+          // CORREÇÃO CRÍTICA: Usar sendRealtimeInput para áudio em tempo real
+          // Isto ativa VAD automático e processamento otimizado
+          sessionRef.current.sendRealtimeInput({
+            audio: {
+              mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}`,
+              data: base64Audio,
+            },
           });
         } catch (e) {
           console.error("❌ Erro ao enviar áudio:", e);
@@ -235,10 +228,18 @@ export function useGeminiLiveAPI({
     scriptProcessorRef.current = null;
     audioContextRef.current = null;
 
-    // A chamada explícita para finalizar o turno foi removida.
-    // A API é projetada para detetar o fim do stream de áudio automaticamente
-    // quando a captura para, o que resolve os erros de tipo persistentes.
-    console.log("🏁 Captura de áudio parada. A API irá processar o turno.");
+    // CORREÇÃO: Enviar sinal de fim de stream de áudio
+    // Isto permite que a API saiba que o utilizador terminou de falar
+    if (sessionRef.current) {
+      try {
+        sessionRef.current.sendRealtimeInput({
+          audioStreamEnd: true,
+        });
+        console.log("🏁 Fim de stream de áudio enviado.");
+      } catch (e) {
+        console.error("❌ Erro ao enviar fim de stream:", e);
+      }
+    }
 
     setIsRecording(false);
   }, [isRecording]);
