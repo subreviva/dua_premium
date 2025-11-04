@@ -261,7 +261,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
       </AnimatePresence>
 
       {/* Conteúdo Principal */}
-      <div className="text-center z-10">
+      <div className="text-center z-10 px-4">
         {/* Título DUA */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
@@ -269,10 +269,10 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mb-2"
         >
-          <h1 className="text-7xl font-bold text-white mb-2 tracking-tight">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-2 tracking-tight">
             DUA
           </h1>
-          <p className="text-gray-400 text-sm font-light tracking-wider uppercase">
+          <p className="text-gray-400 text-xs sm:text-sm font-light tracking-wider uppercase">
             {getStatusSubtext()}
           </p>
         </motion.div>
@@ -284,28 +284,28 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="text-gray-300 text-lg mb-12 font-light"
+          className="text-gray-300 text-base sm:text-lg mb-8 sm:mb-12 font-light px-4"
         >
           {getStatusText()}
         </motion.p>
 
-        {/* Botão Principal com Siri Orb */}
+        {/* Botão Principal com Siri Orb - RESPONSIVO */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.4, type: "spring", stiffness: 200, damping: 20 }}
-          className="relative"
+          className="relative flex justify-center items-center"
         >
           <button
             onClick={handleInteraction}
             disabled={chatState === "connecting"}
-            className="relative focus:outline-none focus:ring-4 focus:ring-purple-500/50 rounded-full transition-all duration-300"
+            className="relative focus:outline-none focus:ring-4 focus:ring-purple-500/50 rounded-full transition-all duration-300 touch-manipulation active:scale-95"
             aria-label={getStatusText()}
           >
-            {/* Siri Orb com Estados Visuais */}
+            {/* Siri Orb com Estados Visuais - TAMANHO RESPONSIVO */}
             <div className="relative">
               <SiriOrb
-                size="256px"
+                size={typeof window !== 'undefined' && window.innerWidth < 640 ? "180px" : "256px"}
                 className="drop-shadow-2xl"
                 isListening={chatState === "listening"}
                 animationDuration={chatState === "listening" ? 8 : 20}
@@ -316,7 +316,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
                 }}
               />
               
-              {/* Ícone Central */}
+              {/* Ícone Central - TAMANHO RESPONSIVO */}
               <motion.div
                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
                 animate={{
@@ -335,7 +335,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
                       initial={{ opacity: 0, scale: 0.5 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.5 }}
-                      className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"
+                      className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"
                     />
                   ) : (
                     <motion.div
@@ -345,7 +345,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
                       exit={{ opacity: 0, scale: 0.5 }}
                     >
                       <Mic
-                        size={chatState === "listening" ? 80 : 64}
+                        size={chatState === "listening" ? (typeof window !== 'undefined' && window.innerWidth < 640 ? 56 : 80) : (typeof window !== 'undefined' && window.innerWidth < 640 ? 48 : 64)}
                         className={`transition-all duration-300 ${
                           chatState === "listening"
                             ? "text-blue-300 drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
@@ -359,21 +359,21 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
             </div>
           </button>
 
-          {/* Indicador de Áudio (Visualização de Ondas) */}
+          {/* Indicador de Áudio (Visualização de Ondas) - RESPONSIVO */}
           <AnimatePresence>
             {chatState === "speaking" && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5"
+                className="absolute -bottom-12 sm:-bottom-16 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-1.5"
               >
                 {[...Array(5)].map((_, i) => (
                   <motion.div
                     key={i}
-                    className="w-1.5 bg-purple-400 rounded-full"
+                    className="w-1 sm:w-1.5 bg-purple-400 rounded-full"
                     animate={{
-                      height: ["20px", "40px", "20px"],
+                      height: ["16px", "32px", "16px"],
                     }}
                     transition={{
                       duration: 0.8,
@@ -388,14 +388,14 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
           </AnimatePresence>
         </motion.div>
 
-        {/* Hint Text */}
+        {/* Hint Text - RESPONSIVO */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-gray-500 text-xs mt-16 max-w-md mx-auto px-4"
+          className="text-gray-500 text-xs sm:text-sm mt-12 sm:mt-16 max-w-md mx-auto px-6"
         >
-          {chatState === "idle" && "Clica no orbe para começar uma conversa por voz"}
+          {chatState === "idle" && "Toca no orbe para começar uma conversa por voz"}
           {chatState === "listening" && "Fala naturalmente, a DUA está a ouvir"}
           {chatState === "speaking" && "A DUA está a responder"}
         </motion.p>
