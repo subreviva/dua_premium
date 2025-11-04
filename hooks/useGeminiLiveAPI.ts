@@ -38,6 +38,7 @@ export function useGeminiLiveAPI({
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  const sentAudioConfig = useRef(false); // Flag para controlar o envio da configuração de áudio
 
   // --- 1. Processamento de Respostas do Servidor ---
   const handleServerMessage = useCallback(
@@ -173,6 +174,7 @@ export function useGeminiLiveAPI({
     }
 
     console.log("🎤 Iniciando captura de áudio...");
+    sentAudioConfig.current = false; // Resetar a flag ao iniciar a captura
     try {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SEND_SAMPLE_RATE });
       console.log(`🎧 AudioContext criado com sampleRate: ${audioContextRef.current.sampleRate}Hz`);
@@ -182,7 +184,7 @@ export function useGeminiLiveAPI({
       scriptProcessorRef.current = audioContextRef.current.createScriptProcessor(CHUNK_SIZE, 1, 1);
 
       scriptProcessorRef.current.onaudioprocess = (event) => {
-        if (!sessionRef.current) return;
+        if (!sessionRef.current || !isConnected) return;
         
         const inputData = event.inputBuffer.getChannelData(0);
         const pcmData = new Int16Array(inputData.length);
@@ -190,7 +192,6 @@ export function useGeminiLiveAPI({
           pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 32767;
         }
         
-        // Browser-compatible base64 encoding
         let binary = '';
         const bytes = new Uint8Array(pcmData.buffer);
         for (let i = 0; i < bytes.byteLength; i++) {
@@ -198,7 +199,7 @@ export function useGeminiLiveAPI({
         }
         const base64Audio = window.btoa(binary);
 
-        sessionRef.current.sendClientContent({
+        const payload: any = {
           turns: [{
             role: "user",
             parts: [{
@@ -208,7 +209,23 @@ export function useGeminiLiveAPI({
               },
             }],
           }],
-        });
+        };
+
+        // CRÍTICO: Enviar a configuração de áudio no primeiro pacote
+        if (!sentAudioConfig.current) {
+          payload.config = {
+            audioEncoding: 'LINEAR16',
+            sampleRateHertz: SEND_SAMPLE_RATE,
+          };
+          console.log("📡 Enviando configuração de áudio inicial...");
+          sentAudioConfig.current = true;
+        }
+
+        try {
+          sessionRef.current.sendClientContent(payload);
+        } catch (e) {
+          console.error("❌ Erro ao enviar áudio (a sessão pode ter fechado):", e);
+        }
       };
 
       source.connect(scriptProcessorRef.current);
