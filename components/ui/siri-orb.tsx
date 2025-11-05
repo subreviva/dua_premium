@@ -103,6 +103,7 @@ export const SiriOrb: React.FC<SiriOrbProps> = ({
         {
           width: size,
           height: size,
+          overflow: 'visible', // CRÍTICO: Garante que a esfera não seja cortada
           "--bg": finalColors.bg,
           "--c1": finalColors.c1,
           "--c2": finalColors.c2,
@@ -125,7 +126,7 @@ export const SiriOrb: React.FC<SiriOrbProps> = ({
         .siri-orb {
           display: grid;
           grid-template-areas: "stack";
-          overflow: hidden;
+          overflow: visible; /* CORRIGIDO: Permite que a esfera seja visível completamente */
           border-radius: 50%;
           position: relative;
           background: radial-gradient(
