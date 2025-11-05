@@ -201,12 +201,12 @@ export function CreatePanel() {
         }),
         
         // Optional advanced parameters
-        vocalGender: vocalGender === "male" ? "m" : "f",  camelCase
-        styleWeight: styleInfluence[0] / 100,              camelCase
-        weirdnessConstraint: weirdness[0] / 100,           camelCase
-        negativeTags: excludeStyles && styles ? styles : undefined,  camelCase
+        vocalGender: vocalGender === "male" ? "m" : "f",
+        styleWeight: styleInfluence[0] / 100,
+        weirdnessConstraint: weirdness[0] / 100,
+        negativeTags: excludeStyles && styles ? styles : undefined,
         
-        callBackUrl: `${window.location.origin}/api/music/callback`  camelCase
+        callBackUrl: `${window.location.origin}/api/music/callback`
       }
 
       // console.log('[Generate] Sending request (camelCase):', JSON.stringify(params, null, 2))

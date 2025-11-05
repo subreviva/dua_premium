@@ -113,3 +113,6 @@ async function handleStreamingWebhook(payload: WebhookPayload) {
 
 // Handle failed songs
 async function handleFailedWebhook(payload: FailedWebhook) {
+  // Song generation failed log removed for production
+  return NextResponse.json({ received: true })
+}
