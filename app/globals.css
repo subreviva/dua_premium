@@ -17,6 +17,15 @@
   .pr-safe {
     padding-right: env(safe-area-inset-right);
   }
+  
+  /* Height utilities for safe areas */
+  .h-safe-top {
+    height: env(safe-area-inset-top);
+  }
+  
+  .pb-safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
 }
 
 /* iOS Mobile Optimizations */

@@ -13,6 +13,9 @@ import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft } fro
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
 import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
+import { ChatHeader } from "@/components/chat/chat-header"
+import { ChatMessages } from "@/components/chat/chat-messages"
+import { ChatInput } from "@/components/chat/chat-input"
 
 interface Message {
   id: string
@@ -164,9 +167,75 @@ export default function ChatPage() {
     setIsSidebarOpen((prev) => !prev)
   }
 
+  // Mobile Ultra-Premium iOS Experience
   if (isMobile) {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleMobileSend = () => {
+      if (!message.trim()) return;
+      
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: message,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, newMessage]);
+      setMessage("");
+      setIsLoading(true);
+
+      // Simular resposta da API
+      setTimeout(() => {
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Estou processando o seu pedido. Esta é uma resposta de demonstração.",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiResponse]);
+        setIsLoading(false);
+      }, 1500);
+    };
+
     return (
-      <div className="relative w-full h-screen flex flex-col overflow-hidden bg-black">
+      <>
+        <div className="flex flex-col h-screen bg-black text-white overflow-hidden">
+          {/* Safe area superior - iOS notch/Dynamic Island */}
+          <div className="h-safe-top bg-black" />
+          
+          <ChatHeader />
+          
+          <ChatMessages 
+            className="flex-1" 
+            messages={messages}
+            isLoading={isLoading}
+          />
+
+          {/* Input com safe area inferior - iOS home indicator */}
+          <div className="bg-black/95 backdrop-blur-xl border-t border-white/5">
+            <div className="px-4 pt-3 pb-safe-bottom">
+              <ChatInput 
+                value={message}
+                onChange={setMessage}
+                onSubmit={handleMobileSend}
+                isLoading={isLoading}
+                placeholder="Mensagem..."
+              />
+            </div>
+          </div>
+        </div>
+        
+        <AnimatePresence>
+          {showRealTimeChat && <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />}
+        </AnimatePresence>
+      </>
+    );
+  }
+
+  // Desktop Version (unchanged)
+  return (
+    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-black">
         {/* Image Background - More Subtle */}
         <div className="fixed inset-0 z-0">
           <div 
