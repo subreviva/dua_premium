@@ -17,15 +17,6 @@
   .pr-safe {
     padding-right: env(safe-area-inset-right);
   }
-  
-  /* Height utilities for safe areas */
-  .h-safe-top {
-    height: env(safe-area-inset-top);
-  }
-  
-  .pb-safe-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
-  }
 }
 
 /* iOS Mobile Optimizations */
@@ -777,4 +768,87 @@ body {
 .design-studio-container {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+/* iOS Chat Ultra-Premium Optimizations */
+@media (max-width: 768px) {
+  /* Dynamic Viewport Height for iOS */
+  .h-\[100dvh\] {
+    height: 100dvh;
+    height: -webkit-fill-available;
+  }
+  
+  /* Smooth momentum scrolling */
+  .premium-scrollbar-chat {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .premium-scrollbar-chat::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* iOS Input Prevention of Zoom */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px !important;
+  }
+  
+  /* iOS Button Active State */
+  button:active,
+  .btn-active:active {
+    transform: scale(0.96);
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* iOS Keyboard Safe Area Fix */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .pb-safe {
+      padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+    }
+  }
+}
+
+/* Glassmorphism Effects */
+.backdrop-blur-2xl {
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+
+/* iOS Spring Animation for Messages */
+@keyframes message-pop {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.9) translateY(10px);
+  }
+  50% { 
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-message-pop {
+  animation: message-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* iOS Haptic Feedback Visual */
+@keyframes haptic-pulse {
+  0%, 100% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(0.95); 
+  }
+}
+
+.animate-haptic-pulse {
+  animation: haptic-pulse 0.15s ease-in-out;
 }

@@ -13,9 +13,6 @@ import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft } fro
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
 import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
-import { ChatHeader } from "@/components/chat/chat-header"
-import { ChatMessages } from "@/components/chat/chat-messages"
-import { ChatInput } from "@/components/chat/chat-input"
 
 interface Message {
   id: string
@@ -63,7 +60,6 @@ export default function ChatPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [showRealTimeChat, setShowRealTimeChat] = useState(false); // Novo estado
-  const [isLoading, setIsLoading] = useState(false); // Para mobile
   const isMobile = useIsMobile()
 
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -168,68 +164,234 @@ export default function ChatPage() {
     setIsSidebarOpen((prev) => !prev)
   }
 
-  const handleMobileSend = () => {
-    if (!message.trim()) return;
-    
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: message,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
-    setMessage("");
-    setIsLoading(true);
-
-    // Simular resposta da API
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Estou processando o seu pedido. Esta é uma resposta de demonstração.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiResponse]);
-      setIsLoading(false);
-    }, 1500);
-  };
-
-  // Mobile Ultra-Premium iOS Experience
   if (isMobile) {
     return (
-      <>
-        <div className="flex flex-col h-screen bg-black text-white overflow-hidden">
-          {/* Safe area superior - iOS notch/Dynamic Island */}
-          <div className="h-safe-top bg-black" />
-          
-          <ChatHeader />
-          
-          <ChatMessages 
-            className="flex-1" 
-            messages={messages}
-            isLoading={isLoading}
+      <div className="relative w-full h-[100dvh] flex flex-col overflow-hidden bg-black">
+        {/* Image Background - More Subtle */}
+        <div className="fixed inset-0 z-0">
+          <div 
+            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-50"
+            style={{
+              backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
+            }}
           />
-
-          {/* Input com safe area inferior - iOS home indicator */}
-          <div className="bg-black/95 backdrop-blur-xl border-t border-white/5">
-            <div className="px-4 pt-3 pb-safe-bottom">
-              <ChatInput 
-                value={message}
-                onChange={setMessage}
-                onSubmit={handleMobileSend}
-                isLoading={isLoading}
-                placeholder="Mensagem..."
-              />
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[50px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
         </div>
-        
+
+        <div className="fixed top-0 left-0 right-0 h-[40vh] bg-gradient-to-b from-black/90 via-black/60 to-transparent z-10 pointer-events-none" />
+
+        {/* Navbar with iOS safe area */}
+        <div className="relative z-50 pt-safe">
+          <PremiumNavbar
+            className="relative"
+            credits={250}
+            variant="transparent"
+            showSidebarToggle={true}
+            onSidebarToggle={toggleSidebar}
+            isSidebarOpen={isSidebarOpen}
+          />
+        </div>
+
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 transition-all duration-300 animate-in fade-in"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        <ChatSidebar
+          isOpen={isSidebarOpen}
+          isCollapsed={isSidebarCollapsed}
+          onToggleOpen={setIsSidebarOpen}
+          onToggleCollapsed={setIsSidebarCollapsed}
+        />
+
+        {/* Main Content Area - iOS App Style */}
+        <div className="relative z-10 flex-1 flex flex-col overflow-hidden">
+          {/* Messages Area com scroll otimizado */}
+          <div 
+            className="flex-1 overflow-y-auto px-4 pt-6 pb-2 premium-scrollbar-chat"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {messages.length === 0 ? (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-col items-center justify-center h-full px-4"
+                >
+                  <div className="text-center space-y-3">
+                    <motion.h1 
+                      className="text-5xl font-bold text-white drop-shadow-lg"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1, duration: 0.5 }}
+                    >
+                      DUA
+                    </motion.h1>
+                    <motion.p 
+                      className="text-neutral-300 text-base max-w-md mx-auto leading-relaxed"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.5 }}
+                    >
+                      Comece uma conversa ou toque no microfone para falar.
+                    </motion.p>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="messages"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="space-y-4 pb-4"
+                >
+                  {messages.map((msg, index) => (
+                    <motion.div 
+                      key={msg.id} 
+                      variants={messageVariants}
+                      custom={index}
+                    >
+                      <div
+                        className={cn(
+                          "flex items-start gap-2.5 w-full",
+                          msg.role === "user" && "justify-end"
+                        )}
+                      >
+                        {msg.role === "assistant" && (
+                          <motion.div 
+                            className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0 shadow-lg"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+                          >
+                            <Bot className="w-4 h-4 text-neutral-400" />
+                          </motion.div>
+                        )}
+                        <motion.div
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                          className={cn(
+                            "px-4 py-2.5 rounded-3xl max-w-[75%] text-white leading-relaxed shadow-lg text-[15px]",
+                            msg.role === "user"
+                              ? "bg-blue-600 rounded-br-md"
+                              : "bg-neutral-800/90 backdrop-blur-sm rounded-bl-md"
+                          )}
+                        >
+                          {msg.content}
+                        </motion.div>
+                        {msg.role === "user" && (
+                          <motion.div 
+                            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+                          >
+                            <User className="w-4 h-4 text-white" />
+                          </motion.div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Premium Input Bar - iOS Style com safe area bottom */}
+          <motion.div 
+            className="relative z-20 px-4 pt-3 pb-safe bg-black/40 backdrop-blur-2xl border-t border-white/5"
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 25 }}
+          >
+            <div className="flex items-end gap-2.5 mb-3">
+              {/* Input Container - iOS iMessage Style */}
+              <div className="flex-1 flex items-center gap-2 bg-neutral-900/80 backdrop-blur-xl rounded-[24px] p-2 shadow-2xl border border-white/5">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-neutral-400 hover:text-white h-8 w-8 hover:bg-white/5 rounded-full shrink-0 active:scale-90 transition-transform"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+                <Textarea
+                  ref={textareaRef}
+                  value={message}
+                  onChange={(e) => {
+                    setMessage(e.target.value)
+                    adjustHeight()
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Mensagem..."
+                  className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-white placeholder:text-neutral-500 resize-none overflow-y-hidden py-2 text-[16px] leading-tight"
+                  style={{ 
+                    fontSize: '16px', // Prevents iOS zoom on focus
+                    WebkitAppearance: 'none',
+                  }}
+                  rows={1}
+                />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    "h-8 w-8 rounded-full shrink-0 transition-all duration-200 active:scale-90",
+                    "hover:bg-blue-500/10 hover:text-blue-400 text-neutral-400"
+                  )}
+                  onClick={() => {
+                    if (navigator.vibrate) navigator.vibrate(10);
+                    setShowRealTimeChat(true);
+                  }}
+                  title="Conversar por Voz"
+                >
+                  <Mic className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {/* Send Button - iOS Style */}
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full w-10 h-10 shadow-xl transition-all duration-200 shrink-0",
+                    message.trim()
+                      ? "bg-blue-600 hover:bg-blue-500 active:scale-90"
+                      : "bg-neutral-800 opacity-50 cursor-not-allowed"
+                  )}
+                  onClick={() => {
+                    if (navigator.vibrate) navigator.vibrate(10);
+                    handleSend();
+                  }}
+                  disabled={!message.trim()}
+                >
+                  <ArrowUpIcon className="w-5 h-5 text-white" />
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
         <AnimatePresence>
-          {showRealTimeChat && <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />}
+          {showRealTimeChat && (
+            <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />
+          )}
         </AnimatePresence>
-      </>
-    );
+      </div>
+    )
   }
 
   // --- DESKTOP VIEW ---
