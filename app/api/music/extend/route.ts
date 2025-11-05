@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
 
     // ⚠️ OFFICIAL PARAMETERS per MegaDetalhada.txt Section 5
     const params: any = {
-      audioId: body.audioId,                  camelCase
-      defaultParamFlag: body.defaultParamFlag, camelCase
+      audioId: body.audioId,
+      defaultParamFlag: body.defaultParamFlag,
       model: body.model,
       callBackUrl: body.callBackUrl || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/music/callback`,
 

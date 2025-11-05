@@ -192,7 +192,7 @@ export function CreatePanel() {
         prompt: mode === "simple" ? songDescription : (lyrics || songDescription),
         customMode: mode === "custom",
         instrumental: isInstrumental,
-        model: modelMap[selectedVersion] || "V4_5",  V3_5/V4/V4_5/V4_5PLUS/V5
+        model: modelMap[selectedVersion] || "V4_5",
         
         // Custom mode fields (only if custom)
         ...(mode === "custom" && {

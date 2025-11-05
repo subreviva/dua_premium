@@ -113,29 +113,3 @@ async function handleStreamingWebhook(payload: WebhookPayload) {
 
 // Handle failed songs
 async function handleFailedWebhook(payload: FailedWebhook) {
-  // console.error("Song generation failed:", {
-    task_id: payload.task_id,
-    platform: payload.platform,
-    message: payload.message,
-    refund: payload.refund_processed,
-  })
-
-  // TODO: Notify user of failure
-  // await notifyUserFailure(payload.task_id, payload.message)
-}
-
-// Example: Save to database (implement your own logic)
-// async function saveSongToDatabase(song: SunoSongData) {
-//   await db.songs.create({
-//     data: {
-//       clip_id: song.clip_id,
-//       title: song.title,
-//       audio_url: song.audio_url,
-//       lyrics: song.lyrics,
-//       tags: song.tags,
-//       duration: parseFloat(song.duration || "0"),
-//       model: song.mv,
-//       created_at: new Date(song.created_at),
-//     },
-//   })
-// }
