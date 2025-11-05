@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { VideoGenerationProvider } from "@/contexts/video-generation-context"
 import { VideoGenerationNotifications } from "@/components/ui/video-generation-notifications"
+import { Toaster } from "sonner"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -44,6 +45,21 @@ export default function RootLayout({
         <VideoGenerationProvider>
           {children}
           <VideoGenerationNotifications />
+          <Toaster 
+            position="top-center"
+            theme="dark"
+            richColors
+            closeButton
+            duration={3000}
+            toastOptions={{
+              className: "font-sans",
+              style: {
+                background: "rgba(0, 0, 0, 0.95)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                backdropFilter: "blur(20px)",
+              }
+            }}
+          />
           <Analytics />
         </VideoGenerationProvider>
       </body>

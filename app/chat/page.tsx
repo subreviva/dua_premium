@@ -17,6 +17,8 @@ import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
 import { TypingIndicator } from "@/components/ui/typing-indicator";
 import { MessageContent } from "@/components/ui/message-content";
 import { MessageActions } from "@/components/ui/message-actions";
+import { toast } from "sonner";
+import { useChatPersistence } from "@/hooks/useChatPersistence";
 
 interface Message {
   id: string
@@ -58,10 +60,27 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: AutoResizeProps) {
 }
 
 export default function ChatPage() {
+  // Persistência de conversas
+  const { initialMessages, isLoaded, saveMessages, clearHistory } = useChatPersistence();
+
   // Integração real com Gemini via Vercel AI SDK
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages, reload } = useChat({
     api: '/api/chat',
+    initialMessages: isLoaded ? initialMessages : undefined,
+    onError: (error: Error) => {
+      console.error('Chat error:', error);
+      toast.error("Erro ao enviar mensagem", {
+        description: error.message || "Não foi possível processar sua mensagem. Tente novamente.",
+      });
+    },
   });
+
+  // Auto-save mensagens
+  useEffect(() => {
+    if (isLoaded && messages.length > 0) {
+      saveMessages(messages);
+    }
+  }, [messages, isLoaded, saveMessages]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -118,6 +137,14 @@ export default function ChatPage() {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
+
+  const handleNewChat = () => {
+    clearHistory();
+    setMessages([]);
+    toast.success("Nova conversa iniciada", {
+      description: "Histórico limpo com sucesso",
+    });
+  };
 
   // Scroll automático inteligente - só faz scroll se user estiver no bottom
   const scrollToBottom = () => {
@@ -191,6 +218,7 @@ export default function ChatPage() {
             showSidebarToggle={true}
             onSidebarToggle={toggleSidebar}
             isSidebarOpen={isSidebarOpen}
+            onNewChat={handleNewChat}
           />
         </div>
 
@@ -302,7 +330,12 @@ export default function ChatPage() {
                           {/* Copy button apenas para mensagens da DUA - posicionado dentro do bubble */}
                           {msg.role === "assistant" && (
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                              <MessageActions content={msg.content} messageId={msg.id} />
+                              <MessageActions 
+                                content={msg.content} 
+                                messageId={msg.id}
+                                onRegenerate={reload}
+                                isRegenerating={isLoading}
+                              />
                             </div>
                           )}
                         </div>
@@ -427,7 +460,15 @@ export default function ChatPage() {
 
       <div className="fixed top-0 left-0 right-0 h-[45vh] z-10 bg-gradient-to-b from-[#0a0a0a]/95 via-[#0a0a0a]/85 to-transparent pointer-events-none" />
 
-      <PremiumNavbar className="relative z-50" credits={250} variant="transparent" />
+      <PremiumNavbar 
+        className="relative z-50" 
+        credits={250} 
+        variant="transparent"
+        showSidebarToggle={true}
+        onSidebarToggle={toggleSidebar}
+        isSidebarOpen={isSidebarOpen}
+        onNewChat={handleNewChat}
+      />
 
       {isSidebarOpen && (
         <div
@@ -513,7 +554,12 @@ export default function ChatPage() {
                     {/* Copy button para desktop */}
                     {msg.role === "assistant" && (
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                        <MessageActions content={msg.content} messageId={msg.id} />
+                        <MessageActions 
+                          content={msg.content} 
+                          messageId={msg.id}
+                          onRegenerate={reload}
+                          isRegenerating={isLoading}
+                        />
                       </div>
                     )}
                   </div>

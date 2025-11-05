@@ -25,6 +25,7 @@ interface PremiumNavbarProps {
   showSidebarToggle?: boolean
   onSidebarToggle?: () => void
   isSidebarOpen?: boolean
+  onNewChat?: () => void
 }
 
 export function PremiumNavbar({
@@ -37,6 +38,7 @@ export function PremiumNavbar({
   showSidebarToggle = false,
   onSidebarToggle,
   isSidebarOpen = false,
+  onNewChat,
 }: PremiumNavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -77,6 +79,18 @@ export function PremiumNavbar({
                   className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl"
                 >
                   {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />}
+                </Button>
+              )}
+
+              {onNewChat && (
+                <Button
+                  onClick={onNewChat}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-3"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Nova Conversa</span>
                 </Button>
               )}
 

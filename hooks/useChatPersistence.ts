@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ChatMessage {
   id: string;
@@ -9,25 +9,28 @@ interface ChatMessage {
   createdAt?: Date;
 }
 
-export function useChatPersistence(messages: ChatMessage[]) {
+export function useChatPersistence() {
   const STORAGE_KEY = 'dua-chat-history';
+  const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Carregar mensagens ao montar
+  // Carregar mensagens uma única vez ao montar
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return parsed;
+        setInitialMessages(parsed);
       }
     } catch (error) {
       console.error('Error loading chat history:', error);
+    } finally {
+      setIsLoaded(true);
     }
-    return [];
   }, []);
 
   // Salvar mensagens automaticamente
-  useEffect(() => {
+  const saveMessages = (messages: ChatMessage[]) => {
     if (messages.length > 0) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
@@ -35,16 +38,17 @@ export function useChatPersistence(messages: ChatMessage[]) {
         console.error('Error saving chat history:', error);
       }
     }
-  }, [messages]);
+  };
 
   // Limpar histórico
   const clearHistory = () => {
     try {
       localStorage.removeItem(STORAGE_KEY);
+      setInitialMessages([]);
     } catch (error) {
       console.error('Error clearing chat history:', error);
     }
   };
 
-  return { clearHistory };
+  return { initialMessages, isLoaded, saveMessages, clearHistory };
 }
