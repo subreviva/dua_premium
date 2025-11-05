@@ -63,6 +63,7 @@ export default function ChatPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [showRealTimeChat, setShowRealTimeChat] = useState(false); // Novo estado
+  const [isLoading, setIsLoading] = useState(false); // Para mobile
   const isMobile = useIsMobile()
 
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -167,37 +168,35 @@ export default function ChatPage() {
     setIsSidebarOpen((prev) => !prev)
   }
 
-  // Mobile Ultra-Premium iOS Experience
-  if (isMobile) {
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleMobileSend = () => {
-      if (!message.trim()) return;
-      
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: message,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, newMessage]);
-      setMessage("");
-      setIsLoading(true);
-
-      // Simular resposta da API
-      setTimeout(() => {
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: "Estou processando o seu pedido. Esta é uma resposta de demonstração.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, aiResponse]);
-        setIsLoading(false);
-      }, 1500);
+  const handleMobileSend = () => {
+    if (!message.trim()) return;
+    
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: message,
+      timestamp: new Date(),
     };
 
+    setMessages((prev) => [...prev, newMessage]);
+    setMessage("");
+    setIsLoading(true);
+
+    // Simular resposta da API
+    setTimeout(() => {
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Estou processando o seu pedido. Esta é uma resposta de demonstração.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, aiResponse]);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  // Mobile Ultra-Premium iOS Experience
+  if (isMobile) {
     return (
       <>
         <div className="flex flex-col h-screen bg-black text-white overflow-hidden">
@@ -231,166 +230,6 @@ export default function ChatPage() {
         </AnimatePresence>
       </>
     );
-  }
-
-  // Desktop Version (unchanged)
-  return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-black">
-        {/* Image Background - More Subtle */}
-        <div className="fixed inset-0 z-0">
-          <div 
-            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-50" // Reduced opacity
-            style={{
-              backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
-            }}
-          />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[50px]" /> {/* Increased blur */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
-        </div>
-
-        <div className="fixed top-0 left-0 right-0 h-[40vh] bg-gradient-to-b from-black/90 via-black/60 to-transparent z-10 pointer-events-none" />
-
-        <PremiumNavbar
-          className="relative z-50 pt-safe"
-          credits={250}
-          variant="transparent"
-          showSidebarToggle={true}
-          onSidebarToggle={toggleSidebar}
-          isSidebarOpen={isSidebarOpen}
-        />
-
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 transition-all duration-300 animate-in fade-in"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
-
-        <ChatSidebar
-          isOpen={isSidebarOpen}
-          isCollapsed={isSidebarCollapsed}
-          onToggleOpen={setIsSidebarOpen}
-          onToggleCollapsed={setIsSidebarCollapsed}
-        />
-
-        <div className="relative z-10 flex-1 flex flex-col overflow-hidden pt-[72px]">
-          <div className="flex-1 overflow-y-auto px-4 pt-28 pb-6 premium-scrollbar-chat">
-            <AnimatePresence>
-              {messages.length === 0 ? (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0, scale: 0.90 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="flex flex-col items-center justify-center h-full px-4"
-                >
-                  <div className="text-center space-y-4">
-                    <h1 className="text-5xl font-bold text-white drop-shadow-lg">DUA</h1>
-                    <p className="text-neutral-300 text-base max-w-md mx-auto leading-relaxed">
-                      Comece uma conversa ou toque no microfone para falar.
-                    </p>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="messages"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-6"
-                >
-                  {messages.map((msg) => (
-                    <motion.div key={msg.id} variants={messageVariants}>
-                      <div
-                        className={cn(
-                          "flex items-start gap-3 w-full",
-                          msg.role === "user" && "justify-end"
-                        )}
-                      >
-                        {msg.role === "assistant" && (
-                          <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0">
-                            <Bot className="w-5 h-5 text-neutral-400" />
-                          </div>
-                        )}
-                        <div
-                          className={cn(
-                            "p-3 rounded-2xl max-w-[80%] text-white leading-relaxed",
-                            msg.role === "user"
-                              ? "bg-blue-600 rounded-br-lg"
-                              : "bg-neutral-800/80 rounded-bl-lg"
-                          )}
-                        >
-                          {msg.content}
-                        </div>
-                        {msg.role === "user" && (
-                          <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0">
-                            <User className="w-5 h-5 text-neutral-400" />
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Premium Input Bar */}
-          <motion.div 
-            className="relative z-20 p-4 border-t border-white/10 bg-black/20 backdrop-blur-xl"
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          >
-            <div className="flex items-center gap-2 bg-neutral-800/80 rounded-2xl p-2">
-              <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white">
-                <Paperclip className="w-5 h-5" />
-              </Button>
-              <Textarea
-                ref={textareaRef}
-                value={message}
-                onChange={(e) => {
-                  setMessage(e.target.value)
-                  adjustHeight()
-                }}
-                onKeyDown={handleKeyDown}
-                placeholder="Mensagem..."
-                className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-white placeholder:text-neutral-500 resize-none overflow-y-hidden p-2 text-base"
-                rows={1}
-              />
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={cn(
-                  "text-neutral-400 hover:text-white transition-all duration-200",
-                  "hover:bg-blue-500/20 hover:text-blue-400",
-                  "active:scale-95 group"
-                )}
-                onClick={() => setShowRealTimeChat(true)}
-                title="Conversar por Voz (Premium)"
-              >
-                <Mic className="w-5 h-5 group-hover:animate-pulse" />
-              </Button>
-              <Button 
-                size="icon" 
-                className="bg-blue-600 hover:bg-blue-500 rounded-full w-9 h-9"
-                onClick={handleSend}
-                disabled={!message.trim()}
-              >
-                <ArrowUpIcon className="w-5 h-5" />
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-
-        <AnimatePresence>
-          {showRealTimeChat && (
-            <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />
-          )}
-        </AnimatePresence>
-      </div>
-    )
   }
 
   // --- DESKTOP VIEW ---
