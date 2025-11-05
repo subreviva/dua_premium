@@ -10,7 +10,7 @@ import { ChatSidebar } from "@/components/ui/chat-sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft } from "lucide-react"
+import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft, StopCircle } from "lucide-react"
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
 import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
@@ -64,7 +64,7 @@ export default function ChatPage() {
   const { initialMessages, isLoaded, saveMessages, clearHistory } = useChatPersistence();
 
   // Integração real com Gemini via Vercel AI SDK
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages, reload } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages, reload, stop } = useChat({
     api: '/api/chat',
     initialMessages: isLoaded ? initialMessages : undefined,
     onError: (error: Error) => {
@@ -500,28 +500,41 @@ export default function ChatPage() {
                 </Button>
               </div>
               
-              {/* Send Button - iOS Style */}
+              {/* Send/Stop Button - iOS Style */}
               <motion.div
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <Button 
-                  size="icon" 
-                  className={cn(
-                    "rounded-full w-10 h-10 shadow-xl transition-all duration-200 shrink-0",
-                    input.trim()
-                      ? "bg-blue-600 hover:bg-blue-500 active:scale-90"
-                      : "bg-neutral-800 opacity-50 cursor-not-allowed"
-                  )}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (navigator.vibrate) navigator.vibrate(10);
-                    handleFormSubmit(e as any);
-                  }}
-                  disabled={!input.trim()}
-                >
-                  <ArrowUpIcon className="w-5 h-5 text-white" />
-                </Button>
+                {isLoading ? (
+                  <Button 
+                    size="icon"
+                    onClick={() => {
+                      stop();
+                      toast.info("Geração interrompida");
+                    }}
+                    className="rounded-full w-10 h-10 shadow-xl bg-red-600 hover:bg-red-500 active:scale-90 transition-all duration-200 shrink-0"
+                  >
+                    <StopCircle className="w-5 h-5 text-white" />
+                  </Button>
+                ) : (
+                  <Button 
+                    size="icon" 
+                    className={cn(
+                      "rounded-full w-10 h-10 shadow-xl transition-all duration-200 shrink-0",
+                      input.trim()
+                        ? "bg-blue-600 hover:bg-blue-500 active:scale-90"
+                        : "bg-neutral-800 opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (navigator.vibrate) navigator.vibrate(10);
+                      handleFormSubmit(e as any);
+                    }}
+                    disabled={!input.trim()}
+                  >
+                    <ArrowUpIcon className="w-5 h-5 text-white" />
+                  </Button>
+                )}
               </motion.div>
             </div>
           </motion.div>
@@ -713,18 +726,31 @@ export default function ChatPage() {
                   </Button>
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={!input.trim()}
-                  className={cn(
-                    "h-9 w-9 sm:h-8 sm:w-8 rounded-full p-0 transition-all duration-300 active:scale-95",
-                    input.trim()
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50"
-                      : "bg-neutral-700 text-neutral-400 cursor-not-allowed",
-                  )}
-                >
-                  <ArrowUpIcon className="w-4 h-4 sm:w-4 sm:h-4" />
-                </Button>
+                {isLoading ? (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      stop();
+                      toast.info("Geração interrompida");
+                    }}
+                    className="h-9 w-9 sm:h-8 sm:w-8 rounded-full p-0 bg-red-600 hover:bg-red-500 shadow-lg shadow-red-500/50 active:scale-95 transition-all duration-300"
+                  >
+                    <StopCircle className="w-4 h-4 sm:w-4 sm:h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={!input.trim()}
+                    className={cn(
+                      "h-9 w-9 sm:h-8 sm:w-8 rounded-full p-0 transition-all duration-300 active:scale-95",
+                      input.trim()
+                        ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50"
+                        : "bg-neutral-700 text-neutral-400 cursor-not-allowed",
+                    )}
+                  >
+                    <ArrowUpIcon className="w-4 h-4 sm:w-4 sm:h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </form>
