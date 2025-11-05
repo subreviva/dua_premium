@@ -565,8 +565,6 @@ export default function ChatPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </div>
 
-      <div className="fixed top-0 left-0 right-0 h-[45vh] z-10 bg-gradient-to-b from-[#0a0a0a]/95 via-[#0a0a0a]/85 to-transparent pointer-events-none" />
-
       <PremiumNavbar 
         className="relative z-50" 
         credits={250} 
@@ -576,6 +574,9 @@ export default function ChatPage() {
         isSidebarOpen={isSidebarOpen}
         onNewChat={handleNewChat}
       />
+
+      {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) */}
+      <div className="fixed top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent z-40 pointer-events-none" />
 
       {isSidebarOpen && (
         <div
