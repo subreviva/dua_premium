@@ -265,8 +265,6 @@ export default function ChatPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
         </div>
 
-        <div className="fixed top-0 left-0 right-0 h-[40vh] bg-gradient-to-b from-black/90 via-black/60 to-transparent z-10 pointer-events-none" />
-
         {/* Navbar with iOS safe area */}
         <div className="relative z-50 pt-safe">
           <PremiumNavbar
@@ -279,6 +277,9 @@ export default function ChatPage() {
             onNewChat={handleNewChat}
           />
         </div>
+
+        {/* Gradient Fade Overlay - Efeito de conversa subindo */}
+        <div className="fixed top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/60 to-transparent z-40 pointer-events-none pt-safe" />
 
         {isSidebarOpen && (
           <div
