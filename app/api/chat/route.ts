@@ -1,49 +1,71 @@
-import { streamText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DUA_SYSTEM_INSTRUCTION } from '@/lib/dua-prompt';
 
 // Configuração do modelo Gemini
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(
+  process.env.GOOGLE_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_API_KEY || ''
+);
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { messages, image } = await req.json();
+    const { messages } = await req.json();
 
-    // Se houver image, adicionar ao último user message
-    let processedMessages = messages;
-    if (image) {
-      const lastUserIndex = messages.map((m: any) => m.role).lastIndexOf('user');
-      if (lastUserIndex !== -1) {
-        processedMessages = [...messages];
-        processedMessages[lastUserIndex] = {
-          ...messages[lastUserIndex],
-          content: [
-            {
-              type: 'text',
-              text: messages[lastUserIndex].content,
-            },
-            {
-              type: 'image',
-              image: image,
-            },
-          ],
-        };
-      }
-    }
+    // Converter messages para o formato do Gemini
+    const geminiMessages = messages
+      .filter((m: any) => m.role !== 'system')
+      .map((m: any) => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.content }],
+      }));
 
-    // Stream de resposta da Gemini com system instruction da DUA
-    const result = streamText({
-      model: google('gemini-2.0-flash-exp'),
-      system: DUA_SYSTEM_INSTRUCTION,
-      messages: processedMessages,
-      temperature: 0.8, // Criatividade moderada para a DUA
+    // Criar model com system instruction
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      systemInstruction: DUA_SYSTEM_INSTRUCTION,
     });
 
-    return result.toTextStreamResponse();
+    // Iniciar chat com histórico
+    const chat = model.startChat({
+      history: geminiMessages.slice(0, -1),
+    });
+
+    // Enviar última mensagem e fazer stream
+    const lastMessage = geminiMessages[geminiMessages.length - 1];
+    const result = await chat.sendMessageStream(lastMessage.parts[0].text);
+
+    // Criar ReadableStream compatível com useChat (Data Stream Protocol)
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Enviar prefixo do data stream
+          controller.enqueue(encoder.encode('0:""\n'));
+          
+          let fullText = '';
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            fullText += text;
+            
+            // Formato do Data Stream Protocol: 0:"text content"
+            const payload = `0:${JSON.stringify(text)}\n`;
+            controller.enqueue(encoder.encode(payload));
+          }
+          
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Vercel-AI-Data-Stream': 'v1',
+      },
+    });
   } catch (error) {
     console.error('Error in chat API:', error);
     return new Response(
