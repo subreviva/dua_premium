@@ -48,12 +48,7 @@ export async function POST(request: NextRequest) {
     const payload: WebhookPayload = JSON.parse(rawBody)
 
     // 5. Log event
-    // console.log("Webhook received:", {
-      event: payload.event,
-      platform: payload.platform,
-      task_id: payload.task_id,
-      webhook_id: headers["x-webhook-id"],
-    })
+    // Console log removed for production build compatibility
 
     // 6. Handle by event type
     if (isCompletedWebhook(payload)) {
@@ -81,37 +76,21 @@ async function handleCompletedWebhook(payload: WebhookPayload) {
     // console.log(`Suno songs completed: ${payload.data.length} tracks`)
     
     for (const song of payload.data) {
-      // console.log({
-        clip_id: song.clip_id,
-        title: song.title,
-        duration: song.duration,
-        audio_url: song.audio_url,
-        model: song.mv,
-      })
+    // Console log removed for production build compatibility
 
       // TODO: Save to database, notify user, etc.
       // await saveSongToDatabase(song)
       // await notifyUser(payload.task_id, song)
     }
   } else if (isNuroWebhook(payload)) {
-    // console.log("Nuro song completed:", {
-      audio_url: payload.audio_url,
-      duration: payload.duration,
-      prompt: payload.prompt,
-    })
+    // Console log removed for production build compatibility
 
     // TODO: Save to database
   } else if (isProducerWebhook(payload)) {
     // console.log(`Producer songs completed: ${payload.data.length} tracks`)
 
     for (const song of payload.data) {
-      // console.log({
-        clip_id: song.clip_id,
-        title: song.title,
-        duration: song.duration,
-        audio_url: song.audio_url,
-        model: song.mv,
-      })
+    // Console log removed for production build compatibility
 
       // TODO: Save to database
     }
@@ -124,12 +103,7 @@ async function handleStreamingWebhook(payload: WebhookPayload) {
     // console.log(`Suno songs streaming: ${payload.data.length} tracks`)
 
     for (const song of payload.data) {
-      // console.log({
-        clip_id: song.clip_id,
-        title: song.title,
-        state: song.state,
-        audio_url: song.audio_url, // Streaming URL
-      })
+    // Console log removed for production build compatibility
 
       // TODO: Update UI with streaming link
       // await notifyUserStreaming(payload.task_id, song)

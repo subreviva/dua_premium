@@ -40,10 +40,7 @@ export async function POST(req: Request) {
       }, { status: 500 })
     }
 
-    // console.log('✅ [Get MIDI] Success:', {
-      midi_url: res.data.data.midi_url,
-      instruments_count: res.data.data.instruments?.length || 0
-    })
+    // Console log removed for production build compatibility
 
     return NextResponse.json({
       success: true,

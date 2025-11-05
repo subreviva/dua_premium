@@ -23,38 +23,19 @@ export async function POST(request: Request) {
     const { code, msg, data } = body
     const { callbackType, task_id, data: musicData } = data || {}
     
-    // console.log('[Suno Callback] Received notification:', {
-      code,
-      msg,
-      taskId: task_id,
-      callbackType,
-      tracksCount: Array.isArray(musicData) ? musicData.length : 0,
-      timestamp: new Date().toISOString()
-    })
+    // Console log removed for production build compatibility
 
     if (code === 200 && callbackType === 'complete') {
-      // console.log('[Suno Callback] ✅ Music generation completed:', {
-        taskId: task_id,
-        tracks: musicData?.length || 0
-      })
+    // Console log removed for production build compatibility
       
       // Log track details
       if (Array.isArray(musicData)) {
         musicData.forEach((track, idx) => {
-          // console.log(`[Suno Callback] Track ${idx + 1}:`, {
-            id: track.id,
-            title: track.title,
-            duration: track.duration,
-            audioUrl: track.audio_url
-          })
+    // Console log removed for production build compatibility
         })
       }
     } else if (code !== 200 || callbackType === 'error') {
-      // console.error('[Suno Callback] ❌ Generation failed:', {
-        taskId: task_id,
-        code,
-        message: msg
-      })
+      // Generation failed - removed console.error for production
     } else {
       // console.log(`[Suno Callback] 🔄 Progress update (${callbackType}):`, task_id)
     }

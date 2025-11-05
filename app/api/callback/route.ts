@@ -1,13 +1,24 @@
-import { type NextRequest, NextResponse } from "next/server"
-import type { MusicGenerationResult } from "@/lib/suno-api"
+import { NextRequest, NextResponse } from "next/server"
+
+export const runtime = 'nodejs'
 
 interface CallbackData {
   code: number
   msg: string
   data: {
-    callbackType: "text" | "first" | "complete" | "error"
     task_id: string
-    data: MusicGenerationResult[] | null
+    callbackType?: string
+    data?: Array<{
+      id: string
+      title: string
+      created_at: string
+      audio_url: string
+      video_url: string
+      image_url: string
+      lyric: string
+      model_name: string
+      status: string
+    }>
   }
 }
 
@@ -15,40 +26,42 @@ export async function POST(request: NextRequest) {
   try {
     const data: CallbackData = await request.json()
 
-    // console.log("[v0] Received music generation callback:", {
-      taskId: data.data.task_id,
-      callbackType: data.data.callbackType,
-      status: data.code,
-      message: data.msg,
-    })
+    // Log callback reception for debugging
+    console.log("Received callback for task:", data.data.task_id)
 
     if (data.code === 200) {
-      // console.log("[v0] Music generation completed successfully")
+      console.log("Music generation completed successfully")
       const musicData = data.data.data || []
 
-      // console.log(`[v0] Generated ${musicData.length} music tracks`)
+      console.log(`Processing ${musicData.length} music tracks`)
       musicData.forEach((music, index) => {
-        // console.log(`[v0] Music ${index + 1}:`, {
+        console.log(`Track ${index + 1}:`, {
+          id: music.id,
           title: music.title,
-          duration: music.duration,
-          tags: music.tags,
-          audioUrl: music.audioUrl,
+          status: music.status
         })
       })
 
-      // Here you could:
-      // - Store the music in a database
-      // - Send notifications to users
-      // - Trigger webhooks
-      // - Update UI via WebSocket/SSE
-    } else {
-      // console.error("[v0] Music generation failed:", data.msg)
-    }
+      // Here you can process the completed music data
+      // e.g., save to database, notify user, etc.
 
-    // Return 200 to acknowledge callback received
-    return NextResponse.json({ status: "received" })
+      return NextResponse.json({ 
+        success: true, 
+        message: "Callback processed successfully",
+        tracksCount: musicData.length 
+      })
+    } else {
+      console.log("Callback received with error:", data.msg)
+      return NextResponse.json({ 
+        success: false, 
+        message: data.msg 
+      })
+    }
   } catch (error) {
-    // console.error("[v0] Callback processing error:", error)
-    return NextResponse.json({ error: "Failed to process callback" }, { status: 500 })
+    console.error("Error processing callback:", error)
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    )
   }
 }

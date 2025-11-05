@@ -190,8 +190,8 @@ export function CreatePanel() {
       // ⚠️ OFFICIAL PARAMETERS per Suno_API_MegaDetalhada.txt Section 3
       const params: any = {
         prompt: mode === "simple" ? songDescription : (lyrics || songDescription),
-        customMode: mode === "custom",      camelCase
-        instrumental: isInstrumental,       camelCase
+        customMode: mode === "custom",
+        instrumental: isInstrumental,
         model: modelMap[selectedVersion] || "V4_5",  V3_5/V4/V4_5/V4_5PLUS/V5
         
         // Custom mode fields (only if custom)

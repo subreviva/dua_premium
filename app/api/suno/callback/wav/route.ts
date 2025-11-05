@@ -5,11 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { code, msg, data } = body
 
-    // console.log("[v0] Received WAV conversion callback:", {
-      taskId: data?.task_id,
-      status: code,
-      message: msg,
-    })
+    // Console log removed for production build compatibility
 
     if (code === 200) {
       // WAV conversion completed successfully

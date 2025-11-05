@@ -15,11 +15,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     
-    // console.log("[API] Music generation request:", {
-      customMode: body.customMode,
-      instrumental: body.instrumental,
-      model: body.model
-    })
+    // Console log removed for production build compatibility
 
     const apiKey = process.env.SUNO_API_KEY
     if (!apiKey) {

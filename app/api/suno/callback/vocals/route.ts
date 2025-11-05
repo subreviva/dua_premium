@@ -5,12 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { code, msg, data } = body
 
-    // console.log("[v0] Received Add Vocals callback:", {
-      taskId: data?.task_id,
-      callbackType: data?.callbackType,
-      status: code,
-      message: msg,
-    })
+    // Console log removed for production build compatibility
 
     if (code === 200) {
       // Task completed successfully
@@ -25,11 +20,7 @@ export async function POST(request: NextRequest) {
         case "first":
           // console.log("[v0] First vocal track completed")
           if (vocalData.length > 0) {
-            // console.log("[v0] First vocal:", {
-              title: vocalData[0].title,
-              duration: vocalData[0].duration,
-              audioUrl: vocalData[0].audio_url,
-            })
+    // Console log removed for production build compatibility
           }
           break
 
@@ -38,18 +29,7 @@ export async function POST(request: NextRequest) {
           // console.log(`[v0] Generated ${vocalData.length} vocal tracks`)
 
           vocalData.forEach((vocal: any, index: number) => {
-            // console.log(`[v0] Vocal ${index + 1}:`, {
-              id: vocal.id,
-              title: vocal.title,
-              duration: vocal.duration,
-              tags: vocal.tags,
-              audioUrl: vocal.audio_url,
-              streamAudioUrl: vocal.stream_audio_url,
-              imageUrl: vocal.image_url,
-              prompt: vocal.prompt,
-              modelName: vocal.model_name,
-              createTime: vocal.createTime,
-            })
+    // Console log removed for production build compatibility
           })
 
           // TODO: Store completed vocals in database or trigger UI update

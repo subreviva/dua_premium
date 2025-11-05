@@ -5,12 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { code, msg, data } = body
 
-    // console.log("[v0] Replace section callback received:", {
-      code,
-      msg,
-      taskId: data?.task_id,
-      callbackType: data?.callbackType,
-    })
+    // Console log removed for production build compatibility
 
     if (code === 200 && data?.callbackType === "complete") {
       // Handle successful replacement
@@ -18,12 +13,7 @@ export async function POST(request: NextRequest) {
       const musicData = data.data || []
 
       musicData.forEach((music: any, index: number) => {
-        // console.log(`[v0] Music ${index + 1}:`, {
-          id: music.id,
-          title: music.title,
-          duration: music.duration,
-          audioUrl: music.audio_url,
-        })
+    // Console log removed for production build compatibility
       })
 
       // TODO: Store results in database or update application state

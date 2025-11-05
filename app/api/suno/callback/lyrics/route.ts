@@ -4,12 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // console.log("[v0] Received lyrics generation callback:", {
-      taskId: body.data?.taskId,
-      callbackType: body.data?.callbackType,
-      status: body.code,
-      message: body.msg,
-    })
+    // Console log removed for production build compatibility
 
     const { code, msg, data } = body
 

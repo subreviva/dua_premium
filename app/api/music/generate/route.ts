@@ -28,12 +28,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // console.log('[Music Generate] Creating music via Suno API:', {
-      promptPreview: (prompt || lyrics)?.substring(0, 50) + '...',
-      instrumental,
-      model,
-      is_custom
-    })
+    // Console log removed for production build compatibility
 
     // Map legacy model names to official API models
     const mapModel = (m: string): string => {

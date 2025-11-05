@@ -61,11 +61,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // console.log('🎨 Gerando imagens com Imagen:', {
-      model: model || 'imagen-4.0-generate-001',
-      prompt: prompt.substring(0, 50) + '...',
-      config: finalConfig,
-    });
+    // Image generation log removed for production
 
     // Gerar imagens
     const response = await ai.models.generateImages({

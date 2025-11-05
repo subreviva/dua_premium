@@ -41,11 +41,7 @@ export async function GET(
 
     const tracks = Array.isArray(res.data.data) ? res.data.data : [res.data.data]
     
-    // console.log('✅ [Get Music] Success:', {
-      task_id,
-      tracks_count: tracks.length,
-      states: tracks.map(t => t.state)
-    })
+    // Console log removed for production build compatibility
 
     return NextResponse.json({
       success: true,

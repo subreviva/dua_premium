@@ -5,11 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { code, msg, data } = body
 
-    // console.log("[v0] Cover generation callback received:", {
-      taskId: data?.taskId,
-      status: code,
-      message: msg,
-    })
+    // Console log removed for production build compatibility
 
     if (code === 200) {
       // Task completed successfully

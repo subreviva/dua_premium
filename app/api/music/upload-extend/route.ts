@@ -62,12 +62,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // console.log('🔄 [Upload-Extend] Request (Suno API):', {
-      uploadUrl: upload_url.substring(0, 50) + '...',
-      defaultParamFlag: default_param_flag,
-      instrumental,
-      model
-    })
+    // Console log removed for production build compatibility
 
     const callBackUrl = `${new URL(req.url).origin}/api/music/callback`
 

@@ -5,13 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { code, msg, data } = body
 
-    // console.log("[v0] Received Suno callback:", {
-      code,
-      msg,
-      callbackType: data?.callbackType,
-      taskId: data?.task_id,
-      dataCount: data?.data?.length || 0,
-    })
+    // Console log removed for production build compatibility
 
     if (code === 200) {
       const callbackType = data?.callbackType
@@ -25,11 +19,7 @@ export async function POST(request: NextRequest) {
         case "first":
           // console.log("[v0] First track completed")
           if (resultData.length > 0) {
-            // console.log("[v0] First track:", {
-              title: resultData[0].title,
-              duration: resultData[0].duration,
-              audioUrl: resultData[0].audio_url,
-            })
+    // Console log removed for production build compatibility
           }
           break
 
@@ -38,18 +28,7 @@ export async function POST(request: NextRequest) {
           // console.log(`[v0] Generated ${resultData.length} tracks`)
 
           resultData.forEach((item: any, index: number) => {
-            // console.log(`[v0] Track ${index + 1}:`, {
-              id: item.id,
-              title: item.title,
-              duration: item.duration,
-              tags: item.tags,
-              audioUrl: item.audio_url,
-              streamAudioUrl: item.stream_audio_url,
-              imageUrl: item.image_url,
-              prompt: item.prompt,
-              modelName: item.model_name,
-              createTime: item.createTime,
-            })
+    // Console log removed for production build compatibility
           })
 
           // TODO: Store completed tracks in database or trigger UI update
