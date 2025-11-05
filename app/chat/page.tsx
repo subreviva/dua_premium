@@ -69,6 +69,8 @@ export default function ChatPage() {
   const isMobile = useIsMobile()
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [userScrolled, setUserScrolled] = useState(false)
 
   const messageVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
@@ -117,13 +119,34 @@ export default function ChatPage() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
+  // Scroll automático inteligente - só faz scroll se user estiver no bottom
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (!userScrolled) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
   }
 
+  // Detecta se user scrollou manualmente para cima
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      
+      const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      setUserScrolled(!isAtBottom);
+    };
+
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  // Auto-scroll quando há novas mensagens (se user não scrollou)
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages, isLoading])
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,6 +212,7 @@ export default function ChatPage() {
         <div className="relative z-10 flex-1 flex flex-col overflow-hidden">
           {/* Messages Area com scroll otimizado */}
           <div 
+            ref={scrollContainerRef}
             className="flex-1 overflow-y-auto px-4 pt-6 pb-2 premium-scrollbar-chat"
             style={{
               WebkitOverflowScrolling: 'touch',
@@ -238,7 +262,7 @@ export default function ChatPage() {
                       key={msg.id} 
                       variants={messageVariants}
                       custom={index}
-                      className="group"
+                      className="group relative"
                     >
                       <div
                         className={cn(
@@ -248,7 +272,7 @@ export default function ChatPage() {
                       >
                         {msg.role === "assistant" && (
                           <motion.div 
-                            className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0 shadow-lg"
+                            className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0 shadow-lg mt-0.5"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
@@ -256,16 +280,16 @@ export default function ChatPage() {
                             <Bot className="w-4 h-4 text-neutral-400" />
                           </motion.div>
                         )}
-                        <div className="relative">
+                        <div className="relative flex-1 max-w-[75%]">
                           <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                             className={cn(
-                              "px-4 py-2.5 rounded-3xl max-w-[75%] text-white leading-relaxed shadow-lg text-[15px]",
+                              "px-4 py-2.5 rounded-3xl text-white leading-relaxed shadow-lg text-[15px] relative",
                               msg.role === "user"
                                 ? "bg-blue-600 rounded-br-md"
-                                : "bg-neutral-800/90 backdrop-blur-sm rounded-bl-md"
+                                : "bg-neutral-800/90 backdrop-blur-sm rounded-bl-md pr-12"
                             )}
                           >
                             {msg.role === "assistant" ? (
@@ -275,9 +299,9 @@ export default function ChatPage() {
                             )}
                           </motion.div>
                           
-                          {/* Copy button apenas para mensagens da DUA */}
+                          {/* Copy button apenas para mensagens da DUA - posicionado dentro do bubble */}
                           {msg.role === "assistant" && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                               <MessageActions content={msg.content} messageId={msg.id} />
                             </div>
                           )}
@@ -440,7 +464,10 @@ export default function ChatPage() {
           isSidebarOpen ? (isSidebarCollapsed ? "ml-0 lg:ml-16" : "ml-0 lg:ml-64") : "ml-0",
         )}
       >
-        <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 premium-scrollbar-chat">
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 premium-scrollbar-chat"
+        >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-4">
               <div className="text-center space-y-3 sm:space-y-4">
@@ -458,35 +485,49 @@ export default function ChatPage() {
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300",
+                    "group flex gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300",
                     msg.role === "user" ? "justify-end" : "justify-start",
                   )}
                 >
                   {msg.role === "assistant" && (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                   )}
-                  <div
-                    className={cn(
-                      "max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 backdrop-blur-xl",
-                      msg.role === "user"
-                        ? "bg-white/10 text-white border border-white/20"
-                        : "bg-black/40 text-white border border-white/10",
+                  <div className="relative max-w-[85%] sm:max-w-[80%]">
+                    <div
+                      className={cn(
+                        "rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 backdrop-blur-xl",
+                        msg.role === "user"
+                          ? "bg-white/10 text-white border border-white/20"
+                          : "bg-black/40 text-white border border-white/10 pr-12",
+                      )}
+                    >
+                      {msg.role === "assistant" ? (
+                        <MessageContent content={msg.content} className="text-sm sm:text-base" />
+                      ) : (
+                        <p className="text-sm sm:text-base leading-relaxed break-words">{msg.content}</p>
+                      )}
+                    </div>
+                    
+                    {/* Copy button para desktop */}
+                    {msg.role === "assistant" && (
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                        <MessageActions content={msg.content} messageId={msg.id} />
+                      </div>
                     )}
-                  >
-                    <p className="text-sm sm:text-base leading-relaxed break-words">{msg.content}</p>
-                    <span className="text-xs text-neutral-400 mt-1 block">
-                      {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
                   </div>
                   {msg.role === "user" && (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                   )}
                 </div>
               ))}
+              
+              {/* Typing indicator desktop */}
+              {isLoading && <TypingIndicator />}
+              
               <div ref={messagesEndRef} />
             </div>
           )}
