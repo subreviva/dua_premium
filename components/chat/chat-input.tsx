@@ -18,7 +18,7 @@ export function ChatInput({
   onChange, 
   onSubmit, 
   isLoading = false,
-  placeholder = "Mensagem..."
+  placeholder = "Mensagem"
 }: ChatInputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -27,9 +27,9 @@ export function ChatInput({
     e.preventDefault();
     if (!value.trim() || isLoading) return;
     
-    // Vibração iOS-style (pattern triplo sutil)
+    // Feedback tátil iOS
     if (navigator.vibrate) {
-      navigator.vibrate([10, 20, 10]);
+      navigator.vibrate(30);
     }
     
     onSubmit();
@@ -73,16 +73,16 @@ export function ChatInput({
             <motion.button
               key="send"
               type="submit"
-              initial={{ scale: 0, rotate: -180 }}
+              initial={{ scale: 0, rotate: -90 }}
               animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0, rotate: 180 }}
+              exit={{ scale: 0, rotate: 90 }}
               transition={{ 
                 type: "spring",
-                stiffness: 400,
-                damping: 25
+                stiffness: 500,
+                damping: 30
               }}
               whileTap={{ scale: 0.9 }}
-              className="absolute right-2 bottom-2 flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 text-white shadow-lg active:shadow-md transition-shadow"
+              className="absolute right-1.5 bottom-[7px] flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 text-white shadow-lg active:shadow-md transition-shadow"
             >
               <Send className="h-4 w-4" />
             </motion.button>

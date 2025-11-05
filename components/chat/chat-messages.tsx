@@ -23,13 +23,14 @@ export function ChatMessages({ className, messages, isLoading }: ChatMessagesPro
       <Virtuoso
         data={messages}
         initialTopMostItemIndex={messages.length > 0 ? messages.length - 1 : 0}
-        followOutput="smooth"
+        followOutput="smooth" // Scroll suave para novas mensagens
         alignToBottom
         itemContent={(index, message) => (
           <ChatMessage key={message.id} message={message} />
         )}
         components={{
-          Footer: () => isLoading ? <TypingIndicator /> : null,
+          // Mostra o indicador "a escrever" no rodapé
+          Footer: () => (isLoading && messages.length > 0) ? <TypingIndicator /> : null,
         }}
       />
     </div>
