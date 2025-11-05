@@ -16,8 +16,7 @@ class StreamingAudioPlayer {
   private audioQueue: { chunk: Int16Array; sampleRate: number }[] = [];
   private isPlaying = false;
   private nextPlayTime = 0; // Relógio absoluto e preciso
-  private activeSources: AudioBufferSourceNode[] = []; // Fila de fontes agendadas
-  private schedulerTimeout: NodeJS.Timeout | null = null; // Timer do scheduler
+  private schedulerAnimationFrame: number | null = null; // rAF handle (sincronizado com browser)
 
   constructor() {}
 
@@ -99,48 +98,33 @@ class StreamingAudioPlayer {
         this.nextPlayTime = currentTime;
       }
 
+      // OTIMIZAÇÃO CRÍTICA: Memory leak prevention - disconnect após terminar
+      source.onended = () => {
+        source.disconnect();
+      };
+
       // Agenda o áudio para tocar no tempo absoluto e preciso
       source.start(this.nextPlayTime);
-      (source as any).stopTime = this.nextPlayTime + audioBuffer.duration; // Guardar tempo de paragem
-      this.activeSources.push(source);
 
       // Avança o relógio absoluto para o final deste pedaço de áudio
       this.nextPlayTime += audioBuffer.duration;
     }
 
-    // Limpa fontes antigas que já terminaram
-    this.activeSources = this.activeSources.filter(s => {
-      const stopTime = (s as any).stopTime;
-      return stopTime && currentTime < stopTime;
-    });
-
-    // CORREÇÃO: Limpa o timeout anterior antes de agendar um novo
-    if (this.schedulerTimeout) {
-      clearTimeout(this.schedulerTimeout);
-    }
-    
-    // Scheduler desacoplado - continua o ciclo após 100ms
-    this.schedulerTimeout = setTimeout(() => this.scheduleNextChunk(), 100);
+    // OTIMIZAÇÃO CRÍTICA: requestAnimationFrame em vez de setTimeout
+    // Sincronizado com o ciclo de repaint do navegador (~60fps = 16ms)
+    // Mais confiável que setTimeout em background tabs
+    this.schedulerAnimationFrame = requestAnimationFrame(() => this.scheduleNextChunk());
   }
 
   public stop() {
     // CORREÇÃO CRÍTICA 5: Cleanup completo e robusto
-    // Limpar o scheduler
-    if (this.schedulerTimeout) {
-      clearTimeout(this.schedulerTimeout);
-      this.schedulerTimeout = null;
+    // Limpar o scheduler (requestAnimationFrame)
+    if (this.schedulerAnimationFrame !== null) {
+      cancelAnimationFrame(this.schedulerAnimationFrame);
+      this.schedulerAnimationFrame = null;
     }
 
-    // Para todas as fontes de áudio agendadas e futuras
-    this.activeSources.forEach(source => {
-      try {
-        source.stop();
-        source.disconnect();
-      } catch (e) {
-        // Ignorar erros se a fonte já parou
-      }
-    });
-    this.activeSources = [];
+    // Limpar a fila de áudio pendente
     this.audioQueue = [];
     this.isPlaying = false;
   }
