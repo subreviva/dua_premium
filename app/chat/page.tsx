@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import type React from "react"
+import { useChat } from "ai/react";
 
 import { useState, useRef, useCallback, useEffect } from "react"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
@@ -13,6 +14,9 @@ import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft } fro
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
 import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
+import { TypingIndicator } from "@/components/ui/typing-indicator";
+import { MessageContent } from "@/components/ui/message-content";
+import { MessageActions } from "@/components/ui/message-actions";
 
 interface Message {
   id: string
@@ -54,18 +58,16 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: AutoResizeProps) {
 }
 
 export default function ChatPage() {
-  const [message, setMessage] = useState("")
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isRecording, setIsRecording] = useState(false)
+  // Integração real com Gemini via Vercel AI SDK
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: '/api/chat',
+  });
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [showRealTimeChat, setShowRealTimeChat] = useState(false); // Novo estado
+  const [showRealTimeChat, setShowRealTimeChat] = useState(false);
   const isMobile = useIsMobile()
 
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
-    minHeight: 48,
-    maxHeight: 150,
-  })
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const messageVariants: Variants = {
@@ -123,41 +125,17 @@ export default function ChatPage() {
     scrollToBottom()
   }, [messages])
 
-  const handleSend = () => {
-    if (!message.trim()) return
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: message,
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, newMessage])
-    setMessage("")
-    adjustHeight(true)
-
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Estou processando o seu pedido. Esta é uma resposta de demonstração.",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, aiResponse])
-    }, 1000)
-  }
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (navigator.vibrate) navigator.vibrate(10);
+    handleSubmit(e);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      handleFormSubmit(e as any)
     }
-  }
-
-  const toggleRecording = () => {
-    setIsRecording(!isRecording)
-    console.log("[v0] Voice recording:", !isRecording)
   }
 
   const toggleSidebar = () => {
@@ -255,11 +233,12 @@ export default function ChatPage() {
                   animate="visible"
                   className="space-y-4 pb-4"
                 >
-                  {messages.map((msg, index) => (
+                  {messages.map((msg: any, index: number) => (
                     <motion.div 
                       key={msg.id} 
                       variants={messageVariants}
                       custom={index}
+                      className="group"
                     >
                       <div
                         className={cn(
@@ -277,19 +256,32 @@ export default function ChatPage() {
                             <Bot className="w-4 h-4 text-neutral-400" />
                           </motion.div>
                         )}
-                        <motion.div
-                          initial={{ scale: 0.9, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                          className={cn(
-                            "px-4 py-2.5 rounded-3xl max-w-[75%] text-white leading-relaxed shadow-lg text-[15px]",
-                            msg.role === "user"
-                              ? "bg-blue-600 rounded-br-md"
-                              : "bg-neutral-800/90 backdrop-blur-sm rounded-bl-md"
+                        <div className="relative">
+                          <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            className={cn(
+                              "px-4 py-2.5 rounded-3xl max-w-[75%] text-white leading-relaxed shadow-lg text-[15px]",
+                              msg.role === "user"
+                                ? "bg-blue-600 rounded-br-md"
+                                : "bg-neutral-800/90 backdrop-blur-sm rounded-bl-md"
+                            )}
+                          >
+                            {msg.role === "assistant" ? (
+                              <MessageContent content={msg.content} />
+                            ) : (
+                              msg.content
+                            )}
+                          </motion.div>
+                          
+                          {/* Copy button apenas para mensagens da DUA */}
+                          {msg.role === "assistant" && (
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <MessageActions content={msg.content} messageId={msg.id} />
+                            </div>
                           )}
-                        >
-                          {msg.content}
-                        </motion.div>
+                        </div>
                         {msg.role === "user" && (
                           <motion.div 
                             className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg"
@@ -303,6 +295,9 @@ export default function ChatPage() {
                       </div>
                     </motion.div>
                   ))}
+                  
+                  {/* Typing Indicator quando está carregando */}
+                  {isLoading && <TypingIndicator />}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -327,12 +322,8 @@ export default function ChatPage() {
                   <Paperclip className="w-4 h-4" />
                 </Button>
                 <Textarea
-                  ref={textareaRef}
-                  value={message}
-                  onChange={(e) => {
-                    setMessage(e.target.value)
-                    adjustHeight()
-                  }}
+                  value={input}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder="Mensagem..."
                   className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-white placeholder:text-neutral-500 resize-none overflow-y-hidden py-2 text-[16px] leading-tight"
@@ -368,15 +359,16 @@ export default function ChatPage() {
                   size="icon" 
                   className={cn(
                     "rounded-full w-10 h-10 shadow-xl transition-all duration-200 shrink-0",
-                    message.trim()
+                    input.trim()
                       ? "bg-blue-600 hover:bg-blue-500 active:scale-90"
                       : "bg-neutral-800 opacity-50 cursor-not-allowed"
                   )}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     if (navigator.vibrate) navigator.vibrate(10);
-                    handleSend();
+                    handleFormSubmit(e as any);
                   }}
-                  disabled={!message.trim()}
+                  disabled={!input.trim()}
                 >
                   <ArrowUpIcon className="w-5 h-5 text-white" />
                 </Button>
@@ -462,7 +454,7 @@ export default function ChatPage() {
             </div>
           ) : (
             <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-              {messages.map((msg) => (
+              {messages.map((msg: any) => (
                 <div
                   key={msg.id}
                   className={cn(
@@ -501,63 +493,61 @@ export default function ChatPage() {
         </div>
 
         <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-3 sm:pb-4 lg:pb-6">
-          <div className="relative bg-black/50 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl">
-            <Textarea
-              ref={textareaRef}
-              value={message}
-              onChange={(e) => {
-                setMessage(e.target.value)
-                adjustHeight()
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder="Digite sua mensagem..."
-              className={cn(
-                "w-full px-3 sm:px-4 py-3 sm:py-3.5 resize-none border-none",
-                "bg-transparent text-white text-sm sm:text-base",
-                "focus-visible:ring-0 focus-visible:ring-offset-0",
-                "placeholder:text-neutral-500 min-h-[48px]",
-              )}
-              style={{ overflow: "hidden" }}
-            />
+          <form onSubmit={handleFormSubmit}>
+            <div className="relative bg-black/50 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl">
+              <Textarea
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Digite sua mensagem..."
+                className={cn(
+                  "w-full px-3 sm:px-4 py-3 sm:py-3.5 resize-none border-none",
+                  "bg-transparent text-white text-sm sm:text-base",
+                  "focus-visible:ring-0 focus-visible:ring-offset-0",
+                  "placeholder:text-neutral-500 min-h-[48px]",
+                )}
+                style={{ overflow: "hidden" }}
+              />
 
-            <div className="flex items-center justify-between p-2.5 sm:p-3 border-t border-white/10">
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center justify-between p-2.5 sm:p-3 border-t border-white/10">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/10 h-9 w-9 sm:h-8 sm:w-8 rounded-lg active:scale-95"
+                  >
+                    <Paperclip className="w-4 h-4 sm:w-4 sm:h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowRealTimeChat(true)}
+                    className={cn(
+                      "h-9 w-9 sm:h-8 sm:w-8 rounded-lg transition-all duration-200 group",
+                      "text-white hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-purple-500/20",
+                      "hover:text-blue-400 active:scale-95 hover:shadow-lg hover:shadow-blue-500/25"
+                    )}
+                    title="🎙️ Modo Voz Premium - Como ChatGPT"
+                  >
+                    <Mic className="w-4 h-4 sm:w-4 sm:h-4 group-hover:animate-pulse" />
+                  </Button>
+                </div>
+
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/10 h-9 w-9 sm:h-8 sm:w-8 rounded-lg active:scale-95"
-                >
-                  <Paperclip className="w-4 h-4 sm:w-4 sm:h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowRealTimeChat(true)}
+                  type="submit"
+                  disabled={!input.trim()}
                   className={cn(
-                    "h-9 w-9 sm:h-8 sm:w-8 rounded-lg transition-all duration-200 group",
-                    "text-white hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-purple-500/20",
-                    "hover:text-blue-400 active:scale-95 hover:shadow-lg hover:shadow-blue-500/25"
+                    "h-9 w-9 sm:h-8 sm:w-8 rounded-full p-0 transition-all duration-300 active:scale-95",
+                    input.trim()
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50"
+                      : "bg-neutral-700 text-neutral-400 cursor-not-allowed",
                   )}
-                  title="🎙️ Modo Voz Premium - Como ChatGPT"
                 >
-                  <Mic className="w-4 h-4 sm:w-4 sm:h-4 group-hover:animate-pulse" />
+                  <ArrowUpIcon className="w-4 h-4 sm:w-4 sm:h-4" />
                 </Button>
               </div>
-
-              <Button
-                onClick={handleSend}
-                disabled={!message.trim()}
-                className={cn(
-                  "h-9 w-9 sm:h-8 sm:w-8 rounded-full p-0 transition-all duration-300 active:scale-95",
-                  message.trim()
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50"
-                    : "bg-neutral-700 text-neutral-400 cursor-not-allowed",
-                )}
-              >
-                <ArrowUpIcon className="w-4 h-4 sm:w-4 sm:h-4" />
-              </Button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
       <AnimatePresence>

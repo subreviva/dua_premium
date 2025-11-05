@@ -9,6 +9,7 @@
     "start": "next start -p 3000"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.28",
     "@emotion/is-prop-valid": "latest",
     "@google/genai": "^1.28.0",
     "@google/generative-ai": "^0.24.1",
@@ -27,7 +28,9 @@
     "@radix-ui/react-switch": "^1.1.5",
     "@radix-ui/react-tabs": "^1.1.5",
     "@radix-ui/react-tooltip": "latest",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "@vercel/analytics": "latest",
+    "ai": "^5.0.87",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
@@ -42,6 +45,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-intersection-observer": "^9.16.0",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.0",
     "react-textarea-autosize": "^8.5.9",
     "react-virtuoso": "^4.14.1",
     "tailwind-merge": "^2.5.5",
