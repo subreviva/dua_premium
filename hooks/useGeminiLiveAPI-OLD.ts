@@ -105,7 +105,7 @@ export function useGeminiLiveAPI({
       const now = Date.now();
       
       if (!token || now >= tokenExpiresAt) {
-        console.log("🔑 Obtendo token...");
+        // PRODUCTION: Removed console.log("🔑 Obtendo token...");
         const response = await fetch("/api/auth/ephemeral-token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -120,7 +120,7 @@ export function useGeminiLiveAPI({
         token = data.token;
         cachedToken = token;
         tokenExpiresAt = now + (25 * 60 * 1000);
-        console.log("✅ Token obtido!");
+        // PRODUCTION: Removed console.log("✅ Token obtido!");
       }
       
       if (!token) throw new Error("Token não disponível");
@@ -132,12 +132,12 @@ export function useGeminiLiveAPI({
       // Formato: wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent
       const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${token}`;
       
-      console.log("🔌 Conectando ao WebSocket...");
+      // PRODUCTION: Removed console.log("🔌 Conectando ao WebSocket...");
       wsRef.current = new WebSocket(wsUrl);
       wsRef.current.binaryType = 'arraybuffer';
       
       wsRef.current.onopen = () => {
-        console.log("🔗 WebSocket conectado! Enviando setup...");
+        // PRODUCTION: Removed console.log("🔗 WebSocket conectado! Enviando setup...");
         
         // Mensagem de setup baseada no CONFIG do Python
         const setupMessage = {
@@ -159,18 +159,18 @@ export function useGeminiLiveAPI({
           }
         };
         
-        console.log("📤 Enviando setup:", JSON.stringify(setupMessage, null, 2));
+        // PRODUCTION: Removed console.log("📤 Enviando setup:", JSON.stringify(setupMessage, null, 2));
         wsRef.current?.send(JSON.stringify(setupMessage));
       };
       
       wsRef.current.onmessage = async (event) => {
         try {
           const response = JSON.parse(event.data);
-          console.log("📥 Mensagem recebida:", response);
+          // PRODUCTION: Removed console.log("📥 Mensagem recebida:", response);
           
           // Setup completo - equivalente ao client.aio.live.connect estabelecido
           if (response.setupComplete) {
-            console.log("✅ Setup completo! Pronto para streaming de áudio.");
+            // PRODUCTION: Removed console.log("✅ Setup completo! Pronto para streaming de áudio.");
             setIsConnected(true);
           }
           
@@ -182,7 +182,7 @@ export function useGeminiLiveAPI({
                 await playAudioChunk(audioData.buffer);
               }
               if (part.text) {
-                console.log("💬 Texto:", part.text);
+                // PRODUCTION: Removed console.log("💬 Texto:", part.text);
                 onMessage?.(part.text);
               }
             }
@@ -190,23 +190,23 @@ export function useGeminiLiveAPI({
           
           // Turn complete - limpa fila de áudio para permitir interrupções
           if (response.serverContent?.turnComplete) {
-            console.log("🔄 Turn complete - limpando fila de áudio");
+            // PRODUCTION: Removed console.log("🔄 Turn complete - limpando fila de áudio");
             audioQueueRef.current = [];
             isPlayingRef.current = false;
           }
           
         } catch (err) {
-          console.error("❌ Erro ao processar mensagem:", err, event.data);
+          // PRODUCTION: Removed console.error("❌ Erro ao processar mensagem:", err, event.data);
         }
       };
       
       wsRef.current.onerror = (err) => {
-        console.error("❌ Erro WebSocket:", err);
+        // PRODUCTION: Removed console.error("❌ Erro WebSocket:", err);
         setError("Erro de conexão WebSocket");
       };
       
       wsRef.current.onclose = (event) => {
-        console.log(`🔌 WebSocket fechado (código: ${event.code}, razão: ${event.reason})`);
+        // PRODUCTION: Removed console.log(`🔌 WebSocket fechado (código: ${event.code}, razão: ${event.reason})`);
         setIsConnected(false);
         
         if (event.code !== 1000) {  // 1000 = fechamento normal
@@ -215,7 +215,7 @@ export function useGeminiLiveAPI({
       };
       
     } catch (err) {
-      console.error("❌ Erro ao conectar:", err);
+      // PRODUCTION: Removed console.error("❌ Erro ao conectar:", err);
       setError(err instanceof Error ? err.message : "Erro ao conectar");
       setIsConnected(false);
     } finally {
@@ -282,7 +282,7 @@ export function useGeminiLiveAPI({
       
     } catch (err) {
       setError("Erro ao acessar microfone");
-      console.error(err);
+      // PRODUCTION: Removed console.error(err);
     }
   }, [isRecording, isConnected, connect]);
 

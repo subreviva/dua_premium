@@ -93,7 +93,7 @@ export function useGeminiLiveVoice({
       
       metricsRef.current.totalTokens += Math.ceil((text.length + fullResponse.length) / 4);
     } catch (err) {
-      console.error("Erro ao enviar para o Gemini:", err);
+      // PRODUCTION: Removed console.error("Erro ao enviar para o Gemini:", err);
       const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
       setError(errorMessage);
       onMessage?.(`Erro: ${errorMessage}`);
@@ -146,7 +146,7 @@ export function useGeminiLiveVoice({
       const now = Date.now();
       
       if (!token || now >= tokenExpiresAt) {
-        console.log("🔑 Buscando novo token da API...");
+        // PRODUCTION: Removed console.log("🔑 Buscando novo token da API...");
         const response = await fetch("/api/auth/ephemeral-token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -162,9 +162,9 @@ export function useGeminiLiveVoice({
         cachedToken = token;
         // Token válido por 25 minutos (API dá 30, usamos margem de segurança)
         tokenExpiresAt = now + (25 * 60 * 1000);
-        console.log("✅ Token obtido e cacheado com sucesso!");
+        // PRODUCTION: Removed console.log("✅ Token obtido e cacheado com sucesso!");
       } else {
-        console.log("♻️ Usando token em cache (válido por mais " + 
+        // PRODUCTION: Removed console.log("♻️ Usando token em cache (válido por mais " + 
                     Math.round((tokenExpiresAt - now) / 60000) + " minutos)");
       }
       

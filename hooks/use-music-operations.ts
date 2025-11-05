@@ -14,7 +14,7 @@ export function useMusicOperations() {
   const [error, setError] = useState<string | null>(null)
 
   const handleError = (operation: string, error: any) => {
-    console.error(`[v0] Error in ${operation}:`, error)
+    // PRODUCTION: Removed console.error(`[v0] Error in ${operation}:`, error)
     setError(`Failed to ${operation}: ${error.message || "Unknown error"}`)
     setIsProcessing(false)
   }
@@ -34,7 +34,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Lyrics generation started:", result)
+      // PRODUCTION: Removed console.log("[v0] Lyrics generation started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -59,7 +59,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Vocal separation started:", result)
+      // PRODUCTION: Removed console.log("[v0] Vocal separation started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -83,7 +83,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] WAV conversion started:", result)
+      // PRODUCTION: Removed console.log("[v0] WAV conversion started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -108,7 +108,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Video creation started:", result)
+      // PRODUCTION: Removed console.log("[v0] Video creation started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -137,7 +137,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Persona generation result:", result)
+      // PRODUCTION: Removed console.log("[v0] Persona generation result:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -157,7 +157,7 @@ export function useMusicOperations() {
         body: JSON.stringify({ content }),
       })
       const result = await response.json()
-      console.log("[v0] Style boost result:", result)
+      // PRODUCTION: Removed console.log("[v0] Style boost result:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -181,7 +181,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Cover generation started:", result)
+      // PRODUCTION: Removed console.log("[v0] Cover generation started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -206,7 +206,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Music extension started:", result)
+      // PRODUCTION: Removed console.log("[v0] Music extension started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -231,7 +231,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Instrumental addition started:", result)
+      // PRODUCTION: Removed console.log("[v0] Instrumental addition started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -256,7 +256,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Vocals addition started:", result)
+      // PRODUCTION: Removed console.log("[v0] Vocals addition started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -281,7 +281,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Section replacement started:", result)
+      // PRODUCTION: Removed console.log("[v0] Section replacement started:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -305,7 +305,7 @@ export function useMusicOperations() {
         }),
       })
       const result = await response.json()
-      console.log("[v0] Timestamped lyrics request:", result)
+      // PRODUCTION: Removed console.log("[v0] Timestamped lyrics request:", result)
       setIsProcessing(false)
       return result
     } catch (error) {
@@ -319,7 +319,7 @@ export function useMusicOperations() {
     try {
       const response = await fetch("/api/music/credits")
       const result = await response.json()
-      console.log("[v0] Remaining credits:", result)
+      // PRODUCTION: Removed console.log("[v0] Remaining credits:", result)
       return result
     } catch (error) {
       handleError("get credits", error)

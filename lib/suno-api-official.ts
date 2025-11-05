@@ -405,15 +405,15 @@ export class SunoAPIClient {
           return status.response!
 
         case "FIRST_SUCCESS":
-          console.log("[Suno] First track generated")
+          // PRODUCTION: Removed console.log("[Suno] First track generated")
           break
 
         case "TEXT_SUCCESS":
-          console.log("[Suno] Lyrics generated")
+          // PRODUCTION: Removed console.log("[Suno] Lyrics generated")
           break
 
         case "PENDING":
-          console.log("[Suno] Waiting for generation...")
+          // PRODUCTION: Removed console.log("[Suno] Waiting for generation...")
           break
 
         case "CREATE_TASK_FAILED":

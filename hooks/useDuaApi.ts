@@ -24,12 +24,12 @@ if (API_KEY) {
     Type = genai.Type;
     // IMPORTANTE: vertexai: false para usar API Key diretamente (não OAuth2)
     ai = new GoogleGenAIModule({ apiKey: API_KEY, vertexai: false });
-    console.log("✅ Google Gemini API configurada (API Key mode)!");
+    // PRODUCTION: Removed console.log("✅ Google Gemini API configurada (API Key mode)!");
   } catch (e) {
-    console.warn("⚠️ @google/genai não instalado. Instale com: npm install @google/genai");
+    // PRODUCTION: Removed console.warn("⚠️ @google/genai não instalado. Instale com: npm install @google/genai");
   }
 } else {
-  console.warn("⚠️ NEXT_PUBLIC_GOOGLE_API_KEY não configurada. Usando modo MOCK.");
+  // PRODUCTION: Removed console.warn("⚠️ NEXT_PUBLIC_GOOGLE_API_KEY não configurada. Usando modo MOCK.");
 }
 
 export const useDuaApi = () => {
@@ -65,13 +65,13 @@ export const useDuaApi = () => {
     startLoading(loadingMsg);
     try {
       if (!ai) {
-        console.warn(`⚠️ MODO MOCK ATIVO - ${loadingMsg}`);
+        // PRODUCTION: Removed console.warn(`⚠️ MODO MOCK ATIVO - ${loadingMsg}`);
         return await mockLogic();
       }
-      console.log(`🚀 Iniciando API Call: ${loadingMsg}`);
+      // PRODUCTION: Removed console.log(`🚀 Iniciando API Call: ${loadingMsg}`);
       return await apiLogic();
     } catch (e: any) {
-      console.error(`Falha em: ${loadingMsg}`, e);
+      // PRODUCTION: Removed console.error(`Falha em: ${loadingMsg}`, e);
       const friendlyError = getErrorMessage(e);
       setError(friendlyError);
       return null;
@@ -97,7 +97,7 @@ export const useDuaApi = () => {
           finalPrompt = `${finalPrompt}. Avoid the following: ${config.negativePrompt}${wantsText ? '' : ', text, words, letters, typography, captions, watermarks'}.`;
         }
         
-        console.log('📝 Prompt final:', finalPrompt);
+        // PRODUCTION: Removed console.log('📝 Prompt final:', finalPrompt);
 
         const response = await ai!.models.generateContent({
           model: MODELS.image,
@@ -265,7 +265,7 @@ export const useDuaApi = () => {
 
   const startChat = useCallback((): any => {
     if (!ai) {
-      console.warn("⚠️ MODO MOCK ATIVO - Chat não pode ser iniciado.");
+      // PRODUCTION: Removed console.warn("⚠️ MODO MOCK ATIVO - Chat não pode ser iniciado.");
       return null;
     }
     return ai.chats.create({ model: MODELS.text, config: { systemInstruction: 'O seu nome é DUA. É a assistente criativa do estúdio DUA Design. Dê ideias, sugestões e conselhos sobre design gráfico, web design, teoria das cores e tipografia. Seja concisa e direta.' } });

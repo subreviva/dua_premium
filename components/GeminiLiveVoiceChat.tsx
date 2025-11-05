@@ -23,16 +23,16 @@ class StreamingAudioPlayer {
   // CORREÇÃO CRÍTICA 1: Garantir que o AudioContext está "acordado"
   private async ensureAudioContextIsRunning(): Promise<void> {
     if (this.audioContext && this.audioContext.state === 'suspended') {
-      console.warn("⚠️ AudioContext estava suspenso. Tentando retomar...");
+      // PRODUCTION: Removed console.warn("⚠️ AudioContext estava suspenso. Tentando retomar...");
       await this.audioContext.resume();
-      console.log("✅ AudioContext retomado com sucesso!");
+      // PRODUCTION: Removed console.log("✅ AudioContext retomado com sucesso!");
     }
   }
 
   public addChunk(audio: { chunk: Int16Array; sampleRate: number }) {
     // Se o AudioContext ainda não foi criado, cria-o com a frequência correta da API
     if (!this.audioContext) {
-      console.log(`🎧 Criando AudioContext adaptativo com frequência da API: ${audio.sampleRate}Hz`);
+      // PRODUCTION: Removed console.log(`🎧 Criando AudioContext adaptativo com frequência da API: ${audio.sampleRate}Hz`);
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
         sampleRate: audio.sampleRate,
         latencyHint: 'interactive', // CRÍTICO: Baixa latência para conversação em tempo real
@@ -43,7 +43,7 @@ class StreamingAudioPlayer {
     
     // Validação: Se um chunk com frequência diferente chegar, reinicia o contexto (edge case)
     if (this.audioContext.sampleRate !== audio.sampleRate) {
-      console.warn(`⚠️ Frequência mudou! Reiniciando AudioContext: ${this.audioContext.sampleRate}Hz → ${audio.sampleRate}Hz`);
+      // PRODUCTION: Removed console.warn(`⚠️ Frequência mudou! Reiniciando AudioContext: ${this.audioContext.sampleRate}Hz → ${audio.sampleRate}Hz`);
       this.close(); // Fecha e limpa tudo
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
         sampleRate: audio.sampleRate,
@@ -94,7 +94,7 @@ class StreamingAudioPlayer {
       // CORREÇÃO CRÍTICA 4: Detecção e reajuste de dessincronização
       // Se o relógio está no passado, reinicia para o presente
       if (this.nextPlayTime < currentTime) {
-        console.warn(`⚠️ Relógio de áudio dessincronizado (${(currentTime - this.nextPlayTime).toFixed(2)}s atrás). Ajustando para o presente.`);
+        // PRODUCTION: Removed console.warn(`⚠️ Relógio de áudio dessincronizado (${(currentTime - this.nextPlayTime).toFixed(2)}s atrás). Ajustando para o presente.`);
         this.nextPlayTime = currentTime;
       }
 
@@ -143,7 +143,7 @@ let playerInstance: StreamingAudioPlayer | null = null;
 const getPlayerInstance = () => {
   if (!playerInstance) {
     playerInstance = new StreamingAudioPlayer(); // Sem argumentos - adaptativo
-    console.log("✅ DUA StreamingAudioPlayer adaptativo criado (singleton)");
+    // PRODUCTION: Removed console.log("✅ DUA StreamingAudioPlayer adaptativo criado (singleton)");
   }
   return playerInstance;
 };
@@ -162,14 +162,14 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
 
   // MODIFICADO: A callback agora recebe o objeto de áudio com chunk e frequência
   const handleNewAudio = useCallback((audio: { chunk: Int16Array; sampleRate: number }) => {
-    console.log(`🎵 DUA a falar - chunk recebido (${audio.chunk.length} samples @ ${audio.sampleRate}Hz)`);
+    // PRODUCTION: Removed console.log(`🎵 DUA a falar - chunk recebido (${audio.chunk.length} samples @ ${audio.sampleRate}Hz)`);
     setChatState("speaking");
     streamingPlayerRef.current.addChunk(audio);
   }, []);
 
   // CORREÇÃO: Nova callback para saber quando a DUA termina de falar
   const handleTurnComplete = useCallback(() => {
-    console.log("✅ DUA terminou de falar - voltando ao estado idle");
+    // PRODUCTION: Removed console.log("✅ DUA terminou de falar - voltando ao estado idle");
     setChatState("idle");
   }, []);
 
@@ -190,15 +190,15 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
 
   // CORREÇÃO: Pré-aquecer a conexão assim que o componente é montado
   useEffect(() => {
-    console.log("🔥 Iniciando pré-aquecimento da conexão com a DUA...");
+    // PRODUCTION: Removed console.log("🔥 Iniciando pré-aquecimento da conexão com a DUA...");
     connect().catch(e => {
-      console.error("❌ Falha ao pré-aquecer a conexão:", e);
+      // PRODUCTION: Removed console.error("❌ Falha ao pré-aquecer a conexão:", e);
       // O erro já é tratado e exposto no estado `error` do hook
     });
 
     // Garante que a sessão da API é fechada ao desmontar o componente
     return () => {
-      console.log("🧹 DUA a encerrar sessão...");
+      // PRODUCTION: Removed console.log("🧹 DUA a encerrar sessão...");
       closeSession();
     };
   }, [connect, closeSession]);
@@ -232,7 +232,7 @@ const GeminiLiveVoiceChat: React.FC<GeminiLiveVoiceChatProps> = ({ onClose }) =>
 
     // MELHORIA: Permitir interromper a DUA
     if (chatState === "speaking") {
-      console.log("🛑 Utilizador interrompeu a DUA");
+      // PRODUCTION: Removed console.log("🛑 Utilizador interrompeu a DUA");
       streamingPlayerRef.current.stop();
     }
     

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Setup Supabase - DUA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        p {
+            text-align: center;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        .step h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-number {
+            background: rgba(255, 255, 255, 0.3);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            margin-top: 15px;
+        }
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Setup DUA</h1>
+        <p>Sistema de Acesso por Código - 3 cliques</p>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">1</span>
+                Abrir SQL Editor
+            </h2>
+            <button onclick="abrirSQLEditor()">
+                🌐 Abrir SQL Editor do Supabase
+            </button>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">2</span>
+                Copiar SQL
+            </h2>
+            <button onclick="copiarSQL()">
+                📋 Copiar SQL para Clipboard
+            </button>
+            <div class="success" id="copiadoMsg">
+                ✅ SQL copiado! Cole no SQL Editor e execute.
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">3</span>
+                Executar
+            </h2>
+            <p style="opacity: 0.8; margin-top: 10px;">
+                No SQL Editor:<br>
+                • Cole o SQL (Ctrl+V)<br>
+                • Clique "Run" ou Ctrl+Enter<br>
+                • Aguarde ✅ "Success"
+            </p>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">4</span>
+                Gerar Códigos
+            </h2>
+            <p style="opacity: 0.8; margin-top: 10px;">
+                Depois volte ao terminal e execute:<br>
+            </p>
+            <div class="code">
+                node scripts/generate-code.js 5
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SQL = `-- ============================================
+-- MIGRATION COMPLETA - Sistema de Acesso por Código
+-- Execute este SQL no Supabase SQL Editor
+-- URL: https://app.supabase.com/project/gocjbfcztorfswlkkjqi/sql/new
+-- ============================================
+
+-- ============================================
+-- PARTE 1: TABELA invite_codes
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS public.invite_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL,
+  active BOOLEAN DEFAULT true NOT NULL,
+  used_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  credits INTEGER DEFAULT 30 NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  
+  -- Constraints
+  CONSTRAINT code_length_check CHECK (char_length(code) >= 6),
+  CONSTRAINT credits_positive_check CHECK (credits >= 0)
+);
+
+-- Indexes para invite_codes
+CREATE INDEX IF NOT EXISTS idx_invite_codes_code 
+  ON public.invite_codes(code);
+
+CREATE INDEX IF NOT EXISTS idx_invite_codes_active 
+  ON public.invite_codes(active) 
+  WHERE active = true;
+
+CREATE INDEX IF NOT EXISTS idx_invite_codes_used_by 
+  ON public.invite_codes(used_by) 
+  WHERE used_by IS NOT NULL;
+
+-- RLS para invite_codes
+ALTER TABLE public.invite_codes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read active codes"
+  ON public.invite_codes
+  FOR SELECT
+  TO authenticated
+  USING (active = true);
+
+CREATE POLICY "Service role can manage all codes"
+  ON public.invite_codes
+  FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
+
+-- ============================================
+-- PARTE 2: TABELA users
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS public.users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT UNIQUE NOT NULL,
+  credits INTEGER DEFAULT 30 NOT NULL,
+  has_access BOOLEAN DEFAULT false NOT NULL,
+  invite_code_used TEXT,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  
+  -- Constraints
+  CONSTRAINT credits_non_negative CHECK (credits >= 0),
+  CONSTRAINT email_valid CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$')
+);
+
+-- Indexes para users
+CREATE INDEX IF NOT EXISTS idx_users_email 
+  ON public.users(email);
+
+CREATE INDEX IF NOT EXISTS idx_users_has_access 
+  ON public.users(has_access) 
+  WHERE has_access = true;
+
+CREATE INDEX IF NOT EXISTS idx_users_invite_code 
+  ON public.users(invite_code_used) 
+  WHERE invite_code_used IS NOT NULL;
+
+-- ============================================
+-- PARTE 3: FUNÇÕES E TRIGGERS
+-- ============================================
+
+-- Função: Auto-update updated_at
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger para updated_at
+DROP TRIGGER IF EXISTS set_updated_at ON public.users;
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+-- Função: Auto-create user profile on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, email, credits, has_access)
+  VALUES (
+    NEW.id, 
+    NEW.email,
+    30,
+    false
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger para criar perfil automaticamente
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================
+-- PARTE 4: RLS POLICIES para users
+-- ============================================
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own profile"
+  ON public.users
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile"
+  ON public.users
+  FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Service role can manage all users"
+  ON public.users
+  FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
+
+-- ============================================
+-- PARTE 5: PERMISSIONS
+-- ============================================
+
+GRANT SELECT, UPDATE ON public.users TO authenticated;
+GRANT ALL ON public.users TO service_role;
+
+-- ============================================
+-- ✅ MIGRATION COMPLETA!
+-- ============================================
+-- Próximo passo: Gerar códigos com:
+-- node scripts/generate-code.js 5
+-- ============================================`;
+
+        function abrirSQLEditor() {
+            window.open('https://app.supabase.com/project/gocjbfcztorfswlkkjqi/sql/new', '_blank');
+        }
+
+        function copiarSQL() {
+            navigator.clipboard.writeText(SQL).then(() => {
+                document.getElementById('copiadoMsg').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('copiadoMsg').style.display = 'none';
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

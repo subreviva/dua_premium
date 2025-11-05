@@ -308,7 +308,7 @@ In this forgotten, shadowed land`
                         disabled={!comment.trim()}
                         className="mt-2 bg-purple-500 hover:bg-purple-600 text-white"
                         onClick={() => {
-                          console.log("[v0] Comment posted:", comment)
+                          // PRODUCTION: Removed console.log("[v0] Comment posted:", comment)
                           setComment("")
                         }}
                       >

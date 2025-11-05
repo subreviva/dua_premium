@@ -37,10 +37,10 @@ export function useSongs() {
         if (stored) {
           const parsed = JSON.parse(stored)
           setSongs(parsed)
-          console.log("[v0] Loaded", parsed.length, "songs from localStorage")
+          // PRODUCTION: Removed console.log("[v0] Loaded", parsed.length, "songs from localStorage")
         }
       } catch (error) {
-        console.error("[v0] Error loading songs:", error)
+        // PRODUCTION: Removed console.error("[v0] Error loading songs:", error)
       } finally {
         setIsLoading(false)
       }
@@ -54,31 +54,31 @@ export function useSongs() {
     if (songs.length > 0) {
       try {
         localStorage.setItem("suno-songs", JSON.stringify(songs))
-        console.log("[v0] Saved", songs.length, "songs to localStorage")
+        // PRODUCTION: Removed console.log("[v0] Saved", songs.length, "songs to localStorage")
       } catch (error) {
-        console.error("[v0] Error saving songs:", error)
+        // PRODUCTION: Removed console.error("[v0] Error saving songs:", error)
       }
     }
   }, [songs])
 
   const addSong = (song: Song) => {
     setSongs((prev) => [song, ...prev])
-    console.log("[v0] Added song:", song.title)
+    // PRODUCTION: Removed console.log("[v0] Added song:", song.title)
   }
 
   const addSongs = (newSongs: Song[]) => {
     setSongs((prev) => [...newSongs, ...prev])
-    console.log("[v0] Added", newSongs.length, "songs")
+    // PRODUCTION: Removed console.log("[v0] Added", newSongs.length, "songs")
   }
 
   const updateSong = (id: string, updates: Partial<Song>) => {
     setSongs((prev) => prev.map((song) => (song.id === id ? { ...song, ...updates } : song)))
-    console.log("[v0] Updated song:", id)
+    // PRODUCTION: Removed console.log("[v0] Updated song:", id)
   }
 
   const deleteSong = (id: string) => {
     setSongs((prev) => prev.filter((song) => song.id !== id))
-    console.log("[v0] Deleted song:", id)
+    // PRODUCTION: Removed console.log("[v0] Deleted song:", id)
   }
 
   const toggleLike = (id: string) => {

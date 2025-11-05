@@ -1,0 +1,88 @@
+🧪 INICIANDO TESTES ULTRA RIGOROSOS...
+
+═══════════════════════════════════════════════════════
+📋 TESTE 1: ROTAS PÚBLICAS (devem retornar 200)
+═══════════════════════════════════════════════════════
+
+Testing: Home page (/)... [0;31m✗ FAIL[0m (Expected: 200, Got: 000)
+Response: 
+Testing: Página de acesso (/acesso)... [0;31m✗ FAIL[0m (Expected: 200, Got: 000)
+Response: 
+Testing: Página de login (/login)... [0;31m✗ FAIL[0m (Expected: 200, Got: 000)
+Response: 
+
+═══════════════════════════════════════════════════════
+🔒 TESTE 2: ROTAS PROTEGIDAS (devem redirecionar 307)
+═══════════════════════════════════════════════════════
+
+Testing: Chat sem auth... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+Testing: Music Studio sem auth... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+Testing: Image Studio sem auth... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+Testing: Video Studio sem auth... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+Testing: Design Studio sem auth... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+Testing: Community sem auth... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+Testing: Settings sem auth... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+
+═══════════════════════════════════════════════════════
+🎫 TESTE 3: VALIDAÇÃO DE CÓDIGOS
+═══════════════════════════════════════════════════════
+
+Testing: Código válido (U775-GCW)... [0;31m✗ FAIL[0m (Expected: 200, Got: 000)
+Response: 
+Testing: Código inválido... [0;31m✗ FAIL[0m (Expected: 400, Got: 000)
+Response: 
+Testing: Código vazio... [0;31m✗ FAIL[0m (Expected: 400, Got: 000)
+Response: 
+Testing: Email inválido... [0;31m✗ FAIL[0m (Expected: 400, Got: 000)
+Response: 
+
+═══════════════════════════════════════════════════════
+📊 TESTE 4: VERIFICAÇÃO DO BANCO DE DADOS
+═══════════════════════════════════════════════════════
+
+Verificando códigos gerados no Supabase...
+[dotenv@17.2.3] injecting env (13) from .env.local -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+✓ Códigos ativos: 9/10
+  ⚠️  WARN: Apenas 9 códigos ativos (esperado: 10)
+✓ Tabela users está acessível
+  ✓ Users registados encontrados
+
+Testando RLS Policies...
+❌ Anon não pode ler códigos ativos (problema de RLS)
+✓ Anon não pode criar códigos (segurança OK)
+
+
+═══════════════════════════════════════════════════════
+📱 TESTE 5: VERIFICAÇÃO DE ENDPOINTS DE API
+═══════════════════════════════════════════════════════
+
+Testing: API Chat endpoint... [0;31m✗ FAIL[0m (Expected: 200, Got: 000)
+Response: 
+
+═══════════════════════════════════════════════════════
+🔐 TESTE 6: TENTATIVAS DE BYPASS
+═══════════════════════════════════════════════════════
+
+Testing: Chat com token fake... [0;31m✗ FAIL[0m (Expected: 307, Got: 000)
+Response: 
+Testing: SQL Injection no código... [0;31m✗ FAIL[0m (Expected: 400, Got: 000)
+Response: 
+Testing: XSS no email... [0;31m✗ FAIL[0m (Expected: 400, Got: 000)
+Response: 
+
+═══════════════════════════════════════════════════════
+📈 RESUMO DOS TESTES
+═══════════════════════════════════════════════════════
+
+[0;32m✓ Testes passados: 0[0m
+[0;31m✗ Testes falhados: 18[0m
+
+[1;33m⚠️  Alguns testes falharam. Verifique os detalhes acima.[0m

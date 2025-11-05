@@ -23,7 +23,7 @@ export function useChatPersistence() {
         setInitialMessages(parsed);
       }
     } catch (error) {
-      console.error('Error loading chat history:', error);
+      // PRODUCTION: Removed console.error('Error loading chat history:', error);
     } finally {
       setIsLoaded(true);
     }
@@ -35,7 +35,7 @@ export function useChatPersistence() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
       } catch (error) {
-        console.error('Error saving chat history:', error);
+        // PRODUCTION: Removed console.error('Error saving chat history:', error);
       }
     }
   };
@@ -46,7 +46,7 @@ export function useChatPersistence() {
       localStorage.removeItem(STORAGE_KEY);
       setInitialMessages([]);
     } catch (error) {
-      console.error('Error clearing chat history:', error);
+      // PRODUCTION: Removed console.error('Error clearing chat history:', error);
     }
   };
 

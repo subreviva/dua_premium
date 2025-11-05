@@ -59,12 +59,12 @@ export function PremiumVideoPlayer({
           if (videoRef.current.readyState >= 2 && !hasError) {
             await videoRef.current.play()
           } else {
-            console.error("Video source not ready or supported")
+            // PRODUCTION: Removed console.error("Video source not ready or supported")
             setHasError(true)
           }
         }
       } catch (error) {
-        console.error("Error playing video:", error)
+        // PRODUCTION: Removed console.error("Error playing video:", error)
         // Reset playing state if play fails
         setIsPlaying(false)
       }
@@ -103,7 +103,7 @@ export function PremiumVideoPlayer({
         setIsFullscreen(false)
       }
     } catch (error) {
-      console.error("Fullscreen error:", error)
+      // PRODUCTION: Removed console.error("Fullscreen error:", error)
     }
   }
 
@@ -162,7 +162,7 @@ export function PremiumVideoPlayer({
       setHasError(false)
     },
     onError: (e: any) => {
-      console.error("Video error:", e)
+      // PRODUCTION: Removed console.error("Video error:", e)
       setHasError(true)
       setIsLoading(false)
       setIsPlaying(false)

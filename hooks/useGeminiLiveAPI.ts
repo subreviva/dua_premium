@@ -48,7 +48,7 @@ export function useGeminiLiveAPI({
           for (const part of message.serverContent.modelTurn.parts) {
             // Processar texto
             if (part.text) {
-              console.log("💬 Texto recebido:", part.text);
+              // PRODUCTION: Removed console.log("💬 Texto recebido:", part.text);
               onMessage?.(part.text);
             }
             
@@ -61,7 +61,7 @@ export function useGeminiLiveAPI({
               const sampleRateMatch = mimeType.match(/rate=(\d+)/);
               const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000; // Default para 24kHz
               
-              console.log(`🔊 Chunk de áudio recebido (${audioData.length} bytes, ${sampleRate}Hz) - enviando para stream`);
+              // PRODUCTION: Removed console.log(`🔊 Chunk de áudio recebido (${audioData.length} bytes, ${sampleRate}Hz) - enviando para stream`);
               
               // Decodificar base64 para bytes
               const rawData = atob(audioData);
@@ -86,11 +86,11 @@ export function useGeminiLiveAPI({
         }
         
         if (message.serverContent?.turnComplete) {
-          console.log("✅ Turno do modelo completo.");
+          // PRODUCTION: Removed console.log("✅ Turno do modelo completo.");
           onTurnComplete?.(); // ADICIONADO: Chamar a callback
         }
       } catch (e) {
-        console.error("❌ Erro ao processar mensagem do servidor:", e);
+        // PRODUCTION: Removed console.error("❌ Erro ao processar mensagem do servidor:", e);
       }
     },
     [onMessage, onAudio, onTurnComplete] // ADICIONADO onTurnComplete
@@ -102,18 +102,18 @@ export function useGeminiLiveAPI({
 
     setIsLoading(true);
     setError(null);
-    console.log("🔌 Conectando à Live API...");
+    // PRODUCTION: Removed console.log("🔌 Conectando à Live API...");
 
     try {
       if (!cachedToken || Date.now() > cachedToken.expiresAt) {
-        console.log("🔑 Obtendo novo token ephemeral...");
+        // PRODUCTION: Removed console.log("🔑 Obtendo novo token ephemeral...");
         const response = await fetch("/api/auth/ephemeral-token", { method: "POST" });
         if (!response.ok) throw new Error(`Falha ao obter token: ${response.statusText}`);
         const data = await response.json();
         cachedToken = { token: data.token, expiresAt: Date.now() + TOKEN_EXPIRATION_MINUTES * 60 * 1000 };
-        console.log("🔑 Token obtido com sucesso.");
+        // PRODUCTION: Removed console.log("🔑 Token obtido com sucesso.");
       } else {
-        console.log("🔑 Usando token em cache.");
+        // PRODUCTION: Removed console.log("🔑 Usando token em cache.");
       }
 
       const ai = new GoogleGenAI({ apiKey: cachedToken.token });
@@ -142,38 +142,38 @@ export function useGeminiLiveAPI({
         },
         callbacks: {
           onopen: () => {
-            console.log("✅ Live API conectada!");
+            // PRODUCTION: Removed console.log("✅ Live API conectada!");
             setIsConnected(true);
             setIsLoading(false);
             reconnectAttemptsRef.current = 0;
           },
           onmessage: handleServerMessage,
           onerror: (e: any) => {
-            console.error("❌ Erro na Live API:", e.message || e);
+            // PRODUCTION: Removed console.error("❌ Erro na Live API:", e.message || e);
             setError(e.message || "Ocorreu um erro na conexão.");
             setIsLoading(false);
             setIsConnected(false);
           },
           onclose: (e: CloseEvent) => {
-            console.log(`🔌 Live API desconectada (Code: ${e.code}, Reason: ${e.reason}, Clean: ${e.wasClean})`);
+            // PRODUCTION: Removed console.log(`🔌 Live API desconectada (Code: ${e.code}, Reason: ${e.reason}, Clean: ${e.wasClean})`);
             setIsConnected(false);
             setIsLoading(false);
             sessionRef.current = null;
             if (!e.wasClean && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
               reconnectAttemptsRef.current++;
-              console.log(`🔄 Tentando reconectar (${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})...`);
+              // PRODUCTION: Removed console.log(`🔄 Tentando reconectar (${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})...`);
               setTimeout(() => connect(), 2000);
             }
           },
         },
       };
 
-      console.log("📡 Configuração da conexão:", JSON.stringify(connectionConfig.config, null, 2));
+      // PRODUCTION: Removed console.log("📡 Configuração da conexão:", JSON.stringify(connectionConfig.config, null, 2));
       sessionRef.current = await ai.live.connect(connectionConfig);
 
     } catch (e) {
       const err = e as Error;
-      console.error("❌ Falha fatal ao conectar:", err);
+      // PRODUCTION: Removed console.error("❌ Falha fatal ao conectar:", err);
       setError(err.message);
       setIsLoading(false);
     }
@@ -184,7 +184,7 @@ export function useGeminiLiveAPI({
     if (isRecording) return;
     
     if (!sessionRef.current || !isConnected) {
-      console.warn("Tentativa de gravar sem conexão. Conectando primeiro...");
+      // PRODUCTION: Removed console.warn("Tentativa de gravar sem conexão. Conectando primeiro...");
       await connect();
       // Aguarda a conexão ser estabelecida antes de continuar
       await new Promise<void>(resolve => {
@@ -197,15 +197,15 @@ export function useGeminiLiveAPI({
       });
     }
 
-    console.log("🎤 Iniciando captura de áudio com AudioWorklet (alta performance)...");
+    // PRODUCTION: Removed console.log("🎤 Iniciando captura de áudio com AudioWorklet (alta performance)...");
     try {
       // MELHORIA: Simplificar a criação do AudioContext (webkit prefix obsoleto)
       audioContextRef.current = new AudioContext({ sampleRate: SEND_SAMPLE_RATE });
-      console.log(`🎧 AudioContext criado com sampleRate: ${audioContextRef.current.sampleRate}Hz`);
+      // PRODUCTION: Removed console.log(`🎧 AudioContext criado com sampleRate: ${audioContextRef.current.sampleRate}Hz`);
       
       // Carregar o módulo AudioWorklet (processamento em thread separada)
       await audioContextRef.current.audioWorklet.addModule('/audio-processor.js');
-      console.log("✅ AudioWorklet módulo carregado");
+      // PRODUCTION: Removed console.log("✅ AudioWorklet módulo carregado");
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
@@ -221,7 +221,7 @@ export function useGeminiLiveAPI({
           }
         }
       );
-      console.log("✅ AudioWorkletNode criado");
+      // PRODUCTION: Removed console.log("✅ AudioWorkletNode criado");
 
       // O worklet processa áudio numa thread separada e envia os dados PCM de volta
       audioWorkletNodeRef.current.port.onmessage = (event) => {
@@ -248,7 +248,7 @@ export function useGeminiLiveAPI({
             },
           });
         } catch (e) {
-          console.error("❌ Erro ao enviar áudio:", e);
+          // PRODUCTION: Removed console.error("❌ Erro ao enviar áudio:", e);
         }
       };
 
@@ -257,10 +257,10 @@ export function useGeminiLiveAPI({
       // Não conectar ao destination para evitar feedback do microfone
       
       setIsRecording(true);
-      console.log("✅ Captura de áudio iniciada com sucesso");
+      // PRODUCTION: Removed console.log("✅ Captura de áudio iniciada com sucesso");
     } catch (e) {
       const err = e as Error;
-      console.error("❌ Falha ao iniciar captura de áudio:", err);
+      // PRODUCTION: Removed console.error("❌ Falha ao iniciar captura de áudio:", err);
       setError("Permissão de microfone negada ou dispositivo não encontrado.");
     }
   }, [isConnected, isRecording, connect]);
@@ -268,7 +268,7 @@ export function useGeminiLiveAPI({
   // --- 4. Parar Captura de Áudio ---
   const stopAudioCapture = useCallback(() => {
     if (!isRecording) return;
-    console.log("🛑 Parando captura de áudio...");
+    // PRODUCTION: Removed console.log("🛑 Parando captura de áudio...");
 
     // Parar todas as tracks do stream de mídia
     mediaStreamRef.current?.getTracks().forEach(track => track.stop());
@@ -278,7 +278,7 @@ export function useGeminiLiveAPI({
       audioWorkletNodeRef.current.port.close();
       audioWorkletNodeRef.current.disconnect();
       audioWorkletNodeRef.current = null;
-      console.log("✅ AudioWorkletNode desconectado e limpo");
+      // PRODUCTION: Removed console.log("✅ AudioWorkletNode desconectado e limpo");
     }
     
     // Fechar o AudioContext
@@ -294,9 +294,9 @@ export function useGeminiLiveAPI({
         sessionRef.current.sendRealtimeInput({
           audioStreamEnd: true,
         });
-        console.log("🏁 Fim de stream de áudio enviado.");
+        // PRODUCTION: Removed console.log("🏁 Fim de stream de áudio enviado.");
       } catch (e) {
-        console.error("❌ Erro ao enviar fim de stream:", e);
+        // PRODUCTION: Removed console.error("❌ Erro ao enviar fim de stream:", e);
       }
     }
 
@@ -313,7 +313,7 @@ export function useGeminiLiveAPI({
   }, [isRecording, startAudioCapture, stopAudioCapture]);
 
   const closeSession = useCallback(() => {
-    console.log("🚪 Fechando sessão...");
+    // PRODUCTION: Removed console.log("🚪 Fechando sessão...");
     stopAudioCapture();
     sessionRef.current?.close();
     sessionRef.current = null;

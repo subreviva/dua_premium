@@ -86,7 +86,7 @@ export function useRealtimeVoice() {
               break;
           }
         } catch (err) {
-          console.error("Error parsing WebSocket message:", err);
+          // PRODUCTION: Removed console.error("Error parsing WebSocket message:", err);
         }
       };
 
@@ -266,7 +266,7 @@ export function useRealtimeVoice() {
         playNextInQueue();
       }
     } catch (err) {
-      console.error("Erro ao processar áudio:", err);
+      // PRODUCTION: Removed console.error("Erro ao processar áudio:", err);
     }
   };
 

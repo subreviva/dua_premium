@@ -6,7 +6,7 @@ import { SunoAPIError } from './suno-api'
  * Returns consistent error responses based on error type
  */
 export function handleApiError(error: unknown, context: string = 'API'): NextResponse {
-  console.error(`❌ [${context}] Error:`, error)
+  // PRODUCTION: Removed console.error(`❌ [${context}] Error:`, error)
   
   // Handle SunoAPIError (validation errors, API errors)
   if (error instanceof SunoAPIError) {

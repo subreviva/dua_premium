@@ -41,6 +41,7 @@
     "lucide-react": "^0.454.0",
     "next": "^16.0.0",
     "ogl": "latest",
+    "pg": "^8.16.3",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-adblocker": "^2.13.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",

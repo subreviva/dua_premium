@@ -140,7 +140,7 @@ export function ImageModal({ isOpen, onClose, image, variations = [] }: ImageMod
   }, [])
 
   const handleDownload = () => {
-    console.log("[v0] Downloading image...")
+    // PRODUCTION: Removed console.log("[v0] Downloading image...")
     // Simulate download
     const link = document.createElement("a")
     link.href = allImages[currentIndex].url
@@ -149,15 +149,15 @@ export function ImageModal({ isOpen, onClose, image, variations = [] }: ImageMod
   }
 
   const handleEdit = () => {
-    console.log("[v0] Opening editor...")
+    // PRODUCTION: Removed console.log("[v0] Opening editor...")
   }
 
   const handleGenerateVariation = () => {
-    console.log("[v0] Generating variation...")
+    // PRODUCTION: Removed console.log("[v0] Generating variation...")
   }
 
   const handleShare = () => {
-    console.log("[v0] Sharing image...")
+    // PRODUCTION: Removed console.log("[v0] Sharing image...")
   }
 
   if (!isOpen) return null

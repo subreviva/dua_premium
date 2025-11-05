@@ -74,7 +74,7 @@ export const SiriOrb: React.FC<SiriOrbProps> = ({
         audioContext.close();
       };
     } catch (error) {
-      console.error("Erro ao configurar análise de áudio:", error);
+      // PRODUCTION: Removed console.error("Erro ao configurar análise de áudio:", error);
     }
   }, [audioStream, isMobile]);
 

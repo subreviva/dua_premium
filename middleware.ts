@@ -2,12 +2,14 @@
  * Next.js Middleware
  * 
  * Protege todas as rotas do app, exceto /acesso e APIs públicas.
+ * Inclui rate limiting avançado para segurança.
  * 
  * Fluxo:
- * 1. Verifica se user está autenticado (Supabase Auth)
- * 2. Verifica se user tem has_access = true
- * 3. Se não, redireciona para /acesso
- * 4. Se sim, permite acesso
+ * 1. Aplica rate limiting baseado em IP
+ * 2. Verifica se user está autenticado (Supabase Auth)
+ * 3. Verifica se user tem has_access = true
+ * 4. Se não, redireciona para /acesso
+ * 5. Se sim, permite acesso
  * 
  * Rotas protegidas: /chat, /dashboard, etc.
  * Rotas públicas: /acesso, /api/validate-code, /api/auth/*
@@ -17,17 +19,96 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Rate Limiting Storage (em produção usar Redis)
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+
+// Configurações de Rate Limiting
+const RATE_LIMITS = {
+  login: { requests: 5, window: 60 * 1000 }, // 5 tentativas por minuto
+  general: { requests: 100, window: 60 * 1000 }, // 100 requests por minuto
+  api: { requests: 50, window: 60 * 1000 }, // 50 API calls por minuto
+};
+
+function getRateLimitKey(ip: string, type: string): string {
+  return `${ip}:${type}`;
+}
+
+function checkRateLimit(ip: string, type: 'login' | 'general' | 'api'): boolean {
+  const key = getRateLimitKey(ip, type);
+  const limit = RATE_LIMITS[type];
+  const now = Date.now();
+  
+  const existing = rateLimitMap.get(key);
+  
+  if (!existing) {
+    rateLimitMap.set(key, { count: 1, lastReset: now });
+    return true;
+  }
+  
+  // Reset window if expired
+  if (now - existing.lastReset > limit.window) {
+    rateLimitMap.set(key, { count: 1, lastReset: now });
+    return true;
+  }
+  
+  // Check if limit exceeded
+  if (existing.count >= limit.requests) {
+    return false;
+  }
+  
+  // Increment count
+  existing.count++;
+  return true;
+}
+
+function getClientIP(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0] ||
+    req.headers.get('x-real-ip') ||
+    req.ip ||
+    'unknown'
+  );
+}
+
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  const clientIP = getClientIP(req);
+
+  // Aplicar rate limiting
+  const rateLimitType = path.startsWith('/api') 
+    ? 'api' 
+    : path.includes('login') || path.includes('acesso') 
+      ? 'login' 
+      : 'general';
+
+  if (!checkRateLimit(clientIP, rateLimitType)) {
+    console.log(`🚫 Rate limit exceeded for ${clientIP} on ${path}`);
+    return new NextResponse(
+      JSON.stringify({ 
+        error: 'Rate limit exceeded',
+        message: 'Too many requests. Please try again later.',
+        retryAfter: 60 
+      }),
+      { 
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': '60',
+        }
+      }
+    );
+  }
 
   // Rotas que NÃO precisam de proteção
   const publicPaths = [
-    '/acesso',
-    '/api/validate-code',
-    '/api/auth',
-    '/api/chat',
-    '/_next',
-    '/favicon.ico',
+    '/',                      // Home page pública
+    '/acesso',               // Página de código de acesso
+    '/login',                // Login para users registados
+    '/sobre',                // Sobre
+    '/api/validate-code',    // API de validação
+    '/api/auth',             // APIs de autenticação
+    '/_next',                // Next.js internals
+    '/favicon.ico',          // Favicon
   ];
 
   // Verificar se a rota é pública
@@ -35,7 +116,7 @@ export async function middleware(req: NextRequest) {
     path.startsWith(publicPath)
   );
 
-  // Se for rota pública, permitir acesso
+  // Se for rota pública, permitir acesso (com rate limiting já aplicado)
   if (isPublicPath) {
     return NextResponse.next();
   }
@@ -63,6 +144,13 @@ export async function middleware(req: NextRequest) {
     if (authError || !user) {
       const redirectUrl = new URL('/acesso', req.url);
       return NextResponse.redirect(redirectUrl);
+    }
+
+    // 🔓 BYPASS PARA DESENVOLVEDORES - Acesso total sem verificações
+    const DEV_EMAILS = ['dev@dua.com', 'admin@dua.com', 'developer@dua.com'];
+    if (DEV_EMAILS.includes(user.email || '')) {
+      console.log('🔓 Acesso de desenvolvedor detectado:', user.email);
+      return NextResponse.next();
     }
 
     // Verificar se user tem acesso (has_access = true)
