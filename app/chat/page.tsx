@@ -91,6 +91,10 @@ export default function ChatPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [userScrolled, setUserScrolled] = useState(false)
 
+  // Image upload states
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const messageVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
@@ -141,9 +145,48 @@ export default function ChatPage() {
   const handleNewChat = () => {
     clearHistory();
     setMessages([]);
+    setSelectedImage(null);
     toast.success("Nova conversa iniciada", {
       description: "Histórico limpo com sucesso",
     });
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      toast.error("Arquivo inválido", {
+        description: "Por favor selecione uma imagem (JPG, PNG, etc.)",
+      });
+      return;
+    }
+
+    // Validar tamanho (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem muito grande", {
+        description: "O tamanho máximo é 5MB",
+      });
+      return;
+    }
+
+    // Converter para base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedImage(reader.result as string);
+      toast.success("Imagem selecionada", {
+        description: "Agora você pode enviar com sua mensagem",
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Scroll automático inteligente - só faz scroll se user estiver no bottom
@@ -178,7 +221,22 @@ export default function ChatPage() {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (navigator.vibrate) navigator.vibrate(10);
-    handleSubmit(e);
+    
+    // Se houver imagem, enviar como body extra
+    if (selectedImage) {
+      handleSubmit(e, {
+        body: {
+          image: selectedImage,
+        },
+      });
+      // Limpar imagem após enviar
+      setSelectedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } else {
+      handleSubmit(e);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -368,13 +426,48 @@ export default function ChatPage() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
           >
+            {/* Image Preview */}
+            {selectedImage && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="mb-3 relative inline-block"
+              >
+                <img 
+                  src={selectedImage} 
+                  alt="Preview" 
+                  className="max-w-[200px] max-h-[200px] rounded-xl border border-white/10 shadow-2xl object-cover"
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={removeImage}
+                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 hover:bg-red-600 text-white"
+                >
+                  <span className="text-xs">✕</span>
+                </Button>
+              </motion.div>
+            )}
+
             <div className="flex items-end gap-2.5 mb-3">
               {/* Input Container - iOS iMessage Style */}
               <div className="flex-1 flex items-center gap-2 bg-neutral-900/80 backdrop-blur-xl rounded-[24px] p-2 shadow-2xl border border-white/5">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
                 <Button 
                   variant="ghost" 
-                  size="icon" 
-                  className="text-neutral-400 hover:text-white h-8 w-8 hover:bg-white/5 rounded-full shrink-0 active:scale-90 transition-transform"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "text-neutral-400 hover:text-white h-8 w-8 hover:bg-white/5 rounded-full shrink-0 active:scale-90 transition-transform",
+                    selectedImage && "text-blue-400 bg-blue-400/10"
+                  )}
                 >
                   <Paperclip className="w-4 h-4" />
                 </Button>
