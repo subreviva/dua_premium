@@ -73,6 +73,9 @@ DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 DROP POLICY IF EXISTS "Enable read access for authenticated users" ON public.users;
 DROP POLICY IF EXISTS "Enable insert for authenticated users" ON public.users;
 DROP POLICY IF EXISTS "Enable update for users based on id" ON public.users;
+DROP POLICY IF EXISTS "users_select_policy" ON public.users;
+DROP POLICY IF EXISTS "users_insert_policy" ON public.users;
+DROP POLICY IF EXISTS "users_update_policy" ON public.users;
 
 -- 6. CRIAR POLÍTICAS MAIS PERMISSIVAS (temporariamente para debug)
 CREATE POLICY "users_select_policy"

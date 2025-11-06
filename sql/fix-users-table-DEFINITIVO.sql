@@ -176,6 +176,12 @@ DROP POLICY IF EXISTS "Sistema pode inserir novos usuários" ON public.users;
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
+DROP POLICY IF EXISTS "Enable read access for authenticated users" ON public.users;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON public.users;
+DROP POLICY IF EXISTS "Enable update for users based on id" ON public.users;
+DROP POLICY IF EXISTS "users_select_policy" ON public.users;
+DROP POLICY IF EXISTS "users_insert_policy" ON public.users;
+DROP POLICY IF EXISTS "users_update_policy" ON public.users;
 
 -- PASSO 12: Criar políticas RLS corretas
 CREATE POLICY "Enable read access for authenticated users"
