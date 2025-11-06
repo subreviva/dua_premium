@@ -149,12 +149,10 @@ export default function PerfilPage() {
       console.log('📤 Salvando perfil:', profileData);
 
       // UPSERT: Inserir ou atualizar perfil (resolve problema se registro não existir)
+      // Nota: onConflict deve ser o nome da coluna, não um parâmetro de objeto
       const { data, error } = await supabase
         .from('users')
-        .upsert(profileData, {
-          onConflict: 'id',
-          ignoreDuplicates: false
-        })
+        .upsert(profileData)
         .select();
 
       console.log('📥 Resposta Supabase:', { data, error });
