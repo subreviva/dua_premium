@@ -53,10 +53,13 @@ const TOKEN_PACKAGES: TokenPackage[] = [
     color: "from-purple-500 to-pink-500"
   },
   {
+    id: "premium",
     name: "Premium",
-    tokens: 1000,
+    tokens_amount: 1000,
     price: 34.99,
-    icon: Rocket,,
+    icon: Rocket,
+    color: "from-purple-600 to-pink-600"
+  },
   {
     id: "ultimate",
     name: "Ultimate",
