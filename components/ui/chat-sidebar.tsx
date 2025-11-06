@@ -21,21 +21,6 @@ import {
   Users,
 } from "lucide-react"
 import Link from "next/link"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
-import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
-import { createClient } from "@/lib/supabase/client"
 
 interface SidebarItem {
   icon: React.ElementType
@@ -66,87 +51,10 @@ export function ChatSidebar({
 }: ChatSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(externalCollapsed)
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [settings, setSettings] = useState({
-    theme: "dark",
-    language: "pt",
-    notifications: true,
-    soundEffects: true,
-    autoSaveChats: true,
-    showTimestamps: true,
-    compactMode: false,
-    enterToSend: true,
-  })
-  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     setIsCollapsed(externalCollapsed)
   }, [externalCollapsed])
-
-  useEffect(() => {
-    // Carregar configurações do localStorage E do usuário
-    const loadSettings = async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (user) {
-        setUserId(user.id)
-        
-        // Tentar carregar do Supabase primeiro
-        const { data: userSettings } = await supabase
-          .from('users')
-          .select('chat_settings')
-          .eq('id', user.id)
-          .single()
-        
-        if (userSettings?.chat_settings) {
-          setSettings(userSettings.chat_settings)
-        } else {
-          // Fallback para localStorage
-          const savedSettings = localStorage.getItem("chatSettings")
-          if (savedSettings) {
-            setSettings(JSON.parse(savedSettings))
-          }
-        }
-      } else {
-        // Usuário não logado - usar apenas localStorage
-        const savedSettings = localStorage.getItem("chatSettings")
-        if (savedSettings) {
-          setSettings(JSON.parse(savedSettings))
-        }
-      }
-    }
-    
-    loadSettings()
-  }, [])
-
-  const updateSettings = async (key: string, value: any) => {
-    const newSettings = { ...settings, [key]: value }
-    setSettings(newSettings)
-    
-    // Salvar no localStorage imediatamente
-    localStorage.setItem("chatSettings", JSON.stringify(newSettings))
-    
-    // Salvar no Supabase se usuário estiver logado
-    if (userId) {
-      setIsSaving(true)
-      const supabase = createClient()
-      
-      const { error } = await supabase
-        .from('users')
-        .update({ chat_settings: newSettings })
-        .eq('id', userId)
-      
-      setIsSaving(false)
-      
-      if (error) {
-        console.error('Erro ao salvar configurações:', error)
-        toast.error('Erro ao salvar configurações')
-      } else {
-        toast.success('Configuração salva ✓', { duration: 1000 })
-      }
-    }
-  }
 
   const handleToggleCollapsed = () => {
     const newCollapsed = !isCollapsed
@@ -293,180 +201,22 @@ export function ChatSidebar({
         </div>
       </div>
 
-      {/* Settings Dialog */}
+      {/* Settings Button - Redireciona para página de configurações */}
       <div className="border-t border-white/5 p-2">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full text-white/70 hover:text-white hover:bg-white/5 transition-colors",
-                isCollapsed
-                  ? "h-10 px-0 flex items-center justify-center"
-                  : "h-10 px-3 flex items-center justify-start gap-3",
-              )}
-            >
-              <Settings className="w-5 h-5 flex-shrink-0" />
-              {!isCollapsed && <span className="flex-1 text-left text-sm">Definições</span>}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-black/95 backdrop-blur-xl border-white/10 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Preferências do Chat</DialogTitle>
-              <DialogDescription className="text-neutral-400">
-                Personalize sua experiência de conversação
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-6 py-4">
-              {/* Tema */}
-              <div className="space-y-2">
-                <Label htmlFor="theme" className="text-sm font-medium">
-                  Tema
-                </Label>
-                <Select value={settings.theme} onValueChange={(value) => updateSettings("theme", value)}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black/95 border-white/10 text-white">
-                    <SelectItem value="dark">Escuro</SelectItem>
-                    <SelectItem value="light">Claro</SelectItem>
-                    <SelectItem value="auto">Automático</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-neutral-500">
-                  Define a aparência da interface do chat
-                </p>
-              </div>
-
-              {/* Idioma */}
-              <div className="space-y-2">
-                <Label htmlFor="language" className="text-sm font-medium">
-                  Idioma
-                </Label>
-                <Select value={settings.language} onValueChange={(value) => updateSettings("language", value)}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black/95 border-white/10 text-white">
-                    <SelectItem value="pt">Português</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Español</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-neutral-500">
-                  Idioma da interface e respostas padrão
-                </p>
-              </div>
-
-              {/* Notificações */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Notificações</Label>
-                  <p className="text-xs text-neutral-500">Receber alertas de novas mensagens</p>
-                </div>
-                <Switch
-                  checked={settings.notifications}
-                  onCheckedChange={(checked) => updateSettings("notifications", checked)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Sons */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Efeitos Sonoros</Label>
-                  <p className="text-xs text-neutral-500">Reproduzir sons ao enviar/receber mensagens</p>
-                </div>
-                <Switch
-                  checked={settings.soundEffects}
-                  onCheckedChange={(checked) => updateSettings("soundEffects", checked)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Auto Save */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Guardar Conversas</Label>
-                  <p className="text-xs text-neutral-500">Salvar automaticamente todas as conversas</p>
-                </div>
-                <Switch
-                  checked={settings.autoSaveChats}
-                  onCheckedChange={(checked) => updateSettings("autoSaveChats", checked)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Mostrar timestamps */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Hora das Mensagens</Label>
-                  <p className="text-xs text-neutral-500">Mostrar data e hora em cada mensagem</p>
-                </div>
-                <Switch
-                  checked={settings.showTimestamps}
-                  onCheckedChange={(checked) => updateSettings("showTimestamps", checked)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Modo Compacto */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Modo Compacto</Label>
-                  <p className="text-xs text-neutral-500">Reduzir espaçamento entre mensagens</p>
-                </div>
-                <Switch
-                  checked={settings.compactMode}
-                  onCheckedChange={(checked) => updateSettings("compactMode", checked)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Enter para enviar */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Enter para Enviar</Label>
-                  <p className="text-xs text-neutral-500">Pressionar Enter envia mensagem (Shift+Enter para nova linha)</p>
-                </div>
-                <Switch
-                  checked={settings.enterToSend}
-                  onCheckedChange={(checked) => updateSettings("enterToSend", checked)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Atalhos de Teclado */}
-              <div className="space-y-2 pt-4 border-t border-white/10">
-                <Label className="text-sm font-medium">Atalhos de Teclado</Label>
-                <div className="space-y-2 text-xs text-neutral-400">
-                  <div className="flex justify-between">
-                    <span>Abrir/Fechar Barra Lateral</span>
-                    <kbd className="px-2 py-1 bg-white/10 rounded">Ctrl+B</kbd>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Nova Conversa</span>
-                    <kbd className="px-2 py-1 bg-white/10 rounded">Ctrl+N</kbd>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Buscar</span>
-                    <kbd className="px-2 py-1 bg-white/10 rounded">⌘K</kbd>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Enviar Mensagem</span>
-                    <kbd className="px-2 py-1 bg-white/10 rounded">Enter</kbd>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Nova Linha</span>
-                    <kbd className="px-2 py-1 bg-white/10 rounded">Shift+Enter</kbd>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Link href="/settings">
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full text-white/70 hover:text-white hover:bg-white/5 transition-colors",
+              isCollapsed
+                ? "h-10 px-0 flex items-center justify-center"
+                : "h-10 px-3 flex items-center justify-start gap-3",
+            )}
+          >
+            <Settings className="w-5 h-5 flex-shrink-0" />
+            {!isCollapsed && <span className="flex-1 text-left text-sm">Definições</span>}
+          </Button>
+        </Link>
       </div>
 
       {/* User Profile */}
