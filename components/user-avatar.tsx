@@ -28,6 +28,8 @@ export function UserAvatar() {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,14 +44,34 @@ export function UserAvatar() {
       if (session?.user) {
         setUser(session.user);
         setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ''));
+        loadUserData(session.user.id);
       } else {
         setUser(null);
         setIsAdmin(false);
+        setAvatarUrl("");
+        setUserName("");
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const loadUserData = async (userId: string) => {
+    try {
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('avatar_url, name')
+        .eq('id', userId)
+        .single();
+
+      if (!error && userData) {
+        setAvatarUrl(userData.avatar_url || '');
+        setUserName(userData.name || '');
+      }
+    } catch (error) {
+      // PRODUCTION: Removed console.error
+    }
+  };
 
   const checkUser = async () => {
     try {
@@ -58,9 +80,10 @@ export function UserAvatar() {
       if (authUser) {
         setUser(authUser);
         setIsAdmin(ADMIN_EMAILS.includes(authUser.email || ''));
+        await loadUserData(authUser.id);
       }
     } catch (error) {
-      console.error('Erro ao verificar usuário:', error);
+      // PRODUCTION: Removed console.error
     } finally {
       setLoading(false);
     }
@@ -108,14 +131,26 @@ export function UserAvatar() {
   };
 
   const getAvatarUrl = () => {
-    if (user?.user_metadata?.avatar_url) {
-      return user.user_metadata.avatar_url;
+    // Usar avatar_url da tabela users (personalizado ou predefinido)
+    if (avatarUrl) {
+      return avatarUrl;
     }
+    // Fallback: gerar avatar baseado no email
     const email = user?.email || 'user';
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`;
   };
 
   const getInitials = () => {
+    // Usar nome da tabela users
+    if (userName) {
+      return userName
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    // Fallback: usar metadata ou email
     if (user?.user_metadata?.name) {
       return user.user_metadata.name
         .split(' ')
@@ -128,6 +163,10 @@ export function UserAvatar() {
       return user.email.slice(0, 2).toUpperCase();
     }
     return 'DU';
+  };
+
+  const getDisplayName = () => {
+    return userName || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário';
   };
 
   // Loading state
@@ -180,7 +219,7 @@ export function UserAvatar() {
       <DropdownMenuContent align="end" className="w-56 bg-black/95 backdrop-blur-xl border border-white/10">
         <DropdownMenuLabel className="text-white">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{user.user_metadata?.name || 'Usuário'}</p>
+            <p className="text-sm font-medium">{getDisplayName()}</p>
             <p className="text-xs text-white/60 truncate">{user.email}</p>
             {isAdmin && (
               <span className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
@@ -193,8 +232,17 @@ export function UserAvatar() {
         
         <DropdownMenuSeparator className="bg-white/10" />
         
-        {isAdmin ? (
-          // Admin - vai para /admin e /profile
+        {/* Link para Perfil - todos os usuários */}
+        <DropdownMenuItem 
+          onClick={() => router.push('/perfil')}
+          className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
+        >
+          <User className="w-4 h-4" />
+          Meu Perfil
+        </DropdownMenuItem>
+        
+        {isAdmin && (
+          // Admin - link adicional para painel
           <>
             <DropdownMenuItem 
               onClick={() => router.push('/admin')}
@@ -203,29 +251,7 @@ export function UserAvatar() {
               <Shield className="w-4 h-4" />
               Painel Admin
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => {
-                const username = user.user_metadata?.display_name || user.email?.split('@')[0] || 'me'
-                router.push(`/profile/${username}`)
-              }}
-              className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
-            >
-              <User className="w-4 h-4" />
-              Meu Perfil
-            </DropdownMenuItem>
           </>
-        ) : (
-          // Usuário normal - não tem acesso (será bloqueado pela página)
-          <DropdownMenuItem 
-            onClick={() => {
-              const username = user.user_metadata?.display_name || user.email?.split('@')[0] || 'me'
-              router.push(`/profile/${username}`)
-            }}
-            className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
-          >
-            <User className="w-4 h-4" />
-            Meu Perfil
-          </DropdownMenuItem>
         )}
         
         <DropdownMenuItem 
