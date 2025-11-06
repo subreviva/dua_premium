@@ -146,22 +146,30 @@ export default function PerfilPage() {
         updated_at: new Date().toISOString()
       };
 
+      console.log('📤 Salvando perfil:', profileData);
+
       // UPSERT: Inserir ou atualizar perfil (resolve problema se registro não existir)
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .upsert(profileData, {
           onConflict: 'id',
           ignoreDuplicates: false
-        });
+        })
+        .select();
+
+      console.log('📥 Resposta Supabase:', { data, error });
 
       if (error) {
+        console.error('❌ Erro detalhado:', error);
         // Se ainda houver erro de schema, mostrar mensagem específica
-        if (error.message.includes('schema cache')) {
-          toast.error("Erro de configuração", {
-            description: "Execute o script SQL fix-users-table-complete.sql no Supabase"
+        if (error.message.includes('schema cache') || error.message.includes('column')) {
+          toast.error("Erro de schema do banco", {
+            description: `${error.message}. Verifique se todas as colunas existem na tabela users.`
           });
         } else {
-          throw error;
+          toast.error("Erro ao salvar", {
+            description: error.message
+          });
         }
         return;
       }
