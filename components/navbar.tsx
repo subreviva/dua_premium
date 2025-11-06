@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import { UserAvatar } from "@/components/user-avatar"
 
 export default function Navbar() {
   const router = useRouter()
@@ -31,8 +32,6 @@ export default function Navbar() {
     { label: "Music", href: "/musicstudio" },
     { label: "Imagem", href: "/imagestudio" },
     { label: "Comunidade", href: "/community" },
-    { label: "Meu Perfil", href: "/profile" },
-    { label: "Admin", href: "/admin-new" },
   ]
 
   return (
@@ -75,26 +74,14 @@ export default function Navbar() {
               ))}
             </motion.div>
 
-            {/* Desktop Auth Buttons */}
+            {/* Desktop Auth Buttons / User Avatar */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="hidden lg:flex items-center gap-4"
             >
-              <Button
-                variant="ghost"
-                className="text-[#f5d4c8] hover:text-[#f5f0eb] hover:bg-[#f5d4c8]/10"
-                onClick={() => router.push("/login")}
-              >
-                Entrar
-              </Button>
-              <Button
-                className="rounded-full bg-[#d4a574] hover:bg-[#c89b6f] text-[#0a1628] font-semibold px-6 transition-all duration-300 hover:scale-105"
-                onClick={() => router.push("/registo")}
-              >
-                Começar
-              </Button>
+              <UserAvatar />
             </motion.div>
 
             {/* Mobile Menu Button */}
@@ -139,26 +126,8 @@ export default function Navbar() {
             </motion.button>
           ))}
 
-          <div className="pt-6 space-y-3 border-t border-[#f5d4c8]/10">
-            <Button
-              variant="outline"
-              className="w-full rounded-full border-[#f5d4c8]/30 text-[#f5d4c8] hover:bg-[#f5d4c8]/10 bg-transparent"
-              onClick={() => {
-                router.push("/login")
-                setIsOpen(false)
-              }}
-            >
-              Entrar
-            </Button>
-            <Button
-              className="w-full rounded-full bg-[#d4a574] hover:bg-[#c89b6f] text-[#0a1628] font-semibold"
-              onClick={() => {
-                router.push("/registo")
-                setIsOpen(false)
-              }}
-            >
-              Começar
-            </Button>
+          <div className="pt-6 border-t border-[#f5d4c8]/10">
+            <UserAvatar />
           </div>
         </div>
       </motion.div>
