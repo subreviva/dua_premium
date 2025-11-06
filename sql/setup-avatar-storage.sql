@@ -40,11 +40,55 @@ USING (
   auth.uid()::text = split_part((storage.filename(name)), '-', 1)
 );
 
--- 5. Adicionar coluna avatar_url na tabela users (se não existir)
-ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+-- 5. Criar tabela users se não existir (com estrutura básica)
+CREATE TABLE IF NOT EXISTS public.users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT,
+  username TEXT UNIQUE,
+  bio TEXT,
+  avatar_url TEXT,
+  has_access BOOLEAN DEFAULT false,
+  invite_code_used TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
--- 6. Criar índice para melhor performance
-CREATE INDEX IF NOT EXISTS idx_users_avatar_url ON users(avatar_url);
+-- 6. Adicionar coluna avatar_url se a tabela já existir (mas sem a coluna)
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users') THEN
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+  END IF;
+END $$;
 
--- 7. Adicionar comentários
-COMMENT ON COLUMN users.avatar_url IS 'URL pública do avatar do usuário (Supabase Storage ou avatar predefinido)';
+-- 7. Criar índice para melhor performance
+CREATE INDEX IF NOT EXISTS idx_users_avatar_url ON public.users(avatar_url);
+CREATE INDEX IF NOT EXISTS idx_users_username ON public.users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+
+-- 8. Habilitar RLS (Row Level Security) na tabela users
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- 9. Políticas RLS para tabela users
+CREATE POLICY "Usuários podem ver seu próprio perfil"
+ON public.users FOR SELECT
+TO authenticated
+USING (auth.uid() = id);
+
+CREATE POLICY "Usuários podem atualizar seu próprio perfil"
+ON public.users FOR UPDATE
+TO authenticated
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Sistema pode inserir novos usuários"
+ON public.users FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = id);
+
+-- 10. Adicionar comentários
+COMMENT ON TABLE public.users IS 'Tabela de perfis de usuários da aplicação DUA';
+COMMENT ON COLUMN public.users.avatar_url IS 'URL pública do avatar do usuário (Supabase Storage ou avatar predefinido)';
+COMMENT ON COLUMN public.users.username IS 'Username único para URL pública (dua.pt/@username)';
+COMMENT ON COLUMN public.users.bio IS 'Biografia do usuário (máximo 200 caracteres)';
