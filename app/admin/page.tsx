@@ -314,65 +314,66 @@ export default function AdminPanelPage() {
 
   // PAINEL ADMIN
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-black text-white">
+      {/* Container com padding responsivo */}
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-6">
-          <h1 className="text-3xl font-bold mb-2">🔧 Painel Administrativo</h1>
-          <p className="text-white/80">Logado como: {currentUser?.email}</p>
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">🔧 Painel Admin</h1>
+          <p className="text-sm sm:text-base text-white/80 truncate">{currentUser?.email}</p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <Users className="w-5 h-5 text-blue-400" />
+        {/* Stats - Grid Responsivo */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-500/20 rounded-lg shrink-0">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
               </div>
-              <div>
-                <p className="text-sm text-white/60">Total Usuários</p>
-                <p className="text-2xl font-bold">{allUsers.length}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-white/60 truncate">Usuários</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold">{allUsers.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <Coins className="w-5 h-5 text-purple-400" />
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-purple-500/20 rounded-lg shrink-0">
+                <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               </div>
-              <div>
-                <p className="text-sm text-white/60">Tokens Distribuídos</p>
-                <p className="text-2xl font-bold">
-                  {allUsers.reduce((sum, u) => sum + (u.total_tokens || 0), 0).toLocaleString()}
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-white/60 truncate">Tokens</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold">
+                  {(allUsers.reduce((sum, u) => sum + (u.total_tokens || 0), 0) / 1000).toFixed(1)}k
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <Activity className="w-5 h-5 text-green-400" />
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-green-500/20 rounded-lg shrink-0">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
               </div>
-              <div>
-                <p className="text-sm text-white/60">Conteúdo Gerado</p>
-                <p className="text-2xl font-bold">
-                  {allUsers.reduce((sum, u) => sum + (u.total_generated_content || 0), 0).toLocaleString()}
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-white/60 truncate">Gerados</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold">
+                  {allUsers.reduce((sum, u) => sum + (u.total_generated_content || 0), 0)}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-pink-500/20 rounded-lg">
-                <Trophy className="w-5 h-5 text-pink-400" />
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-pink-500/20 rounded-lg shrink-0">
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-pink-400" />
               </div>
-              <div>
-                <p className="text-sm text-white/60">Premium Users</p>
-                <p className="text-2xl font-bold">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-white/60 truncate">Premium</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold">
                   {allUsers.filter(u => u.subscription_tier !== 'free').length}
                 </p>
               </div>
@@ -380,226 +381,283 @@ export default function AdminPanelPage() {
           </div>
         </div>
 
-        {/* Injeção de Tokens */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Plus className="w-5 h-5" />
+        {/* Injeção de Tokens - Mobile Optimized */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             Injetar Tokens
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="text-sm text-white/60 mb-2 block">Selecionar Usuário</label>
+          <div className="space-y-3 sm:space-y-4">
+            {/* Select de usuário - Full width mobile */}
+            <div>
+              <label className="text-xs sm:text-sm text-white/60 mb-2 block">Usuário</label>
               <select
                 value={selectedUserId || ''}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white"
+                className="w-full bg-black/50 border border-white/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-white appearance-none"
                 disabled={processing}
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
               >
                 <option value="">Escolha um usuário...</option>
                 {allUsers.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.email} ({user.total_tokens || 0} tokens)
+                    {user.email.length > 30 ? user.email.substring(0, 30) + '...' : user.email} ({user.total_tokens || 0})
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* Quantidade - Mobile friendly */}
             <div>
-              <label className="text-sm text-white/60 mb-2 block">Quantidade</label>
+              <label className="text-xs sm:text-sm text-white/60 mb-2 block">Quantidade</label>
               <Input
                 type="number"
                 value={tokensToAdd}
                 onChange={(e) => setTokensToAdd(Number(e.target.value))}
-                className="bg-black/50 border-white/20 text-white"
+                className="w-full bg-black/50 border-white/20 text-white text-base sm:text-base h-11 sm:h-12"
                 disabled={processing}
                 min={1}
               />
               
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                <Button size="sm" variant="outline" onClick={() => setTokensToAdd(100)} className="border-white/20">
+              {/* Botões rápidos - Grid 2x2 mobile */}
+              <div className="grid grid-cols-4 gap-2 mt-3">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setTokensToAdd(100)} 
+                  className="border-white/20 hover:bg-white/10 h-9 sm:h-10 text-xs sm:text-sm"
+                  disabled={processing}
+                >
                   +100
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setTokensToAdd(500)} className="border-white/20">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setTokensToAdd(500)} 
+                  className="border-white/20 hover:bg-white/10 h-9 sm:h-10 text-xs sm:text-sm"
+                  disabled={processing}
+                >
                   +500
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setTokensToAdd(1000)} className="border-white/20">
-                  +1000
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setTokensToAdd(1000)} 
+                  className="border-white/20 hover:bg-white/10 h-9 sm:h-10 text-xs sm:text-sm"
+                  disabled={processing}
+                >
+                  +1K
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setTokensToAdd(5000)} className="border-white/20">
-                  +5000
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setTokensToAdd(5000)} 
+                  className="border-white/20 hover:bg-white/10 h-9 sm:h-10 text-xs sm:text-sm"
+                  disabled={processing}
+                >
+                  +5K
                 </Button>
               </div>
 
+              {/* Botão de injeção - Destaque */}
               <Button
                 onClick={handleInjectTokens}
                 disabled={!selectedUserId || processing}
-                className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600"
+                className="w-full mt-3 sm:mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 h-11 sm:h-12 text-sm sm:text-base font-semibold shadow-lg shadow-purple-500/25"
               >
-                {processing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Coins className="w-4 h-4 mr-2" />}
-                Injetar
+                {processing ? (
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+                ) : (
+                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                )}
+                Adicionar Tokens
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Lista de Usuários */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">Gerenciar Usuários ({filteredUsers.length})</h2>
-            
-            <div className="flex items-center gap-3">
-              {/* Busca */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                <Input
-                  placeholder="Buscar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-black/50 border-white/20 pl-10 w-64"
-                />
-              </div>
+        {/* Lista de Usuários - Mobile Optimized */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+          {/* Header com filtros */}
+          <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl font-bold">Usuários ({filteredUsers.length})</h2>
+              
+              {/* Refresh button */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={checkAdminAndLoadData}
+                className="border-white/20 h-8 w-8 sm:h-9 sm:w-9 p-0"
+                disabled={processing}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${processing ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
 
-              {/* Filtro Tier */}
+            {/* Busca - Full width mobile */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+              <Input
+                placeholder="Buscar por email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-black/50 border-white/20 pl-10 pr-3 h-11 text-sm sm:text-base"
+              />
+            </div>
+
+            {/* Filtros - Stack mobile, inline desktop */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <select
                 value={filterTier}
                 onChange={(e) => setFilterTier(e.target.value)}
-                className="bg-black/50 border border-white/20 rounded-lg px-3 py-2 text-sm"
+                className="flex-1 bg-black/50 border border-white/20 rounded-lg px-3 py-2.5 text-sm appearance-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
               >
-                <option value="all">Todas as Tiers</option>
-                <option value="free">Free</option>
-                <option value="basic">Basic</option>
-                <option value="premium">Premium</option>
-                <option value="ultimate">Ultimate</option>
+                <option value="all">📊 Todas as Tiers</option>
+                <option value="free">🆓 Free</option>
+                <option value="basic">🔵 Basic</option>
+                <option value="premium">💜 Premium</option>
+                <option value="ultimate">⭐ Ultimate</option>
               </select>
 
-              {/* Ordenação */}
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-black/50 border border-white/20 rounded-lg px-3 py-2 text-sm"
+                className="flex-1 bg-black/50 border border-white/20 rounded-lg px-3 py-2.5 text-sm appearance-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
               >
-                <option value="created">Mais Recentes</option>
-                <option value="email">Email (A-Z)</option>
-                <option value="tokens">Mais Tokens</option>
-                <option value="usage">Mais Usados</option>
+                <option value="created">🕐 Mais Recentes</option>
+                <option value="email">📧 Email (A-Z)</option>
+                <option value="tokens">💰 Mais Tokens</option>
+                <option value="usage">📈 Mais Usados</option>
               </select>
             </div>
           </div>
 
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          {/* Lista de usuários - Scrollable */}
+          <div className="space-y-2 sm:space-y-3 max-h-[500px] sm:max-h-[600px] overflow-y-auto pr-1 -mr-1">
             {filteredUsers.map((user) => (
               <div
                 key={user.id}
-                className="bg-black/30 border border-white/5 rounded-lg p-4 hover:bg-white/5 transition-all"
+                className="bg-black/30 border border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 hover:bg-white/5 transition-all"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{user.email}</p>
-                    <p className="text-sm text-white/60">{user.full_name || 'Nome não definido'}</p>
+                {/* Mobile: Stack vertical | Desktop: Horizontal */}
+                <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+                  {/* Info do usuário */}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm sm:text-base truncate">{user.email}</p>
+                    <p className="text-xs sm:text-sm text-white/60 truncate">{user.full_name || 'Nome não definido'}</p>
                     {user.display_name && (
-                      <p className="text-xs text-purple-400">@{user.display_name}</p>
+                      <p className="text-xs text-purple-400 truncate">@{user.display_name}</p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
+                  {/* Stats + Badge - Mobile: Grid | Desktop: Flex */}
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="text-center sm:text-right">
                       <p className="text-xs text-white/60">Tokens</p>
-                      <p className="font-bold">{user.total_tokens || 0}</p>
+                      <p className="font-bold text-sm sm:text-base">{user.total_tokens || 0}</p>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-center sm:text-right">
                       <p className="text-xs text-white/60">Usados</p>
-                      <p className="font-bold">{user.tokens_used || 0}</p>
+                      <p className="font-bold text-sm sm:text-base">{user.tokens_used || 0}</p>
                     </div>
 
-                    <Badge className={getTierBadge(user.subscription_tier)}>
+                    <Badge className={`${getTierBadge(user.subscription_tier)} text-xs px-2 py-0.5`}>
                       {user.subscription_tier}
                     </Badge>
-
-                    {/* Actions */}
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setEditingUser(user.id);
-                          setEditForm({
-                            full_name: user.full_name || '',
-                            display_name: user.display_name || '',
-                            subscription_tier: user.subscription_tier,
-                            bio: user.bio || ''
-                          });
-                        }}
-                        className="h-8 w-8 p-0"
-                        title="Editar"
-                        disabled={processing}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleResetTokens(user.id)}
-                        className="h-8 w-8 p-0"
-                        title="Reset tokens"
-                        disabled={processing}
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleToggleAccess(user.id, user.has_access)}
-                        className="h-8 w-8 p-0"
-                        title={user.has_access ? "Remover acesso" : "Dar acesso"}
-                        disabled={processing}
-                      >
-                        {user.has_access ? (
-                          <Unlock className="w-4 h-4 text-green-400" />
-                        ) : (
-                          <Lock className="w-4 h-4 text-red-400" />
-                        )}
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteUser(user.id, user.email)}
-                        className="h-8 w-8 p-0"
-                        title="Excluir"
-                        disabled={processing}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </Button>
-                    </div>
                   </div>
                 </div>
 
-                {/* Form de Edição */}
+                {/* Actions - Mobile: Full width grid | Desktop: Inline */}
+                <div className="flex gap-1.5 sm:gap-2 mt-3 sm:mt-0 sm:pt-3 sm:border-t sm:border-white/5">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setEditingUser(user.id);
+                      setEditForm({
+                        full_name: user.full_name || '',
+                        display_name: user.display_name || '',
+                        subscription_tier: user.subscription_tier,
+                        bio: user.bio || ''
+                      });
+                    }}
+                    className="flex-1 sm:flex-none h-9 sm:h-8 sm:w-8 sm:p-0 text-xs sm:text-sm hover:bg-blue-500/20"
+                    disabled={processing}
+                  >
+                    <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-0 mr-1.5" />
+                    <span className="sm:hidden">Editar</span>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleResetTokens(user.id)}
+                    className="flex-1 sm:flex-none h-9 sm:h-8 sm:w-8 sm:p-0 text-xs sm:text-sm hover:bg-yellow-500/20"
+                    disabled={processing}
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-0 mr-1.5" />
+                    <span className="sm:hidden">Reset</span>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleToggleAccess(user.id, user.has_access)}
+                    className="flex-1 sm:flex-none h-9 sm:h-8 sm:w-8 sm:p-0 text-xs sm:text-sm hover:bg-green-500/20"
+                    disabled={processing}
+                  >
+                    {user.has_access ? (
+                      <>
+                        <Unlock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 sm:mr-0 mr-1.5" />
+                        <span className="sm:hidden">Ativo</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400 sm:mr-0 mr-1.5" />
+                        <span className="sm:hidden">Bloq</span>
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleDeleteUser(user.id, user.email)}
+                    className="flex-1 sm:flex-none h-9 sm:h-8 sm:w-8 sm:p-0 text-xs sm:text-sm hover:bg-red-500/20"
+                    disabled={processing}
+                  >
+                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400 sm:mr-0 mr-1.5" />
+                    <span className="sm:hidden">Excluir</span>
+                  </Button>
+                </div>
+
+                {/* Form de Edição - Responsivo */}
                 {editingUser === user.id && (
-                  <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Input
                         placeholder="Nome completo"
                         value={editForm.full_name}
                         onChange={(e) => setEditForm({...editForm, full_name: e.target.value})}
-                        className="bg-black/50 border-white/20"
+                        className="bg-black/50 border-white/20 h-11 text-sm"
                         disabled={processing}
                       />
                       <Input
                         placeholder="Display name"
                         value={editForm.display_name}
                         onChange={(e) => setEditForm({...editForm, display_name: e.target.value})}
-                        className="bg-black/50 border-white/20"
+                        className="bg-black/50 border-white/20 h-11 text-sm"
                         disabled={processing}
                       />
                       <select
                         value={editForm.subscription_tier}
                         onChange={(e) => setEditForm({...editForm, subscription_tier: e.target.value})}
-                        className="bg-black/50 border border-white/20 rounded-lg px-3 py-2 text-sm"
+                        className="bg-black/50 border border-white/20 rounded-lg px-3 py-2.5 text-sm h-11"
                         disabled={processing}
                       >
                         <option value="free">Free</option>
@@ -611,16 +669,16 @@ export default function AdminPanelPage() {
                         placeholder="Bio"
                         value={editForm.bio}
                         onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
-                        className="bg-black/50 border-white/20"
+                        className="bg-black/50 border-white/20 h-11 text-sm"
                         disabled={processing}
                       />
                     </div>
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-2 sm:justify-end">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => { setEditingUser(null); setEditForm({}); }}
-                        className="border-white/20"
+                        className="flex-1 sm:flex-none border-white/20 h-10"
                         disabled={processing}
                       >
                         Cancelar
@@ -628,10 +686,10 @@ export default function AdminPanelPage() {
                       <Button
                         size="sm"
                         onClick={handleUpdateUser}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600"
+                        className="flex-1 sm:flex-none bg-gradient-to-r from-purple-600 to-pink-600 h-10"
                         disabled={processing}
                       >
-                        {processing && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+                        {processing && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                         Salvar
                       </Button>
                     </div>
@@ -641,13 +699,17 @@ export default function AdminPanelPage() {
             ))}
           </div>
 
+          {/* Empty state */}
           {filteredUsers.length === 0 && (
-            <div className="text-center py-12 text-white/40">
-              <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhum usuário encontrado</p>
+            <div className="text-center py-12 sm:py-16 text-white/40">
+              <Users className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 opacity-50" />
+              <p className="text-sm sm:text-base">Nenhum usuário encontrado</p>
             </div>
           )}
         </div>
+
+        {/* Safe area bottom - iOS */}
+        <div className="h-6 sm:h-0" />
       </div>
     </div>
   );
