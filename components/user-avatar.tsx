@@ -160,7 +160,7 @@ export function UserAvatar() {
         <DropdownMenuSeparator className="bg-white/10" />
         
         {isAdmin ? (
-          // Admin - vai para /admin
+          // Admin - vai para /admin e /profile
           <>
             <DropdownMenuItem 
               onClick={() => router.push('/admin')}
@@ -170,7 +170,10 @@ export function UserAvatar() {
               Painel Admin
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => router.push('/profile')}
+              onClick={() => {
+                const username = user.user_metadata?.display_name || user.email?.split('@')[0] || 'me'
+                router.push(`/profile/${username}`)
+              }}
               className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
             >
               <User className="w-4 h-4" />
@@ -178,9 +181,12 @@ export function UserAvatar() {
             </DropdownMenuItem>
           </>
         ) : (
-          // Usuário normal - vai para /profile
+          // Usuário normal - não tem acesso (será bloqueado pela página)
           <DropdownMenuItem 
-            onClick={() => router.push('/profile')}
+            onClick={() => {
+              const username = user.user_metadata?.display_name || user.email?.split('@')[0] || 'me'
+              router.push(`/profile/${username}`)
+            }}
             className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
           >
             <User className="w-4 h-4" />
