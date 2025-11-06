@@ -19,6 +19,7 @@ import { MessageContent } from "@/components/ui/message-content";
 import { MessageActions } from "@/components/ui/message-actions";
 import { toast } from "sonner";
 import { useChatPersistence } from "@/hooks/useChatPersistence";
+import { UserAvatarGlobal } from "@/components/ui/user-avatar-global";
 
 interface Message {
   id: string
@@ -399,12 +400,11 @@ export default function ChatPage() {
                         </div>
                         {msg.role === "user" && (
                           <motion.div 
-                            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
                           >
-                            <User className="w-4 h-4 text-white" />
+                            <UserAvatarGlobal size="sm" />
                           </motion.div>
                         )}
                       </div>
@@ -673,9 +673,7 @@ export default function ChatPage() {
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    </div>
+                    <UserAvatarGlobal size="sm" className="mt-0.5" />
                   )}
                 </div>
               ))}
