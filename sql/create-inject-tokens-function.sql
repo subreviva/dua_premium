@@ -52,14 +52,14 @@ BEGIN
   END IF;
 
   -- Pega saldo atual
-  SELECT COALESCE(tokens, 0) INTO current_balance
+  SELECT COALESCE(total_tokens, 0) INTO current_balance
   FROM public.users
   WHERE id = user_id;
 
   -- Atualiza o saldo
   UPDATE public.users
   SET 
-    tokens = COALESCE(tokens, 0) + tokens_amount,
+    total_tokens = COALESCE(total_tokens, 0) + tokens_amount,
     updated_at = NOW()
   WHERE id = user_id;
 
