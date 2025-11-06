@@ -28,56 +28,56 @@ export default function ResetPasswordPage() {
   const [isValid, setIsValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  const [tokenData, setTokenData] = useState<any>(null);
 
   useEffect(() => {
-    const tokenParam = searchParams.get('token');
-    if (tokenParam) {
-      setToken(tokenParam);
-      validateToken(tokenParam);
-    } else {
-      setIsValidating(false);
-      toast.error("Token inválido", {
-        description: "Link de recuperação inválido ou expirado"
-      });
-    }
-  }, [searchParams]);
+    // Verificar se há hash de recuperação do Supabase
+    checkRecoverySession();
+  }, []);
 
-  const validateToken = async (tokenValue: string) => {
+  const checkRecoverySession = async () => {
     try {
-      const { data, error } = await supabase
-        .from('password_resets')
-        .select('*')
-        .eq('token', tokenValue)
-        .eq('used', false)
-        .single();
-
-      if (error || !data) {
+      // Verificar se há sessão de recuperação ativa
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Erro ao verificar sessão:', error);
         setIsValid(false);
-        toast.error("Token inválido", {
-          description: "Este link já foi usado ou expirou"
+        toast.error("Sessão inválida", {
+          description: "Link de recuperação inválido ou expirado"
         });
+        setIsValidating(false);
         return;
       }
 
-      // Verificar se expirou
-      const expiresAt = new Date(data.expires_at);
-      if (expiresAt < new Date()) {
-        setIsValid(false);
-        toast.error("Token expirado", {
-          description: "Este link expirou. Solicite um novo"
-        });
-        return;
+      // Se há sessão, o link é válido
+      if (session) {
+        setIsValid(true);
+      } else {
+        // Tentar verificar se há parâmetros de recuperação na URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const type = hashParams.get('type');
+        
+        if (accessToken && type === 'recovery') {
+          setIsValid(true);
+        } else {
+          setIsValid(false);
+          toast.error("Link inválido", {
+            description: "Este link expirou ou já foi usado"
+          });
+        }
       }
-
-      setIsValid(true);
-      setTokenData(data);
     } catch (error) {
-      console.error('Erro ao validar token:', error);
+      console.error('Erro ao validar sessão:', error);
       setIsValid(false);
     } finally {
       setIsValidating(false);
     }
+  };
+
+  const validateToken = async (tokenValue: string) => {
+    // Função não é mais necessária - Supabase gerencia automaticamente
+    return;
   };
 
   const getPasswordStrength = (pwd: string): { score: number; label: string; color: string } => {
@@ -124,35 +124,33 @@ export default function ResetPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      // Atualizar password no Supabase Auth
+      // Atualizar password usando Supabase Auth (sistema nativo)
       const { error: updateError } = await supabase.auth.updateUser({
         password: password
       });
 
       if (updateError) throw updateError;
 
-      // Marcar token como usado
-      const { error: tokenError } = await supabase
-        .from('password_resets')
-        .update({
-          used: true,
-          used_at: new Date().toISOString()
-        })
-        .eq('token', token);
+      // Obter ID do usuário atual
+      const { data: { user } } = await supabase.auth.getUser();
 
-      if (tokenError) throw tokenError;
+      if (user) {
+        // Atualizar metadados do usuário
+        const { error: userError } = await supabase
+          .from('users')
+          .update({
+            password_changed_at: new Date().toISOString(),
+            failed_login_attempts: 0,
+            account_locked_until: null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
 
-      // Atualizar data de mudança de password
-      const { error: userError } = await supabase
-        .from('users')
-        .update({
-          password_changed_at: new Date().toISOString(),
-          failed_login_attempts: 0,
-          account_locked_until: null
-        })
-        .eq('id', tokenData.user_id);
-
-      if (userError) throw userError;
+        // Não bloquear se houver erro (tabela pode não existir ainda)
+        if (userError) {
+          console.error('Aviso ao atualizar metadados:', userError);
+        }
+      }
 
       setResetSuccess(true);
       toast.success("Password alterada com sucesso! 🎉", {

@@ -35,57 +35,21 @@ export default function EsqueciPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      // Verificar se o email existe
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id, email, name')
-        .eq('email', email.toLowerCase())
-        .single();
-
-      if (userError || !userData) {
-        // Por segurança, não revelar se o email existe ou não
-        setEmailSent(true);
-        toast.success("Email enviado", {
-          description: "Se o email existir, você receberá as instruções"
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Gerar token único e seguro
-      const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 1); // Expira em 1 hora
-
-      // Salvar token no banco
-      const { error: tokenError } = await supabase
-        .from('password_resets')
-        .insert({
-          user_id: userData.id,
-          email: userData.email,
-          token: token,
-          expires_at: expiresAt.toISOString()
-        });
-
-      if (tokenError) {
-        throw tokenError;
-      }
-
-      // Enviar email (integração com Supabase Auth)
+      // Enviar email de recuperação usando Supabase Auth (sistema nativo)
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email.toLowerCase(),
         {
-          redirectTo: `${window.location.origin}/reset-password?token=${token}`
+          redirectTo: `${window.location.origin}/reset-password`
         }
       );
 
       if (resetError) {
-        throw resetError;
+        // Se houver erro, não revelar detalhes por segurança
+        console.error('Erro ao enviar email:', resetError);
       }
 
+      // SEMPRE mostrar mensagem de sucesso (segurança)
+      // Não revelar se o email existe ou não
       setEmailSent(true);
       toast.success("Email enviado com sucesso! 📧", {
         description: "Verifique sua caixa de entrada"

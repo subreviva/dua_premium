@@ -6,7 +6,6 @@ import { VideoGenerationProvider } from "@/contexts/video-generation-context"
 import { VideoGenerationNotifications } from "@/components/ui/video-generation-notifications"
 import { StagewiseToolbar } from "@/components/stagewise-toolbar"
 import { PremiumToaster } from "@/components/ui/premium-toaster"
-import { PremiumCursor } from "@/components/ui/premium-cursor"
 import { PremiumLoading } from "@/components/ui/premium-loading"
 import PWAInstallPrompt, { ConnectionStatus } from "@/components/PWAInstallPrompt"
 import "./globals.css"
@@ -59,13 +58,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <head>
-        <style>{`
-          * {
-            cursor: none !important;
-          }
-        `}</style>
-      </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <VideoGenerationProvider>
           {children}
@@ -80,7 +72,6 @@ export default function RootLayout({
           
           {/* Premium Components */}
           <PremiumToaster />
-          <PremiumCursor />
           
           <Analytics />
         </VideoGenerationProvider>

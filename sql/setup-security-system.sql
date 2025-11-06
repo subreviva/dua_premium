@@ -16,26 +16,7 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_email ON public.login_attempts(ema
 CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON public.login_attempts(ip_address);
 CREATE INDEX IF NOT EXISTS idx_login_attempts_attempted_at ON public.login_attempts(attempted_at);
 
--- 2. Tabela de recuperação de password
-CREATE TABLE IF NOT EXISTS public.password_resets (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  token TEXT UNIQUE NOT NULL,
-  used BOOLEAN DEFAULT false,
-  expires_at TIMESTAMPTZ NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  used_at TIMESTAMPTZ,
-  ip_address TEXT,
-  user_agent TEXT
-);
-
-CREATE INDEX IF NOT EXISTS idx_password_resets_token ON public.password_resets(token);
-CREATE INDEX IF NOT EXISTS idx_password_resets_user_id ON public.password_resets(user_id);
-CREATE INDEX IF NOT EXISTS idx_password_resets_email ON public.password_resets(email);
-CREATE INDEX IF NOT EXISTS idx_password_resets_expires_at ON public.password_resets(expires_at);
-
--- 3. Tabela de histórico de sessões
+-- 2. Tabela de histórico de sessões
 CREATE TABLE IF NOT EXISTS public.sessions_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -76,12 +57,11 @@ CREATE INDEX IF NOT EXISTS idx_users_email_verified ON public.users(email_verifi
 CREATE INDEX IF NOT EXISTS idx_users_last_login_at ON public.users(last_login_at);
 CREATE INDEX IF NOT EXISTS idx_users_account_locked_until ON public.users(account_locked_until);
 
--- 6. Habilitar RLS nas novas tabelas
+-- 3. Habilitar RLS nas novas tabelas
 ALTER TABLE public.login_attempts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.password_resets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sessions_history ENABLE ROW LEVEL SECURITY;
 
--- 7. Políticas RLS para login_attempts (apenas admin e sistema)
+-- 4. Políticas RLS para login_attempts (apenas admin e sistema)
 DROP POLICY IF EXISTS "Admin pode ver todas tentativas" ON public.login_attempts;
 CREATE POLICY "Admin pode ver todas tentativas"
 ON public.login_attempts FOR SELECT
@@ -100,26 +80,7 @@ ON public.login_attempts FOR INSERT
 TO anon, authenticated
 WITH CHECK (true);
 
--- 8. Políticas RLS para password_resets
-DROP POLICY IF EXISTS "Usuário pode ver seus resets" ON public.password_resets;
-CREATE POLICY "Usuário pode ver seus resets"
-ON public.password_resets FOR SELECT
-TO authenticated
-USING (user_id = auth.uid());
-
-DROP POLICY IF EXISTS "Sistema pode inserir resets" ON public.password_resets;
-CREATE POLICY "Sistema pode inserir resets"
-ON public.password_resets FOR INSERT
-TO anon, authenticated
-WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Sistema pode atualizar resets" ON public.password_resets;
-CREATE POLICY "Sistema pode atualizar resets"
-ON public.password_resets FOR UPDATE
-TO anon, authenticated
-USING (true);
-
--- 9. Políticas RLS para sessions_history
+-- 5. Políticas RLS para sessions_history
 DROP POLICY IF EXISTS "Usuário pode ver suas sessões" ON public.sessions_history;
 CREATE POLICY "Usuário pode ver suas sessões"
 ON public.sessions_history FOR SELECT
@@ -139,7 +100,7 @@ TO authenticated
 USING (user_id = auth.uid())
 WITH CHECK (user_id = auth.uid());
 
--- 10. Função para limpar tentativas antigas (> 24h)
+-- 6. Função para limpar tentativas antigas (> 24h)
 CREATE OR REPLACE FUNCTION clean_old_login_attempts()
 RETURNS void
 LANGUAGE plpgsql

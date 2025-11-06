@@ -12,15 +12,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Premium Cursor */
-body {
-  cursor: none !important;
-}
-
-button, a, input, textarea, [role="button"], [role="link"] {
-  cursor: none !important;
-}
-
 /* Premium Animations */
 @keyframes premium-fade-in {
   from {
