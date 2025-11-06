@@ -96,6 +96,8 @@ export default function ChatPage() {
     conversations,
     currentConversationId,
     groupConversationsByDate,
+    selectConversation,
+    deleteConversation,
   } = useConversations();
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -315,6 +317,12 @@ export default function ChatPage() {
           isCollapsed={isSidebarCollapsed}
           onToggleOpen={setIsSidebarOpen}
           onToggleCollapsed={setIsSidebarCollapsed}
+          conversations={conversations}
+          currentConversationId={currentConversationId}
+          onSelectConversation={selectConversation}
+          onDeleteConversation={deleteConversation}
+          onNewConversation={handleNewChat}
+          groupConversationsByDate={groupConversationsByDate}
         />
 
         {/* Main Content Area - iOS App Style */}
@@ -612,6 +620,12 @@ export default function ChatPage() {
         isCollapsed={isSidebarCollapsed}
         onToggleOpen={setIsSidebarOpen}
         onToggleCollapsed={setIsSidebarCollapsed}
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        onSelectConversation={selectConversation}
+        onDeleteConversation={deleteConversation}
+        onNewConversation={handleNewChat}
+        groupConversationsByDate={groupConversationsByDate}
       />
 
       <Button
