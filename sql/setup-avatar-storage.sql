@@ -16,6 +16,7 @@ ON CONFLICT (id) DO UPDATE SET
   allowed_mime_types = ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
 -- 2. Política de storage: permitir usuários autenticados fazerem upload
+DROP POLICY IF EXISTS "Usuários podem fazer upload de suas imagens" ON storage.objects;
 CREATE POLICY "Usuários podem fazer upload de suas imagens"
 ON storage.objects FOR INSERT
 TO authenticated
@@ -26,12 +27,14 @@ WITH CHECK (
 );
 
 -- 3. Política de storage: permitir todos lerem imagens (bucket público)
+DROP POLICY IF EXISTS "Qualquer um pode ver imagens públicas" ON storage.objects;
 CREATE POLICY "Qualquer um pode ver imagens públicas"
 ON storage.objects FOR SELECT
 TO public
 USING (bucket_id = 'profile-images');
 
 -- 4. Política de storage: permitir usuários deletarem suas próprias imagens
+DROP POLICY IF EXISTS "Usuários podem deletar suas imagens" ON storage.objects;
 CREATE POLICY "Usuários podem deletar suas imagens"
 ON storage.objects FOR DELETE
 TO authenticated
@@ -71,17 +74,20 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 -- 9. Políticas RLS para tabela users
+DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON public.users;
 CREATE POLICY "Usuários podem ver seu próprio perfil"
 ON public.users FOR SELECT
 TO authenticated
 USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Usuários podem atualizar seu próprio perfil" ON public.users;
 CREATE POLICY "Usuários podem atualizar seu próprio perfil"
 ON public.users FOR UPDATE
 TO authenticated
 USING (auth.uid() = id)
 WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Sistema pode inserir novos usuários" ON public.users;
 CREATE POLICY "Sistema pode inserir novos usuários"
 ON public.users FOR INSERT
 TO authenticated
