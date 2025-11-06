@@ -493,11 +493,50 @@ export function ChatProfile() {
             </div>
           </div>
 
-          {/* Lista de Usuários */}
+          {/* Lista de Usuários com Controles Avançados */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-            <h2 className="text-xl font-bold mb-4">Todos os Usuários</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">Todos os Usuários</h2>
+              
+              {/* Filtros e Ordenação */}
+              <div className="flex items-center gap-3">
+                {/* Filtro por Tier */}
+                <select
+                  value={filterTier}
+                  onChange={(e) => setFilterTier(e.target.value)}
+                  className="bg-black/50 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500"
+                >
+                  <option value="all">Todas as Tiers</option>
+                  <option value="free">Free</option>
+                  <option value="basic">Basic</option>
+                  <option value="premium">Premium</option>
+                  <option value="ultimate">Ultimate</option>
+                </select>
+
+                {/* Ordenação */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-black/50 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500"
+                >
+                  <option value="created">Mais Recentes</option>
+                  <option value="email">Email (A-Z)</option>
+                  <option value="tokens">Mais Tokens</option>
+                  <option value="usage">Mais Usados</option>
+                </select>
+
+                {/* Busca */}
+                <Input
+                  type="text"
+                  placeholder="🔍 Buscar usuário..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-black/50 border-white/20 w-64"
+                />
+              </div>
+            </div>
             
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
               {filteredUsers.map((user) => (
                 <div
                   key={user.id}
@@ -515,28 +554,184 @@ export function ChatProfile() {
                         <p className="text-sm text-white/60">
                           {user.full_name || 'Nome não definido'}
                         </p>
+                        {user.display_name && (
+                          <p className="text-xs text-purple-400">@{user.display_name}</p>
+                        )}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-sm text-white/60">Tokens</p>
-                        <p className="font-bold">{user.total_tokens || 0}</p>
+                        <p className="text-xs text-white/60">Tokens</p>
+                        <p className="font-bold text-lg">{user.total_tokens || 0}</p>
                       </div>
 
                       <div className="text-right">
-                        <p className="text-sm text-white/60">Usados</p>
-                        <p className="font-bold">{user.tokens_used || 0}</p>
+                        <p className="text-xs text-white/60">Usados</p>
+                        <p className="font-bold text-lg">{user.tokens_used || 0}</p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-xs text-white/60">Gerado</p>
+                        <p className="font-bold text-sm">{user.total_generated_content || 0}</p>
                       </div>
 
                       <Badge className={cn("bg-gradient-to-r", getTierBadge(user.subscription_tier))}>
                         {user.subscription_tier}
                       </Badge>
+
+                      {/* Actions Menu */}
+                      <div className="flex gap-1">
+                        {/* Editar */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingUser(user.id);
+                            setEditForm({
+                              full_name: user.full_name || '',
+                              display_name: user.display_name || '',
+                              subscription_tier: user.subscription_tier,
+                              bio: user.bio || ''
+                            });
+                          }}
+                          className="h-8 w-8 p-0 hover:bg-blue-500/20"
+                          title="Editar usuário"
+                          disabled={processing}
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </Button>
+
+                        {/* Reset Tokens */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleResetTokens(user.id)}
+                          className="h-8 w-8 p-0 hover:bg-yellow-500/20"
+                          title="Resetar tokens usados"
+                          disabled={processing}
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        </Button>
+
+                        {/* Toggle Access */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleToggleAccess(user.id, user.has_access)}
+                          className="h-8 w-8 p-0 hover:bg-green-500/20"
+                          title={user.has_access ? "Remover acesso" : "Dar acesso"}
+                          disabled={processing}
+                        >
+                          {user.has_access ? (
+                            <Unlock className="w-3.5 h-3.5 text-green-400" />
+                          ) : (
+                            <Lock className="w-3.5 h-3.5 text-red-400" />
+                          )}
+                        </Button>
+
+                        {/* Deletar */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteUser(user.id, user.email)}
+                          className="h-8 w-8 p-0 hover:bg-red-500/20"
+                          title="Excluir usuário"
+                          disabled={processing}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Form de Edição Inline (Expandido) */}
+                  {editingUser === user.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 pt-4 border-t border-white/10 space-y-3"
+                    >
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-white/60 mb-1 block">Nome Completo</label>
+                          <Input
+                            value={editForm.full_name || ''}
+                            onChange={(e) => setEditForm({...editForm, full_name: e.target.value})}
+                            className="bg-black/50 border-white/20 h-9"
+                            disabled={processing}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-white/60 mb-1 block">Display Name</label>
+                          <Input
+                            value={editForm.display_name || ''}
+                            onChange={(e) => setEditForm({...editForm, display_name: e.target.value})}
+                            className="bg-black/50 border-white/20 h-9"
+                            disabled={processing}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-white/60 mb-1 block">Tier</label>
+                          <select
+                            value={editForm.subscription_tier || 'free'}
+                            onChange={(e) => setEditForm({...editForm, subscription_tier: e.target.value})}
+                            className="w-full bg-black/50 border border-white/20 rounded-lg px-3 h-9 text-sm focus:outline-none focus:border-purple-500"
+                            disabled={processing}
+                          >
+                            <option value="free">Free</option>
+                            <option value="basic">Basic</option>
+                            <option value="premium">Premium</option>
+                            <option value="ultimate">Ultimate</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-white/60 mb-1 block">Bio</label>
+                          <Input
+                            value={editForm.bio || ''}
+                            onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
+                            className="bg-black/50 border-white/20 h-9"
+                            placeholder="Bio do usuário..."
+                            disabled={processing}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingUser(null);
+                            setEditForm({});
+                          }}
+                          className="border-white/20"
+                          disabled={processing}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleUpdateUser}
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
+                          disabled={processing}
+                        >
+                          {processing ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3 mr-1" />}
+                          Salvar
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               ))}
             </div>
+
+            {filteredUsers.length === 0 && (
+              <div className="text-center py-12 text-white/40">
+                <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>Nenhum usuário encontrado</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
