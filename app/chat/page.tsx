@@ -261,15 +261,15 @@ export default function ChatPage() {
               backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
             }}
           />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[50px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-[50px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
         </div>
 
-        {/* Navbar with iOS safe area */}
-        <div className="relative z-50 pt-safe">
+        {/* Navbar Preta com iOS safe area */}
+        <div className="relative z-50 pt-safe bg-black/90 backdrop-blur-xl border-b border-white/10">
           <PremiumNavbar
             className="relative"
-            variant="transparent"
+            variant="solid"
             showSidebarToggle={true}
             onSidebarToggle={toggleSidebar}
             isSidebarOpen={isSidebarOpen}
@@ -277,8 +277,8 @@ export default function ChatPage() {
           />
         </div>
 
-        {/* Gradient Fade Overlay - Efeito de conversa subindo */}
-        <div className="fixed top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/60 to-transparent z-40 pointer-events-none pt-safe" />
+        {/* Gradient Fade Overlay - Efeito de conversa subindo (Mobile) - Mais forte */}
+        <div className="fixed top-[60px] left-0 right-0 h-40 bg-gradient-to-b from-black via-black/80 to-transparent z-40 pointer-events-none pt-safe" />
 
         {isSidebarOpen && (
           <div
@@ -551,7 +551,7 @@ export default function ChatPage() {
 
   // --- DESKTOP VIEW ---
   return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-[#0a0a0a]">
+    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-black">
       {/* Image Background - Super Elegant & Blurred */}
       <div className="fixed inset-0 z-0">
         <div 
@@ -560,21 +560,24 @@ export default function ChatPage() {
             backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
           }}
         />
-        <div className="absolute inset-0 bg-[#0a0a0a]/50 backdrop-blur-[40px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[40px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
       </div>
 
-      <PremiumNavbar 
-        className="relative z-50" 
-        variant="transparent"
-        showSidebarToggle={true}
-        onSidebarToggle={toggleSidebar}
-        isSidebarOpen={isSidebarOpen}
-        onNewChat={handleNewChat}
-      />
+      {/* Navbar Preta Premium */}
+      <div className="relative z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
+        <PremiumNavbar 
+          className="relative" 
+          variant="solid"
+          showSidebarToggle={true}
+          onSidebarToggle={toggleSidebar}
+          isSidebarOpen={isSidebarOpen}
+          onNewChat={handleNewChat}
+        />
+      </div>
 
-      {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) */}
-      <div className="fixed top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent z-40 pointer-events-none" />
+      {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) - Mais escuro e suave */}
+      <div className="fixed top-[60px] left-0 right-0 h-48 bg-gradient-to-b from-black via-black/80 to-transparent z-40 pointer-events-none" />
 
       {isSidebarOpen && (
         <div
