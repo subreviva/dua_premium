@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react";
+import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { audit } from "@/lib/audit";
@@ -186,9 +186,9 @@ export default function LoginPage() {
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-4"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-4 text-3xl font-bold text-white"
           >
-            <Sparkles className="w-8 h-8 text-white" />
+            D
           </motion.div>
           <h1 className="text-4xl font-bold text-white mb-2">DUA</h1>
           <p className="text-neutral-400 text-sm">

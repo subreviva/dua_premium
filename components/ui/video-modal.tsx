@@ -10,7 +10,7 @@ import {
   Download,
   Share2,
   Info,
-  Sparkles,
+  CheckCircle2,
   FileText,
   Film,
 } from "lucide-react"
@@ -96,7 +96,7 @@ export function VideoModal({ isOpen, onClose, video }: VideoModalProps) {
                   
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     </div>
                     <span className="text-white font-medium text-sm">Vídeo Pronto</span>
                   </div>
@@ -113,7 +113,7 @@ export function VideoModal({ isOpen, onClose, video }: VideoModalProps) {
                 <>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     </div>
                     <div>
                       <h2 className="text-white font-semibold text-lg">Vídeo Gerado com Sucesso</h2>

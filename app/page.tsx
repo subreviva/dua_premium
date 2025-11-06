@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Sparkles, Building2, Coins } from "lucide-react"
+import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Building2, Coins } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useRef } from "react"
 import { FeatureSteps } from "@/components/ui/feature-steps"
@@ -63,7 +63,6 @@ export default function HomePage() {
               transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-xl border border-white/10"
             >
-              <Sparkles className="w-4 h-4 text-white/90" />
               <span className="text-sm font-medium text-white/90 tracking-wide">Plataforma de Criação com IA</span>
             </motion.div>
 

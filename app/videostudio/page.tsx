@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { Video, Loader2, PlayCircle, Clock, Image as ImageIcon, Film, Settings, Sparkles } from "lucide-react"
+import { Video, Loader2, PlayCircle, Clock, Image as ImageIcon, Film, Settings, Wand2, CheckCircle2 } from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { VideoModal } from "@/components/ui/video-modal"
@@ -503,7 +503,7 @@ export default function VideoStudioPage() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Vídeo pronto! Toque para visualizar</span>
                       </div>
                       <PlayCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />

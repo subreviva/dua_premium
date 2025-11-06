@@ -6,7 +6,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
 interface PremiumLoadingProps {
@@ -80,13 +80,8 @@ export function PremiumLoading({ isLoading = true, onComplete }: PremiumLoadingP
               />
               
               {/* Logo */}
-              <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                >
-                  <Sparkles className="w-12 h-12 text-white" />
-                </motion.div>
+                            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/50">
+                <Loader2 className="w-12 h-12 text-white animate-spin" />
               </div>
             </motion.div>
 

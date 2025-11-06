@@ -6,15 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { 
-  Coins, 
+  CreditCard, 
   Check, 
-  Sparkles, 
+  Loader2, 
   Zap, 
-  Crown, 
-  Rocket, 
-  Loader2,
-  ArrowLeft 
-} from "lucide-react"
+  Rocket,
+  ArrowLeft,
+  Coins
+} from "lucide-react";
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { createClient } from "@supabase/supabase-js"
@@ -41,7 +40,7 @@ const TOKEN_PACKAGES: TokenPackage[] = [
     name: "Iniciante",
     tokens_amount: 100,
     price: 4.99,
-    icon: Sparkles,
+    icon: Zap,
     color: "from-blue-500 to-cyan-500"
   },
   {
@@ -54,13 +53,10 @@ const TOKEN_PACKAGES: TokenPackage[] = [
     color: "from-purple-500 to-pink-500"
   },
   {
-    id: "premium",
     name: "Premium",
-    tokens_amount: 1000,
+    tokens: 1000,
     price: 34.99,
-    icon: Crown,
-    color: "from-yellow-500 to-orange-500"
-  },
+    icon: Rocket,,
   {
     id: "ultimate",
     name: "Ultimate",

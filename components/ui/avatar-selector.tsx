@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Camera, Check, User as UserIcon, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Upload, Camera, Check, User as UserIcon, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@supabase/supabase-js";
 
@@ -199,7 +199,7 @@ export function AvatarSelector({ currentAvatar, userId, onAvatarUpdate }: Avatar
           {isUploading && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-full backdrop-blur-md z-30">
               <div className="text-center">
-                <Sparkles className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-2" />
+                <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-2" />
                 <span className="text-xs text-white font-bold">{uploadProgress}%</span>
               </div>
             </div>
@@ -232,13 +232,13 @@ export function AvatarSelector({ currentAvatar, userId, onAvatarUpdate }: Avatar
         >
           {isUploading ? (
             <>
-              <Sparkles className="w-5 h-5 mr-2 animate-spin" />
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
               Enviando... {uploadProgress}%
             </>
           ) : (
             <>
               <Upload className="w-5 h-5 mr-2" />
-              Fazer Upload de Foto
+              Fazer Upload
             </>
           )}
         </Button>

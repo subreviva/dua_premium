@@ -23,7 +23,7 @@ import {
   Trash2, 
   LogOut,
   CheckCircle,
-  Sparkles,
+
   Shield,
   AlertTriangle,
   Loader2
@@ -456,7 +456,9 @@ export default function SettingsPage() {
                       </CardDescription>
                     )}
                   </div>
-                  <Sparkles className="h-8 w-8 text-purple-400" />
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+                    P
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">

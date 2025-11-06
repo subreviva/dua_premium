@@ -13,7 +13,6 @@ import {
   Image as ImageIcon,
   Film,
   Settings,
-  Sparkles,
   ChevronDown,
   Zap,
 } from "lucide-react"
@@ -98,7 +97,7 @@ export default function VideoStudioMobileApp() {
 
               <label className="block text-white/70 text-xs font-semibold uppercase tracking-widest mb-2">
                 <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-purple-400" />
+                  <Film className="w-3 h-3 text-purple-400" />
                   Descrição do Vídeo
                 </span>
               </label>
@@ -279,7 +278,7 @@ export default function VideoStudioMobileApp() {
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
+                  <Video className="w-4 h-4" />
                   Gerar Vídeo com Veo 3.0
                 </span>
               )}

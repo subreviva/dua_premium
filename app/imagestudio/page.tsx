@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/components/ui/use-mobile"
 import {
   Wand2,
-  Sparkles,
+
   ChevronDown,
   Palette,
   Camera,
@@ -119,7 +119,7 @@ export default function ImageStudioPage() {
   const styles = [
     { id: "photorealistic", name: "Fotorrealista", icon: Camera },
     { id: "illustration", name: "Ilustração", icon: Palette },
-    { id: "minimalist", name: "Minimalista", icon: Sparkles },
+    { id: "minimalist", name: "Minimalista", icon: Circle },
     { id: "product", name: "Produto", icon: Camera },
     { id: "comic", name: "Quadrinhos", icon: Layers },
     { id: "3d", name: "3D Render", icon: Zap },
@@ -474,7 +474,7 @@ export default function ImageStudioPage() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-5 h-5 mr-2" />
+                          <Wand2 className="w-5 h-5 mr-2" />
                           Gerar Imagem
                         </>
                       )}
@@ -485,7 +485,7 @@ export default function ImageStudioPage() {
                   <div className="flex items-center gap-3">
                     {/* Badge: Geração de Imagem */}
                     <div className="flex items-center gap-2 px-3 py-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg text-sm font-medium flex-shrink-0">
-                      <Sparkles className="w-4 h-4" />
+                      <Image className="w-4 h-4" />
                       <span>Geração</span>
                     </div>
 
@@ -556,7 +556,7 @@ export default function ImageStudioPage() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-4 h-4 mr-2" />
+                          <Wand2 className="w-4 h-4 mr-2" />
                           Gerar
                         </>
                       )}
