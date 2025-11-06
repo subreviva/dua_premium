@@ -52,7 +52,7 @@ Você verá mensagens de sucesso:
 A função `inject_tokens`:
 
 ✅ **Validações de Segurança:**
-- Verifica se quem executa é admin (role = 'admin')
+- Verifica se quem executa é admin (has_access = true)
 - Verifica se o usuário alvo existe
 - Valida que a quantidade é maior que zero
 

@@ -29,11 +29,11 @@ BEGIN
   -- Pega o ID do usuário que está executando
   admin_id := auth.uid();
   
-  -- Verifica se quem está executando é admin
+  -- Verifica se quem está executando é admin (has_access = true)
   IF NOT EXISTS (
     SELECT 1 FROM public.users 
     WHERE id = admin_id 
-    AND role = 'admin'
+    AND has_access = true
   ) THEN
     RETURN QUERY SELECT FALSE, 0, 'Acesso negado: apenas administradores podem injetar tokens'::TEXT;
     RETURN;
