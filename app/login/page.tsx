@@ -280,6 +280,16 @@ export default function LoginPage() {
               )}
             </Button>
 
+            {/* Link Esqueci a Password */}
+            <div className="text-center">
+              <Link 
+                href="/esqueci-password" 
+                className="text-sm text-neutral-400 hover:text-purple-400 transition-colors inline-flex items-center gap-1"
+              >
+                Esqueci a password
+              </Link>
+            </div>
+
             {/* Link para registo */}
             <div className="pt-4 border-t border-white/5 text-center space-y-3">
               <p className="text-sm text-neutral-400">
