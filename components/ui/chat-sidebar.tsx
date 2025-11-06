@@ -33,6 +33,9 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
 
 interface SidebarItem {
   icon: React.ElementType
@@ -63,31 +66,86 @@ export function ChatSidebar({
 }: ChatSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(externalCollapsed)
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   const [settings, setSettings] = useState({
-    model: "gpt-4",
-    temperature: 0.7,
-    maxTokens: 2000,
+    theme: "dark",
     language: "pt",
-    voiceEnabled: true,
-    autoSave: true,
-    streamResponse: true,
+    notifications: true,
+    soundEffects: true,
+    autoSaveChats: true,
+    showTimestamps: true,
+    compactMode: false,
+    enterToSend: true,
   })
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     setIsCollapsed(externalCollapsed)
   }, [externalCollapsed])
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem("chatSettings")
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings))
+    // Carregar configurações do localStorage E do usuário
+    const loadSettings = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        setUserId(user.id)
+        
+        // Tentar carregar do Supabase primeiro
+        const { data: userSettings } = await supabase
+          .from('users')
+          .select('chat_settings')
+          .eq('id', user.id)
+          .single()
+        
+        if (userSettings?.chat_settings) {
+          setSettings(userSettings.chat_settings)
+        } else {
+          // Fallback para localStorage
+          const savedSettings = localStorage.getItem("chatSettings")
+          if (savedSettings) {
+            setSettings(JSON.parse(savedSettings))
+          }
+        }
+      } else {
+        // Usuário não logado - usar apenas localStorage
+        const savedSettings = localStorage.getItem("chatSettings")
+        if (savedSettings) {
+          setSettings(JSON.parse(savedSettings))
+        }
+      }
     }
+    
+    loadSettings()
   }, [])
 
-  const updateSettings = (key: string, value: any) => {
+  const updateSettings = async (key: string, value: any) => {
     const newSettings = { ...settings, [key]: value }
     setSettings(newSettings)
+    
+    // Salvar no localStorage imediatamente
     localStorage.setItem("chatSettings", JSON.stringify(newSettings))
+    
+    // Salvar no Supabase se usuário estiver logado
+    if (userId) {
+      setIsSaving(true)
+      const supabase = createClient()
+      
+      const { error } = await supabase
+        .from('users')
+        .update({ chat_settings: newSettings })
+        .eq('id', userId)
+      
+      setIsSaving(false)
+      
+      if (error) {
+        console.error('Erro ao salvar configurações:', error)
+        toast.error('Erro ao salvar configurações')
+      } else {
+        toast.success('Configuração salva ✓', { duration: 1000 })
+      }
+    }
   }
 
   const handleToggleCollapsed = () => {
@@ -254,67 +312,34 @@ export function ChatSidebar({
           </DialogTrigger>
           <DialogContent className="bg-black/95 backdrop-blur-xl border-white/10 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Definições do Chat</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">Preferências do Chat</DialogTitle>
               <DialogDescription className="text-neutral-400">
-                Configure a experiência do seu chat premium
+                Personalize sua experiência de conversação
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              {/* Model Selection */}
+              {/* Tema */}
               <div className="space-y-2">
-                <Label htmlFor="model" className="text-sm font-medium">
-                  Modelo de IA
+                <Label htmlFor="theme" className="text-sm font-medium">
+                  Tema
                 </Label>
-                <Select value={settings.model} onValueChange={(value) => updateSettings("model", value)}>
+                <Select value={settings.theme} onValueChange={(value) => updateSettings("theme", value)}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-black/95 border-white/10 text-white">
-                    <SelectItem value="gpt-4">GPT-4 (Mais inteligente)</SelectItem>
-                    <SelectItem value="gpt-3.5">GPT-3.5 (Mais rápido)</SelectItem>
-                    <SelectItem value="claude-3">Claude 3 (Criativo)</SelectItem>
-                    <SelectItem value="gemini-pro">Gemini Pro (Versátil)</SelectItem>
+                    <SelectItem value="dark">Escuro</SelectItem>
+                    <SelectItem value="light">Claro</SelectItem>
+                    <SelectItem value="auto">Automático</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              {/* Temperature/Creativity */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label className="text-sm font-medium">Criatividade</Label>
-                  <span className="text-xs text-neutral-400">{settings.temperature.toFixed(1)}</span>
-                </div>
-                <Slider
-                  value={[settings.temperature]}
-                  onValueChange={([value]) => updateSettings("temperature", value)}
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  className="w-full"
-                />
                 <p className="text-xs text-neutral-500">
-                  Menor = mais preciso e focado | Maior = mais criativo e variado
+                  Define a aparência da interface do chat
                 </p>
               </div>
 
-              {/* Max Tokens */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label className="text-sm font-medium">Tamanho da Resposta</Label>
-                  <span className="text-xs text-neutral-400">{settings.maxTokens} tokens</span>
-                </div>
-                <Slider
-                  value={[settings.maxTokens]}
-                  onValueChange={([value]) => updateSettings("maxTokens", value)}
-                  min={500}
-                  max={4000}
-                  step={100}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Language */}
+              {/* Idioma */}
               <div className="space-y-2">
                 <Label htmlFor="language" className="text-sm font-medium">
                   Idioma
@@ -330,45 +355,90 @@ export function ChatSidebar({
                     <SelectItem value="fr">Français</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-neutral-500">
+                  Idioma da interface e respostas padrão
+                </p>
               </div>
 
-              {/* Voice Enabled */}
+              {/* Notificações */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Entrada de Voz</Label>
-                  <p className="text-xs text-neutral-500">Ativar gravação de áudio</p>
+                  <Label className="text-sm font-medium">Notificações</Label>
+                  <p className="text-xs text-neutral-500">Receber alertas de novas mensagens</p>
                 </div>
                 <Switch
-                  checked={settings.voiceEnabled}
-                  onCheckedChange={(checked) => updateSettings("voiceEnabled", checked)}
+                  checked={settings.notifications}
+                  onCheckedChange={(checked) => updateSettings("notifications", checked)}
+                  disabled={isSaving}
+                />
+              </div>
+
+              {/* Sons */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Efeitos Sonoros</Label>
+                  <p className="text-xs text-neutral-500">Reproduzir sons ao enviar/receber mensagens</p>
+                </div>
+                <Switch
+                  checked={settings.soundEffects}
+                  onCheckedChange={(checked) => updateSettings("soundEffects", checked)}
+                  disabled={isSaving}
                 />
               </div>
 
               {/* Auto Save */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Guardar Automaticamente</Label>
-                  <p className="text-xs text-neutral-500">Salvar conversas automaticamente</p>
+                  <Label className="text-sm font-medium">Guardar Conversas</Label>
+                  <p className="text-xs text-neutral-500">Salvar automaticamente todas as conversas</p>
                 </div>
                 <Switch
-                  checked={settings.autoSave}
-                  onCheckedChange={(checked) => updateSettings("autoSave", checked)}
+                  checked={settings.autoSaveChats}
+                  onCheckedChange={(checked) => updateSettings("autoSaveChats", checked)}
+                  disabled={isSaving}
                 />
               </div>
 
-              {/* Stream Response */}
+              {/* Mostrar timestamps */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Resposta em Tempo Real</Label>
-                  <p className="text-xs text-neutral-500">Ver resposta enquanto é gerada</p>
+                  <Label className="text-sm font-medium">Hora das Mensagens</Label>
+                  <p className="text-xs text-neutral-500">Mostrar data e hora em cada mensagem</p>
                 </div>
                 <Switch
-                  checked={settings.streamResponse}
-                  onCheckedChange={(checked) => updateSettings("streamResponse", checked)}
+                  checked={settings.showTimestamps}
+                  onCheckedChange={(checked) => updateSettings("showTimestamps", checked)}
+                  disabled={isSaving}
                 />
               </div>
 
-              {/* Keyboard Shortcuts */}
+              {/* Modo Compacto */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Modo Compacto</Label>
+                  <p className="text-xs text-neutral-500">Reduzir espaçamento entre mensagens</p>
+                </div>
+                <Switch
+                  checked={settings.compactMode}
+                  onCheckedChange={(checked) => updateSettings("compactMode", checked)}
+                  disabled={isSaving}
+                />
+              </div>
+
+              {/* Enter para enviar */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Enter para Enviar</Label>
+                  <p className="text-xs text-neutral-500">Pressionar Enter envia mensagem (Shift+Enter para nova linha)</p>
+                </div>
+                <Switch
+                  checked={settings.enterToSend}
+                  onCheckedChange={(checked) => updateSettings("enterToSend", checked)}
+                  disabled={isSaving}
+                />
+              </div>
+
+              {/* Atalhos de Teclado */}
               <div className="space-y-2 pt-4 border-t border-white/10">
                 <Label className="text-sm font-medium">Atalhos de Teclado</Label>
                 <div className="space-y-2 text-xs text-neutral-400">
