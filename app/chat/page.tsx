@@ -345,27 +345,9 @@ export default function ChatPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex flex-col items-center justify-center h-full px-4 relative"
+                  className="flex flex-col items-center justify-center h-full px-4"
                 >
-                  {/* Background Video */}
-                  <div className="absolute inset-0 overflow-hidden">
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="absolute inset-0 w-full h-full object-cover opacity-30"
-                    >
-                      <source
-                        src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-2225-ultra%20premium%20loop%20para%20hero%20-%20sem%20objet....mp4"
-                        type="video/mp4"
-                      />
-                    </video>
-                    {/* Gradient overlay para melhor legibilidade */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
-                  </div>
-
-                  <div className="text-center space-y-3 relative z-10">
+                  <div className="text-center space-y-3">
                     <motion.h1 
                       className="text-5xl font-bold text-white drop-shadow-lg"
                       initial={{ opacity: 0, y: 20 }}
@@ -672,26 +654,8 @@ export default function ChatPage() {
           className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 premium-scrollbar-chat"
         >
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full px-4 relative">
-              {/* Background Video */}
-              <div className="absolute inset-0 overflow-hidden">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover opacity-30"
-                >
-                  <source
-                    src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-2225-ultra%20premium%20loop%20para%20hero%20-%20sem%20objet....mp4"
-                    type="video/mp4"
-                  />
-                </video>
-                {/* Gradient overlay para melhor legibilidade */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
-              </div>
-
-              <div className="text-center space-y-3 sm:space-y-4 relative z-10">
+            <div className="flex flex-col items-center justify-center h-full px-4">
+              <div className="text-center space-y-3 sm:space-y-4">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg">
                   DUA IA
                 </h1>
