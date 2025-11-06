@@ -10,7 +10,7 @@ import { ChatSidebar } from "@/components/ui/chat-sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft, StopCircle } from "lucide-react"
+import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft, StopCircle, Menu } from "lucide-react"
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
 import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
@@ -18,8 +18,9 @@ import { TypingIndicator } from "@/components/ui/typing-indicator";
 import { MessageContent } from "@/components/ui/message-content";
 import { MessageActions } from "@/components/ui/message-actions";
 import { toast } from "sonner";
-import { useChatPersistence } from "@/hooks/useChatPersistence";
+import { useConversations } from "@/hooks/useConversations";
 import { UserAvatarGlobal } from "@/components/ui/user-avatar-global";
+import ConversationHistory from "@/components/ConversationHistory";
 
 interface Message {
   id: string
@@ -61,31 +62,62 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: AutoResizeProps) {
 }
 
 export default function ChatPage() {
-  // Persistência de conversas
-  const { initialMessages, isLoaded, saveMessages, clearHistory } = useChatPersistence();
+  // Sistema de múltiplas conversas
+  const {
+    conversations,
+    currentConversationId,
+    isLoading: conversationsLoading,
+    isSyncing,
+    getCurrentMessages,
+    createNewConversation,
+    updateCurrentConversation,
+    selectConversation,
+    deleteConversation,
+    restoreConversation,
+    renameConversation,
+    exportConversations,
+  } = useConversations();
 
   // Integração real com Gemini via Vercel AI SDK
   const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages, reload, stop } = useChat({
     api: '/api/chat',
-    initialMessages: isLoaded ? initialMessages : undefined,
+    initialMessages: conversationsLoading ? [] : getCurrentMessages(),
     onError: (error: Error) => {
-      // console.error('Chat error:', error);
       toast.error("Erro ao enviar mensagem", {
         description: error.message || "Não foi possível processar sua mensagem. Tente novamente.",
       });
     },
   });
 
-  // Auto-save mensagens
+  // Auto-save mensagens da conversa atual
   useEffect(() => {
-    if (isLoaded && messages.length > 0) {
-      saveMessages(messages);
+    if (!conversationsLoading && messages.length > 0 && currentConversationId) {
+      // Filtrar apenas user e assistant roles
+      const validMessages = messages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({
+          id: m.id,
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          createdAt: m.createdAt || new Date()
+        }));
+      
+      updateCurrentConversation(validMessages);
     }
-  }, [messages, isLoaded, saveMessages]);
+  }, [messages, conversationsLoading, currentConversationId, updateCurrentConversation]);
+
+  // Atualizar mensagens quando trocar de conversa
+  useEffect(() => {
+    if (!conversationsLoading) {
+      const currentMessages = getCurrentMessages();
+      setMessages(currentMessages);
+    }
+  }, [currentConversationId, conversationsLoading]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [showRealTimeChat, setShowRealTimeChat] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const isMobile = useIsMobile()
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -144,12 +176,10 @@ export default function ChatPage() {
   }, [])
 
   const handleNewChat = () => {
-    clearHistory();
+    const newId = createNewConversation();
     setMessages([]);
     setSelectedImage(null);
-    toast.success("Nova conversa iniciada", {
-      description: "Histórico limpo com sucesso",
-    });
+    toast.success("✨ Nova conversa iniciada");
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,10 +306,32 @@ export default function ChatPage() {
             isSidebarOpen={isSidebarOpen}
             onNewChat={handleNewChat}
           />
+          
+          {/* Botão de Histórico de Conversas */}
+          <button
+            onClick={() => setIsHistoryOpen(true)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
+          >
+            <Menu className="w-5 h-5 text-white" />
+          </button>
         </div>
 
         {/* Gradient Fade Overlay - Efeito de conversa subindo (Mobile) - Mais forte */}
         <div className="fixed top-[60px] left-0 right-0 h-40 bg-gradient-to-b from-black via-black/80 to-transparent z-40 pointer-events-none pt-safe" />
+
+        {/* Histórico de Conversas */}
+        <ConversationHistory
+          conversations={conversations}
+          currentConversationId={currentConversationId}
+          onSelectConversation={selectConversation}
+          onDeleteConversation={deleteConversation}
+          onNewConversation={handleNewChat}
+          onRenameConversation={renameConversation}
+          onExportConversations={exportConversations}
+          isSyncing={isSyncing}
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+        />
 
         {isSidebarOpen && (
           <div
@@ -551,7 +603,7 @@ export default function ChatPage() {
 
   // --- DESKTOP VIEW ---
   return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-black">
+    <div className="relative w-full h-screen flex overflow-hidden bg-black">
       {/* Image Background - Super Elegant & Blurred */}
       <div className="fixed inset-0 z-0">
         <div 
@@ -564,20 +616,36 @@ export default function ChatPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
       </div>
 
-      {/* Navbar Preta Premium */}
-      <div className="relative z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
-        <PremiumNavbar 
-          className="relative" 
-          variant="solid"
-          showSidebarToggle={true}
-          onSidebarToggle={toggleSidebar}
-          isSidebarOpen={isSidebarOpen}
-          onNewChat={handleNewChat}
-        />
-      </div>
+      {/* Histórico de Conversas - Desktop */}
+      <ConversationHistory
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        onSelectConversation={selectConversation}
+        onDeleteConversation={deleteConversation}
+        onNewConversation={handleNewChat}
+        onRenameConversation={renameConversation}
+        onExportConversations={exportConversations}
+        isSyncing={isSyncing}
+        isOpen={true}
+        onClose={() => {}}
+      />
 
-      {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) - Mais escuro e suave */}
-      <div className="fixed top-[60px] left-0 right-0 h-48 bg-gradient-to-b from-black via-black/80 to-transparent z-40 pointer-events-none" />
+      {/* Main Content */}
+      <div className="relative flex-1 flex flex-col overflow-hidden">
+        {/* Navbar Preta Premium */}
+        <div className="relative z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
+          <PremiumNavbar 
+            className="relative" 
+            variant="solid"
+            showSidebarToggle={true}
+            onSidebarToggle={toggleSidebar}
+            isSidebarOpen={isSidebarOpen}
+            onNewChat={handleNewChat}
+          />
+        </div>
+
+        {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) - Mais escuro e suave */}
+        <div className="absolute top-[60px] left-0 right-0 h-48 bg-gradient-to-b from-black via-black/80 to-transparent z-40 pointer-events-none" />
 
       {isSidebarOpen && (
         <div
@@ -756,6 +824,7 @@ export default function ChatPage() {
             </div>
           </form>
         </div>
+      </div>
       </div>
       <AnimatePresence>
         {showRealTimeChat && <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />}
