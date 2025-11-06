@@ -292,6 +292,13 @@ export default function HomePage() {
                 image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-3815-estu%CC%81dio%20criativo%2C%20artistas%20a%20trabalhar%20e....jpeg"
               },
               {
+                icon: Home,
+                title: "Kyntal: Hospitalidade Premium",
+                subtitle: "O refúgio criativo do ecossistema",
+                description: "Alojamento local premium que recebe artistas, criadores e visitantes em ambientes inspiradores. Um espaço onde a hospitalidade lusófona se encontra com a experiência criativa, criando conexões autênticas.",
+                image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-3815-estu%CC%81dio%20criativo%2C%20artistas%20a%20trabalhar%20e....jpeg"
+              },
+              {
                 icon: Coins,
                 title: "DUA Coin: Economia Criativa",
                 subtitle: "A moeda do ecossistema 2 LADOS",
