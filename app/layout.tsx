@@ -5,7 +5,9 @@ import { Analytics } from "@vercel/analytics/next"
 import { VideoGenerationProvider } from "@/contexts/video-generation-context"
 import { VideoGenerationNotifications } from "@/components/ui/video-generation-notifications"
 import { StagewiseToolbar } from "@/components/stagewise-toolbar"
-import { Toaster } from "sonner"
+import { PremiumToaster } from "@/components/ui/premium-toaster"
+import { PremiumCursor } from "@/components/ui/premium-cursor"
+import { PremiumLoading } from "@/components/ui/premium-loading"
 import PWAInstallPrompt, { ConnectionStatus } from "@/components/PWAInstallPrompt"
 import "./globals.css"
 
@@ -57,6 +59,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
+      <head>
+        <style>{`
+          * {
+            cursor: none !important;
+          }
+        `}</style>
+      </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <VideoGenerationProvider>
           {children}
@@ -69,21 +78,10 @@ export default function RootLayout({
           <PWAInstallPrompt />
           <ConnectionStatus />
           
-          <Toaster 
-            position="top-center"
-            theme="dark"
-            richColors
-            closeButton
-            duration={3000}
-            toastOptions={{
-              className: "font-sans",
-              style: {
-                background: "rgba(0, 0, 0, 0.95)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                backdropFilter: "blur(20px)",
-              }
-            }}
-          />
+          {/* Premium Components */}
+          <PremiumToaster />
+          <PremiumCursor />
+          
           <Analytics />
         </VideoGenerationProvider>
       </body>

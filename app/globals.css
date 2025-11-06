@@ -3,6 +3,68 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Premium Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+/* Premium Cursor */
+body {
+  cursor: none !important;
+}
+
+button, a, input, textarea, [role="button"], [role="link"] {
+  cursor: none !important;
+}
+
+/* Premium Animations */
+@keyframes premium-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes premium-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes premium-glow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.premium-fade-in {
+  animation: premium-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.premium-scale-in {
+  animation: premium-scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.premium-glow {
+  animation: premium-glow 2s ease-in-out infinite;
+}
+
 /* iOS Safe Area Support */
 @supports (padding-top: env(safe-area-inset-top)) {
   .pt-safe {
