@@ -1,21 +1,25 @@
 /**
  * Página: /login
  * 
- * Login para users já registados
- * Email + Password
+ * Login Premium para users já registados
+ * - Email + Password com validação
+ * - Verificação de acesso
+ * - Auditoria de login
+ * - Design premium consistente
  */
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Loader2, Mail, Lock, Sparkles, ArrowRight } from "lucide-react";
+import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import { audit } from "@/lib/audit";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -27,6 +31,30 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    // Registrar acesso à página
+    audit.pageAccess('/login');
+    
+    // Verificar se já está logado
+    checkExistingSession();
+  }, []);
+
+  const checkExistingSession = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        toast.info("Já está autenticado", {
+          description: "Redirecionando...",
+        });
+        router.push("/chat");
+      }
+    } catch (error) {
+      // Usuário não está logado, continua na página
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,11 +83,16 @@ export default function LoginPage() {
       });
 
       if (error) {
+        const errorMessage = error.message === "Invalid login credentials" 
+          ? "Email ou password incorretos" 
+          : error.message;
+        
         toast.error("Erro ao fazer login", {
-          description: error.message === "Invalid login credentials" 
-            ? "Email ou password incorretos" 
-            : error.message,
+          description: errorMessage,
         });
+        
+        // Auditar falha de login
+        audit.login(false, 'email');
         return;
       }
 
@@ -67,39 +100,61 @@ export default function LoginPage() {
         toast.error("Erro ao fazer login", {
           description: "Não foi possível autenticar",
         });
+        audit.login(false, 'email');
         return;
       }
 
       // Verificar se user tem acesso
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('has_access')
+        .select('has_access, subscription_tier, display_name')
         .eq('id', data.user.id)
         .single();
 
-      if (userError || !userData || !userData.has_access) {
+      if (userError || !userData) {
+        toast.error("Erro ao verificar conta", {
+          description: "Não foi possível verificar suas permissões",
+        });
+        await supabase.auth.signOut();
+        audit.login(false, 'email');
+        return;
+      }
+
+      if (!userData.has_access) {
         toast.error("Sem acesso", {
           description: "Sua conta não tem permissão de acesso",
         });
         await supabase.auth.signOut();
+        audit.login(false, 'email');
         return;
       }
 
+      // Atualizar último login
+      await supabase
+        .from('users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', data.user.id);
+
       // Login bem-sucedido!
-      toast.success("Bem-vindo de volta! 🎉", {
-        description: "Redirecionando...",
+      const userName = userData.display_name || email.split('@')[0];
+      toast.success(`Bem-vindo, ${userName}! 🎉`, {
+        description: "Redirecionando para o chat...",
         duration: 2000,
       });
 
+      // Auditar login bem-sucedido
+      audit.login(true, 'email');
+
       setTimeout(() => {
         router.push("/chat");
+        router.refresh();
       }, 1000);
 
     } catch (error) {
-      // console.error("Erro no login:", error);
       toast.error("Erro de conexão", {
         description: "Não foi possível fazer login",
       });
+      audit.error(error as Error, 'login_exception');
     } finally {
       setIsLoading(false);
     }
@@ -172,16 +227,38 @@ export default function LoginPage() {
                 <Lock className="w-4 h-4" />
                 Password
               </label>
-              <Input
-                type="password"
-                placeholder="Sua password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                className="bg-black/50 border-white/10 text-white placeholder:text-neutral-500 focus:border-purple-500 h-12"
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Sua password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-black/50 border-white/10 text-white placeholder:text-neutral-500 focus:border-purple-500 h-12 pr-12"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Features info */}
+            <div className="flex items-center gap-2 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+              <ShieldCheck className="w-5 h-5 text-purple-400 flex-shrink-0" />
+              <p className="text-xs text-purple-300">
+                Login seguro com verificação de acesso
+              </p>
             </div>
 
             {/* Botão Login */}
@@ -204,7 +281,7 @@ export default function LoginPage() {
             </Button>
 
             {/* Link para registo */}
-            <div className="pt-4 border-t border-white/5 text-center">
+            <div className="pt-4 border-t border-white/5 text-center space-y-3">
               <p className="text-sm text-neutral-400">
                 Não tem conta?{" "}
                 <Link 
@@ -213,6 +290,9 @@ export default function LoginPage() {
                 >
                   Obter acesso
                 </Link>
+              </p>
+              <p className="text-xs text-neutral-500">
+                Precisa de um código de convite para se registar
               </p>
             </div>
           </form>
