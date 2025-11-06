@@ -10,7 +10,7 @@ import { ChatSidebar } from "@/components/ui/chat-sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft, StopCircle, Menu } from "lucide-react"
+import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft, StopCircle } from "lucide-react"
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
 import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
@@ -18,8 +18,9 @@ import { TypingIndicator } from "@/components/ui/typing-indicator";
 import { MessageContent } from "@/components/ui/message-content";
 import { MessageActions } from "@/components/ui/message-actions";
 import { toast } from "sonner";
+import { useChatPersistence } from "@/hooks/useChatPersistence";
 import { useConversations } from "@/hooks/useConversations";
-import { UserAvatarGlobal } from "@/components/ui/user-avatar-global";
+import { useHotkeys, commonHotkeys } from "@/hooks/useHotkeys";
 import ConversationHistory from "@/components/ConversationHistory";
 
 interface Message {
@@ -62,63 +63,40 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: AutoResizeProps) {
 }
 
 export default function ChatPage() {
-  // Sistema de múltiplas conversas
-  const {
-    conversations,
-    currentConversationId,
-    isLoading: conversationsLoading,
-    isSyncing,
-    getCurrentMessages,
-    createNewConversation,
-    updateCurrentConversation,
-    selectConversation,
-    deleteConversation,
-    restoreConversation,
-    renameConversation,
-    exportConversations,
-  } = useConversations();
+  // Persistência de conversas
+  const { initialMessages, isLoaded, saveMessages, clearHistory } = useChatPersistence();
 
   // Integração real com Gemini via Vercel AI SDK
   const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages, reload, stop } = useChat({
     api: '/api/chat',
-    initialMessages: conversationsLoading ? [] : getCurrentMessages(),
+    initialMessages: isLoaded ? initialMessages : undefined,
     onError: (error: Error) => {
+      // console.error('Chat error:', error);
       toast.error("Erro ao enviar mensagem", {
         description: error.message || "Não foi possível processar sua mensagem. Tente novamente.",
       });
     },
   });
 
-  // Auto-save mensagens da conversa atual
+  // Auto-save mensagens
   useEffect(() => {
-    if (!conversationsLoading && messages.length > 0 && currentConversationId) {
-      // Filtrar apenas user e assistant roles
-      const validMessages = messages
-        .filter(m => m.role === 'user' || m.role === 'assistant')
-        .map(m => ({
-          id: m.id,
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-          createdAt: m.createdAt || new Date()
-        }));
-      
-      updateCurrentConversation(validMessages);
+    if (isLoaded && messages.length > 0) {
+      saveMessages(messages);
     }
-  }, [messages, conversationsLoading, currentConversationId, updateCurrentConversation]);
-
-  // Atualizar mensagens quando trocar de conversa
-  useEffect(() => {
-    if (!conversationsLoading) {
-      const currentMessages = getCurrentMessages();
-      setMessages(currentMessages);
-    }
-  }, [currentConversationId, conversationsLoading]);
+  }, [messages, isLoaded, saveMessages]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [showRealTimeChat, setShowRealTimeChat] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const isMobile = useIsMobile()
+
+  // Sistema de múltiplas conversas (Sprint 2)
+  const {
+    conversations,
+    currentConversationId,
+    groupConversationsByDate,
+  } = useConversations();
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -176,11 +154,24 @@ export default function ChatPage() {
   }, [])
 
   const handleNewChat = () => {
-    const newId = createNewConversation();
+    clearHistory();
     setMessages([]);
     setSelectedImage(null);
-    toast.success("✨ Nova conversa iniciada");
+    toast.success("Nova conversa iniciada", {
+      description: "Histórico limpo com sucesso",
+    });
   };
+
+  // Hotkeys globais (Sprint 2)
+  const { isMac, getHotkeyLabel } = useHotkeys([
+    commonHotkeys.newChat(handleNewChat),
+    commonHotkeys.toggleHistory(() => setIsSidebarOpen(prev => !prev)),
+    commonHotkeys.escape(() => {
+      if (isSidebarOpen) setIsSidebarOpen(false);
+      if (showHelpModal) setShowHelpModal(false);
+    }),
+    commonHotkeys.help(() => setShowHelpModal(true)),
+  ]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -292,46 +283,25 @@ export default function ChatPage() {
               backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
             }}
           />
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-[50px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[50px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
         </div>
 
-        {/* Navbar Preta com iOS safe area */}
-        <div className="relative z-50 pt-safe bg-black/90 backdrop-blur-xl border-b border-white/10">
+        {/* Navbar with iOS safe area */}
+        <div className="relative z-50 pt-safe">
           <PremiumNavbar
             className="relative"
-            variant="solid"
+            credits={250}
+            variant="transparent"
             showSidebarToggle={true}
             onSidebarToggle={toggleSidebar}
             isSidebarOpen={isSidebarOpen}
             onNewChat={handleNewChat}
           />
-          
-          {/* Botão de Histórico de Conversas */}
-          <button
-            onClick={() => setIsHistoryOpen(true)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
-          >
-            <Menu className="w-5 h-5 text-white" />
-          </button>
         </div>
 
-        {/* Gradient Fade Overlay - Efeito de conversa subindo (Mobile) - Mais forte */}
-        <div className="fixed top-[60px] left-0 right-0 h-40 bg-gradient-to-b from-black via-black/80 to-transparent z-40 pointer-events-none pt-safe" />
-
-        {/* Histórico de Conversas */}
-        <ConversationHistory
-          conversations={conversations}
-          currentConversationId={currentConversationId}
-          onSelectConversation={selectConversation}
-          onDeleteConversation={deleteConversation}
-          onNewConversation={handleNewChat}
-          onRenameConversation={renameConversation}
-          onExportConversations={exportConversations}
-          isSyncing={isSyncing}
-          isOpen={isHistoryOpen}
-          onClose={() => setIsHistoryOpen(false)}
-        />
+        {/* Gradient Fade Overlay - Efeito de conversa subindo */}
+        <div className="fixed top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/60 to-transparent z-40 pointer-events-none pt-safe" />
 
         {isSidebarOpen && (
           <div
@@ -452,11 +422,12 @@ export default function ChatPage() {
                         </div>
                         {msg.role === "user" && (
                           <motion.div 
+                            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
                           >
-                            <UserAvatarGlobal size="sm" />
+                            <User className="w-4 h-4 text-white" />
                           </motion.div>
                         )}
                       </div>
@@ -603,7 +574,7 @@ export default function ChatPage() {
 
   // --- DESKTOP VIEW ---
   return (
-    <div className="relative w-full h-screen flex overflow-hidden bg-black">
+    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-[#0a0a0a]">
       {/* Image Background - Super Elegant & Blurred */}
       <div className="fixed inset-0 z-0">
         <div 
@@ -612,40 +583,22 @@ export default function ChatPage() {
             backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
           }}
         />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[40px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
+        <div className="absolute inset-0 bg-[#0a0a0a]/50 backdrop-blur-[40px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </div>
 
-      {/* Histórico de Conversas - Desktop */}
-      <ConversationHistory
-        conversations={conversations}
-        currentConversationId={currentConversationId}
-        onSelectConversation={selectConversation}
-        onDeleteConversation={deleteConversation}
-        onNewConversation={handleNewChat}
-        onRenameConversation={renameConversation}
-        onExportConversations={exportConversations}
-        isSyncing={isSyncing}
-        isOpen={true}
-        onClose={() => {}}
+      <PremiumNavbar 
+        className="relative z-50" 
+        credits={250} 
+        variant="transparent"
+        showSidebarToggle={true}
+        onSidebarToggle={toggleSidebar}
+        isSidebarOpen={isSidebarOpen}
+        onNewChat={handleNewChat}
       />
 
-      {/* Main Content */}
-      <div className="relative flex-1 flex flex-col overflow-hidden">
-        {/* Navbar Preta Premium */}
-        <div className="relative z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
-          <PremiumNavbar 
-            className="relative" 
-            variant="solid"
-            showSidebarToggle={true}
-            onSidebarToggle={toggleSidebar}
-            isSidebarOpen={isSidebarOpen}
-            onNewChat={handleNewChat}
-          />
-        </div>
-
-        {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) - Mais escuro e suave */}
-        <div className="absolute top-[60px] left-0 right-0 h-48 bg-gradient-to-b from-black via-black/80 to-transparent z-40 pointer-events-none" />
+      {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) */}
+      <div className="fixed top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent z-40 pointer-events-none" />
 
       {isSidebarOpen && (
         <div
@@ -741,7 +694,9 @@ export default function ChatPage() {
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <UserAvatarGlobal size="sm" className="mt-0.5" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </div>
                   )}
                 </div>
               ))}
@@ -825,9 +780,84 @@ export default function ChatPage() {
           </form>
         </div>
       </div>
-      </div>
       <AnimatePresence>
         {showRealTimeChat && <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />}
+      </AnimatePresence>
+
+      {/* Help Modal - Keyboard Shortcuts (Sprint 2) */}
+      <AnimatePresence>
+        {showHelpModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowHelpModal(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-full max-w-md"
+            >
+              <div className="bg-gradient-to-br from-zinc-900 via-zinc-900/95 to-black border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
+                <div className="relative p-6 border-b border-zinc-800">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10" />
+                  <div className="relative">
+                    <h2 className="text-xl font-bold text-white mb-1">⌨️ Atalhos de Teclado</h2>
+                    <p className="text-sm text-zinc-400">Navegue mais rápido com esses comandos</p>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
+                  {[
+                    { key: 'K', modifiers: isMac ? '⌘' : 'Ctrl', desc: 'Nova conversa' },
+                    { key: 'H', modifiers: isMac ? '⌘ + Shift' : 'Ctrl + Shift', desc: 'Abrir/fechar histórico' },
+                    { key: '/', modifiers: isMac ? '⌘' : 'Ctrl', desc: 'Mostrar esta ajuda' },
+                    { key: 'Esc', modifiers: '', desc: 'Fechar modal/sidebar' },
+                  ].map((hotkey, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group"
+                    >
+                      <span className="text-sm text-zinc-300 group-hover:text-white transition-colors">
+                        {hotkey.desc}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {hotkey.modifiers && (
+                          <>
+                            <kbd className="px-2 py-1 text-xs font-semibold text-zinc-300 bg-zinc-900 border border-zinc-700 rounded shadow-sm">
+                              {hotkey.modifiers}
+                            </kbd>
+                            <span className="text-zinc-600">+</span>
+                          </>
+                        )}
+                        <kbd className="px-2 py-1 text-xs font-semibold text-zinc-300 bg-zinc-900 border border-zinc-700 rounded shadow-sm">
+                          {hotkey.key}
+                        </kbd>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
+                  <button
+                    onClick={() => setShowHelpModal(false)}
+                    className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
       </AnimatePresence>
     </div>
   )

@@ -26,6 +26,20 @@ export interface Conversation {
   syncVersion?: number;
 }
 
+export interface ConversationGroup {
+  name: string;
+  order: number;
+  conversations: Conversation[];
+}
+
+export type GroupedConversations = {
+  hoje: Conversation[];
+  ontem: Conversation[];
+  semana: Conversation[];
+  mes: Conversation[];
+  antigos: Conversation[];
+}
+
 interface SupabaseConversation {
   id: string;
   user_id: string;
@@ -477,6 +491,45 @@ export function useConversations() {
     toast.success('📦 Conversas exportadas!');
   }, [conversations, userId]);
 
+  // Agrupar conversas por data (client-side)
+  const groupConversationsByDate = useCallback((): GroupedConversations => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const grouped: GroupedConversations = {
+      hoje: [],
+      ontem: [],
+      semana: [],
+      mes: [],
+      antigos: []
+    };
+
+    conversations.forEach(conv => {
+      const convDate = new Date(conv.updatedAt);
+      const convDay = new Date(convDate.getFullYear(), convDate.getMonth(), convDate.getDate());
+
+      if (convDay.getTime() === today.getTime()) {
+        grouped.hoje.push(conv);
+      } else if (convDay.getTime() === yesterday.getTime()) {
+        grouped.ontem.push(conv);
+      } else if (convDate >= sevenDaysAgo) {
+        grouped.semana.push(conv);
+      } else if (convDate >= thirtyDaysAgo) {
+        grouped.mes.push(conv);
+      } else {
+        grouped.antigos.push(conv);
+      }
+    });
+
+    return grouped;
+  }, [conversations]);
+
   return {
     conversations,
     currentConversationId,
@@ -491,6 +544,7 @@ export function useConversations() {
     restoreConversation,
     renameConversation,
     clearAllConversations,
-    exportConversations
+    exportConversations,
+    groupConversationsByDate
   };
 }
