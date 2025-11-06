@@ -277,13 +277,6 @@ export default function HomePage() {
                 image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-3815-estu%CC%81dio%20criativo%2C%20artistas%20a%20trabalhar%20e....jpeg"
               },
               {
-                icon: Music,
-                title: "Kyntal: Distribuição Musical",
-                subtitle: "Distribuição profissional global",
-                description: "Lança a tua música nas principais plataformas globais. À medida que atinges metas, ganhas DUA Coin para reinvestir na tua carreira. Royalties tradicionais + economia criativa.",
-                image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-7939-homem%20com%20camisola%20castanha%20%20KYNTAL%20.%20A%20....jpeg"
-              },
-              {
                 icon: Coins,
                 title: "DUA Coin: Economia Criativa",
                 subtitle: "A moeda do ecossistema 2 LADOS",

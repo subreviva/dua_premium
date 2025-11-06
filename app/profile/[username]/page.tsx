@@ -228,10 +228,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
                       <Video className="w-4 h-4" />
                       Vídeos
                     </TabsTrigger>
-                    <TabsTrigger value="music" className="gap-2">
-                      <Music className="w-4 h-4" />
-                      Músicas
-                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="all" className="mt-6">
@@ -282,10 +278,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
                   <TabsContent value="videos" className="mt-6">
                     <div className="text-center py-12 text-white/60">Nenhum vídeo ainda</div>
-                  </TabsContent>
-
-                  <TabsContent value="music" className="mt-6">
-                    <div className="text-center py-12 text-white/60">Nenhuma música ainda</div>
                   </TabsContent>
                 </Tabs>
               </div>

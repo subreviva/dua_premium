@@ -12,14 +12,14 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" })
 
 export const metadata: Metadata = {
-  title: "Music Studio AI - Crie Música com IA",
-  description: "Estúdio de música profissional com Inteligência Artificial - Crie, produza e edite música",
+  title: "DUA - Plataforma de IA Criativa",
+  description: "Plataforma completa com Inteligência Artificial - Crie vídeos, imagens, designs e muito mais",
   generator: "v0.app",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Music Studio AI",
+    title: "DUA",
   },
   formatDetection: {
     telephone: false,
