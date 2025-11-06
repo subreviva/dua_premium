@@ -57,7 +57,7 @@ const AdminPanel = () => {
       }
 
       // Verificar se é admin (email específico ou role)
-      const adminEmails = ['admin@dua.pt', 'subreviva@gmail.com', 'dev@dua.pt'];
+      const adminEmails = ['admin@dua.pt', 'subreviva@gmail.com', 'dev@dua.pt', 'dev@dua.com'];
       
       if (!adminEmails.includes(user.email || '')) {
         toast.error('Acesso Negado', {
