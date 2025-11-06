@@ -57,11 +57,19 @@ CREATE TABLE IF NOT EXISTS public.users (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. Adicionar coluna avatar_url se a tabela já existir (mas sem a coluna)
+-- 6. Adicionar colunas faltantes se a tabela já existir
 DO $$ 
 BEGIN
   IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users') THEN
+    -- Adicionar todas as colunas necessárias
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS name TEXT;
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS username TEXT UNIQUE;
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS bio TEXT;
     ALTER TABLE public.users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS has_access BOOLEAN DEFAULT false;
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS invite_code_used TEXT;
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+    ALTER TABLE public.users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
   END IF;
 END $$;
 

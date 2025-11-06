@@ -139,25 +139,42 @@ export default function PerfilPage() {
         }
       }
 
-      // Atualizar perfil
+      // Preparar dados do perfil
+      const profileData = {
+        id: user.id,
+        email: user.email,
+        name: name.trim(),
+        username: username.toLowerCase().trim() || null,
+        bio: bio.trim() || null,
+        avatar_url: avatarUrl || null,
+        updated_at: new Date().toISOString()
+      };
+
+      // UPSERT: Inserir ou atualizar perfil (resolve problema se registro não existir)
       const { error } = await supabase
         .from('users')
-        .update({
-          name: name.trim(),
-          username: username.toLowerCase().trim() || null,
-          bio: bio.trim() || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+        .upsert(profileData, {
+          onConflict: 'id',
+          ignoreDuplicates: false
+        });
 
-      if (error) throw error;
+      if (error) {
+        // Se ainda houver erro de schema, mostrar mensagem específica
+        if (error.message.includes('schema cache')) {
+          toast.error("Erro de configuração", {
+            description: "Execute o script SQL fix-users-table-complete.sql no Supabase"
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast.success("Perfil atualizado! ✨", {
         description: "Suas alterações foram salvas"
       });
 
     } catch (error: any) {
-      // PRODUCTION: Removed console.error
       toast.error("Erro ao salvar perfil", {
         description: error.message || "Tente novamente"
       });
