@@ -398,7 +398,7 @@ export default function FeedPage() {
         <BeamsBackground intensity="subtle" />
       </div>
 
-      <PremiumNavbar className="relative z-50" credits={250} />
+      <PremiumNavbar className="relative z-50" />
 
       <ChatSidebar
         isOpen={isSidebarOpen}

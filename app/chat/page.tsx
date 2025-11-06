@@ -269,7 +269,6 @@ export default function ChatPage() {
         <div className="relative z-50 pt-safe">
           <PremiumNavbar
             className="relative"
-            credits={250}
             variant="transparent"
             showSidebarToggle={true}
             onSidebarToggle={toggleSidebar}
@@ -567,7 +566,6 @@ export default function ChatPage() {
 
       <PremiumNavbar 
         className="relative z-50" 
-        credits={250} 
         variant="transparent"
         showSidebarToggle={true}
         onSidebarToggle={toggleSidebar}

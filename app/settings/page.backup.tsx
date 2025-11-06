@@ -1,8 +1,24 @@
 "use client"
 
+import { useState } from "react"
+import { ChatSidebar } from "@/components/ui/chat-sidebar"
+import { PremiumNavbar } from "@/components/ui/premium-navbar"
+import { UserAvatar } from "@/components/ui/user-avatar"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { User, Bell, Lock, Palette, PanelLeftClose, PanelLeft } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { BeamsBackground } from "@/components/ui/beams-background"
+
+"use client"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ChatSidebar } from "@/components/ui/chat-sidebar"
+import { ChatSidebar } from "@/components/chat-sidebar"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { Button } from "@/components/ui/button"
@@ -17,6 +33,7 @@ import {
   Settings, 
   Bell, 
   Lock, 
+  Palette, 
   Menu, 
   User, 
   CreditCard, 
@@ -103,6 +120,7 @@ export default function SettingsPage() {
   
   // UI states
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Fetch real user data from Supabase
   useEffect(() => {
@@ -342,8 +360,8 @@ export default function SettingsPage() {
       <ChatSidebar
         isOpen={isSidebarOpen}
         isCollapsed={isSidebarCollapsed}
-        onToggleOpen={setIsSidebarOpen}
-        onToggleCollapsed={setIsSidebarCollapsed}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        onCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
       {/* Main Content */}
@@ -352,7 +370,7 @@ export default function SettingsPage() {
       }`}>
         
         {/* Navbar */}
-        <PremiumNavbar />
+        <PremiumNavbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         {/* Settings Content */}
         <div className="flex-1 overflow-y-auto">

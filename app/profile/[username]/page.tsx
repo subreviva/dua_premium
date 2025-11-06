@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChatSidebar } from "@/components/ui/chat-sidebar"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
   Award,
   Trophy,
   Rocket,
+  Loader2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BeamsBackground } from "@/components/ui/beams-background"
@@ -26,81 +27,88 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { InteractionBar } from "@/components/ui/interaction-bar"
 import { GlassmorphismProfileCard } from "@/components/ui/glassmorphism-profile-card"
 import { useRouter } from "next/navigation"
+import { createClient } from "@supabase/supabase-js"
+import { toast } from "sonner"
 
-const mockUserData = {
-  username: "maria_silva",
-  displayName: "Maria Silva",
-  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
-  title: "Artista Digital & Criadora",
-  bio: "Criadora de arte digital e fotografia gerada por IA. Apaixonada por explorar novos estilos visuais e técnicas inovadoras.",
-  stats: {
-    generations: 1234,
-    likes: 45678,
-    followers: 892,
-    following: 234,
-  },
-  badges: [
-    { id: "1", name: "Criador Premium", icon: Award, color: "from-yellow-500 to-orange-500" },
-    { id: "2", name: "Top Contribuidor", icon: Trophy, color: "from-purple-500 to-pink-500" },
-    { id: "3", name: "Pioneiro", icon: Rocket, color: "from-blue-500 to-cyan-500" },
-  ],
-  portfolio: [
-    {
-      id: "1",
-      type: "image",
-      url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80",
-      title: "Cidade Cyberpunk",
-      likes: 234,
-      comments: 45,
-    },
-    {
-      id: "2",
-      type: "image",
-      url: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80",
-      title: "Retrato Artístico",
-      likes: 567,
-      comments: 89,
-    },
-    {
-      id: "3",
-      type: "image",
-      url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&q=80",
-      title: "Paisagem Abstrata",
-      likes: 892,
-      comments: 123,
-    },
-    {
-      id: "4",
-      type: "image",
-      url: "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=800&q=80",
-      title: "Arte Abstrata",
-      likes: 456,
-      comments: 67,
-    },
-    {
-      id: "5",
-      type: "image",
-      url: "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80",
-      title: "Natureza Digital",
-      likes: 678,
-      comments: 89,
-    },
-    {
-      id: "6",
-      type: "image",
-      url: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&q=80",
-      title: "Espaço Sideral",
-      likes: 345,
-      comments: 56,
-    },
-  ],
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+)
+
+interface UserProfile {
+  id: string
+  email: string
+  full_name: string | null
+  display_name: string | null
+  bio: string | null
+  avatar_url: string | null
+  total_tokens: number
+  tokens_used: number
+  tier: string
+  created_at: string
+}
+
+interface Generation {
+  id: string
+  user_id: string
+  type: string
+  prompt: string
+  result_url: string | null
+  created_at: string
+  likes_count: number
 }
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isFollowing, setIsFollowing] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [generations, setGenerations] = useState<Generation[]>([])
   const router = useRouter()
+
+  useEffect(() => {
+    loadProfileData()
+  }, [params.username])
+
+  const loadProfileData = async () => {
+    try {
+      setLoading(true)
+
+      // Get user by display_name or username
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .or(`display_name.eq.${params.username},email.ilike.%${params.username}%`)
+        .single()
+
+      if (userError) {
+        toast.error('Usuário não encontrado')
+        router.push('/chat')
+        return
+      }
+
+      setUserProfile(userData)
+
+      // Load user generations
+      const { data: genData, error: genError } = await supabase
+        .from('generation_history')
+        .select('*')
+        .eq('user_id', userData.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      if (!genError && genData) {
+        setGenerations(genData)
+      }
+
+    } catch (error) {
+      console.error('Error loading profile:', error)
+      toast.error('Erro ao carregar perfil')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev)
@@ -110,13 +118,50 @@ export default function ProfilePage({ params }: { params: { username: string } }
     setIsFollowing(!isFollowing)
   }
 
+  const getAvatarUrl = (email: string) => {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
+  }
+
+  const getTierBadge = (tier: string) => {
+    const badges = {
+      free: { name: "Membro", icon: Award, color: "from-gray-500 to-gray-600" },
+      basic: { name: "Básico", icon: Award, color: "from-blue-500 to-blue-600" },
+      premium: { name: "Premium", icon: Trophy, color: "from-yellow-500 to-orange-500" },
+      pro: { name: "Profissional", icon: Rocket, color: "from-purple-500 to-pink-500" }
+    }
+    return badges[tier as keyof typeof badges] || badges.free
+  }
+
+  if (loading) {
+    return (
+      <div className="relative w-full min-h-screen flex items-center justify-center">
+        <div className="fixed inset-0 z-0">
+          <BeamsBackground intensity="subtle" />
+        </div>
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-white animate-spin" />
+          <p className="text-white/60">Carregando perfil...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!userProfile) {
+    return null
+  }
+
+  const totalGenerations = generations.length
+  const totalLikes = generations.reduce((acc, gen) => acc + (gen.likes_count || 0), 0)
+  const tierBadge = getTierBadge(userProfile.tier)
+  const availableTokens = userProfile.total_tokens - userProfile.tokens_used
+
   return (
     <div className="relative w-full min-h-screen">
       <div className="fixed inset-0 z-0">
         <BeamsBackground intensity="subtle" />
       </div>
 
-      <PremiumNavbar className="relative z-50" credits={250} />
+      <PremiumNavbar className="relative z-50" credits={availableTokens} />
 
       <ChatSidebar
         isOpen={isSidebarOpen}
@@ -150,10 +195,10 @@ export default function ProfilePage({ params }: { params: { username: string } }
             <div className="lg:col-span-1">
               <div className="sticky top-24">
                 <GlassmorphismProfileCard
-                  avatarUrl={mockUserData.avatar}
-                  name={mockUserData.displayName}
-                  title={mockUserData.title}
-                  bio={mockUserData.bio}
+                  avatarUrl={userProfile.avatar_url || getAvatarUrl(userProfile.email)}
+                  name={userProfile.display_name || userProfile.full_name || userProfile.email}
+                  title={`Membro ${tierBadge.name}`}
+                  bio={userProfile.bio || "Criador na plataforma DUA"}
                   socialLinks={[
                     { id: "github", icon: Github, label: "GitHub", href: "#" },
                     { id: "linkedin", icon: Linkedin, label: "LinkedIn", href: "#" },
@@ -169,36 +214,33 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   <h3 className="text-lg font-semibold text-white">Estatísticas</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer">
-                      <div className="text-2xl font-bold text-white">{mockUserData.stats.generations}</div>
+                      <div className="text-2xl font-bold text-white">{totalGenerations}</div>
                       <div className="text-xs text-white/60 mt-1">Gerações</div>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer">
-                      <div className="text-2xl font-bold text-white">{mockUserData.stats.likes}</div>
+                      <div className="text-2xl font-bold text-white">{totalLikes}</div>
                       <div className="text-xs text-white/60 mt-1">Likes</div>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer">
-                      <div className="text-2xl font-bold text-white">{mockUserData.stats.followers}</div>
-                      <div className="text-xs text-white/60 mt-1">Seguidores</div>
+                      <div className="text-2xl font-bold text-white">{availableTokens}</div>
+                      <div className="text-xs text-white/60 mt-1">Tokens</div>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer">
-                      <div className="text-2xl font-bold text-white">{mockUserData.stats.following}</div>
-                      <div className="text-xs text-white/60 mt-1">Seguindo</div>
+                      <div className="text-2xl font-bold text-white">{userProfile.tier.toUpperCase()}</div>
+                      <div className="text-xs text-white/60 mt-1">Plano</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-6 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 p-6 space-y-4 hover:border-white/20 transition-all">
-                  <h3 className="text-lg font-semibold text-white">Conquistas</h3>
+                  <h3 className="text-lg font-semibold text-white">Conquista</h3>
                   <div className="flex flex-col gap-3">
-                    {mockUserData.badges.map((badge) => (
-                      <Badge
-                        key={badge.id}
-                        className={`bg-gradient-to-r ${badge.color} text-white border-0 gap-2 py-2 px-4 justify-start hover:scale-105 transition-transform cursor-pointer`}
-                      >
-                        <badge.icon className="w-4 h-4" />
-                        <span className="text-sm font-medium">{badge.name}</span>
-                      </Badge>
-                    ))}
+                    <Badge
+                      className={`bg-gradient-to-r ${tierBadge.color} text-white border-0 gap-2 py-2 px-4 justify-start hover:scale-105 transition-transform cursor-pointer`}
+                    >
+                      <tierBadge.icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{tierBadge.name}</span>
+                    </Badge>
                   </div>
                 </div>
 
@@ -232,47 +274,75 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
                   <TabsContent value="all" className="mt-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {mockUserData.portfolio.map((item) => (
-                        <div
-                          key={item.id}
-                          className="bg-black/40 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all group"
-                        >
-                          <AspectRatio ratio={1}>
-                            <img
-                              src={item.url || "/placeholder.svg"}
-                              alt={item.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          </AspectRatio>
-                          <div className="p-4 space-y-2">
-                            <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                            <InteractionBar likes={item.likes} comments={item.comments} shares={0} />
-                          </div>
+                      {generations.length === 0 ? (
+                        <div className="col-span-2 text-center py-12 text-white/60">
+                          Nenhuma geração ainda
                         </div>
-                      ))}
+                      ) : (
+                        generations.map((item) => (
+                          <div
+                            key={item.id}
+                            className="bg-black/40 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all group"
+                          >
+                            <AspectRatio ratio={1}>
+                              {item.result_url ? (
+                                <img
+                                  src={item.result_url}
+                                  alt={item.prompt.substring(0, 50)}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                                  <ImageIcon className="w-12 h-12 text-white/40" />
+                                </div>
+                              )}
+                            </AspectRatio>
+                            <div className="p-4 space-y-2">
+                              <h3 className="text-sm font-semibold text-white line-clamp-1">
+                                {item.prompt.substring(0, 50)}...
+                              </h3>
+                              <InteractionBar likes={item.likes_count || 0} comments={0} shares={0} />
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </TabsContent>
 
                   <TabsContent value="images" className="mt-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {mockUserData.portfolio.map((item) => (
-                        <div
-                          key={item.id}
-                          className="bg-black/40 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all group"
-                        >
-                          <AspectRatio ratio={1}>
-                            <img
-                              src={item.url || "/placeholder.svg"}
-                              alt={item.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          </AspectRatio>
-                          <div className="p-4 space-y-2">
-                            <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                            <InteractionBar likes={item.likes} comments={item.comments} shares={0} />
-                          </div>
+                      {generations.filter(g => g.type === 'image').length === 0 ? (
+                        <div className="col-span-2 text-center py-12 text-white/60">
+                          Nenhuma imagem ainda
                         </div>
-                      ))}
+                      ) : (
+                        generations.filter(g => g.type === 'image').map((item) => (
+                          <div
+                            key={item.id}
+                            className="bg-black/40 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all group"
+                          >
+                            <AspectRatio ratio={1}>
+                              {item.result_url ? (
+                                <img
+                                  src={item.result_url}
+                                  alt={item.prompt.substring(0, 50)}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                                  <ImageIcon className="w-12 h-12 text-white/40" />
+                                </div>
+                              )}
+                            </AspectRatio>
+                            <div className="p-4 space-y-2">
+                              <h3 className="text-sm font-semibold text-white line-clamp-1">
+                                {item.prompt.substring(0, 50)}...
+                              </h3>
+                              <InteractionBar likes={item.likes_count || 0} comments={0} shares={0} />
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </TabsContent>
 

@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { VideoGenerationProvider } from "@/contexts/video-generation-context"
 import { VideoGenerationNotifications } from "@/components/ui/video-generation-notifications"
+import { StagewiseToolbar } from "@/components/stagewise-toolbar"
 import { Toaster } from "sonner"
 import PWAInstallPrompt, { ConnectionStatus } from "@/components/PWAInstallPrompt"
 import "./globals.css"
@@ -60,6 +61,9 @@ export default function RootLayout({
         <VideoGenerationProvider>
           {children}
           <VideoGenerationNotifications />
+          
+          {/* Stagewise Toolbar - Dev Mode Only */}
+          <StagewiseToolbar />
           
           {/* PWA Components */}
           <PWAInstallPrompt />

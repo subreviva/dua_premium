@@ -14,6 +14,12 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+)
 
 interface PremiumNavbarProps {
   className?: string
@@ -30,7 +36,7 @@ interface PremiumNavbarProps {
 
 export function PremiumNavbar({
   className,
-  credits = 100,
+  credits: propCredits,
   title = "DUA IA",
   showBackButton = false,
   backLink = "/",
@@ -42,6 +48,7 @@ export function PremiumNavbar({
 }: PremiumNavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [userCredits, setUserCredits] = useState<number | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -51,6 +58,39 @@ export function PremiumNavbar({
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    // Fetch real user credits if not provided via props
+    if (propCredits === undefined) {
+      loadUserCredits()
+    }
+  }, [propCredits])
+
+  const loadUserCredits = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('total_tokens, tokens_used')
+          .eq('id', user.id)
+          .single()
+        
+        if (userData) {
+          setUserCredits(userData.total_tokens - userData.tokens_used)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading credits:', error)
+    }
+  }
+
+  const handleBuyCredits = () => {
+    router.push('/comprar')
+  }
+
+  const displayCredits = propCredits !== undefined ? propCredits : userCredits
 
   const variantStyles = {
     default: "backdrop-blur-xl bg-black/60 border-b border-white/5",
@@ -120,15 +160,15 @@ export function PremiumNavbar({
 
             {/* Right Section - Credits & Actions */}
             <div className="flex items-center gap-3 sm:gap-4">
-              {credits !== undefined && (
+              {displayCredits !== null && displayCredits !== undefined && (
                 <>
                   <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 hover:border-white/20 hover:from-white/10 hover:to-white/5 transition-all duration-300 backdrop-blur-sm">
                     <Coins className="w-4 h-4 text-yellow-400/90" />
-                    <span className="text-sm font-semibold text-white tracking-wide">{credits}</span>
+                    <span className="text-sm font-semibold text-white tracking-wide">{displayCredits}</span>
                   </div>
 
                   <Button
-                    onClick={() => console.log("[v0] Buy credits clicked")}
+                    onClick={handleBuyCredits}
                     className={cn(
                       "hidden md:flex bg-gradient-to-br from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 text-white border border-white/20 hover:border-white/30 transition-all duration-300 rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide shadow-lg hover:shadow-white/10",
                       isScrolled && "lg:hidden",

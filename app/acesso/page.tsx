@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, KeyRound, Mail, Sparkles, User, Lock, ArrowRight, Check } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { audit } from "@/lib/audit";
@@ -21,14 +20,13 @@ export default function AcessoPage() {
   const [step, setStep] = useState("code");
   const [code, setCode] = useState("");
   const [isValidatingCode, setIsValidatingCode] = useState(false);
-  const [validatedCode, setValidatedCode] = useState(null);
+  const [validatedCode, setValidatedCode] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
 
-  // Log page access
   useEffect(() => {
     audit.pageAccess('/acesso');
   }, []);
@@ -55,12 +53,12 @@ export default function AcessoPage() {
       }
       setValidatedCode(data.code);
       setStep("register");
-      toast.success("Código válido! ✅", { description: "Complete seu registo para continuar" });
+      toast.success("Código válido", { description: "Complete seu registo para continuar" });
       audit.codeValidation(code, true, 1);
     } catch (error) {
-      // console.error("Erro ao validar código:", error);
       toast.error("Erro de conexão", { description: "Não foi possível validar o código" });
       audit.error(error as Error, 'code_validation');
+      audit.codeValidation(code, false, 1);
     } finally {
       setIsValidatingCode(false);
     }
@@ -103,11 +101,10 @@ export default function AcessoPage() {
       }
       await supabase.from('users').update({ has_access: true, invite_code_used: validatedCode }).eq('id', authData.user.id);
       await supabase.from('invite_codes').update({ active: false, used_by: authData.user.id }).eq('code', validatedCode);
-      toast.success("Conta criada com sucesso! 🎉", { description: "Redirecionando para o chat...", duration: 3000 });
+      toast.success("Conta criada com sucesso", { description: "Redirecionando para o chat", duration: 3000 });
       audit.registration(true, validatedCode || undefined);
       setTimeout(() => { router.push("/chat"); }, 2000);
     } catch (error) {
-      // console.error("Erro no registo:", error);
       toast.error("Erro de conexão", { description: "Não foi possível completar o registo" });
       audit.error(error as Error, 'user_registration');
       audit.registration(false, validatedCode || undefined);
@@ -118,71 +115,228 @@ export default function AcessoPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-black overflow-hidden">
+      {/* Sophisticated background gradient - Sora style */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 w-full h-full bg-cover bg-center opacity-40" style={{ backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)' }} />
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(236,72,153,0.06),transparent_50%)]" />
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="relative z-10 w-full max-w-md px-6">
-        <div className="text-center mb-8">
-          <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 200 }} className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-4">
-            <Sparkles className="w-8 h-8 text-white" />
-          </motion.div>
-          <h1 className="text-4xl font-bold text-white mb-2">DUA</h1>
-          <p className="text-neutral-400 text-sm">{step === "code" ? "Insira seu código de acesso" : "Complete seu registo"}</p>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="relative z-10 w-full max-w-xl px-6"
+      >
+        
+        {/* Ultra-minimal header - No icons, no logos, just typography */}
+        <div className="text-center mb-16">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="text-6xl font-light tracking-tight text-white mb-4"
+            style={{ fontFamily: 'var(--font-geist-sans)' }}
+          >
+            DUA
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-neutral-500 text-sm font-light tracking-wide"
+          >
+            {step === "code" ? "Insira seu código de acesso" : "Complete seu registo"}
+          </motion.p>
         </div>
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className={`w-2 h-2 rounded-full transition-all ${step === "code" ? "bg-purple-500 w-8" : "bg-purple-500/50"}`} />
-          <div className={`w-2 h-2 rounded-full transition-all ${step === "register" ? "bg-purple-500 w-8" : "bg-neutral-700"}`} />
+
+        {/* Minimal progress indicator - No colors, just subtle dots */}
+        <div className="flex items-center justify-center gap-3 mb-12">
+          <div 
+            className={`transition-all duration-500 ${
+              step === "code" 
+                ? "w-12 h-0.5 bg-white" 
+                : "w-2 h-0.5 bg-neutral-800"
+            }`} 
+          />
+          <div 
+            className={`transition-all duration-500 ${
+              step === "register" 
+                ? "w-12 h-0.5 bg-white" 
+                : "w-2 h-0.5 bg-neutral-800"
+            }`} 
+          />
         </div>
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.4 }} className="bg-neutral-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+
+        {/* Main card - Ultra clean, no borders, just subtle shadow */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }} 
+          animate={{ opacity: 1, scale: 1 }} 
+          transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="bg-neutral-950/40 backdrop-blur-2xl rounded-none p-12 shadow-2xl shadow-black/50"
+        >
           <AnimatePresence mode="wait">
             {step === "code" ? (
-              <motion.form key="code-form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleValidateCode} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-300 flex items-center gap-2"><KeyRound className="w-4 h-4" />Código de Convite</label>
-                  <Input type="text" placeholder="XXXX-XXXX" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} disabled={isValidatingCode} className="bg-black/50 border-white/10 text-white placeholder:text-neutral-500 focus:border-purple-500 h-14 text-center text-xl font-mono tracking-widest" maxLength={20} required />
+              <motion.form 
+                key="code-form" 
+                initial={{ opacity: 0, x: -20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.4 }}
+                onSubmit={handleValidateCode} 
+                className="space-y-8"
+              >
+                {/* Code input - No label, just placeholder */}
+                <div className="space-y-4">
+                  <Input 
+                    type="text" 
+                    placeholder="Código de convite" 
+                    value={code} 
+                    onChange={(e) => setCode(e.target.value.toUpperCase())} 
+                    disabled={isValidatingCode}
+                    className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-700 focus:border-white h-16 text-center text-2xl font-light tracking-[0.5em] rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
+                    maxLength={20}
+                    required
+                    autoFocus
+                  />
                 </div>
-                <Button type="submit" disabled={isValidatingCode || !code} className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-xl transition-all">
-                  {isValidatingCode ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Validando...</> : <>Validar Código<ArrowRight className="w-5 h-5 ml-2" /></>}
+
+                {/* Submit button - Minimal */}
+                <Button 
+                  type="submit" 
+                  disabled={isValidatingCode || !code}
+                  className="w-full h-14 bg-white hover:bg-neutral-200 text-black font-light text-base tracking-wide rounded-none transition-all duration-300 disabled:opacity-30"
+                >
+                  {isValidatingCode ? "Validando" : "Continuar"}
                 </Button>
-                <div className="pt-4 border-t border-white/5 text-center space-y-2">
-                  <p className="text-xs text-neutral-500">Não tem um código? Entre em contato para acesso antecipado.</p>
-                  <p className="text-sm text-neutral-400">Já tem conta? <Link href="/login" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">Fazer login</Link></p>
+
+                {/* Footer links - Ultra subtle */}
+                <div className="pt-8 border-t border-neutral-900 space-y-3">
+                  <p className="text-xs text-neutral-700 text-center font-light">
+                    Não tem um código? Entre em contato para acesso antecipado
+                  </p>
+                  <p className="text-sm text-neutral-600 text-center font-light">
+                    Já tem conta?{" "}
+                    <Link 
+                      href="/login" 
+                      className="text-neutral-400 hover:text-white transition-colors duration-300"
+                    >
+                      Fazer login
+                    </Link>
+                  </p>
                 </div>
               </motion.form>
             ) : (
-              <motion.form key="register-form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} onSubmit={handleRegister} className="space-y-4">
-                <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg mb-4">
-                  <Check className="w-5 h-5 text-green-400" />
-                  <span className="text-sm text-green-400">Código {validatedCode} validado</span>
+              <motion.form 
+                key="register-form" 
+                initial={{ opacity: 0, x: 20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                onSubmit={handleRegister} 
+                className="space-y-6"
+              >
+                {/* Validated code indicator - Minimal */}
+                <div className="py-3 border-b border-neutral-800 mb-8">
+                  <p className="text-sm text-neutral-500 font-light text-center">
+                    Código {validatedCode} validado
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-300 flex items-center gap-2"><User className="w-4 h-4" />Nome Completo</label>
-                  <Input type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)} disabled={isRegistering} className="bg-black/50 border-white/10 text-white placeholder:text-neutral-500 focus:border-purple-500 h-12" required />
+
+                {/* Form fields - No icons, clean labels */}
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
+                      Nome completo
+                    </label>
+                    <Input 
+                      type="text" 
+                      placeholder="Seu nome" 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)} 
+                      disabled={isRegistering}
+                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
+                      Email
+                    </label>
+                    <Input 
+                      type="email" 
+                      placeholder="seu@email.com" 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value.toLowerCase())} 
+                      disabled={isRegistering}
+                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
+                      Password
+                    </label>
+                    <Input 
+                      type="password" 
+                      placeholder="Mínimo 6 caracteres" 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)} 
+                      disabled={isRegistering}
+                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
+                      Confirmar password
+                    </label>
+                    <Input 
+                      type="password" 
+                      placeholder="Confirme sua password" 
+                      value={confirmPassword} 
+                      onChange={(e) => setConfirmPassword(e.target.value)} 
+                      disabled={isRegistering}
+                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
+                      required
+                      minLength={6}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-300 flex items-center gap-2"><Mail className="w-4 h-4" />Email</label>
-                  <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value.toLowerCase())} disabled={isRegistering} className="bg-black/50 border-white/10 text-white placeholder:text-neutral-500 focus:border-purple-500 h-12" required />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-300 flex items-center gap-2"><Lock className="w-4 h-4" />Password</label>
-                  <Input type="password" placeholder="Mínimo 6 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isRegistering} className="bg-black/50 border-white/10 text-white placeholder:text-neutral-500 focus:border-purple-500 h-12" required minLength={6} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-300 flex items-center gap-2"><Lock className="w-4 h-4" />Confirmar Password</label>
-                  <Input type="password" placeholder="Confirme sua password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={isRegistering} className="bg-black/50 border-white/10 text-white placeholder:text-neutral-500 focus:border-purple-500 h-12" required minLength={6} />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <Button type="button" onClick={() => { setStep("code"); setValidatedCode(null); }} disabled={isRegistering} variant="outline" className="flex-1 h-12 border-white/20 text-white hover:bg-white/5">Voltar</Button>
-                  <Button type="submit" disabled={isRegistering || !name || !email || !password || !confirmPassword} className="flex-1 h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold">
-                    {isRegistering ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Criando...</> : <><Sparkles className="w-5 h-5 mr-2" />Criar Conta</>}
+
+                {/* Action buttons - Minimal spacing */}
+                <div className="flex gap-4 pt-8">
+                  <Button 
+                    type="button" 
+                    onClick={() => { setStep("code"); setValidatedCode(null); }} 
+                    disabled={isRegistering}
+                    variant="ghost"
+                    className="flex-1 h-14 border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700 rounded-none font-light text-base transition-all duration-300"
+                  >
+                    Voltar
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isRegistering || !name || !email || !password || !confirmPassword}
+                    className="flex-1 h-14 bg-white hover:bg-neutral-200 text-black font-light text-base rounded-none transition-all duration-300 disabled:opacity-30"
+                  >
+                    {isRegistering ? "Criando" : "Criar conta"}
                   </Button>
                 </div>
               </motion.form>
             )}
           </AnimatePresence>
         </motion.div>
-        <p className="text-center text-neutral-600 text-xs mt-6">© 2025 DUA • Acesso seguro via Supabase Auth</p>
+
+        {/* Minimal footer */}
+        <p className="text-center text-neutral-800 text-xs mt-12 font-light tracking-wide">
+          DUA 2025
+        </p>
       </motion.div>
     </div>
   );

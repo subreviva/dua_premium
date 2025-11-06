@@ -291,7 +291,7 @@ export default function VideoStudioPage() {
   return (
     <BeamsBackground intensity="medium">
       <div className="relative z-10 min-h-screen flex flex-col">
-        <PremiumNavbar credits={100} showBackButton={true} backLink="/" variant="default" />
+        <PremiumNavbar showBackButton={true} backLink="/" variant="default" />
 
         {/* Hero Section */}
         <section

@@ -59,6 +59,7 @@
     "wavefile": "^11.0.0"
   },
   "devDependencies": {
+    "@21st-extension/toolbar": "^0.5.14",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22.18.13",
     "@types/react": "^19.0.6",

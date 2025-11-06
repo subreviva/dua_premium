@@ -331,7 +331,7 @@ export default function ImageStudioPage() {
   return (
     <BeamsBackground intensity="strong">
       <div className="relative z-10 min-h-screen flex flex-col">
-        <PremiumNavbar credits={100} showBackButton={true} backLink="/" variant="default" />
+        <PremiumNavbar showBackButton={true} backLink="/" variant="default" />
 
         {/* Header Premium - Mais compacto */}
         <section className={cn(
