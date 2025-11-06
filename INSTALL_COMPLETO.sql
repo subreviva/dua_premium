@@ -259,7 +259,7 @@ BEGIN
   WHERE id = user_id;
   
   -- Registrar no log de uso (com valor negativo para indicar crédito)
-  INSERT INTO token_usage_log (user_id, tokens_used, action_type, description)
+  INSERT INTO token_usage_log (user_id, tokens_used, action_type, content_generated)
   VALUES (user_id, -tokens_amount, 'admin_injection', 'Tokens injetados pelo administrador');
   
   RAISE NOTICE 'Tokens injetados com sucesso: % tokens para usuário %', tokens_amount, user_id;
