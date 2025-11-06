@@ -14,20 +14,37 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Galeria de avatares predefinidos premium
+// Galeria de avatares predefinidos premium - Estilos 3D modernos
 const PRESET_AVATARS = [
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Princess",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mittens",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Max",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Bella",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Star",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Nova",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Aurora",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Cosmic",
+  // Avataaars 3D - Personagens realistas
+  "https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=Felix&backgroundColor=b6e3f4,c0aede,d1d4f9&radius=50",
+  "https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=Aneka&backgroundColor=ffdfbf,ffd5dc,c0aede&radius=50",
+  "https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=Princess&backgroundColor=d1d4f9,ffd5dc,ffdfbf&radius=50",
+  
+  // Lorelei - Estilo 3D elegante
+  "https://api.dicebear.com/9.x/lorelei/svg?seed=Luna&backgroundColor=b6e3f4&radius=50&backgroundType=gradientLinear",
+  "https://api.dicebear.com/9.x/lorelei/svg?seed=Nova&backgroundColor=ffd5dc&radius=50&backgroundType=gradientLinear",
+  "https://api.dicebear.com/9.x/lorelei/svg?seed=Aurora&backgroundColor=c0aede&radius=50&backgroundType=gradientLinear",
+  
+  // Notionists - Estilo minimalista 3D
+  "https://api.dicebear.com/9.x/notionists/svg?seed=Max&backgroundColor=ffdfbf&radius=50",
+  "https://api.dicebear.com/9.x/notionists/svg?seed=Charlie&backgroundColor=d1d4f9&radius=50",
+  "https://api.dicebear.com/9.x/notionists/svg?seed=Bella&backgroundColor=b6e3f4&radius=50",
+  
+  // Adventurer - Personagens de aventura 3D
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Star&backgroundColor=ffd5dc&radius=50",
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Cosmic&backgroundColor=c0aede&radius=50",
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Galaxy&backgroundColor=ffdfbf&radius=50",
+  
+  // Big Smile - Avatares felizes e coloridos
+  "https://api.dicebear.com/9.x/big-smile/svg?seed=Happy&backgroundColor=b6e3f4&radius=50",
+  "https://api.dicebear.com/9.x/big-smile/svg?seed=Joy&backgroundColor=ffd5dc&radius=50",
+  "https://api.dicebear.com/9.x/big-smile/svg?seed=Smile&backgroundColor=d1d4f9&radius=50",
+  
+  // Fun Emoji - Emojis 3D divertidos
+  "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Cool&backgroundColor=c0aede&radius=50",
+  "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Party&backgroundColor=ffdfbf&radius=50",
+  "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Vibe&backgroundColor=b6e3f4&radius=50",
 ];
 
 interface AvatarSelectorProps {
@@ -154,28 +171,46 @@ export function AvatarSelector({ currentAvatar, userId, onAvatarUpdate }: Avatar
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="relative"
+          className="relative group"
         >
-          <Avatar className="w-32 h-32 border-4 border-purple-500/20 shadow-2xl shadow-purple-500/20">
-            <AvatarImage src={selectedAvatar} alt="Avatar" />
-            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-3xl">
+          {/* Glow effect 3D */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 rounded-full opacity-20 group-hover:opacity-40 blur-2xl transition-all duration-500 animate-pulse" />
+          
+          <Avatar className="w-36 h-36 border-4 border-purple-500/30 shadow-2xl shadow-purple-500/30 relative z-10 transform group-hover:scale-105 transition-all duration-300">
+            <AvatarImage 
+              src={selectedAvatar} 
+              alt="Avatar"
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 text-white text-3xl">
               <UserIcon className="w-16 h-16" />
             </AvatarFallback>
           </Avatar>
           
+          {/* Badge 3D effect */}
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -bottom-2 -right-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full p-3 shadow-lg z-20 border-4 border-neutral-900"
+          >
+            <Camera className="w-4 h-4 text-white" />
+          </motion.div>
+          
           {isUploading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-full backdrop-blur-md z-30">
               <div className="text-center">
-                <Sparkles className="w-8 h-8 text-white animate-spin mx-auto mb-2" />
-                <span className="text-xs text-white font-medium">{uploadProgress}%</span>
+                <Sparkles className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-2" />
+                <span className="text-xs text-white font-bold">{uploadProgress}%</span>
               </div>
             </div>
           )}
         </motion.div>
 
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-white mb-1">Escolha seu Avatar</h3>
-          <p className="text-sm text-neutral-400">Selecione um avatar ou faça upload de sua foto</p>
+          <h3 className="text-xl font-bold text-white mb-1 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Escolha seu Avatar
+          </h3>
+          <p className="text-sm text-neutral-400">Selecione um estilo 3D ou faça upload</p>
         </div>
       </div>
 
@@ -218,39 +253,62 @@ export function AvatarSelector({ currentAvatar, userId, onAvatarUpdate }: Avatar
         </div>
       </div>
 
-      {/* Preset Avatars Grid */}
-      <div className="grid grid-cols-4 gap-3">
+      {/* Preset Avatars Grid - 3D Gallery */}
+      <div className="grid grid-cols-6 gap-3">
         {PRESET_AVATARS.map((avatarUrl, index) => (
           <motion.button
             key={index}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            whileHover={{ scale: 1.15, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => handlePresetSelect(avatarUrl)}
-            className={`relative rounded-xl overflow-hidden transition-all ${
+            className={`relative rounded-2xl overflow-hidden transition-all group ${
               selectedAvatar === avatarUrl
-                ? "ring-4 ring-purple-500 shadow-lg shadow-purple-500/50"
-                : "ring-2 ring-white/10 hover:ring-purple-500/50"
+                ? "ring-4 ring-purple-500 shadow-xl shadow-purple-500/50 scale-105"
+                : "ring-2 ring-white/10 hover:ring-purple-400/50 hover:shadow-lg hover:shadow-purple-400/30"
             }`}
           >
-            <Avatar className="w-full h-full">
-              <AvatarImage src={avatarUrl} alt={`Avatar ${index + 1}`} />
-              <AvatarFallback>
-                <UserIcon className="w-6 h-6" />
+            {/* 3D Glow Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <Avatar className="w-full h-full aspect-square">
+              <AvatarImage 
+                src={avatarUrl} 
+                alt={`Avatar ${index + 1}`}
+                className="object-cover transform group-hover:scale-110 transition-transform duration-300"
+              />
+              <AvatarFallback className="bg-gradient-to-br from-neutral-800 to-neutral-900">
+                <UserIcon className="w-6 h-6 text-neutral-600" />
               </AvatarFallback>
             </Avatar>
             
+            {/* Selected Badge with 3D effect */}
             <AnimatePresence>
               {selectedAvatar === avatarUrl && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
-                  className="absolute inset-0 bg-purple-600/80 backdrop-blur-sm flex items-center justify-center"
+                  className="absolute inset-0 bg-gradient-to-br from-purple-600/90 via-pink-600/90 to-purple-600/90 backdrop-blur-sm flex items-center justify-center"
                 >
-                  <Check className="w-8 h-8 text-white" />
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <Check className="w-10 h-10 text-white drop-shadow-lg" strokeWidth={3} />
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
+            
+            {/* Hover shimmer effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            </div>
+```
           </motion.button>
         ))}
       </div>
