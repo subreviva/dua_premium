@@ -112,17 +112,7 @@ BEGIN
 END;
 $$;
 
--- 11. Função para limpar tokens expirados
-CREATE OR REPLACE FUNCTION clean_expired_password_resets()
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  DELETE FROM public.password_resets
-  WHERE expires_at < NOW() AND used = false;
-END;
-$$;
+-- 11. Função para limpar tokens expirados (removida - tabela não existe neste script)
 
 -- 12. Função para verificar rate limit (5 tentativas em 15min)
 CREATE OR REPLACE FUNCTION check_rate_limit(p_email TEXT, p_ip TEXT)
@@ -194,7 +184,6 @@ $$;
 
 -- 14. Comentários
 COMMENT ON TABLE public.login_attempts IS 'Histórico de tentativas de login para rate limiting';
-COMMENT ON TABLE public.password_resets IS 'Tokens de recuperação de password com expiração';
 COMMENT ON TABLE public.sessions_history IS 'Histórico de sessões de usuários com detalhes de dispositivo';
 
 COMMENT ON COLUMN public.users.email_verified IS 'Se o email do usuário foi verificado';
