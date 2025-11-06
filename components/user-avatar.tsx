@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, Shield, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const ADMIN_EMAILS = [
   'admin@dua.pt',
@@ -66,11 +67,44 @@ export function UserAvatar() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsAdmin(false);
-    router.push('/');
-    router.refresh();
+    try {
+      // Mostrar feedback imediato
+      toast.loading("A sair...", { id: "logout" });
+      
+      // Fazer logout no Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        toast.error("Erro ao sair", {
+          description: error.message,
+          id: "logout"
+        });
+        return;
+      }
+      
+      // Limpar estado local
+      setUser(null);
+      setIsAdmin(false);
+      
+      // Feedback de sucesso
+      toast.success("Sessão encerrada", {
+        description: "Até breve!",
+        id: "logout"
+      });
+      
+      // Redirecionar para home
+      setTimeout(() => {
+        router.push('/');
+        router.refresh();
+      }, 500);
+      
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      toast.error("Erro ao sair", {
+        description: "Tente novamente",
+        id: "logout"
+      });
+    }
   };
 
   const getAvatarUrl = () => {
