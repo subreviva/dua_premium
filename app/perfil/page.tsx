@@ -49,6 +49,19 @@ export default function PerfilPage() {
 
   useEffect(() => {
     loadUserProfile();
+    
+    // Timeout de segurança - se após 10s ainda estiver carregando, force parar
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.error('⏱️ Timeout: carregamento demorou muito');
+        setLoading(false);
+        toast.error("Timeout ao carregar perfil", {
+          description: "A página demorou muito. Tente recarregar."
+        });
+      }
+    }, 10000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const loadUserProfile = async () => {
@@ -60,6 +73,7 @@ export default function PerfilPage() {
           description: "Faça login para continuar"
         });
         router.push('/login');
+        setLoading(false);
         return;
       }
 
@@ -77,8 +91,37 @@ export default function PerfilPage() {
         .single();
 
       if (error) {
-        // PRODUCTION: Removed console.error
-        toast.error("Erro ao carregar perfil");
+        console.error('❌ Erro ao carregar perfil:', error);
+        // Se não existir registro, criar um básico
+        if (error.code === 'PGRST116') {
+          console.log('⚠️ Usuário não existe na tabela, criando...');
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert({
+              id: userId,
+              email: userEmail,
+              name: userEmail.split('@')[0],
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+          
+          if (insertError) {
+            console.error('❌ Erro ao criar usuário:', insertError);
+            toast.error("Erro ao inicializar perfil", {
+              description: insertError.message
+            });
+          } else {
+            console.log('✅ Usuário criado, recarregando...');
+            // Recarregar depois de criar
+            await loadUserProfile();
+            return;
+          }
+        } else {
+          toast.error("Erro ao carregar perfil", {
+            description: error.message
+          });
+        }
+        setLoading(false);
         return;
       }
 
@@ -89,9 +132,11 @@ export default function PerfilPage() {
         setAvatarUrl(userData.avatar_url || '');
       }
 
-    } catch (error) {
-      // PRODUCTION: Removed console.error
-      toast.error("Erro ao carregar perfil");
+    } catch (error: any) {
+      console.error('❌ Erro catch:', error);
+      toast.error("Erro ao carregar perfil", {
+        description: error.message || "Erro desconhecido"
+      });
     } finally {
       setLoading(false);
     }
