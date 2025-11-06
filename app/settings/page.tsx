@@ -25,10 +25,20 @@ import {
   CheckCircle,
   Sparkles,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { supabaseClient } from "@/lib/supabase"
+import { toast } from "sonner"
+
+// Admin emails list
+const ADMIN_EMAILS = [
+  'admin@dua.pt',
+  'subreviva@gmail.com',
+  'dev@dua.pt',
+  'dev@dua.com'
+]
 
 // User data interface with all subscription details
 interface UserData {
@@ -89,6 +99,10 @@ export default function SettingsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
+  // Admin check
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
   // User data state - NO MORE MOCK DATA
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -104,11 +118,44 @@ export default function SettingsPage() {
   // UI states
   const [saving, setSaving] = useState(false)
 
-  // Fetch real user data from Supabase
+  // Check admin access first
   useEffect(() => {
-    loadUserData()
+    checkAdminAccess()
   }, [])
 
+  async function checkAdminAccess() {
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession()
+      
+      if (!session) {
+        toast.error("Acesso negado", { description: "Faça login para continuar" })
+        router.push('/login')
+        return
+      }
+
+      const userEmail = session.user.email || ''
+      const adminStatus = ADMIN_EMAILS.includes(userEmail)
+      
+      setIsAdmin(adminStatus)
+      
+      if (!adminStatus) {
+        toast.error("Acesso restrito", { description: "Esta página é exclusiva para administradores" })
+        router.push('/chat')
+        return
+      }
+
+      // If admin, load data
+      loadUserData()
+    } catch (error) {
+      // PRODUCTION: Removed console.error('Erro ao verificar acesso:', error)
+      toast.error("Erro de autenticação")
+      router.push('/login')
+    } finally {
+      setIsCheckingAuth(false)
+    }
+  }
+
+  // Fetch real user data from Supabase
   async function loadUserData() {
     try {
       setLoading(true)
@@ -323,12 +370,21 @@ export default function SettingsPage() {
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
   }
 
-  if (loading || !userData) {
+  if (isCheckingAuth || loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-black">
-        <div className="text-white">Carregando...</div>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+          <p className="text-white/60">
+            {isCheckingAuth ? 'Verificando acesso...' : 'Carregando dados...'}
+          </p>
+        </div>
       </div>
     )
+  }
+
+  if (!isAdmin || !userData) {
+    return null
   }
 
   const availableTokens = userData.total_tokens - userData.tokens_used

@@ -20,6 +20,7 @@ import {
   Trophy,
   Rocket,
   Loader2,
+  Shield,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BeamsBackground } from "@/components/ui/beams-background"
@@ -34,6 +35,14 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 )
+
+// Admin emails list
+const ADMIN_EMAILS = [
+  'admin@dua.pt',
+  'subreviva@gmail.com',
+  'dev@dua.pt',
+  'dev@dua.com'
+]
 
 interface UserProfile {
   id: string
@@ -63,13 +72,47 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isFollowing, setIsFollowing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [generations, setGenerations] = useState<Generation[]>([])
   const router = useRouter()
 
   useEffect(() => {
-    loadProfileData()
+    checkAdminAccess()
   }, [params.username])
+
+  const checkAdminAccess = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        toast.error("Acesso negado", { description: "Faça login para continuar" })
+        router.push('/login')
+        return
+      }
+
+      const userEmail = session.user.email || ''
+      const adminStatus = ADMIN_EMAILS.includes(userEmail)
+      
+      setIsAdmin(adminStatus)
+      
+      if (!adminStatus) {
+        toast.error("Acesso restrito", { description: "Esta página é exclusiva para administradores" })
+        router.push('/chat')
+        return
+      }
+
+      // If admin, load profile data
+      loadProfileData()
+    } catch (error) {
+      // PRODUCTION: Removed console.error
+      toast.error("Erro de autenticação")
+      router.push('/login')
+    } finally {
+      setIsCheckingAuth(false)
+    }
+  }
 
   const loadProfileData = async () => {
     try {
@@ -132,21 +175,23 @@ export default function ProfilePage({ params }: { params: { username: string } }
     return badges[tier as keyof typeof badges] || badges.free
   }
 
-  if (loading) {
+  if (isCheckingAuth || loading) {
     return (
       <div className="relative w-full min-h-screen flex items-center justify-center">
         <div className="fixed inset-0 z-0">
           <BeamsBackground intensity="subtle" />
         </div>
         <div className="relative z-10 flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 text-white animate-spin" />
-          <p className="text-white/60">Carregando perfil...</p>
+          <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
+          <p className="text-white/60 text-lg">
+            {isCheckingAuth ? 'Verificando acesso...' : 'Carregando perfil...'}
+          </p>
         </div>
       </div>
     )
   }
 
-  if (!userProfile) {
+  if (!isAdmin || !userProfile) {
     return null
   }
 
