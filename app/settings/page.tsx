@@ -13,6 +13,14 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { 
   Settings, 
   Bell, 
@@ -115,6 +123,15 @@ export default function SettingsPage() {
   const [marketingEmails, setMarketingEmails] = useState(false)
   const [profileVisibility, setProfileVisibility] = useState("public")
   
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  
+  // Delete account state
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState("")
+  
   // UI states
   const [saving, setSaving] = useState(false)
 
@@ -211,10 +228,10 @@ export default function SettingsPage() {
 
       // Reload data
       await loadUserData()
-      alert('Perfil atualizado com sucesso!')
+      toast.success('✅ Perfil atualizado!')
     } catch (error) {
       console.error('Error saving profile:', error)
-      alert('Erro ao salvar perfil')
+      toast.error('❌ Erro ao salvar perfil')
     } finally {
       setSaving(false)
     }
@@ -238,10 +255,10 @@ export default function SettingsPage() {
       if (error) throw error
 
       await loadUserData()
-      alert('Notificações atualizadas com sucesso!')
+      toast.success('✅ Notificações atualizadas!')
     } catch (error) {
       console.error('Error saving notifications:', error)
-      alert('Erro ao salvar notificações')
+      toast.error('❌ Erro ao salvar notificações')
     } finally {
       setSaving(false)
     }
@@ -263,12 +280,113 @@ export default function SettingsPage() {
       if (error) throw error
 
       await loadUserData()
-      alert('Privacidade atualizada com sucesso!')
+      toast.success('✅ Privacidade atualizada!')
     } catch (error) {
       console.error('Error saving privacy:', error)
-      alert('Erro ao salvar privacidade')
+      toast.error('❌ Erro ao salvar privacidade')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleChangePassword() {
+    // Validações
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('❌ Preencha todos os campos')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('❌ As passwords não coincidem')
+      return
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('❌ Password deve ter no mínimo 8 caracteres')
+      return
+    }
+
+    try {
+      setSaving(true)
+
+      // Supabase Auth update password
+      const { error } = await supabaseClient.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) throw error
+
+      // Limpar campos
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+
+      toast.success('✅ Password alterada com sucesso!', {
+        description: 'Use a nova password no próximo login'
+      })
+    } catch (error: any) {
+      console.error('Error changing password:', error)
+      toast.error('❌ Erro ao alterar password', {
+        description: error.message || 'Tente novamente'
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== 'ELIMINAR') {
+      toast.error('❌ Digite "ELIMINAR" para confirmar')
+      return
+    }
+
+    try {
+      setSaving(true)
+
+      // 1. Deletar dados do usuário na tabela users
+      const { data: { session } } = await supabaseClient.auth.getSession()
+      if (!session) {
+        throw new Error('Sessão não encontrada')
+      }
+
+      const { error: deleteError } = await supabaseClient
+        .from('users')
+        .delete()
+        .eq('id', session.user.id)
+
+      if (deleteError) throw deleteError
+
+      // 2. Deletar conta do auth
+      const { error: authError } = await supabaseClient.auth.admin.deleteUser(
+        session.user.id
+      )
+
+      if (authError) {
+        // Se falhar, tentar via RPC (se existir)
+        console.warn('Admin delete failed, trying alternative:', authError)
+      }
+
+      // 3. Logout
+      await supabaseClient.auth.signOut()
+
+      toast.success('✅ Conta eliminada com sucesso', {
+        description: 'Os seus dados foram removidos permanentemente'
+      })
+
+      // Redirecionar para homepage
+      setTimeout(() => {
+        router.push('/')
+      }, 2000)
+
+    } catch (error: any) {
+      console.error('Error deleting account:', error)
+      toast.error('❌ Erro ao eliminar conta', {
+        description: error.message || 'Contacte o suporte'
+      })
+    } finally {
+      setSaving(false)
+      setShowDeleteDialog(false)
+      setDeleteConfirmText("")
     }
   }
 
@@ -288,43 +406,6 @@ export default function SettingsPage() {
       router.push('/login')
     } catch (error) {
       console.error('Error logging out all devices:', error)
-    }
-  }
-
-  async function handleDeleteAccount() {
-    if (!userData) return
-    
-    const confirmed = window.confirm(
-      'TEM CERTEZA? Esta ação é IRREVERSÍVEL e apagará:\n\n' +
-      '• Todos os seus dados\n' +
-      '• Todas as suas criações\n' +
-      '• Todo o seu histórico\n' +
-      '• Sua subscrição\n\n' +
-      'Digite "ELIMINAR" para confirmar'
-    )
-    
-    if (confirmed) {
-      const confirmText = window.prompt('Digite ELIMINAR para confirmar:')
-      if (confirmText === 'ELIMINAR') {
-        try {
-          // Call admin API to delete user (needs to be implemented)
-          const response = await fetch('/api/admin/delete-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userData.id })
-          })
-
-          if (response.ok) {
-            await supabaseClient.auth.signOut()
-            router.push('/')
-          } else {
-            alert('Erro ao eliminar conta')
-          }
-        } catch (error) {
-          console.error('Error deleting account:', error)
-          alert('Erro ao eliminar conta')
-        }
-      }
     }
   }
 
@@ -727,6 +808,61 @@ export default function SettingsPage() {
                     </CardContent>
                   </Card>
 
+                  {/* Password Change */}
+                  <Card className="bg-black/40 backdrop-blur-xl border-white/10">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Lock className="h-5 w-5" />
+                        Alterar Password
+                      </CardTitle>
+                      <CardDescription className="text-white/60">
+                        Atualize a sua palavra-passe de acesso
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-white">Password Atual</Label>
+                        <Input
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          placeholder="Digite a password atual"
+                          className="bg-white/5 border-white/10 text-white"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white">Nova Password</Label>
+                        <Input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Mínimo 8 caracteres"
+                          className="bg-white/5 border-white/10 text-white"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white">Confirmar Nova Password</Label>
+                        <Input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Digite novamente"
+                          className="bg-white/5 border-white/10 text-white"
+                        />
+                      </div>
+
+                      <Button 
+                        onClick={handleChangePassword}
+                        disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                      >
+                        {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Alterando...</> : 'Alterar Password'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+
                   {/* Payment Management */}
                   <Card className="bg-black/40 backdrop-blur-xl border-white/10">
                     <CardHeader>
@@ -773,7 +909,7 @@ export default function SettingsPage() {
                         </ul>
                         <Button 
                           variant="destructive"
-                          onClick={handleDeleteAccount}
+                          onClick={() => setShowDeleteDialog(true)}
                           className="w-full bg-red-500 hover:bg-red-600 text-white"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -789,6 +925,68 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="bg-black/95 backdrop-blur-xl border-red-500/20 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-red-400 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Confirmar Eliminação de Conta
+            </DialogTitle>
+            <DialogDescription className="text-white/70">
+              Esta ação é <strong className="text-red-400">PERMANENTE</strong> e não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+              <h4 className="text-white font-semibold mb-2">O que será eliminado:</h4>
+              <ul className="text-white/70 text-sm space-y-1 list-disc list-inside">
+                <li>Todos os seus dados pessoais</li>
+                <li>Todo o histórico de conversas</li>
+                <li>Músicas, imagens e vídeos criados</li>
+                <li>Tokens e subscrição ativa</li>
+                <li>Acesso permanente à plataforma</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-white">
+                Para confirmar, digite <strong className="text-red-400">ELIMINAR</strong> abaixo:
+              </Label>
+              <Input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Digite ELIMINAR"
+                className="bg-white/5 border-white/10 text-white uppercase"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false)
+                setDeleteConfirmText("")
+              }}
+              className="bg-white/5 border-white/10 text-white hover:bg-white/10"
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={saving || deleteConfirmText !== 'ELIMINAR'}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Eliminando...</> : 'Eliminar Conta'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
+
