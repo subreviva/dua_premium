@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/components/ui/use-mobile"
 import {
   Wand2,
-
+  Circle,
   ChevronDown,
   Palette,
   Camera,
@@ -29,6 +29,7 @@ import {
   Eye,
   Share2,
   Loader2,
+  Image as ImageIcon,
 } from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
@@ -485,7 +486,7 @@ export default function ImageStudioPage() {
                   <div className="flex items-center gap-3">
                     {/* Badge: Geração de Imagem */}
                     <div className="flex items-center gap-2 px-3 py-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg text-sm font-medium flex-shrink-0">
-                      <Image className="w-4 h-4" />
+                      <ImageIcon className="w-4 h-4" />
                       <span>Geração</span>
                     </div>
 
