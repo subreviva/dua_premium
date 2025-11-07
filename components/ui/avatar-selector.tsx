@@ -7,12 +7,9 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Camera, Check, User as UserIcon, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseClient } from "@/lib/supabase";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = supabaseClient;
 
 // Galeria de avatares predefinidos premium - Estilos 3D modernos
 const PRESET_AVATARS = [

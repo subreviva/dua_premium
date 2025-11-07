@@ -4,13 +4,10 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { X, Upload, Coins, FileText, Tag, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { createClient } from '@supabase/supabase-js'
+import { supabaseClient } from '@/lib/supabase';
 import { toast } from 'sonner'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = supabaseClient;
 
 interface PublicarItemModalProps {
   onClose: () => void
