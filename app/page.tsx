@@ -292,19 +292,19 @@ export default function HomePage() {
                 image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-3815-estu%CC%81dio%20criativo%2C%20artistas%20a%20trabalhar%20e....jpeg"
               },
               {
-                icon: Home,
-                title: "Kyntal: Hospitalidade Premium",
-                subtitle: "O refúgio criativo do ecossistema",
-                description: "Alojamento local premium que recebe artistas, criadores e visitantes em ambientes inspiradores. Um espaço onde a hospitalidade lusófona se encontra com a experiência criativa, criando conexões autênticas.",
-                image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-3815-estu%CC%81dio%20criativo%2C%20artistas%20a%20trabalhar%20e....jpeg"
-              },
-              {
                 icon: Coins,
                 title: "DUA Coin: Economia Criativa",
                 subtitle: "A moeda do ecossistema 2 LADOS",
                 description: "Um ativo real que apoia artistas e financia Bolsas Criativas. Crescimento transparente em 3 fases: €0.30 → €0.60 → €1.20. Cada DUA Coin movimenta talento, tecnologia e impacto social real.",
                 image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/DUA%20COIN1.jpeg",
                 phase: "Fase 1: €0.30"
+              },
+              {
+                icon: Music,
+                title: "Kyntal: Distribuição Digital",
+                subtitle: "A primeira distribuidora portuguesa com IA",
+                description: "A distribuidora digital de música do ecossistema 2 LADOS com inteligência artificial própria (a DUA). Autonomia total para artistas emergentes lançarem música nacional e internacionalmente. Artistas que usam a Kyntal geram DUA Coin ao atingir metas, reinvestindo em serviços 2 LADOS.",
+                image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-3815-estu%CC%81dio%20criativo%2C%20artistas%20a%20trabalhar%20e....jpeg"
               }
             ]}
           />
