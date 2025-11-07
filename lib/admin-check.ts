@@ -1,33 +1,28 @@
 /**
  * Admin Check Utilities
  * Centraliza a verificação de permissões de administrador
+ * ATUALIZADO: Agora verifica via role no banco de dados
  */
 
-export const ADMIN_EMAILS = [
-  'admin@dua.pt',
-  'subreviva@gmail.com',
-  'dev@dua.pt',
-  'dev@dua.com'
-]
-
 /**
- * Verifica se o email é de um administrador
- */
-export function isAdminEmail(email: string | undefined | null): boolean {
-  if (!email) return false
-  return ADMIN_EMAILS.includes(email.toLowerCase())
-}
-
-/**
- * Verifica se o usuário atual é administrador
+ * Verifica se o usuário atual é administrador consultando o banco
  */
 export async function checkIsAdmin(supabase: any): Promise<boolean> {
   try {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user?.email) return false
-    return isAdminEmail(session.user.email)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return false
+
+    // Verificar role no banco de dados
+    const { data: userData, error } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (error || !userData) return false
+    
+    return ['admin', 'super_admin'].includes(userData.role)
   } catch (error) {
-    // PRODUCTION: Removed console.error
     return false
   }
 }
@@ -37,15 +32,26 @@ export async function checkIsAdmin(supabase: any): Promise<boolean> {
  */
 export async function getAdminSession(supabase: any) {
   try {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return null
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
     
-    const isAdmin = isAdminEmail(session.user.email)
+    // Verificar role no banco
+    const { data: userData, error } = await supabase
+      .from('users')
+      .select('id, email, role, name')
+      .eq('id', user.id)
+      .single()
+
+    if (error || !userData) return null
+    
+    const isAdmin = ['admin', 'super_admin'].includes(userData.role)
     if (!isAdmin) return null
     
-    return session
+    return {
+      user: userData,
+      session: { user }
+    }
   } catch (error) {
-    // PRODUCTION: Removed console.error
     return null
   }
 }

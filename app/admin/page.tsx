@@ -11,14 +11,7 @@ import {
   Users, Coins, Activity, Trophy, Plus, Loader2, 
   Edit, Trash2, RefreshCw, Lock, Unlock, Search, Filter
 } from "lucide-react";
-
-// ⚠️ WHITELIST DE ADMINS
-const ADMIN_EMAILS = [
-  'admin@dua.pt',
-  'subreviva@gmail.com',
-  'dev@dua.pt',
-  'dev@dua.com'
-];
+import { clientCheckAdmin } from "@/lib/admin-check-db";
 
 interface UserData {
   id: string;
@@ -33,6 +26,7 @@ interface UserData {
   created_at: string;
   avatar_url?: string;
   bio?: string;
+  role?: string;
 }
 
 export default function AdminPanelPage() {
@@ -73,35 +67,28 @@ export default function AdminPanelPage() {
 
   const checkAdminAndLoadData = async () => {
     try {
-      // 1. Verificar autenticação
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      // 1. Verificar se é admin via database
+      console.log('🔍 Verificando acesso admin via database...');
       
-      console.log('🔍 Auth User:', user?.email);
+      const adminCheck = await clientCheckAdmin(supabase);
       
-      if (authError || !user) {
-        console.error('❌ Não autenticado');
-        toast.error('Você precisa fazer login');
-        router.push('/login');
-        return;
-      }
-
-      setCurrentUser(user);
-
-      // 2. Verificar se é admin
-      const adminStatus = ADMIN_EMAILS.includes(user.email || '');
-      console.log('🔐 Is Admin?', adminStatus, 'Email:', user.email);
-      console.log('📋 Admin Emails:', ADMIN_EMAILS);
+      console.log('� Admin Check Result:', adminCheck);
       
-      setIsAdmin(adminStatus);
-
-      if (!adminStatus) {
-        console.error('❌ Não é admin');
+      if (!adminCheck.isAdmin || adminCheck.error) {
+        console.error('❌ Não é admin:', adminCheck.error);
         toast.error('Acesso negado - apenas administradores');
         router.push('/chat');
         return;
       }
 
-      // 3. Carregar todos os usuários
+      console.log('✅ Acesso admin confirmado!');
+      console.log('   Email:', adminCheck.user?.email);
+      console.log('   Role:', adminCheck.role);
+      
+      setCurrentUser(adminCheck.user);
+      setIsAdmin(true);
+
+      // 2. Carregar todos os usuários
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
