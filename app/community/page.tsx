@@ -2,15 +2,22 @@
 
 import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Music, ImageIcon, Video, Heart, MessageCircle, Share2, User } from "lucide-react"
+import { Music, ImageIcon, Video, Heart, MessageCircle, Share2, User, Lock, Sparkles } from "lucide-react"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { OrbitingAvatarsCTA } from "@/components/ui/orbiting-avatars"
 import { MasonryGrid } from "@/components/ui/image-testimonial-grid"
 import { MusicPlayerCard } from "@/components/ui/music-player-card"
 import { GlassmorphismProfileCard } from "@/components/ui/glassmorphism-profile-card"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
+import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const mockImages = [
   {
@@ -341,8 +348,18 @@ const VideoCard = ({ video }: { video: (typeof mockVideos)[0] }) => {
 
 export default function CommunityPage() {
   const [hasAccessedCommunity, setHasAccessedCommunity] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [columns, setColumns] = useState(3)
   const router = useRouter()
+
+  // Verificar autenticação
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setIsAuthenticated(!!session)
+    }
+    checkAuth()
+  }, [])
 
   useEffect(() => {
     const getColumns = (width: number) => {
@@ -369,6 +386,132 @@ export default function CommunityPage() {
     { src: "https://images.unsplash.com/photo-1488161628813-04466f872be2?w=150&h=150&fit=crop", alt: "Criador 6" },
   ]
 
+  // Loading state
+  if (isAuthenticated === null) {
+    return (
+      <div className="relative w-full min-h-screen flex items-center justify-center">
+        <div className="fixed inset-0 z-0">
+          <BeamsBackground intensity="medium" />
+        </div>
+        <div className="relative z-10 text-white text-lg">Carregando...</div>
+      </div>
+    )
+  }
+
+  // Not authenticated - show login gate
+  if (isAuthenticated === false) {
+    return (
+      <div className="relative w-full min-h-screen">
+        <div className="fixed inset-0 z-0">
+          <BeamsBackground intensity="medium" />
+        </div>
+
+        <PremiumNavbar variant="transparent" credits={undefined} />
+
+        <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-2xl mx-auto text-center space-y-8"
+          >
+            {/* Lock Icon with glow */}
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex justify-center"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full blur-3xl opacity-40 animate-pulse" />
+                <div className="relative w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-xl">
+                  <Lock className="w-12 h-12 text-cyan-400" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Title */}
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">
+                Comunidade <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Exclusiva</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-white/80 leading-relaxed max-w-xl mx-auto">
+                A Comunidade DUA é um espaço <span className="text-cyan-400 font-semibold">privado</span> onde criadores lusófonos
+                partilham arte gerada por IA, conectam-se e colaboram.
+              </p>
+            </div>
+
+            {/* Benefits */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
+              >
+                <Sparkles className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+                <p className="text-sm text-white/90 font-medium">Galerias Exclusivas</p>
+                <p className="text-xs text-white/60 mt-1">Arte, música e vídeos únicos</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
+              >
+                <User className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                <p className="text-sm text-white/90 font-medium">Rede de Criadores</p>
+                <p className="text-xs text-white/60 mt-1">Conecte-se com artistas</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
+              >
+                <Heart className="w-8 h-8 text-pink-400 mx-auto mb-2" />
+                <p className="text-sm text-white/90 font-medium">Colaboração</p>
+                <p className="text-xs text-white/60 mt-1">Projetos em comunidade</p>
+              </motion.div>
+            </div>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
+            >
+              <Button
+                onClick={() => router.push('/acesso')}
+                size="lg"
+                className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                Criar Conta Gratuita
+              </Button>
+              <Button
+                onClick={() => router.push('/login')}
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-xl"
+              >
+                Já tenho conta
+              </Button>
+            </motion.div>
+
+            {/* Info text */}
+            <p className="text-xs text-white/50 pt-4">
+              🔒 Acesso exclusivo para membros registados • Gratuito para sempre
+            </p>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
+
+  // Authenticated - show welcome screen first
   if (!hasAccessedCommunity) {
     return (
       <div className="relative w-full min-h-screen">
@@ -381,12 +524,12 @@ export default function CommunityPage() {
         <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
           <OrbitingAvatarsCTA
             title="Bem-vindo à Comunidade DUA"
-            description="Explore milhares de criações de arte geradas por IA. Descubra galerias de imagens, vídeos e músicas criadas pela nossa comunidade vibrante."
-            buttonText="Explorar Comunidade"
+            description="Explore milhares de criações de arte gerada por IA. Descubra galerias de imagens, vídeos e músicas criadas pela nossa vibrante comunidade de criadores lusófonos. Partilhe as suas criações, conecte-se com outros artistas e inspire-se."
+            buttonText="Entrar na Comunidade"
             buttonProps={{
               onClick: () => setHasAccessedCommunity(true),
               className:
-                "bg-cyan-500 hover:bg-cyan-600 text-white font-semibold shadow-lg shadow-cyan-500/50 active:scale-95 h-11 sm:h-10 text-sm sm:text-base",
+                "bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/60 active:scale-95 h-12 text-base transition-all duration-300",
             }}
             avatars={communityAvatars}
             orbitRadius={22}
@@ -398,6 +541,7 @@ export default function CommunityPage() {
     )
   }
 
+  // Authenticated and accessed - show full community
   return (
     <div className="relative w-full min-h-screen">
       <div className="fixed inset-0 z-0">
@@ -409,9 +553,14 @@ export default function CommunityPage() {
       <div className="relative z-10 min-h-screen pt-4 sm:pt-6 lg:pt-8">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
           <div className="space-y-1.5 sm:space-y-2 px-1">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Comunidade DUA</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white flex items-center gap-3">
+              Comunidade DUA
+              <span className="text-xs sm:text-sm px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 text-cyan-400">
+                Membros
+              </span>
+            </h1>
             <p className="text-sm sm:text-base text-white/70">
-              Explore criações de imagens, músicas e vídeos da comunidade
+              Explore criações exclusivas de imagens, músicas e vídeos da nossa comunidade de criadores
             </p>
           </div>
 
