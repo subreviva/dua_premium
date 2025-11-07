@@ -48,7 +48,7 @@ export default function HomePage() {
 
             {/* Content Cards */}
             <div className="w-full max-w-sm space-y-2 md:space-y-3">
-              <Link href="/create" className="group block">
+              <Link href="/musicstudio/create" className="group block">
                 <div className="relative overflow-hidden rounded-xl glass-effect border border-border/50 p-3.5 transition-all active:scale-[0.98] touch-manipulation md:rounded-2xl md:p-5 backdrop-blur-xl">
                   <div className="absolute inset-0 gradient-primary opacity-0 group-active:opacity-10 transition-opacity" />
                   <div className="relative flex items-center gap-3 md:gap-4">
@@ -65,7 +65,7 @@ export default function HomePage() {
                 </div>
               </Link>
 
-              <Link href="/melody" className="group block">
+              <Link href="/musicstudio/melody" className="group block">
                 <div className="relative overflow-hidden rounded-xl glass-effect border border-border/50 p-3.5 transition-all active:scale-[0.98] touch-manipulation md:rounded-2xl md:p-5 backdrop-blur-xl">
                   <div className="absolute inset-0 gradient-accent opacity-0 group-active:opacity-10 transition-opacity" />
                   <div className="relative flex items-center gap-3 md:gap-4">
@@ -82,7 +82,7 @@ export default function HomePage() {
                 </div>
               </Link>
 
-              <Link href="/library" className="group block">
+              <Link href="/musicstudio/library" className="group block">
                 <div className="relative overflow-hidden rounded-xl glass-effect border border-border/50 p-3.5 transition-all active:scale-[0.98] touch-manipulation md:rounded-2xl md:p-5 backdrop-blur-xl">
                   <div className="absolute inset-0 gradient-secondary opacity-0 group-active:opacity-10 transition-opacity" />
                   <div className="relative flex items-center gap-3 md:gap-4">
