@@ -1,15 +1,18 @@
 /**
  * API Route: /api/validate-code
  * 
- * Endpoint para validar código de convite e conceder acesso tipo Sora.
+ * Endpoint para validar código de convite e conceder acesso exclusivo.
  * 
  * Fluxo:
  * 1. Recebe { code, email }
  * 2. Verifica se código existe e está ativo
  * 3. Cria/autentica user via Supabase Auth (magic link)
- * 4. Atualiza users.has_access = true e atribui créditos
- * 5. Marca invite_codes como usado
- * 6. Retorna sucesso ou erro
+ * 4. Cria registro em users (DUA IA) com has_access = true
+ * 5. Cria registro em duacoin_profiles (DUA COIN) automaticamente
+ * 6. Marca invite_codes como usado
+ * 7. Retorna sucesso ou erro
+ * 
+ * IMPORTANTE: Sistema funciona em conjunto - DUA IA + DUA COIN sempre juntos
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,8 +32,10 @@ interface ValidateCodeResponse {
   user?: {
     id: string;
     email: string;
-    credits: number;
+    total_tokens?: number;
     has_access: boolean;
+    subscription_tier?: string;
+    dua_coins?: number;
   };
 }
 
@@ -118,7 +123,7 @@ export async function POST(req: NextRequest) {
 
     const userId = authData.user.id;
 
-    // 4. Atualizar ou criar registro em public.users
+    // 4. Atualizar ou criar registro em public.users (DUA IA)
     const { data: existingUser } = await supabaseAdmin
       .from('users')
       .select('*')
@@ -131,13 +136,13 @@ export async function POST(req: NextRequest) {
         .from('users')
         .update({
           has_access: true,
-          credits: existingUser.credits + inviteCode.credits, // Adicionar créditos
+          total_tokens: (existingUser.total_tokens || 0) + 5000, // 5000 tokens iniciais
           invite_code_used: code.toUpperCase(),
         })
         .eq('id', userId);
 
       if (updateError) {
-        // console.error('Erro ao atualizar user:', updateError);
+        console.error('❌ Erro ao atualizar user:', updateError);
         return NextResponse.json(
           {
             success: false,
@@ -147,62 +152,119 @@ export async function POST(req: NextRequest) {
         );
       }
     } else {
-      // User novo, criar registro
+      // User novo, criar registro em users (DUA IA)
       const { error: insertError } = await supabaseAdmin
         .from('users')
         .insert({
           id: userId,
           email: email.toLowerCase(),
           has_access: true,
-          credits: inviteCode.credits,
+          subscription_tier: 'premium', // Acesso exclusivo = premium
+          total_tokens: 5000, // 5000 tokens iniciais
+          tokens_used: 0,
           invite_code_used: code.toUpperCase(),
+          created_at: new Date().toISOString(),
         });
 
       if (insertError) {
-        // console.error('Erro ao criar user:', insertError);
+        console.error('❌ Erro ao criar user:', insertError);
         return NextResponse.json(
           {
             success: false,
-            message: 'Erro ao criar conta. Tente novamente.',
+            message: 'Erro ao criar conta DUA IA. Tente novamente.',
           } as ValidateCodeResponse,
           { status: 500 }
         );
       }
     }
 
-    // 5. Marcar código como usado
+    // 5. Criar perfil DUA COIN (sempre, mesmo se user já existe)
+    // Verificar se já tem perfil DUA COIN
+    const { data: existingCoinProfile } = await supabaseAdmin
+      .from('duacoin_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (!existingCoinProfile) {
+      // Criar perfil DUA COIN
+      const { error: coinProfileError } = await supabaseAdmin
+        .from('duacoin_profiles')
+        .insert({
+          user_id: userId,
+          balance: 1000, // 1000 DUA coins iniciais
+          total_earned: 1000,
+          total_spent: 0,
+          level: 1,
+          experience: 0,
+          created_at: new Date().toISOString(),
+        });
+
+      if (coinProfileError) {
+        console.error('❌ Erro ao criar perfil DUA COIN:', coinProfileError);
+        // Não bloquear o fluxo, mas registrar erro
+      } else {
+        console.log('✅ Perfil DUA COIN criado para user:', userId);
+        
+        // Registrar transação inicial
+        await supabaseAdmin
+          .from('duacoin_transactions')
+          .insert({
+            user_id: userId,
+            type: 'reward',
+            amount: 1000,
+            description: 'Bônus de boas-vindas - Acesso exclusivo',
+            balance_after: 1000,
+            created_at: new Date().toISOString(),
+          });
+      }
+    } else {
+      console.log('ℹ️  Perfil DUA COIN já existe para user:', userId);
+    }
+
+    // 6. Marcar código como usado
     const { error: updateCodeError } = await supabaseAdmin
       .from('invite_codes')
       .update({
         active: false,
         used_by: userId,
+        used_at: new Date().toISOString(),
       })
       .eq('id', inviteCode.id);
 
     if (updateCodeError) {
-      // console.error('Erro ao marcar código como usado:', updateCodeError);
+      console.error('⚠️  Erro ao marcar código como usado:', updateCodeError);
       // Não retornar erro aqui, pois o user já foi criado
     }
 
-    // 6. Obter dados atualizados do user
+    // 7. Obter dados atualizados do user
     const { data: updatedUser } = await supabaseAdmin
       .from('users')
-      .select('id, email, credits, has_access')
+      .select('id, email, total_tokens, has_access, subscription_tier')
       .eq('id', userId)
       .single();
+      
+    const { data: coinProfile } = await supabaseAdmin
+      .from('duacoin_profiles')
+      .select('balance')
+      .eq('user_id', userId)
+      .single();
 
-    // 7. Retornar sucesso
+    // 8. Retornar sucesso
     return NextResponse.json(
       {
         success: true,
-        message: `Acesso concedido! ${inviteCode.credits} créditos adicionados. Verifique seu email para o link de acesso.`,
-        user: updatedUser || undefined,
+        message: `🎉 Acesso concedido! 5000 tokens + 1000 DUA coins adicionados. Verifique seu email para o link de acesso.`,
+        user: updatedUser ? {
+          ...updatedUser,
+          dua_coins: coinProfile?.balance || 0,
+        } : undefined,
       } as ValidateCodeResponse,
       { status: 200 }
     );
 
   } catch (error) {
-    // console.error('Erro inesperado em /api/validate-code:', error);
+    console.error('❌ Erro inesperado em /api/validate-code:', error);
     return NextResponse.json(
       {
         success: false,
