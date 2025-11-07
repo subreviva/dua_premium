@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { GenerationProvider } from "@/contexts/generation-context"
 import { StemsProvider } from "@/contexts/stems-context"
