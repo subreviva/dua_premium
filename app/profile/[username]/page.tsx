@@ -28,13 +28,10 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { InteractionBar } from "@/components/ui/interaction-bar"
 import { GlassmorphismProfileCard } from "@/components/ui/glassmorphism-profile-card"
 import { useRouter } from "next/navigation"
-import { createClient } from "@supabase/supabase-js"
+import { supabaseClient } from "@/lib/supabase"
 import { toast } from "sonner"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
+const supabase = supabaseClient;
 
 // Admin emails list
 const ADMIN_EMAILS = [

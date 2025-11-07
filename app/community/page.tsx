@@ -12,12 +12,9 @@ import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { createClient } from '@supabase/supabase-js'
+import { supabaseClient } from '@/lib/supabase'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = supabaseClient;
 
 const mockImages = [
   {

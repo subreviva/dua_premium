@@ -16,13 +16,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
-import { createClient } from "@supabase/supabase-js"
+import { supabaseClient } from "@/lib/supabase"
 import { toast } from "sonner"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
+const supabase = supabaseClient;
 
 interface TokenPackage {
   id: string

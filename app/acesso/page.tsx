@@ -6,14 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseClient } from "@/lib/supabase";
 import Link from "next/link";
 import { audit } from "@/lib/audit";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+const supabase = supabaseClient;
 
 export default function AcessoPage() {
   const router = useRouter();

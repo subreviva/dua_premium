@@ -17,16 +17,13 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseClient } from "@/lib/supabase";
 import Link from "next/link";
 // TEMPORÁRIO: audit desabilitado até audit_logs estar configurado
 // import { audit } from "@/lib/audit";
 const audit = { login: () => {}, pageAccess: () => {} };
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+const supabase = supabaseClient;
 
 export default function LoginPage() {
   const router = useRouter();
