@@ -13,7 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getAdminClient } from '@/lib/supabase';
 import type { InviteCode, User } from '@/lib/supabase';
 
 export const maxDuration = 30;
@@ -36,6 +36,8 @@ interface ValidateCodeResponse {
 
 export async function POST(req: NextRequest) {
   try {
+    const supabaseAdmin = getAdminClient();
+    
     // 1. Parse e validação do body
     const body: ValidateCodeRequest = await req.json();
     const { code, email } = body;

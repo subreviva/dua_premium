@@ -16,65 +16,59 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-// URLs e Keys do Supabase (com fallback vazio para evitar erro durante build)
+// URLs e Keys do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Singleton instances
-let clientInstance: SupabaseClient | null = null;
-let adminInstance: SupabaseClient | null = null;
+let _clientInstance: SupabaseClient | null = null;
+let _adminInstance: SupabaseClient | null = null;
 
 /**
  * Cliente Supabase padrão (com RLS)
  * Use este para operações normais de frontend
- * Lazy loading para evitar instanciar durante build
  */
-export const supabaseClient = (() => {
-  if (typeof window === 'undefined' && !supabaseUrl) {
-    // Durante build SSR sem env vars, retorna mock
-    return null as any;
-  }
-  
-  if (!clientInstance) {
-    clientInstance = createClient(supabaseUrl, supabaseAnonKey, {
+function getSupabaseClient(): SupabaseClient {
+  if (!_clientInstance) {
+    _clientInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
       },
     });
   }
-  
-  return clientInstance;
-})();
+  return _clientInstance;
+}
 
 /**
  * Cliente Supabase ADMIN (sem RLS)
  * ⚠️ USE APENAS EM API ROUTES NO SERVIDOR!
  * ⚠️ NUNCA exponha no frontend!
- * Lazy loading para evitar instanciar durante build
  */
-export const supabaseAdmin = (() => {
+function getSupabaseAdmin(): SupabaseClient {
   if (typeof window !== 'undefined') {
     throw new Error('supabaseAdmin só pode ser usado no servidor!');
   }
   
-  if (!supabaseUrl || !supabaseServiceKey) {
-    // Durante build sem env vars, retorna mock
-    return null as any;
-  }
-  
-  if (!adminInstance) {
-    adminInstance = createClient(supabaseUrl, supabaseServiceKey, {
+  if (!_adminInstance) {
+    _adminInstance = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
       },
     });
   }
-  
-  return adminInstance;
-})();
+  return _adminInstance;
+}
+
+// Export singleton instance (safe para import no browser)
+export const supabaseClient = getSupabaseClient();
+
+// Export getter function para admin (só usar no servidor)
+export function getAdminClient() {
+  return getSupabaseAdmin();
+}
 
 /**
  * Tipos TypeScript para as tabelas
