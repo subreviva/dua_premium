@@ -165,7 +165,7 @@ export function useGeminiLiveVoice({
         // PRODUCTION: Removed console.log("✅ Token obtido e cacheado com sucesso!");
       } else {
         // PRODUCTION: Removed console.log("♻️ Usando token em cache (válido por mais " + 
-                    Math.round((tokenExpiresAt - now) / 60000) + " minutos)");
+        //             Math.round((tokenExpiresAt - now) / 60000) + " minutos)");
       }
       
       if (!token) {

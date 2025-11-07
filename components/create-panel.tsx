@@ -276,10 +276,10 @@ export function CreatePanel() {
           
           generatedSongs.forEach((song: any, index: number) => {
             // console.log(`[v0] Processing song ${index + 1}:`, {
-              id: song.clip_id,
-              title: song.title,
-              audio_url: song.audio_url
-            })
+            //   id: song.clip_id,
+            //   title: song.title,
+            //   audio_url: song.audio_url
+            // })
             
             const songData = {
               id: song.clip_id || Math.random().toString(36).substr(2, 9),

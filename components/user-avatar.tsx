@@ -16,17 +16,11 @@ import { User, Shield, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const ADMIN_EMAILS = [
-  'admin@dua.pt',
-  'subreviva@gmail.com',
-  'dev@dua.pt',
-  'dev@dua.com'
-];
-
 export function UserAvatar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
@@ -43,11 +37,12 @@ export function UserAvatar() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ''));
+        checkAdminStatus(session.user.id);
         loadUserData(session.user.id);
       } else {
         setUser(null);
         setIsAdmin(false);
+        setIsSuperAdmin(false);
         setAvatarUrl("");
         setUserName("");
       }
@@ -55,6 +50,25 @@ export function UserAvatar() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      // Verificar se é super admin através dos metadados
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role, full_access')
+        .eq('id', userId)
+        .single();
+
+      if (profile) {
+        const isSuperAdminUser = profile.role === 'super_admin' && profile.full_access === true;
+        setIsSuperAdmin(isSuperAdminUser);
+        setIsAdmin(isSuperAdminUser || profile.role === 'admin');
+      }
+    } catch (error) {
+      // PRODUCTION: Removed console.error
+    }
+  };
 
   const loadUserData = async (userId: string) => {
     try {
@@ -79,7 +93,7 @@ export function UserAvatar() {
       
       if (authUser) {
         setUser(authUser);
-        setIsAdmin(ADMIN_EMAILS.includes(authUser.email || ''));
+        await checkAdminStatus(authUser.id);
         await loadUserData(authUser.id);
       }
     } catch (error) {
@@ -208,7 +222,7 @@ export function UserAvatar() {
               {getInitials()}
             </AvatarFallback>
           </Avatar>
-          {isAdmin && (
+          {(isAdmin || isSuperAdmin) && (
             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-black flex items-center justify-center">
               <Shield className="w-2.5 h-2.5 text-black" />
             </div>
@@ -221,7 +235,13 @@ export function UserAvatar() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{getDisplayName()}</p>
             <p className="text-xs text-white/60 truncate">{user.email}</p>
-            {isAdmin && (
+            {isSuperAdmin && (
+              <span className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
+                <Shield className="w-3 h-3" />
+                Super Administrador
+              </span>
+            )}
+            {isAdmin && !isSuperAdmin && (
               <span className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
                 <Shield className="w-3 h-3" />
                 Administrador
@@ -241,15 +261,15 @@ export function UserAvatar() {
           Meu Perfil
         </DropdownMenuItem>
         
-        {isAdmin && (
+        {(isAdmin || isSuperAdmin) && (
           // Admin - link adicional para painel
           <>
             <DropdownMenuItem 
               onClick={() => router.push('/admin')}
-              className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
+              className="text-yellow-400 hover:bg-yellow-500/10 cursor-pointer flex items-center gap-2 font-semibold"
             >
               <Shield className="w-4 h-4" />
-              Painel Admin
+              Painel Administrador
             </DropdownMenuItem>
           </>
         )}

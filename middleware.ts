@@ -156,7 +156,7 @@ export async function middleware(req: NextRequest) {
     // Verificar se user tem acesso (has_access = true)
     const { data: userData, error } = await supabase
       .from('users')
-      .select('has_access')
+      .select('has_access, duaia_enabled, duacoin_enabled')
       .eq('id', user.id)
       .single();
 
@@ -166,7 +166,30 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    // User autenticado e com acesso, permitir
+    // 🎯 VERIFICAÇÃO UNIFIED ARCHITECTURE: Acesso por produto
+    // DUA IA routes: /chat, /dashboard, /api/chat, /api/conversations
+    const DUAIA_ROUTES = ['/chat', '/dashboard', '/api/chat', '/api/conversations'];
+    const isDuaIARoute = DUAIA_ROUTES.some(route => path.startsWith(route));
+
+    // DUA COIN routes: /wallet, /coin, /api/wallet, /api/transactions
+    const DUACOIN_ROUTES = ['/wallet', '/coin', '/api/wallet', '/api/transactions', '/api/staking'];
+    const isDuaCoinRoute = DUACOIN_ROUTES.some(route => path.startsWith(route));
+
+    // Se rota do DUA IA e user não tem acesso, redirecionar
+    if (isDuaIARoute && !userData.duaia_enabled) {
+      console.log(`🚫 User ${user.email} tentou acessar DUA IA sem permissão`);
+      const redirectUrl = new URL('/acesso?product=duaia&reason=disabled', req.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Se rota do DUA COIN e user não tem acesso, redirecionar
+    if (isDuaCoinRoute && !userData.duacoin_enabled) {
+      console.log(`🚫 User ${user.email} tentou acessar DUA COIN sem permissão`);
+      const redirectUrl = new URL('/acesso?product=duacoin&reason=disabled', req.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // User autenticado e com acesso ao produto correto, permitir
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);
