@@ -18,12 +18,16 @@ interface UserData {
   invite_code_used?: string;
   created_at: string;
   updated_at?: string;
-  last_login_at?: string; // Renamed from last_login
-  // Fake fields para compatibilidade (não vêm do DB)
+  last_login_at?: string;
+  // Fields opcionais (podem não existir no DB)
+  full_name?: string;
+  display_name?: string;
+  subscription_tier?: string;
   total_tokens?: number;
   tokens_used?: number;
   total_projects?: number;
   total_generated_content?: number;
+  last_login?: string;
 }
 
 interface TokenPackage {
@@ -58,10 +62,15 @@ const AdminPanel = () => {
         return;
       }
 
-      // Verificar se é admin (email específico ou role)
-      const adminEmails = ['admin@dua.pt', 'subreviva@gmail.com', 'dev@dua.pt', 'dev@dua.com'];
+      // SUPER ADMINS: acesso total sempre
+      const superAdmins = ['estraca@2lados.pt', 'dev@dua.com'];
       
-      if (!adminEmails.includes(user.email || '')) {
+      // Outros admins
+      const adminEmails = ['admin@dua.pt', 'subreviva@gmail.com', 'dev@dua.pt'];
+      
+      const isAdmin = superAdmins.includes(user.email || '') || adminEmails.includes(user.email || '');
+      
+      if (!isAdmin) {
         toast.error('Acesso Negado', {
           description: 'Você não tem permissão para acessar este painel'
         });
@@ -124,9 +133,10 @@ const AdminPanel = () => {
       setProcessing(true);
 
       // Primeiro, buscar o usuário atual para somar os tokens
+      // Buscar dados do usuário
       const { data: currentUser, error: fetchError } = await supabaseClient
         .from('users')
-        .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
+        .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret, total_tokens')
         .eq('id', userId)
         .single();
 
@@ -138,7 +148,7 @@ const AdminPanel = () => {
       const { error: updateError } = await supabaseClient
         .from('users')
         .update({
-          total_tokens: currentUser.total_tokens + tokens,
+          total_tokens: (currentUser.total_tokens || 0) + tokens,
           updated_at: new Date().toISOString()
         })
         .eq('id', userId);
@@ -291,21 +301,21 @@ const AdminPanel = () => {
           
           <div className="bg-gradient-to-r from-slate-900/40 to-purple-900/40 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20">
             <div className="text-2xl font-bold text-orange-400">
-              {users.reduce((sum, u) => sum + u.total_tokens, 0).toLocaleString()}
+              {users.reduce((sum, u) => sum + (u.total_tokens || 0), 0).toLocaleString()}
             </div>
             <div className="text-sm text-gray-400">Total de Tokens</div>
           </div>
           
           <div className="bg-gradient-to-r from-purple-900/40 to-slate-900/40 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20">
             <div className="text-2xl font-bold text-purple-400">
-              {users.reduce((sum, u) => sum + u.tokens_used, 0).toLocaleString()}
+              {users.reduce((sum, u) => sum + (u.tokens_used || 0), 0).toLocaleString()}
             </div>
             <div className="text-sm text-gray-400">Tokens Usados</div>
           </div>
           
           <div className="bg-gradient-to-r from-pink-900/40 to-purple-900/40 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20">
             <div className="text-2xl font-bold text-pink-400">
-              {users.reduce((sum, u) => sum + u.total_generated_content, 0).toLocaleString()}
+              {users.reduce((sum, u) => sum + (u.total_generated_content || 0), 0).toLocaleString()}
             </div>
             <div className="text-sm text-gray-400">Conteúdos Gerados</div>
           </div>
@@ -374,13 +384,13 @@ const AdminPanel = () => {
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-green-400 font-medium">
-                          {user.total_tokens.toLocaleString()} total
+                          {(user.total_tokens || 0).toLocaleString()} total
                         </div>
                         <div className="text-orange-400 text-sm">
-                          {user.tokens_used.toLocaleString()} usados
+                          {(user.tokens_used || 0).toLocaleString()} usados
                         </div>
                         <div className="text-purple-400 text-sm">
-                          {(user.total_tokens - user.tokens_used).toLocaleString()} disponíveis
+                          {((user.total_tokens || 0) - (user.tokens_used || 0)).toLocaleString()} disponíveis
                         </div>
                       </div>
                     </td>
