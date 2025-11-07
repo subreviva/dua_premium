@@ -47,6 +47,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
   const [completedTracks, setCompletedTracks] = useState<Track[]>([])
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
 
+  // Load completed tracks from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem("dua-music-tracks")
     if (stored) {
@@ -59,11 +60,45 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Load active tasks from localStorage on mount
+  useEffect(() => {
+    const storedTasks = localStorage.getItem("dua-music-tasks")
+    if (storedTasks) {
+      try {
+        const parsedTasks = JSON.parse(storedTasks)
+        // Only restore tasks that are still active (not completed or failed)
+        const activeTasks = parsedTasks.filter(
+          (task: GenerationTask) => 
+            task.status !== "SUCCESS" && 
+            !task.error && 
+            !task.status.includes("FAILED") &&
+            task.progress < 100
+        )
+        if (activeTasks.length > 0) {
+          setTasks(activeTasks)
+          console.log(`🔄 Restored ${activeTasks.length} active music generation task(s)`)
+        }
+      } catch (err) {
+        console.error("Error loading tasks from localStorage:", err)
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (completedTracks.length > 0) {
       localStorage.setItem("dua-music-tracks", JSON.stringify(completedTracks))
     }
   }, [completedTracks])
+
+  // Persist active tasks to localStorage whenever they change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      localStorage.setItem("dua-music-tasks", JSON.stringify(tasks))
+    } else {
+      // Clear storage if no tasks remain
+      localStorage.removeItem("dua-music-tasks")
+    }
+  }, [tasks])
 
   useEffect(() => {
     const activeTasks = tasks.filter(
@@ -112,7 +147,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
                     createTime: track.createTime || new Date().toISOString(),
                     taskId: task.taskId,
                   }))
-                  .filter((track) => track.audioUrl || track.streamAudioUrl)
+                  .filter((track: Track) => track.audioUrl || track.streamAudioUrl)
               }
               break
 
