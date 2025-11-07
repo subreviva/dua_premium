@@ -1,0 +1,1303 @@
+{
+  "metadata": {
+    "exported_at": "2025-11-07T03:31:10.034Z",
+    "source": "DUA IA",
+    "source_url": "https://gocjbfcztorfswlkkjqi.supabase.co",
+    "total_users": 2
+  },
+  "auth_users": [
+    {
+      "id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+      "email": "dev@dua.com",
+      "email_confirmed_at": "2025-11-05T18:20:11.94768Z",
+      "created_at": "2025-11-05T18:20:11.908941Z",
+      "updated_at": "2025-11-07T02:11:48.329231Z",
+      "last_sign_in_at": "2025-11-06T16:43:53.197562Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email_verified": true,
+        "invite_code": "DEV-ADMIN",
+        "name": "Developer Admin",
+        "role": "admin"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+      "email": "estracaofficial@gmail.com",
+      "email_confirmed_at": "2025-11-06T20:56:35.284223Z",
+      "created_at": "2025-11-05T16:48:23.631861Z",
+      "updated_at": "2025-11-06T20:56:35.3098Z",
+      "last_sign_in_at": "2025-11-06T20:56:35.289564Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email_verified": true
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    }
+  ],
+  "tables": {
+    "users": [
+      {
+        "id": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+        "email": "estracaofficial@gmail.com",
+        "credits": 60,
+        "has_access": true,
+        "invite_code_used": "U775-GCW",
+        "created_at": "2025-11-05T16:48:23.631494+00:00",
+        "updated_at": "2025-11-06T16:06:29.781327+00:00",
+        "full_name": "Usuário",
+        "display_name": null,
+        "avatar_url": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "phone": null,
+        "total_tokens": 300,
+        "tokens_used": 0,
+        "subscription_tier": "free",
+        "profile_visibility": "public",
+        "email_notifications": true,
+        "push_notifications": true,
+        "marketing_emails": false,
+        "total_projects": 0,
+        "total_generated_content": 0,
+        "last_login": null,
+        "name": null,
+        "username": null,
+        "email_verified": false,
+        "email_verified_at": null,
+        "last_login_at": null,
+        "last_login_ip": null,
+        "failed_login_attempts": 0,
+        "account_locked_until": null,
+        "password_changed_at": null,
+        "two_factor_enabled": false,
+        "two_factor_secret": null,
+        "chat_settings": {
+          "theme": "dark",
+          "language": "pt",
+          "compactMode": false,
+          "enterToSend": true,
+          "soundEffects": true,
+          "autoSaveChats": true,
+          "notifications": true,
+          "showTimestamps": true
+        }
+      },
+      {
+        "id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "email": "dev@dua.com",
+        "credits": 999999,
+        "has_access": true,
+        "invite_code_used": "DEV-ADMIN",
+        "created_at": "2025-11-05T18:20:11.894+00:00",
+        "updated_at": "2025-11-06T19:14:31.375949+00:00",
+        "full_name": "Usuário",
+        "display_name": null,
+        "avatar_url": "https://api.dicebear.com/9.x/notionists/svg?seed=Bella&backgroundColor=b6e3f4&radius=50",
+        "bio": null,
+        "location": null,
+        "website": null,
+        "phone": null,
+        "total_tokens": 1100,
+        "tokens_used": 0,
+        "subscription_tier": "free",
+        "profile_visibility": "public",
+        "email_notifications": true,
+        "push_notifications": true,
+        "marketing_emails": false,
+        "total_projects": 0,
+        "total_generated_content": 0,
+        "last_login": "2025-11-06T16:43:53.291+00:00",
+        "name": "DUA apoio",
+        "username": null,
+        "email_verified": false,
+        "email_verified_at": null,
+        "last_login_at": null,
+        "last_login_ip": null,
+        "failed_login_attempts": 0,
+        "account_locked_until": null,
+        "password_changed_at": null,
+        "two_factor_enabled": false,
+        "two_factor_secret": null,
+        "chat_settings": {
+          "theme": "dark",
+          "language": "pt",
+          "compactMode": false,
+          "enterToSend": true,
+          "soundEffects": true,
+          "autoSaveChats": true,
+          "notifications": true,
+          "showTimestamps": true
+        }
+      }
+    ],
+    "invite_codes": [
+      {
+        "id": "17042717-5506-4490-ada8-8027b9d18dd2",
+        "code": "UA4T-S9R",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:49.557963+00:00"
+      },
+      {
+        "id": "21fe48d4-67bf-4c8c-a4bf-6599aaebf969",
+        "code": "RP8H-FWS",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:49.655235+00:00"
+      },
+      {
+        "id": "0cca0c49-c281-4108-9c86-ba0d140d394a",
+        "code": "X3JL-36K",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:49.738888+00:00"
+      },
+      {
+        "id": "ef8138f8-2c20-457e-a837-d53748d65e5b",
+        "code": "Z4B9-6RV",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:49.812387+00:00"
+      },
+      {
+        "id": "b29db14b-ca86-4a5c-b01a-0d14b6bc9d47",
+        "code": "VE5P-NE6",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:49.875884+00:00"
+      },
+      {
+        "id": "0176f34c-733c-4a2c-9a00-0089e47fef20",
+        "code": "TKH7-YSK",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:49.94256+00:00"
+      },
+      {
+        "id": "9f134ba4-0185-49d3-83a0-49074189448a",
+        "code": "KNAN-6Z6",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:50.026027+00:00"
+      },
+      {
+        "id": "41fe2a70-c9e0-4979-ac4b-9bcb19936c19",
+        "code": "4F38-MT3",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:50.097306+00:00"
+      },
+      {
+        "id": "1e399b52-dbe5-410e-8ec0-faaf9f3a5b37",
+        "code": "F285-SDY",
+        "active": true,
+        "used_by": null,
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:50.169563+00:00"
+      },
+      {
+        "id": "3d53beec-4a03-4637-8aa9-75f5dbc08429",
+        "code": "U775-GCW",
+        "active": false,
+        "used_by": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+        "credits": 30,
+        "created_at": "2025-11-05T16:37:49.430112+00:00"
+      },
+      {
+        "id": "4a308c5c-b97a-43eb-ada9-f60a90089199",
+        "code": "DEV-ADMIN",
+        "active": true,
+        "used_by": null,
+        "credits": 999999,
+        "created_at": "2025-11-05T18:20:11.255+00:00"
+      },
+      {
+        "id": "2afb6495-bd61-406e-8f76-1e5b2b74f633",
+        "code": "PREMIUM-001",
+        "active": true,
+        "used_by": null,
+        "credits": 500,
+        "created_at": "2025-11-05T18:27:50.014092+00:00"
+      },
+      {
+        "id": "77fcd48b-9b5c-4630-9226-2c76df91d06a",
+        "code": "PREMIUM-002",
+        "active": true,
+        "used_by": null,
+        "credits": 500,
+        "created_at": "2025-11-05T18:27:50.1292+00:00"
+      },
+      {
+        "id": "a2790a0b-f5f2-47f5-a04a-072083687d00",
+        "code": "VIP-BETA-01",
+        "active": true,
+        "used_by": null,
+        "credits": 1000,
+        "created_at": "2025-11-05T18:27:50.200295+00:00"
+      }
+    ],
+    "conversations": [],
+    "token_usage_log": [],
+    "user_purchases": [],
+    "sessions_history": [],
+    "login_attempts": [],
+    "token_packages": [
+      {
+        "id": 1,
+        "name": "Pack Inicial",
+        "description": "Perfeito para começar sua jornada criativa",
+        "tokens_amount": 100,
+        "price": 4.99,
+        "currency": "EUR",
+        "is_active": true,
+        "is_featured": false,
+        "sort_order": 1,
+        "discount_percentage": 0,
+        "promotional_price": null,
+        "created_at": "2025-11-05T20:16:46.218008+00:00",
+        "updated_at": "2025-11-05T20:16:46.218008+00:00"
+      },
+      {
+        "id": 2,
+        "name": "Pack Popular",
+        "description": "Melhor custo-benefício para criadores",
+        "tokens_amount": 500,
+        "price": 19.99,
+        "currency": "EUR",
+        "is_active": true,
+        "is_featured": true,
+        "sort_order": 2,
+        "discount_percentage": 0,
+        "promotional_price": null,
+        "created_at": "2025-11-05T20:16:46.218008+00:00",
+        "updated_at": "2025-11-05T20:16:46.218008+00:00"
+      },
+      {
+        "id": 3,
+        "name": "Pack Profissional",
+        "description": "Para criadores avançados e estúdios",
+        "tokens_amount": 1000,
+        "price": 34.99,
+        "currency": "EUR",
+        "is_active": true,
+        "is_featured": false,
+        "sort_order": 3,
+        "discount_percentage": 0,
+        "promotional_price": null,
+        "created_at": "2025-11-05T20:16:46.218008+00:00",
+        "updated_at": "2025-11-05T20:16:46.218008+00:00"
+      },
+      {
+        "id": 4,
+        "name": "Pack Ultimate",
+        "description": "Máxima criatividade sem limites",
+        "tokens_amount": 2500,
+        "price": 79.99,
+        "currency": "EUR",
+        "is_active": true,
+        "is_featured": false,
+        "sort_order": 4,
+        "discount_percentage": 0,
+        "promotional_price": null,
+        "created_at": "2025-11-05T20:16:46.218008+00:00",
+        "updated_at": "2025-11-05T20:16:46.218008+00:00"
+      },
+      {
+        "id": 5,
+        "name": "Pack Mega",
+        "description": "Para estúdios profissionais",
+        "tokens_amount": 5000,
+        "price": 149.99,
+        "currency": "EUR",
+        "is_active": true,
+        "is_featured": false,
+        "sort_order": 5,
+        "discount_percentage": 0,
+        "promotional_price": null,
+        "created_at": "2025-11-05T20:16:46.218008+00:00",
+        "updated_at": "2025-11-05T20:16:46.218008+00:00"
+      }
+    ],
+    "audit_logs": [
+      {
+        "id": "553944fa-f97b-478b-b3cb-e2f0754f2fa1",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T15:18:12.490Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T15:18:17.961941+00:00"
+      },
+      {
+        "id": "39e79289-4acc-489e-9a2c-1e8be9e63565",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T15:18:12.491Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T15:18:18.430936+00:00"
+      },
+      {
+        "id": "fbf06fb6-6d69-4575-8a79-128c515e08c9",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T15:57:27.790Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T15:57:43.179187+00:00"
+      },
+      {
+        "id": "0ec6fa0d-9270-4cac-a612-9f08536095da",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T15:57:27.959Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T15:57:43.771384+00:00"
+      },
+      {
+        "id": "52f06e23-6d24-4223-8ec3-11ac8d566f2e",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T15:58:04.972Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T15:58:08.245857+00:00"
+      },
+      {
+        "id": "45f44e7b-1722-40fe-aa70-a9b06a77c8da",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T15:58:04.972Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T15:58:08.599251+00:00"
+      },
+      {
+        "id": "4a4ea171-1703-4961-b661-5da7608099cd",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:02:45.792Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:02:51.252838+00:00"
+      },
+      {
+        "id": "62c5f311-26be-4119-b76d-4d020b5466f0",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:02:45.793Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:02:51.698313+00:00"
+      },
+      {
+        "id": "8d3a45e8-f2b3-47fe-9e4a-31ec3c0271b7",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:04:40.808Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:04:46.292664+00:00"
+      },
+      {
+        "id": "597df62e-5471-40bb-b511-7f66d955169a",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:04:40.808Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:04:46.680576+00:00"
+      },
+      {
+        "id": "4351ecb3-f8bc-42d2-a57b-e23afa22f8de",
+        "user_id": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+        "action": "tokens_injected",
+        "details": {
+          "amount": 100,
+          "injected_by": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+          "new_balance": 200,
+          "previous_balance": 100
+        },
+        "ip_address": "::1/128",
+        "user_agent": null,
+        "created_at": "2025-11-06T16:06:17.012277+00:00"
+      },
+      {
+        "id": "ea41d9e3-4615-4228-979a-f9d938acaf3a",
+        "user_id": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+        "action": "tokens_injected",
+        "details": {
+          "amount": 100,
+          "injected_by": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+          "new_balance": 300,
+          "previous_balance": 200
+        },
+        "ip_address": "::1/128",
+        "user_agent": null,
+        "created_at": "2025-11-06T16:06:29.781327+00:00"
+      },
+      {
+        "id": "302c45af-f881-46d7-ae69-e9c193e180cc",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:19:45.814Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:19:57.550761+00:00"
+      },
+      {
+        "id": "49facbec-7c18-477a-9828-05ee78d1e9bc",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:19:45.961Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:19:58.062528+00:00"
+      },
+      {
+        "id": "3d58efb4-82f7-44bd-8aa5-c6ad1679c195",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:24:31.317Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:33:19.839351+00:00"
+      },
+      {
+        "id": "236e7755-5bb0-44fe-8b26-68f047cff12b",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:40:46.272Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:40:51.734528+00:00"
+      },
+      {
+        "id": "3f8237cf-44ae-496c-9608-c8f6224c490a",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:40:46.272Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:40:52.157618+00:00"
+      },
+      {
+        "id": "d4c14e46-d03b-4d5a-b43e-3aa56e256043",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:41:07.235Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:41:12.613952+00:00"
+      },
+      {
+        "id": "b0df886d-644f-4fea-b57a-a1837d09d6a5",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:41:07.235Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:41:12.950509+00:00"
+      },
+      {
+        "id": "1541aa58-04d0-4170-aa27-d39c756126df",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "auth.login",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/login",
+          "method": "email",
+          "success": true,
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:43:53.512Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:43:56.110975+00:00"
+      },
+      {
+        "id": "20719d85-1f1b-41b1-b150-cd1e10bfc458",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:50:29.691Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:50:35.031742+00:00"
+      },
+      {
+        "id": "216f126a-bfe3-42c9-abfc-4f1e5536802b",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T16:50:29.691Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T16:50:35.39487+00:00"
+      },
+      {
+        "id": "0281b38c-d99d-4d67-af2e-65b8451f1e6a",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T18:55:00.318Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T18:55:30.635241+00:00"
+      },
+      {
+        "id": "c8d87fc6-1a8a-4cc9-819c-77f48322d681",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T18:55:00.318Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T18:55:31.310591+00:00"
+      },
+      {
+        "id": "be9ac873-4552-47c2-96b3-42c97131b2c0",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T18:55:53.712Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T18:55:56.601873+00:00"
+      },
+      {
+        "id": "16c541f4-1974-48ad-b0ea-5792768e11ca",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T18:55:53.712Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T18:55:57.006935+00:00"
+      },
+      {
+        "id": "d998803d-58a9-4d4b-929e-768e8e8ea4ca",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T18:59:14.681Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T18:59:20.098576+00:00"
+      },
+      {
+        "id": "a2762747-8918-4ff0-b397-63747372bad3",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T18:59:14.682Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T18:59:20.479499+00:00"
+      },
+      {
+        "id": "38b9eabd-17ca-4fc4-aae8-726c09a8d808",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:14:13.245Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:14:27.384497+00:00"
+      },
+      {
+        "id": "1eddeaa5-05c8-41ec-b586-6bd0564c0178",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:14:13.412Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:14:27.941012+00:00"
+      },
+      {
+        "id": "4a7b7aea-9355-46d2-b865-ad095f7c80b5",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/perfil",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:14:28.067Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:14:33.540472+00:00"
+      },
+      {
+        "id": "27ffe9db-4035-49bd-a385-b99852a252e7",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/perfil",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:14:28.067Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:14:33.939559+00:00"
+      },
+      {
+        "id": "9cbdc3d9-514d-4325-8776-3a2749a9348e",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:22:09.406Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:22:14.478781+00:00"
+      },
+      {
+        "id": "6dcbf55d-4ce6-487d-a31b-019de3c67ab3",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:22:09.406Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:22:14.85755+00:00"
+      },
+      {
+        "id": "705dc08b-a953-4266-9b1c-cc126fe99278",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:22:22.742Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:22:28.331974+00:00"
+      },
+      {
+        "id": "14ef4944-78d0-473d-8420-cac106563722",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:22:22.742Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:22:28.715894+00:00"
+      },
+      {
+        "id": "b5c5e036-5e3f-4e95-bc67-5d38a149e499",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:37:12.734Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:37:18.185689+00:00"
+      },
+      {
+        "id": "1ca53570-f295-45aa-a0a2-21d4fd704402",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:37:12.734Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:37:18.569569+00:00"
+      },
+      {
+        "id": "dc1f198f-37dc-41a2-885e-3cc096e0506a",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:43:20.090Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:43:25.468511+00:00"
+      },
+      {
+        "id": "9c3bb10c-05f6-43d7-a31b-435eb5fbd844",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T19:43:20.090Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T19:43:25.835545+00:00"
+      },
+      {
+        "id": "c34dad0d-af7b-40b1-903a-539a47b740a0",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T20:08:37.162Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T20:09:52.085096+00:00"
+      },
+      {
+        "id": "f024c13a-8df1-4749-9b06-d428a7d79745",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T20:12:03.759Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T20:13:32.01271+00:00"
+      },
+      {
+        "id": "8b2515ab-a314-457e-9f83-077adb860c90",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T20:12:03.759Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T22:31:22.190097+00:00"
+      },
+      {
+        "id": "c45c0fef-0320-451f-ad2c-d50d71957636",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-06T23:53:42.299Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-06T23:55:21.507979+00:00"
+      },
+      {
+        "id": "82cf3d9d-c9b2-4d17-b1d0-8becb1845867",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T00:07:00.503Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T00:09:45.337582+00:00"
+      },
+      {
+        "id": "8b10ffb4-aac7-4eda-a030-c3993e3b97e1",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T00:07:00.732Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T00:09:45.812741+00:00"
+      },
+      {
+        "id": "dd50edb3-2de7-4b31-93d9-a026d787e82f",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T01:20:41.236Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T01:21:24.289264+00:00"
+      },
+      {
+        "id": "3411e148-b6bc-4e45-be83-d89b15033706",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/community",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:02:17.454Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:02:24.014388+00:00"
+      },
+      {
+        "id": "94e259d7-d1d2-43f9-8be2-c80ddbe5eb96",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/community",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:02:17.454Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:02:27.043908+00:00"
+      },
+      {
+        "id": "01eadbec-fde1-41c4-a3e7-b0a3bb3764f6",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/community",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:07:50.297Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:07:55.785332+00:00"
+      },
+      {
+        "id": "550ecf80-72d5-47ac-bb74-6b1e77034cb6",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/community",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:07:50.297Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:07:56.172002+00:00"
+      },
+      {
+        "id": "e5dcd295-0ee7-410a-93cd-16bb4e35bf84",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/imagestudio",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:16:43.083Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:16:48.403342+00:00"
+      },
+      {
+        "id": "61b2f35e-de87-4155-aaec-14bd250b7745",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/imagestudio",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:16:43.083Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:16:48.754953+00:00"
+      },
+      {
+        "id": "e24305ac-6ca0-4a74-8144-3c76e7a35e40",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "navigation.page_access",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/acesso",
+          "page": "/acesso",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:16:59.565Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "85.240.177.102",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:17:03.815512+00:00"
+      },
+      {
+        "id": "93bccc2f-76e9-415e-8b72-dad74bf980cd",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:55:17.238Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:55:28.58432+00:00"
+      },
+      {
+        "id": "32db164a-bb18-4bd1-89a6-560e824232b8",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:55:17.239Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:55:29.176759+00:00"
+      },
+      {
+        "id": "a923ba46-f33c-48a2-9bea-46cfef8ac709",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:56:41.142Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:56:46.600004+00:00"
+      },
+      {
+        "id": "5032fe04-9572-4b3d-aa71-bfc8c7a29826",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/admin",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:56:41.142Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:56:46.96644+00:00"
+      },
+      {
+        "id": "90ddc002-7630-47dc-b210-559662bc3407",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:57:20.602Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:57:26.030963+00:00"
+      },
+      {
+        "id": "9ac154bc-a0a2-4aeb-b3c7-c020670edac3",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:57:20.603Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:57:26.367817+00:00"
+      },
+      {
+        "id": "1e8f22ca-6bc8-4b68-9f68-75880e30af54",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:57:43.472Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:57:46.021296+00:00"
+      },
+      {
+        "id": "044365f2-68ba-4fd5-998d-6c08303ae91f",
+        "user_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "action": "custom.sw_registered",
+        "details": {
+          "url": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/chat",
+          "scope": "https://v0-remix-of-untitled-chat-liard-one.vercel.app/",
+          "sessionId": "session_1762389686094_knckibwdaea",
+          "timestamp": "2025-11-07T02:57:43.472Z",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+        },
+        "ip_address": "149.22.86.247",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "created_at": "2025-11-07T02:57:46.357234+00:00"
+      }
+    ]
+  },
+  "storage_buckets": [
+    {
+      "id": "profile-images",
+      "name": "profile-images",
+      "public": true,
+      "file_size_limit": 5242880,
+      "allowed_mime_types": [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+        "image/gif"
+      ],
+      "created_at": "2025-11-06T15:05:25.837Z",
+      "updated_at": "2025-11-06T15:05:25.837Z"
+    }
+  ],
+  "summary": {
+    "users": 2,
+    "invite_codes": 14,
+    "conversations": 0,
+    "token_usage_log": 0,
+    "user_purchases": 0,
+    "sessions_history": 0,
+    "login_attempts": 0,
+    "token_packages": 5,
+    "audit_logs": 62,
+    "storage_buckets": 1
+  }
+}

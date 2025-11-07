@@ -19,7 +19,9 @@ import { motion } from "framer-motion";
 import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import { audit } from "@/lib/audit";
+// TEMPORÁRIO: audit desabilitado até audit_logs estar configurado
+// import { audit } from "@/lib/audit";
+const audit = { login: () => {}, pageAccess: () => {} };
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -104,10 +106,11 @@ export default function LoginPage() {
         return;
       }
 
-      // Verificar se user tem acesso
+            // Verificar se user tem acesso
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('has_access, subscription_tier, display_name')
+        // Query com APENAS colunas que existem no schema
+        .select('has_access, name, email, last_login_at')
         .eq('id', data.user.id)
         .single();
 
@@ -132,11 +135,11 @@ export default function LoginPage() {
       // Atualizar último login
       await supabase
         .from('users')
-        .update({ last_login: new Date().toISOString() })
+        .update({ last_login_at: new Date().toISOString() })
         .eq('id', data.user.id);
 
-      // Login bem-sucedido!
-      const userName = userData.display_name || email.split('@')[0];
+            // Login bem-sucedido!
+      const userName = (userData && userData.name) || email.split('@')[0];
       toast.success(`Bem-vindo, ${userName}! 🎉`, {
         description: "Redirecionando para o chat...",
         duration: 2000,

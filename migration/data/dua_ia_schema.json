@@ -1,0 +1,91 @@
+{
+  "url": "https://gocjbfcztorfswlkkjqi.supabase.co",
+  "timestamp": "2025-11-07T03:27:38.854Z",
+  "tables_found": [
+    {
+      "name": "profiles",
+      "count": null
+    },
+    {
+      "name": "perfis",
+      "count": null
+    },
+    {
+      "name": "usuarios",
+      "count": null
+    },
+    {
+      "name": "users",
+      "count": 2
+    },
+    {
+      "name": "user_profiles",
+      "count": null
+    },
+    {
+      "name": "perfis_usuarios",
+      "count": null
+    },
+    {
+      "name": "codigos_acesso",
+      "count": null
+    },
+    {
+      "name": "access_codes",
+      "count": null
+    },
+    {
+      "name": "convites",
+      "count": null
+    },
+    {
+      "name": "invites",
+      "count": null
+    },
+    {
+      "name": "subscriptions",
+      "count": null
+    },
+    {
+      "name": "subscricoes",
+      "count": null
+    },
+    {
+      "name": "transactions",
+      "count": null
+    },
+    {
+      "name": "transacoes",
+      "count": null
+    },
+    {
+      "name": "credits",
+      "count": null
+    },
+    {
+      "name": "creditos",
+      "count": null
+    },
+    {
+      "name": "dua_credits",
+      "count": null
+    },
+    {
+      "name": "dua_coins",
+      "count": null
+    },
+    {
+      "name": "balances",
+      "count": null
+    },
+    {
+      "name": "saldos",
+      "count": null
+    },
+    {
+      "name": "auth_users",
+      "count": null
+    }
+  ],
+  "total_tables": 21
+}

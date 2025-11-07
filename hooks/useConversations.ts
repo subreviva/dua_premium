@@ -168,7 +168,12 @@ export function useConversations() {
         .order('updated_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Erro ao carregar do Supabase:', error);
+        // PGRST205 = tabela não existe, silenciar erro e usar localStorage
+        if (error.code === 'PGRST205') {
+          console.warn('⚠️  Tabela conversations não existe no Supabase, usando localStorage');
+        } else {
+          console.error('❌ Erro ao carregar do Supabase:', error);
+        }
         loadConversationsFromLocalStorage();
         return;
       }
@@ -238,7 +243,10 @@ export function useConversations() {
         });
 
         if (error) {
-          console.error('❌ Erro ao sync:', error);
+          // PGRST205 = tabela não existe, silenciar (localStorage já salva)
+          if (error.code !== 'PGRST205') {
+            console.error('❌ Erro ao sync:', error);
+          }
         } else {
           console.log(`✅ Conversa ${conv.id} sincronizada`);
         }
@@ -372,8 +380,11 @@ export function useConversations() {
     if (userId) {
       try {
         await supabase.rpc('soft_delete_conversation', { conversation_id: id });
-      } catch (error) {
-        console.error('❌ Erro ao deletar no Supabase:', error);
+      } catch (error: any) {
+        // PGRST205/PGRST202 = tabela/função não existe, silenciar (localStorage já deletou)
+        if (error?.code !== 'PGRST205' && error?.code !== 'PGRST202') {
+          console.error('❌ Erro ao deletar no Supabase:', error);
+        }
       }
     }
 
@@ -406,8 +417,11 @@ export function useConversations() {
       try {
         await supabase.rpc('restore_conversation', { conversation_id: id });
         toast.success('✅ Conversa restaurada');
-      } catch (error) {
-        console.error('❌ Erro ao restaurar no Supabase:', error);
+      } catch (error: any) {
+        // PGRST205/PGRST202 = tabela/função não existe, silenciar (localStorage já restaurou)
+        if (error?.code !== 'PGRST205' && error?.code !== 'PGRST202') {
+          console.error('❌ Erro ao restaurar no Supabase:', error);
+        }
       }
     }
   }, [deletedConversations, userId]);

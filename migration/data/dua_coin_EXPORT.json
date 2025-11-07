@@ -1,0 +1,310 @@
+{
+  "metadata": {
+    "exported_at": "2025-11-07T03:31:55.001Z",
+    "source": "DUA COIN",
+    "source_url": "https://nranmngyocaqjwcokcxm.supabase.co",
+    "total_users": 8,
+    "note": "ESTES UUIDs DEVEM SER PRESERVADOS - SÃO PRIORITÁRIOS"
+  },
+  "auth_users": [
+    {
+      "id": "22b7436c-41be-4332-859e-9d2315bcfe1f",
+      "email": "dev@dua.com",
+      "email_confirmed_at": "2025-11-07T03:10:10.845094Z",
+      "created_at": "2025-11-07T02:26:24.310551Z",
+      "updated_at": "2025-11-07T03:21:21.700882Z",
+      "last_sign_in_at": "2025-11-07T03:21:21.69621Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email_verified": true,
+        "invite_code": "DEV-ADMIN",
+        "name": "Developer Admin",
+        "role": "admin"
+      },
+      "app_metadata": {
+        "migrated_from": "DUA_IA",
+        "old_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "4e07c1aa-0742-4c53-956f-d45d3801455c",
+      "email": "jorsonnrijo@gmail.com",
+      "email_confirmed_at": "2025-10-15T13:30:47.477463Z",
+      "created_at": "2025-10-15T13:30:28.090602Z",
+      "updated_at": "2025-10-15T13:31:33.767226Z",
+      "last_sign_in_at": "2025-10-15T13:31:33.718852Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email": "jorsonnrijo@gmail.com",
+        "email_verified": true,
+        "full_name": "Jorge Miguel Rijo Rodrigues",
+        "phone_verified": false,
+        "sub": "4e07c1aa-0742-4c53-956f-d45d3801455c"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "91ce94c6-2643-40b7-9637-132c9156d5eb",
+      "email": "abelx2775@gmail.com",
+      "email_confirmed_at": "2025-09-24T14:51:49.734871Z",
+      "created_at": "2025-09-24T14:51:37.901039Z",
+      "updated_at": "2025-09-24T15:27:49.437372Z",
+      "last_sign_in_at": "2025-09-24T15:27:49.435396Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email": "abelx2775@gmail.com",
+        "email_verified": true,
+        "full_name": "Carlos Guedes",
+        "phone_verified": false,
+        "sub": "91ce94c6-2643-40b7-9637-132c9156d5eb"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "92a04ab8-bfd7-471e-8f12-3fdf4ea1a060",
+      "email": "sabedoria2024@gmail.com",
+      "email_confirmed_at": "2025-09-23T22:50:53.627305Z",
+      "created_at": "2025-09-23T22:50:34.901605Z",
+      "updated_at": "2025-11-06T18:51:04.75867Z",
+      "last_sign_in_at": "2025-11-06T18:51:04.747711Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email": "sabedoria2024@gmail.com",
+        "email_verified": true,
+        "full_name": "Carlos Guedes",
+        "phone_verified": false,
+        "sub": "92a04ab8-bfd7-471e-8f12-3fdf4ea1a060"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "345bb6b6-7e47-40db-bbbe-e9fe4836f682",
+      "email": "estraca@2lados.pt",
+      "email_confirmed_at": "2025-09-23T15:18:39.232912Z",
+      "created_at": "2025-09-23T15:18:39.193453Z",
+      "updated_at": "2025-11-07T02:06:08.48731Z",
+      "last_sign_in_at": "2025-11-06T20:09:17.165476Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "dua_balance": 1000000,
+        "email_verified": true,
+        "full_name": "Administrador",
+        "role": "admin"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "0728689d-cd48-436e-85ef-84d6341448bb",
+      "email": "info@2lados.pt",
+      "email_confirmed_at": "2025-09-22T23:12:20.545511Z",
+      "created_at": "2025-09-22T23:11:59.834839Z",
+      "updated_at": "2025-11-06T12:19:24.973087Z",
+      "last_sign_in_at": "2025-11-06T04:37:39.677847Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email": "info@2lados.pt",
+        "email_verified": true,
+        "full_name": "carlos guedes",
+        "phone": "+351968508709",
+        "phone_verified": false,
+        "sub": "0728689d-cd48-436e-85ef-84d6341448bb"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "a6bf32f2-b522-4c87-bfef-0d98d6c7d380",
+      "email": "vinhosclasse@gmail.com",
+      "email_confirmed_at": "2025-09-22T22:50:47.498647Z",
+      "created_at": "2025-09-22T22:50:02.214698Z",
+      "updated_at": "2025-09-24T14:28:26.706392Z",
+      "last_sign_in_at": "2025-09-24T13:29:44.327246Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email": "vinhosclasse@gmail.com",
+        "email_verified": true,
+        "full_name": "Carlos Guedes",
+        "phone": "+351968508709",
+        "phone_verified": false,
+        "sub": "a6bf32f2-b522-4c87-bfef-0d98d6c7d380"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "3606c797-0eb8-4fdb-a150-50d51ffaf460",
+      "email": "estracaofficial@gmail.com",
+      "email_confirmed_at": "2025-09-22T22:17:11.847434Z",
+      "created_at": "2025-09-22T22:16:53.006466Z",
+      "updated_at": "2025-11-06T18:13:45.790562Z",
+      "last_sign_in_at": "2025-11-06T18:13:45.786149Z",
+      "role": "authenticated",
+      "user_metadata": {
+        "email": "estracaofficial@gmail.com",
+        "email_verified": true,
+        "full_name": "Carlos Filipe Morais Guedes",
+        "phone": "+351968508709",
+        "phone_verified": false,
+        "sub": "3606c797-0eb8-4fdb-a150-50d51ffaf460"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "id": "3606c797-0eb8-4fdb-a150-50d51ffaf460",
+      "email": "estracaofficial@gmail.com",
+      "full_name": "Carlos Filipe Morais Guedes",
+      "avatar_url": null,
+      "role": "user",
+      "dua_balance": 0,
+      "created_at": "2025-09-22T22:16:53.006466+00:00",
+      "updated_at": "2025-11-06T16:15:40.52901+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    },
+    {
+      "id": "0728689d-cd48-436e-85ef-84d6341448bb",
+      "email": "info@2lados.pt",
+      "full_name": "carlos guedes",
+      "avatar_url": null,
+      "role": "user",
+      "dua_balance": 0,
+      "created_at": "2025-09-22T23:11:59.834839+00:00",
+      "updated_at": "2025-11-06T16:15:40.52901+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    },
+    {
+      "id": "4e07c1aa-0742-4c53-956f-d45d3801455c",
+      "email": "jorsonnrijo@gmail.com",
+      "full_name": "Jorge Miguel Rijo Rodrigues",
+      "avatar_url": null,
+      "role": "user",
+      "dua_balance": 0,
+      "created_at": "2025-10-15T13:30:28.090602+00:00",
+      "updated_at": "2025-11-06T16:15:40.52901+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    },
+    {
+      "id": "91ce94c6-2643-40b7-9637-132c9156d5eb",
+      "email": "abelx2775@gmail.com",
+      "full_name": "Carlos Guedes",
+      "avatar_url": null,
+      "role": "user",
+      "dua_balance": 0,
+      "created_at": "2025-09-24T14:51:37.901039+00:00",
+      "updated_at": "2025-11-06T16:15:40.52901+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    },
+    {
+      "id": "a6bf32f2-b522-4c87-bfef-0d98d6c7d380",
+      "email": "vinhosclasse@gmail.com",
+      "full_name": "Carlos Guedes",
+      "avatar_url": null,
+      "role": "user",
+      "dua_balance": 0,
+      "created_at": "2025-09-22T22:50:02.214698+00:00",
+      "updated_at": "2025-11-06T16:15:40.52901+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    },
+    {
+      "id": "92a04ab8-bfd7-471e-8f12-3fdf4ea1a060",
+      "email": "sabedoria2024@gmail.com",
+      "full_name": "Carlos Guedes",
+      "avatar_url": null,
+      "role": "user",
+      "dua_balance": 0,
+      "created_at": "2025-09-23T22:50:34.901605+00:00",
+      "updated_at": "2025-11-06T16:15:40.52901+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    },
+    {
+      "id": "345bb6b6-7e47-40db-bbbe-e9fe4836f682",
+      "email": "estraca@2lados.pt",
+      "full_name": "Administrador",
+      "avatar_url": null,
+      "role": "admin",
+      "dua_balance": 0,
+      "created_at": "2025-09-23T15:18:39.193453+00:00",
+      "updated_at": "2025-11-06T16:15:40.52901+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    },
+    {
+      "id": "22b7436c-41be-4332-859e-9d2315bcfe1f",
+      "email": "dev@dua.com",
+      "full_name": "dev@dua.com",
+      "avatar_url": null,
+      "role": "user",
+      "dua_balance": 0,
+      "created_at": "2025-11-07T02:26:24.308795+00:00",
+      "updated_at": "2025-11-07T02:26:24.308795+00:00",
+      "wallet_address": null,
+      "wallet_provider": null,
+      "is_custodial_user": true
+    }
+  ],
+  "users": [],
+  "tables": {
+    "codigos_acesso": [],
+    "convites": [],
+    "audit_logs": []
+  },
+  "summary": {
+    "auth_users": 8,
+    "profiles": 8,
+    "users": 0,
+    "codigos_acesso": 0,
+    "convites": 0,
+    "audit_logs": 0
+  }
+}

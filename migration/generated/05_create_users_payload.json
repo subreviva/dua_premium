@@ -1,0 +1,16 @@
+[
+  {
+    "email": "dev@dua.com",
+    "email_confirm": true,
+    "user_metadata": {
+      "email_verified": true,
+      "invite_code": "DEV-ADMIN",
+      "name": "Developer Admin",
+      "role": "admin"
+    },
+    "app_metadata": {
+      "migrated_from": "DUA_IA",
+      "old_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b"
+    }
+  }
+]

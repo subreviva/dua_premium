@@ -1,0 +1,42 @@
+{
+  "auth_users": [
+    {
+      "id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+      "email": "dev@dua.com",
+      "email_confirmed_at": "2025-11-05T18:20:11.94768Z",
+      "created_at": "2025-11-05T18:20:11.908941Z",
+      "user_metadata": {
+        "email_verified": true,
+        "invite_code": "DEV-ADMIN",
+        "name": "Developer Admin",
+        "role": "admin"
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+      "email": "estracaofficial@gmail.com",
+      "email_confirmed_at": "2025-11-06T20:56:35.284223Z",
+      "created_at": "2025-11-05T16:48:23.631861Z",
+      "user_metadata": {
+        "email_verified": true
+      },
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email"
+        ]
+      }
+    }
+  ],
+  "codigos_acesso": [],
+  "perfis_usuarios": [],
+  "convites": [],
+  "users_extra_data": [],
+  "users_dua_coins": []
+}

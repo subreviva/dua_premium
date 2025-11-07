@@ -47,7 +47,7 @@ interface UserData {
   bio?: string;
   total_tokens: number;
   tokens_used: number;
-  subscription_tier: string;
+  // subscription_tier não existe no schema - usando default 'free'
   total_projects: number;
   total_generated_content: number;
   created_at: string;
@@ -97,7 +97,7 @@ export function ChatProfile() {
       // Carregar dados do usuário atual
       const { data: userData, error: userError } = await supabaseClient
         .from('users')
-        .select('*')
+      .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
         .eq('id', user.id)
         .single();
 
@@ -109,7 +109,7 @@ export function ChatProfile() {
       if (adminStatus) {
         const { data: usersData, error: usersError } = await supabaseClient
           .from('users')
-          .select('*')
+      .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
           .order('created_at', { ascending: false });
 
         if (!usersError && usersData) {
@@ -274,7 +274,7 @@ export function ChatProfile() {
 
   const getAvatarUrl = (user: UserData) => {
     if (user.avatar_url) return user.avatar_url;
-    const name = user.display_name || user.full_name || user.email;
+    const name = (user.display_name || user.name || user.full_name) || user.full_name || user.email;
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
   };
 
@@ -283,9 +283,9 @@ export function ChatProfile() {
       const matchesSearch = 
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.display_name?.toLowerCase().includes(searchTerm.toLowerCase());
+        (user.display_name || user.name || user.full_name)?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesTier = filterTier === 'all' || user.subscription_tier === filterTier;
+      const matchesTier = filterTier === 'all' || (user.subscription_tier || 'free') === filterTier;
       
       return matchesSearch && matchesTier;
     })
@@ -423,7 +423,7 @@ export function ChatProfile() {
                         <div>
                           <p className="font-medium">{user.email}</p>
                           <p className="text-sm text-white/60">
-                            {user.total_tokens || 0} tokens • {user.subscription_tier}
+                            {user.total_tokens || 0} tokens • {(user.subscription_tier || 'free')}
                           </p>
                         </div>
                         {selectedUserId === user.id && (
@@ -554,8 +554,8 @@ export function ChatProfile() {
                         <p className="text-sm text-white/60">
                           {user.full_name || 'Nome não definido'}
                         </p>
-                        {user.display_name && (
-                          <p className="text-xs text-purple-400">@{user.display_name}</p>
+                        {(user.display_name || user.name || user.full_name) && (
+                          <p className="text-xs text-purple-400">@{(user.display_name || user.name || user.full_name)}</p>
                         )}
                       </div>
                     </div>
@@ -576,8 +576,8 @@ export function ChatProfile() {
                         <p className="font-bold text-sm">{user.total_generated_content || 0}</p>
                       </div>
 
-                      <Badge className={cn("bg-gradient-to-r", getTierBadge(user.subscription_tier))}>
-                        {user.subscription_tier}
+                      <Badge className={cn("bg-gradient-to-r", getTierBadge((user.subscription_tier || 'free')))}>
+                        {(user.subscription_tier || 'free')}
                       </Badge>
 
                       {/* Actions Menu */}
@@ -590,8 +590,8 @@ export function ChatProfile() {
                             setEditingUser(user.id);
                             setEditForm({
                               full_name: user.full_name || '',
-                              display_name: user.display_name || '',
-                              subscription_tier: user.subscription_tier,
+                              display_name: (user.display_name || user.name || user.full_name) || '',
+                              subscription_tier: (user.subscription_tier || 'free'),
                               bio: user.bio || ''
                             });
                           }}

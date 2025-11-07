@@ -11,17 +11,19 @@ interface UserData {
   id: string;
   email: string;
   name?: string;
-  full_name?: string;
-  display_name?: string;
-  total_tokens: number;
-  tokens_used: number;
-  subscription_tier: string;
+  username?: string;
+  bio?: string;
+  avatar_url?: string;
   has_access: boolean;
   invite_code_used?: string;
-  total_projects: number;
-  total_generated_content: number;
   created_at: string;
-  last_login?: string;
+  updated_at?: string;
+  last_login_at?: string; // Renamed from last_login
+  // Fake fields para compatibilidade (não vêm do DB)
+  total_tokens?: number;
+  tokens_used?: number;
+  total_projects?: number;
+  total_generated_content?: number;
 }
 
 interface TokenPackage {
@@ -82,7 +84,7 @@ const AdminPanel = () => {
       // Carregar usuários
       const { data: usersData, error: usersError } = await supabaseClient
         .from('users')
-        .select('*')
+        .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
         .order('created_at', { ascending: false });
 
       if (usersError) {
@@ -124,7 +126,7 @@ const AdminPanel = () => {
       // Primeiro, buscar o usuário atual para somar os tokens
       const { data: currentUser, error: fetchError } = await supabaseClient
         .from('users')
-        .select('total_tokens')
+        .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
         .eq('id', userId)
         .single();
 
@@ -232,7 +234,7 @@ const AdminPanel = () => {
       user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.display_name?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesTier = filterTier === 'all' || user.subscription_tier === filterTier;
+    const matchesTier = filterTier === 'all' || (user.subscription_tier || 'free') === filterTier;
     
     return matchesSearch && matchesTier;
   });
@@ -385,11 +387,11 @@ const AdminPanel = () => {
                     
                     <td className="px-6 py-4">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        user.subscription_tier === 'free' 
+                        (user.subscription_tier || 'free') === 'free' 
                           ? 'bg-gray-700 text-gray-300'
                           : 'bg-purple-500/20 text-purple-300'
                       }`}>
-                        {user.subscription_tier === 'free' ? 'Gratuito' : user.subscription_tier}
+                        {(user.subscription_tier || 'free') === 'free' ? 'Gratuito' : (user.subscription_tier || 'free')}
                       </span>
                     </td>
                     

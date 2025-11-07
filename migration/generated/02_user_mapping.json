@@ -1,0 +1,26 @@
+{
+  "existing": [
+    {
+      "old_id": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+      "new_id": "3606c797-0eb8-4fdb-a150-50d51ffaf460",
+      "email": "estracaofficial@gmail.com",
+      "action": "MAP_EXISTING"
+    }
+  ],
+  "toCreate": [
+    {
+      "old_id": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+      "email": "dev@dua.com",
+      "email_confirmed_at": "2025-11-05T18:20:11.94768Z",
+      "created_at": "2025-11-05T18:20:11.908941Z",
+      "user_metadata": {
+        "email_verified": true,
+        "invite_code": "DEV-ADMIN",
+        "name": "Developer Admin",
+        "role": "admin"
+      },
+      "action": "CREATE_NEW"
+    }
+  ],
+  "duaCoinsSync": []
+}

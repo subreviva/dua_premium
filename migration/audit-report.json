@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-11-07T02:50:13.706Z",
+  "site_config": {
+    "url": "https://nranmngyocaqjwcokcxm.supabase.co"
+  },
+  "dua_ia": {
+    "users": 0,
+    "users_list": []
+  },
+  "dua_coin": {
+    "users": 8,
+    "users_list": [
+      {
+        "email": "dev@dua.com",
+        "id": "22b7436c-41be-4332-859e-9d2315bcfe1f"
+      },
+      {
+        "email": "jorsonnrijo@gmail.com",
+        "id": "4e07c1aa-0742-4c53-956f-d45d3801455c"
+      },
+      {
+        "email": "abelx2775@gmail.com",
+        "id": "91ce94c6-2643-40b7-9637-132c9156d5eb"
+      },
+      {
+        "email": "sabedoria2024@gmail.com",
+        "id": "92a04ab8-bfd7-471e-8f12-3fdf4ea1a060"
+      },
+      {
+        "email": "estraca@2lados.pt",
+        "id": "345bb6b6-7e47-40db-bbbe-e9fe4836f682"
+      },
+      {
+        "email": "info@2lados.pt",
+        "id": "0728689d-cd48-436e-85ef-84d6341448bb"
+      },
+      {
+        "email": "vinhosclasse@gmail.com",
+        "id": "a6bf32f2-b522-4c87-bfef-0d98d6c7d380"
+      },
+      {
+        "email": "estracaofficial@gmail.com",
+        "id": "3606c797-0eb8-4fdb-a150-50d51ffaf460"
+      }
+    ]
+  },
+  "issues": [
+    "Não foi possível verificar users da DUA IA: Invalid API key"
+  ],
+  "warnings": []
+}

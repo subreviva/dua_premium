@@ -1,0 +1,52 @@
+{
+  "dua_ia": {
+    "tables": {
+      "codigos_acesso": {
+        "exists": true,
+        "count": null
+      },
+      "perfis_usuarios": {
+        "exists": true,
+        "count": null
+      },
+      "convites": {
+        "exists": true,
+        "count": null
+      },
+      "users_extra_data": {
+        "exists": true,
+        "count": null
+      },
+      "users": {
+        "exists": true,
+        "count": 2
+      }
+    },
+    "users_count": 2
+  },
+  "dua_coin": {
+    "tables": {
+      "codigos_acesso": {
+        "exists": true,
+        "count": null
+      },
+      "perfis_usuarios": {
+        "exists": true,
+        "count": null
+      },
+      "convites": {
+        "exists": true,
+        "count": null
+      },
+      "users_extra_data": {
+        "exists": true,
+        "count": null
+      },
+      "users": {
+        "exists": true,
+        "count": 0
+      }
+    },
+    "users_count": 7
+  }
+}

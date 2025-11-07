@@ -143,16 +143,20 @@ async function networkFirst(request) {
   try {
     const networkResponse = await fetch(request);
     
-    if (networkResponse.ok) {
+    // ✅ FIX: Só cachear requisições GET (POST/PUT/DELETE não podem ser cacheadas)
+    if (networkResponse.ok && request.method === 'GET') {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
     
     return networkResponse;
   } catch (error) {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
+    // Só tentar cache em requisições GET
+    if (request.method === 'GET') {
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
     }
     throw error;
   }

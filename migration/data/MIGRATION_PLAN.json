@@ -1,0 +1,151 @@
+{
+  "generated_at": "2025-11-07T03:33:55.500Z",
+  "updated_at": "2025-11-07T04:15:00.000Z",
+  "version": "2.0",
+  "summary": {
+    "conflicts": 2,
+    "new_users": 0,
+    "keep_as_is": 6,
+    "total_users_after_migration": 8,
+    "admin_users": 2
+  },
+  "admin_configuration": {
+    "admins": [
+      {
+        "email": "estraca@2lados.pt",
+        "uuid": "345bb6b6-7e47-40db-bbbe-e9fe4836f682",
+        "level": "super_admin",
+        "platforms": ["DUA IA", "DUA COIN"],
+        "permissions": [
+          "manage_users",
+          "manage_content",
+          "manage_billing",
+          "view_analytics",
+          "manage_settings",
+          "access_api"
+        ]
+      },
+      {
+        "email": "dev@dua.com",
+        "uuid": "22b7436c-41be-4332-859e-9d2315bcfe1f",
+        "level": "super_admin",
+        "platforms": ["DUA IA", "DUA COIN"],
+        "permissions": [
+          "manage_users",
+          "manage_content",
+          "manage_billing",
+          "view_analytics",
+          "manage_settings",
+          "access_api"
+        ]
+      }
+    ]
+  },
+  "conflicts": [
+    {
+      "email": "dev@dua.com",
+      "uuid_dua_ia": "4108aea5-9e82-4620-8c1c-a6a8b5878f7b",
+      "uuid_dua_coin": "22b7436c-41be-4332-859e-9d2315bcfe1f",
+      "metadata_ia": {
+        "email_verified": true,
+        "invite_code": "DEV-ADMIN",
+        "name": "Developer Admin",
+        "role": "admin"
+      },
+      "metadata_coin": {
+        "email_verified": true,
+        "invite_code": "DEV-ADMIN",
+        "name": "Developer Admin",
+        "role": "admin"
+      },
+      "action": "MERGE"
+    },
+    {
+      "email": "estracaofficial@gmail.com",
+      "uuid_dua_ia": "a3261e1f-4b05-49e3-ac06-2f430d007c3a",
+      "uuid_dua_coin": "3606c797-0eb8-4fdb-a150-50d51ffaf460",
+      "metadata_ia": {
+        "email_verified": true
+      },
+      "metadata_coin": {
+        "email": "estracaofficial@gmail.com",
+        "email_verified": true,
+        "full_name": "Carlos Filipe Morais Guedes",
+        "phone": "+351968508709",
+        "phone_verified": false,
+        "sub": "3606c797-0eb8-4fdb-a150-50d51ffaf460"
+      },
+      "action": "MERGE"
+    }
+  ],
+  "new_users": [],
+  "only_coin": [
+    {
+      "email": "jorsonnrijo@gmail.com",
+      "uuid": "4e07c1aa-0742-4c53-956f-d45d3801455c",
+      "action": "KEEP_AS_IS"
+    },
+    {
+      "email": "abelx2775@gmail.com",
+      "uuid": "91ce94c6-2643-40b7-9637-132c9156d5eb",
+      "action": "KEEP_AS_IS"
+    },
+    {
+      "email": "sabedoria2024@gmail.com",
+      "uuid": "92a04ab8-bfd7-471e-8f12-3fdf4ea1a060",
+      "action": "KEEP_AS_IS"
+    },
+    {
+      "email": "estraca@2lados.pt",
+      "uuid": "345bb6b6-7e47-40db-bbbe-e9fe4836f682",
+      "action": "KEEP_AS_IS"
+    },
+    {
+      "email": "info@2lados.pt",
+      "uuid": "0728689d-cd48-436e-85ef-84d6341448bb",
+      "action": "KEEP_AS_IS"
+    },
+    {
+      "email": "vinhosclasse@gmail.com",
+      "uuid": "a6bf32f2-b522-4c87-bfef-0d98d6c7d380",
+      "action": "KEEP_AS_IS"
+    }
+  ],
+  "sql_files": [
+    "SQL_01_MERGE_conflicts.sql",
+    "SQL_02_CREATE_new_users.sql",
+    "SQL_03_IMPORT_tables.sql",
+    "SQL_04_STORAGE_buckets.sql",
+    "SQL_05_CONFIGURE_ADMINS.sql"
+  ],
+  "scripts": [
+    "05_set_admin_metadata.mjs"
+  ],
+  "execution_order": [
+    {
+      "step": 1,
+      "file": "SQL_01_MERGE_conflicts.sql",
+      "description": "Merge de 2 utilizadores preservando UUIDs DUA COIN"
+    },
+    {
+      "step": 2,
+      "file": "SQL_05_CONFIGURE_ADMINS.sql",
+      "description": "Configurar admin_permissions e roles"
+    },
+    {
+      "step": 3,
+      "script": "05_set_admin_metadata.mjs",
+      "description": "Atualizar user_metadata e app_metadata via Admin API"
+    },
+    {
+      "step": 4,
+      "file": "SQL_03_IMPORT_tables.sql",
+      "description": "Importar invite_codes, token_packages, etc."
+    },
+    {
+      "step": 5,
+      "manual": true,
+      "description": "Criar storage bucket profile-images via Dashboard"
+    }
+  ]
+}

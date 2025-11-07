@@ -47,8 +47,8 @@ const ADMIN_EMAILS = [
 interface UserProfile {
   id: string
   email: string
-  full_name: string | null
-  display_name: string | null
+  name: string | null
+  name: string | null
   bio: string | null
   avatar_url: string | null
   total_tokens: number
@@ -118,11 +118,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
     try {
       setLoading(true)
 
-      // Get user by display_name or username
+      // Get user by name or username
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('*')
-        .or(`display_name.eq.${params.username},email.ilike.%${params.username}%`)
+        .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
+        .or(`name.eq.${params.username},email.ilike.%${params.username}%`)
         .single()
 
       if (userError) {
@@ -241,7 +241,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
               <div className="sticky top-24">
                 <GlassmorphismProfileCard
                   avatarUrl={userProfile.avatar_url || getAvatarUrl(userProfile.email)}
-                  name={userProfile.display_name || userProfile.full_name || userProfile.email}
+                  name={userProfile.name || userProfile.name || userProfile.email}
                   title={`Membro ${tierBadge.name}`}
                   bio={userProfile.bio || "Criador na plataforma DUA"}
                   socialLinks={[
