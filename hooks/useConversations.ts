@@ -119,7 +119,7 @@ export function useConversations() {
       console.log(`🔄 Migrando ${parsed.length} conversas para Supabase...`);
 
       for (const conv of parsed) {
-        await supabase.from('conversations').insert({
+        await supabase.from('duaia_conversations').insert({
           id: conv.id,
           user_id: uid,
           title: conv.title,
@@ -161,7 +161,7 @@ export function useConversations() {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('conversations')
+        .from('duaia_conversations')
         .select('*')
         .eq('user_id', uid)
         .is('deleted_at', null)
@@ -170,7 +170,7 @@ export function useConversations() {
       if (error) {
         // PGRST205 = tabela não existe, silenciar erro e usar localStorage
         if (error.code === 'PGRST205') {
-          console.warn('⚠️  Tabela conversations não existe no Supabase, usando localStorage');
+          console.warn('⚠️  Tabela duaia_conversations não existe no Supabase, usando localStorage');
         } else {
           console.error('❌ Erro ao carregar do Supabase:', error);
         }
@@ -234,7 +234,7 @@ export function useConversations() {
       try {
         setIsSyncing(true);
         
-        const { error } = await supabase.from('conversations').upsert({
+        const { error } = await supabase.from('duaia_conversations').upsert({
           id: conv.id,
           user_id: userId,
           title: conv.title,
@@ -295,7 +295,7 @@ export function useConversations() {
     // Sync imediato para Supabase
     if (userId) {
       try {
-        await supabase.from('conversations').insert({
+        await supabase.from('duaia_conversations').insert({
           id: newConv.id,
           user_id: userId,
           title: newConv.title,
@@ -436,7 +436,7 @@ export function useConversations() {
     if (userId) {
       try {
         await supabase
-          .from('conversations')
+          .from('duaia_conversations')
           .update({ title: newTitle, updated_at: new Date().toISOString() })
           .eq('id', id)
           .eq('user_id', userId);
@@ -461,7 +461,7 @@ export function useConversations() {
     if (userId) {
       try {
         await supabase
-          .from('conversations')
+          .from('duaia_conversations')
           .delete()
           .eq('user_id', userId);
         toast.success('🧹 Todas conversas deletadas');
