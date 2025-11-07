@@ -5,12 +5,9 @@
  * e comportamento. Envia logs para Supabase de forma assíncrona.
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabaseClient } from '@/lib/supabase';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = supabaseClient;
 
 export interface AuditLogData {
   action: string;

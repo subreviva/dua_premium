@@ -1,8 +1,8 @@
 // Admin Check - Via Database Role
-import { createClient } from '@supabase/supabase-js';
+import { supabaseClient } from '@/lib/supabase';
 
 export async function checkAdminAccess(supabaseUrl: string, supabaseKey: string, userEmail?: string) {
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = supabaseClient;
   
   try {
     // Get current user

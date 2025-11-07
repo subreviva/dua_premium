@@ -1,12 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = getAdminClient();
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
