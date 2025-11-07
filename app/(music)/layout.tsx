@@ -6,8 +6,9 @@ import { StemsProvider } from "@/contexts/stems-context"
 import { GenerationSidebarWrapper } from "@/components/generation-sidebar-wrapper"
 import { PersistentPlayer } from "@/components/persistent-player"
 import { MobileNav } from "@/components/mobile-nav"
+import { StemsIndicator } from "@/components/stems-indicator"
 
-export default function CreateLayout({
+export default function MusicLayout({
   children,
 }: {
   children: React.ReactNode
@@ -19,6 +20,7 @@ export default function CreateLayout({
         <GenerationSidebarWrapper />
         <PersistentPlayer />
         <MobileNav />
+        <StemsIndicator />
       </StemsProvider>
     </GenerationProvider>
   )
