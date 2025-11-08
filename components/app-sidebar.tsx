@@ -12,7 +12,7 @@ const navigation = [
   { name: "Criar", href: "/create", icon: null },
   { name: "Melodia", href: "/melody", icon: null },
   { name: "Biblioteca", href: "/library", icon: null },
-  { name: "Estúdio", href: "/studio", icon: Scissors },
+  { name: "Estúdio", href: "", icon: Scissors, isStudio: true }, // href vazio, será gerido dinamicamente
 ]
 
 const exitNav = [
@@ -129,11 +129,17 @@ export function AppSidebar() {
           </div>
         )}
         {navigation.map((item) => {
-          const isActive = pathname === item.href || (item.href === "/studio" && pathname.startsWith("/stems"))
+          const isActive = pathname === item.href || (item.isStudio && pathname.startsWith("/stems"))
+          
+          // Para o botão Estúdio, usa o primeiro stem disponível ou vai para /stems/demo
+          const href = item.isStudio 
+            ? (stemsTrackId ? `/stems/${stemsTrackId}` : `/stems/demo`)
+            : item.href
+
           return (
             <Link
               key={item.name}
-              href={item.href}
+              href={href}
               className={cn(
                 "group relative flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-light tracking-wide transition-all duration-300",
                 isActive
