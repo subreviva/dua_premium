@@ -27,7 +27,7 @@ const FEATURED_TRACKS: Track[] = [
   {
     id: "xJqFtvSGsgcaNczS",
     title: "Ainda Não Acabou",
-    artist: "JubilantHarmonic3057",
+    artist: "Riicky",
     genre: "Portuguese Pop",
     cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
     audioUrl: `/api/track-audio?id=xJqFtvSGsgcaNczS`,
@@ -35,7 +35,7 @@ const FEATURED_TRACKS: Track[] = [
   {
     id: "J9z2aqpTWcknLPil",
     title: "Struggle Symphony",
-    artist: "JubilantHarmonic3057",
+    artist: "FabyJunior",
     genre: "Orchestral Rock",
     cover: "https://cdn2.suno.ai/image_cb01ecb0-2e67-430c-bdae-d235fa14808a.jpeg",
     audioUrl: `/api/track-audio?id=J9z2aqpTWcknLPil`,
@@ -43,7 +43,7 @@ const FEATURED_TRACKS: Track[] = [
   {
     id: "EzOHEKgUHyGshDNR",
     title: "Bo Surrize Ta Alegra-m Nha Dia",
-    artist: "JubilantHarmonic3057",
+    artist: "Joana_Goncalves",
     genre: "Cabo Verde",
     cover: "https://cdn2.suno.ai/image_5de28091-36c4-4d33-8c15-af93d6c0a220.jpeg",
     audioUrl: `/api/track-audio?id=EzOHEKgUHyGshDNR`,
@@ -51,7 +51,7 @@ const FEATURED_TRACKS: Track[] = [
   {
     id: "Lq50KP37gz9hwLv0",
     title: "Amor e Paz",
-    artist: "JubilantHarmonic3057",
+    artist: "Riicky",
     genre: "Reggae",
     cover: "https://cdn2.suno.ai/image_4888bcf5-8414-4d77-a178-af2a2338fa78.jpeg",
     audioUrl: `/api/track-audio?id=Lq50KP37gz9hwLv0`,
@@ -59,7 +59,7 @@ const FEATURED_TRACKS: Track[] = [
   {
     id: "xmQohTCXLLxIjOc4",
     title: "Rap Portugal Fado - Lei da Vida",
-    artist: "JubilantHarmonic3057",
+    artist: "FabyJunior",
     genre: "Rap Fado",
     cover: "https://cdn2.suno.ai/image_0a031014-6dfd-419d-879c-bf5955f79e9f.jpeg",
     audioUrl: `/api/track-audio?id=xmQohTCXLLxIjOc4`,
@@ -67,7 +67,7 @@ const FEATURED_TRACKS: Track[] = [
   {
     id: "zKgQ4mbyGiLCkqqo",
     title: "Revolution in the Air",
-    artist: "JubilantHarmonic3057",
+    artist: "Joana_Goncalves",
     genre: "Rock Anthem",
     cover: "https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg",
     audioUrl: `/api/track-audio?id=zKgQ4mbyGiLCkqqo`,
