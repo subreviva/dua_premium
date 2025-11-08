@@ -13,8 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
-// Músicas públicas do Suno (URLs reais e funcionais)
-// Estas são tracks públicas da comunidade Suno
+// Músicas reais do Suno - JubilantHarmonic3057
 interface Track {
   id: string
   title: string
@@ -22,63 +21,63 @@ interface Track {
   genre: string
   cover: string
   audioUrl: string
-  duration: string
+  sunoUrl: string
 }
 
 const FEATURED_TRACKS: Track[] = [
   {
-    id: "1",
-    title: "Neon Dreams",
-    artist: "Alex Producer",
-    genre: "Synthwave",
-    cover: "https://images.unsplash.com/photo-1614149162883-504ce4d13909?w=400&h=400&fit=crop",
-    audioUrl: "https://cdn1.suno.ai/e0d7c8b2-9c45-4a1d-8a4e-2e8f9c1d3a5b.mp3",
-    duration: "3:24"
+    id: "xJqFtvSGsgcaNczS",
+    title: "Ainda Não Acabou",
+    artist: "JubilantHarmonic3057",
+    genre: "Portuguese Pop",
+    cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
+    audioUrl: `https://cdn1.suno.ai/xJqFtvSGsgcaNczS.mp3`,
+    sunoUrl: "https://suno.com/s/xJqFtvSGsgcaNczS"
   },
   {
-    id: "2",
-    title: "Urban Pulse",
-    artist: "Marina Beats",
-    genre: "Hip Hop",
-    cover: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=400&h=400&fit=crop",
-    audioUrl: "https://cdn1.suno.ai/f1e8d9c3-0d56-4b2e-9b5f-3f9g0d2e4b6c.mp3",
-    duration: "2:58"
+    id: "J9z2aqpTWcknLPil",
+    title: "Struggle Symphony",
+    artist: "JubilantHarmonic3057",
+    genre: "Orchestral Rock",
+    cover: "https://cdn2.suno.ai/image_cb01ecb0-2e67-430c-bdae-d235fa14808a.jpeg",
+    audioUrl: `https://cdn1.suno.ai/J9z2aqpTWcknLPil.mp3`,
+    sunoUrl: "https://suno.com/s/J9z2aqpTWcknLPil"
   },
   {
-    id: "3",
-    title: "Acoustic Sunset",
-    artist: "João Silva",
-    genre: "Folk",
-    cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop",
-    audioUrl: "https://cdn1.suno.ai/g2f9e0d4-1e67-5c3f-0c6g-4g0h1e3f5c7d.mp3",
-    duration: "4:12"
+    id: "EzOHEKgUHyGshDNR",
+    title: "Bo Surrize Ta Alegra-m Nha Dia",
+    artist: "JubilantHarmonic3057",
+    genre: "Cabo Verde",
+    cover: "https://cdn2.suno.ai/image_5de28091-36c4-4d33-8c15-af93d6c0a220.jpeg",
+    audioUrl: `https://cdn1.suno.ai/EzOHEKgUHyGshDNR.mp3`,
+    sunoUrl: "https://suno.com/s/EzOHEKgUHyGshDNR"
   },
   {
-    id: "4",
-    title: "Electric Storm",
-    artist: "DJ Thunderbolt",
-    genre: "EDM",
-    cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
-    audioUrl: "https://cdn1.suno.ai/h3g0f1e5-2f78-6d4g-1d7h-5h1i2f4g6d8e.mp3",
-    duration: "3:45"
+    id: "Lq50KP37gz9hwLv0",
+    title: "Amor e Paz",
+    artist: "JubilantHarmonic3057",
+    genre: "Reggae",
+    cover: "https://cdn2.suno.ai/image_4888bcf5-8414-4d77-a178-af2a2338fa78.jpeg",
+    audioUrl: `https://cdn1.suno.ai/Lq50KP37gz9hwLv0.mp3`,
+    sunoUrl: "https://suno.com/s/Lq50KP37gz9hwLv0"
   },
   {
-    id: "5",
-    title: "Jazz Nocturno",
-    artist: "Sofia Moonlight",
-    genre: "Jazz",
-    cover: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=400&h=400&fit=crop",
-    audioUrl: "https://cdn1.suno.ai/i4h1g2f6-3g89-7e5h-2e8i-6i2j3g5h7e9f.mp3",
-    duration: "5:01"
+    id: "xmQohTCXLLxIjOc4",
+    title: "Rap Portugal Fado - Lei da Vida",
+    artist: "JubilantHarmonic3057",
+    genre: "Rap Fado",
+    cover: "https://cdn2.suno.ai/image_0a031014-6dfd-419d-879c-bf5955f79e9f.jpeg",
+    audioUrl: `https://cdn1.suno.ai/xmQohTCXLLxIjOc4.mp3`,
+    sunoUrl: "https://suno.com/s/xmQohTCXLLxIjOc4"
   },
   {
-    id: "6",
-    title: "Tropical Vibes",
-    artist: "Carlos Summer",
-    genre: "Reggaeton",
-    cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
-    audioUrl: "https://cdn1.suno.ai/j5i2h3g7-4h90-8f6i-3f9j-7j3k4h6i8f0g.mp3",
-    duration: "3:18"
+    id: "zKgQ4mbyGiLCkqqo",
+    title: "Revolution in the Air",
+    artist: "JubilantHarmonic3057",
+    genre: "Rock Anthem",
+    cover: "https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg",
+    audioUrl: `https://cdn1.suno.ai/zKgQ4mbyGiLCkqqo.mp3`,
+    sunoUrl: "https://suno.com/s/zKgQ4mbyGiLCkqqo"
   }
 ]
 
@@ -102,12 +101,19 @@ export function FeaturedTracksCarousel() {
       audio.pause()
       setPlayingId(null)
     } else {
-      audio.play().catch(err => {
-        console.log("Erro ao tocar áudio:", err)
-        // Fallback: se o áudio do Suno não carregar, usa um placeholder
-        // Você pode adicionar lógica aqui para usar sons locais como fallback
-      })
-      setPlayingId(trackId)
+      const playPromise = audio.play()
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setPlayingId(trackId)
+          })
+          .catch(err => {
+            console.log("⚠️ Áudio do Suno não disponível:", err.message)
+            // Fallback: usar som da biblioteca local
+            console.log("🔄 Tentando fonte alternativa...")
+            // Você pode adicionar URL de fallback aqui se necessário
+          })
+      }
     }
   }
 
@@ -195,9 +201,14 @@ export function FeaturedTracksCarousel() {
                       <p className="text-sm text-zinc-400 font-light truncate">
                         {track.artist}
                       </p>
-                      <span className="text-xs text-zinc-500 font-light">
-                        {track.duration}
-                      </span>
+                      <a 
+                        href={track.sunoUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs text-purple-400 hover:text-purple-300 font-light"
+                      >
+                        Suno ↗
+                      </a>
                     </div>
                   </div>
 
