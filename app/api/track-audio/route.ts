@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * API Proxy para obter URLs de áudio de tracks externas
- * Busca múltiplas fontes CDN para garantir disponibilidade
+ * PROXY DE STREAMING DE ÁUDIO
+ * Contorna CORS fazendo proxy server-side do áudio
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -13,44 +13,56 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Tenta diferentes CDNs automaticamente
+    // Lista de URLs para tentar
     const cdnUrls = [
       `https://cdn1.suno.ai/${trackId}.mp3`,
       `https://cdn2.suno.ai/${trackId}.mp3`,
+      `https://audiopipe.suno.ai/?item_id=${trackId}`,
     ]
 
-    // Retorna a primeira URL disponível
-    for (const url of cdnUrls) {
+    // Tenta cada URL até encontrar uma que funcione
+    for (const audioUrl of cdnUrls) {
       try {
-        const response = await fetch(url, { method: 'HEAD' })
-        if (response.ok) {
-          return NextResponse.json({ 
-            success: true,
-            audioUrl: url,
-            trackId: trackId
+        const audioResponse = await fetch(audioUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.8',
+            'Range': 'bytes=0-', // Suporta streaming
+          },
+        })
+
+        if (audioResponse.ok) {
+          // Faz streaming do áudio através do nosso servidor
+          const audioBuffer = await audioResponse.arrayBuffer()
+          
+          return new NextResponse(audioBuffer, {
+            status: 200,
+            headers: {
+              'Content-Type': 'audio/mpeg',
+              'Content-Length': audioBuffer.byteLength.toString(),
+              'Accept-Ranges': 'bytes',
+              'Cache-Control': 'public, max-age=31536000', // Cache por 1 ano
+              'Access-Control-Allow-Origin': '*', // Permite CORS
+            },
           })
         }
-      } catch {
+      } catch (error) {
+        console.log(`Tentativa falhou para ${audioUrl}:`, error)
         continue
       }
     }
 
-    // Fallback: retorna URL padrão mesmo se não validado
-    return NextResponse.json({ 
-      success: true,
-      audioUrl: cdnUrls[0],
-      trackId: trackId
-    })
+    // Se todas as tentativas falharem, retorna erro
+    return NextResponse.json(
+      { error: 'Audio not available', trackId },
+      { status: 404 }
+    )
 
   } catch (error) {
-    console.error('Error fetching audio URL:', error)
+    console.error('Error proxying audio:', error)
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch audio URL',
-        trackId: trackId,
-        audioUrl: `https://cdn1.suno.ai/${trackId}.mp3`
-      },
-      { status: 200 } // Retorna 200 com fallback URL
+      { error: 'Failed to proxy audio', trackId },
+      { status: 500 }
     )
   }
 }

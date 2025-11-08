@@ -30,7 +30,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Portuguese Pop",
     cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
-    audioUrl: `https://cdn1.suno.ai/xJqFtvSGsgcaNczS.mp3`,
+    audioUrl: `/api/track-audio?id=xJqFtvSGsgcaNczS`,
   },
   {
     id: "J9z2aqpTWcknLPil",
@@ -38,7 +38,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Orchestral Rock",
     cover: "https://cdn2.suno.ai/image_cb01ecb0-2e67-430c-bdae-d235fa14808a.jpeg",
-    audioUrl: `https://cdn1.suno.ai/J9z2aqpTWcknLPil.mp3`,
+    audioUrl: `/api/track-audio?id=J9z2aqpTWcknLPil`,
   },
   {
     id: "EzOHEKgUHyGshDNR",
@@ -46,7 +46,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Cabo Verde",
     cover: "https://cdn2.suno.ai/image_5de28091-36c4-4d33-8c15-af93d6c0a220.jpeg",
-    audioUrl: `https://cdn1.suno.ai/EzOHEKgUHyGshDNR.mp3`,
+    audioUrl: `/api/track-audio?id=EzOHEKgUHyGshDNR`,
   },
   {
     id: "Lq50KP37gz9hwLv0",
@@ -54,7 +54,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Reggae",
     cover: "https://cdn2.suno.ai/image_4888bcf5-8414-4d77-a178-af2a2338fa78.jpeg",
-    audioUrl: `https://cdn1.suno.ai/Lq50KP37gz9hwLv0.mp3`,
+    audioUrl: `/api/track-audio?id=Lq50KP37gz9hwLv0`,
   },
   {
     id: "xmQohTCXLLxIjOc4",
@@ -62,7 +62,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Rap Fado",
     cover: "https://cdn2.suno.ai/image_0a031014-6dfd-419d-879c-bf5955f79e9f.jpeg",
-    audioUrl: `https://cdn1.suno.ai/xmQohTCXLLxIjOc4.mp3`,
+    audioUrl: `/api/track-audio?id=xmQohTCXLLxIjOc4`,
   },
   {
     id: "zKgQ4mbyGiLCkqqo",
@@ -70,7 +70,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Rock Anthem",
     cover: "https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg",
-    audioUrl: `https://cdn1.suno.ai/zKgQ4mbyGiLCkqqo.mp3`,
+    audioUrl: `/api/track-audio?id=zKgQ4mbyGiLCkqqo`,
   }
 ]
 
@@ -78,18 +78,6 @@ export function FeaturedTracksCarousel() {
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [loadingAudio, setLoadingAudio] = useState<string | null>(null)
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({})
-
-  // Busca URL real do áudio via API proxy
-  const fetchAudioUrl = async (trackId: string): Promise<string> => {
-    try {
-      const response = await fetch(`/api/track-audio?id=${trackId}`)
-      const data = await response.json()
-      return data.audioUrl || `https://cdn1.suno.ai/${trackId}.mp3`
-    } catch (error) {
-      console.error('Error fetching audio URL:', error)
-      return `https://cdn1.suno.ai/${trackId}.mp3`
-    }
-  }
 
   const togglePlay = async (trackId: string) => {
     // Pausa todas as outras músicas
@@ -109,46 +97,16 @@ export function FeaturedTracksCarousel() {
     } else {
       setLoadingAudio(trackId)
       
-      // Tenta buscar URL real se ainda não tiver
-      if (!audio.src || audio.src.includes('placeholder')) {
-        const realUrl = await fetchAudioUrl(trackId)
-        audio.src = realUrl
-      }
-
-      const playPromise = audio.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setPlayingId(trackId)
-            setLoadingAudio(null)
-          })
-          .catch(async (err) => {
-            console.log("⚠️ Tentativa 1 falhou, tentando URL alternativa...")
-            
-            // Tenta URLs alternativas do CDN do Suno
-            const alternativeUrls = [
-              `https://cdn1.suno.ai/${trackId}.mp3`,
-              `https://cdn2.suno.ai/${trackId}.mp3`,
-              `https://suno.com/song/${trackId}`, // Fallback para página do Suno
-            ]
-            
-            for (const url of alternativeUrls) {
-              try {
-                audio.src = url
-                await audio.play()
-                setPlayingId(trackId)
-                setLoadingAudio(null)
-                console.log(`✅ Áudio carregado de: ${url}`)
-                return
-              } catch {
-                continue
-              }
-            }
-            
-            // Se tudo falhar, mostra erro silencioso
-            console.log("⚠️ Áudio temporariamente indisponível")
-            setLoadingAudio(null)
-          })
+      try {
+        await audio.play()
+        setPlayingId(trackId)
+        setLoadingAudio(null)
+      } catch (error) {
+        console.error('Erro ao reproduzir áudio:', error)
+        setLoadingAudio(null)
+        
+        // Mostra mensagem amigável ao usuário
+        alert('Desculpe, este áudio está temporariamente indisponível. Tente novamente em alguns segundos.')
       }
     }
   }
