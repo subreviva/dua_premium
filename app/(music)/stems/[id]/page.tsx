@@ -44,8 +44,6 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import KeyboardShortcutsOverlay from "@/components/keyboard-shortcuts-overlay"
-// Import AI components
-import { AIMusicGenerator } from "@/components/ai-music-generator"
 import { AddTrackModal } from "@/components/add-track-modal"
 
 // Import track effects modal and master effects modal
@@ -57,6 +55,8 @@ import { SoundLibraryModal } from "@/components/sound-library-modal" // Import S
 import { SessionInfoPanel } from "@/components/session-info-panel"
 import { ZoomControls } from "@/components/zoom-controls"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog" // Import Dialog components
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -2060,10 +2060,10 @@ export default function StemsPage({ params }: { params: { id: string } }) {
 
               <DropdownMenuItem
                 onClick={() => setDuaPanelOpen(true)}
-                className="gap-2 cursor-pointer bg-gradient-to-r from-purple-500/10 to-pink-500/10"
+                className="gap-2 cursor-pointer bg-white/5"
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>Estúdio DUA</span>
+                <span>Gerar com DUA</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -2154,7 +2154,7 @@ export default function StemsPage({ params }: { params: { id: string } }) {
                       className="bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5 rounded-lg h-11 font-light"
                     >
                       <Sparkles className="h-4 w-4 mr-2" />
-                      Gerar IA
+                      Gerar com DUA
                     </Button>
                     <Button
                       onClick={() => setSoundLibraryOpen(true)}
@@ -2372,27 +2372,40 @@ export default function StemsPage({ params }: { params: { id: string } }) {
 
       <KeyboardShortcutsOverlay isOpen={showKeyboardShortcuts} onClose={() => setShowKeyboardShortcuts(false)} />
 
-      {/* DUA Features Dialog */}
+      {/* DUA Generator Dialog - Simple like /create page */}
       <Dialog open={duaPanelOpen} onOpenChange={setDuaPanelOpen}>
-        <DialogContent className="max-w-2xl bg-zinc-950/95 backdrop-blur-xl border-zinc-800">
+        <DialogContent className="max-w-xl bg-black/95 backdrop-blur-xl border-white/10">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              DUA - A Guardiã do Estúdio
+            <DialogTitle className="flex items-center gap-2 text-white font-light">
+              <Sparkles className="w-5 h-5 text-white" />
+              Gerar com DUA
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
-              <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                Gerador de Música DUA
-              </h3>
-              <AIMusicGenerator onGenerate={handleGenerateMusic} />
-              <p className="text-xs text-white/40 mt-3">
-                DUA usa a API Suno para gerar música original a partir das tuas descrições
-              </p>
+          <div className="space-y-4 py-2">
+            <div className="space-y-3">
+              <Label htmlFor="dua-prompt" className="text-sm font-light text-zinc-300">
+                Descreva a música que deseja gerar
+              </Label>
+              <Textarea
+                id="dua-prompt"
+                placeholder="ex: música electrónica animada com baixo pesado e sintetizadores"
+                className="min-h-[100px] resize-none border-white/10 bg-black/40 backdrop-blur-sm text-sm text-white leading-relaxed rounded-lg focus:border-white/20 focus:ring-1 focus:ring-white/10 px-4 py-3 placeholder:text-zinc-600"
+                maxLength={500}
+              />
             </div>
+
+            <Button
+              onClick={() => {
+                // Redireciona para a página /create
+                router.push('/create')
+                setDuaPanelOpen(false)
+              }}
+              className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-lg h-12 font-light transition-all duration-300"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Gerar Música com DUA
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
