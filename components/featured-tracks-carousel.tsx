@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import Image from "next/image"
-import { Play, Pause, Music2, Loader2, Headphones } from "lucide-react"
+import { Play, Pause, Music2, Loader2 } from "lucide-react"
 import {
   Carousel,
   CarouselContent,
@@ -12,9 +12,8 @@ import {
 } from "@/components/ui/carousel"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { SunoEmbedPlayer } from "./suno-embed-player"
 
-// Músicas reais do Suno - JubilantHarmonic3057
+// Músicas da comunidade DUA
 interface Track {
   id: string
   title: string
@@ -22,7 +21,6 @@ interface Track {
   genre: string
   cover: string
   audioUrl: string
-  sunoUrl: string
 }
 
 const FEATURED_TRACKS: Track[] = [
@@ -32,8 +30,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Portuguese Pop",
     cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
-    audioUrl: `https://cdn1.suno.ai/xJqFtvSGsgcaNczS.mp3`,
-    sunoUrl: "https://suno.com/s/xJqFtvSGsgcaNczS"
+    audioUrl: `https://cdn1.suno.ai/xJqFtvSGsgcaNczS.mp3`
   },
   {
     id: "J9z2aqpTWcknLPil",
@@ -41,8 +38,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Orchestral Rock",
     cover: "https://cdn2.suno.ai/image_cb01ecb0-2e67-430c-bdae-d235fa14808a.jpeg",
-    audioUrl: `https://cdn1.suno.ai/J9z2aqpTWcknLPil.mp3`,
-    sunoUrl: "https://suno.com/s/J9z2aqpTWcknLPil"
+    audioUrl: `https://cdn1.suno.ai/J9z2aqpTWcknLPil.mp3`
   },
   {
     id: "EzOHEKgUHyGshDNR",
@@ -50,8 +46,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Cabo Verde",
     cover: "https://cdn2.suno.ai/image_5de28091-36c4-4d33-8c15-af93d6c0a220.jpeg",
-    audioUrl: `https://cdn1.suno.ai/EzOHEKgUHyGshDNR.mp3`,
-    sunoUrl: "https://suno.com/s/EzOHEKgUHyGshDNR"
+    audioUrl: `https://cdn1.suno.ai/EzOHEKgUHyGshDNR.mp3`
   },
   {
     id: "Lq50KP37gz9hwLv0",
@@ -59,8 +54,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Reggae",
     cover: "https://cdn2.suno.ai/image_4888bcf5-8414-4d77-a178-af2a2338fa78.jpeg",
-    audioUrl: `https://cdn1.suno.ai/Lq50KP37gz9hwLv0.mp3`,
-    sunoUrl: "https://suno.com/s/Lq50KP37gz9hwLv0"
+    audioUrl: `https://cdn1.suno.ai/Lq50KP37gz9hwLv0.mp3`
   },
   {
     id: "xmQohTCXLLxIjOc4",
@@ -68,8 +62,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Rap Fado",
     cover: "https://cdn2.suno.ai/image_0a031014-6dfd-419d-879c-bf5955f79e9f.jpeg",
-    audioUrl: `https://cdn1.suno.ai/xmQohTCXLLxIjOc4.mp3`,
-    sunoUrl: "https://suno.com/s/xmQohTCXLLxIjOc4"
+    audioUrl: `https://cdn1.suno.ai/xmQohTCXLLxIjOc4.mp3`
   },
   {
     id: "zKgQ4mbyGiLCkqqo",
@@ -77,25 +70,23 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Rock Anthem",
     cover: "https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg",
-    audioUrl: `https://cdn1.suno.ai/zKgQ4mbyGiLCkqqo.mp3`,
-    sunoUrl: "https://suno.com/s/zKgQ4mbyGiLCkqqo"
+    audioUrl: `https://cdn1.suno.ai/zKgQ4mbyGiLCkqqo.mp3`
   }
 ]
 
 export function FeaturedTracksCarousel() {
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [loadingAudio, setLoadingAudio] = useState<string | null>(null)
-  const [embedTrack, setEmbedTrack] = useState<{ id: string; title: string } | null>(null)
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({})
 
   // Busca URL real do áudio via API proxy
   const fetchAudioUrl = async (trackId: string): Promise<string> => {
     try {
-      const response = await fetch(`/api/suno-audio?id=${trackId}`)
+      const response = await fetch(`/api/track-audio?id=${trackId}`)
       const data = await response.json()
       return data.audioUrl || `https://cdn1.suno.ai/${trackId}.mp3`
     } catch (error) {
-      console.error('Error fetching audio URL:', error)
+      console.error('Erro ao buscar áudio:', error)
       return `https://cdn1.suno.ai/${trackId}.mp3`
     }
   }
@@ -132,13 +123,12 @@ export function FeaturedTracksCarousel() {
             setLoadingAudio(null)
           })
           .catch(async (err) => {
-            console.log("⚠️ Tentativa 1 falhou, tentando URL alternativa...")
+            console.log("⚠️ Tentando URLs alternativas...")
             
-            // Tenta URLs alternativas do CDN do Suno
+            // Tenta URLs alternativas do CDN
             const alternativeUrls = [
               `https://cdn1.suno.ai/${trackId}.mp3`,
               `https://cdn2.suno.ai/${trackId}.mp3`,
-              `https://suno.com/song/${trackId}`, // Fallback para página do Suno
             ]
             
             for (const url of alternativeUrls) {
@@ -147,16 +137,15 @@ export function FeaturedTracksCarousel() {
                 await audio.play()
                 setPlayingId(trackId)
                 setLoadingAudio(null)
-                console.log(`✅ Áudio carregado de: ${url}`)
+                console.log(`✅ Áudio carregado: ${url}`)
                 return
               } catch {
                 continue
               }
             }
             
-            // Se tudo falhar, abre no Suno
-            console.log("❌ Não foi possível reproduzir. Abrindo no Suno...")
-            window.open(`https://suno.com/song/${trackId}`, '_blank')
+            // Se falhar, mostra mensagem
+            console.log("❌ Áudio temporariamente indisponível")
             setLoadingAudio(null)
           })
       }
@@ -250,23 +239,12 @@ export function FeaturedTracksCarousel() {
                       <p className="text-sm text-zinc-400 font-light truncate">
                         {track.artist}
                       </p>
-                      <div className="flex items-center gap-2">
-                        {playingId === track.id && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-xs text-green-400">Live</span>
-                          </div>
-                        )}
-                        <a 
-                          href={track.sunoUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs text-purple-400 hover:text-purple-300 font-light hover:underline"
-                          title="Abrir no Suno"
-                        >
-                          Suno ↗
-                        </a>
-                      </div>
+                      {playingId === track.id && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                          <span className="text-xs text-green-400">Tocando</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -290,23 +268,6 @@ export function FeaturedTracksCarousel() {
           <CarouselNext className="static translate-y-0 bg-white/5 border-white/10 hover:bg-white/10 text-white" />
         </div>
       </Carousel>
-
-      {/* Suno Embed Player Modal */}
-      {embedTrack && (
-        <SunoEmbedPlayer
-          trackId={embedTrack.id}
-          title={embedTrack.title}
-          open={!!embedTrack}
-          onClose={() => setEmbedTrack(null)}
-        />
-      )}
-
-      {/* Helper Text */}
-      <div className="mt-4 text-center">
-        <p className="text-xs text-zinc-500 font-light">
-          💡 Clique em <span className="text-purple-400">"Suno ↗"</span> para garantir reprodução no site original
-        </p>
-      </div>
     </div>
   )
 }
