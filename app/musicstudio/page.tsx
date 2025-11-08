@@ -3,6 +3,7 @@ import { Music, Library, Mic, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
+import { MusicStudioNavbar } from "@/components/music-studio-navbar"
 import { FeaturedTracksCarousel } from "@/components/featured-tracks-carousel"
 import { HowItWorksSection } from "@/components/how-it-works-section"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,11 @@ export default function HomePage() {
       {/* Desktop Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <AppSidebar />
+      </div>
+
+      {/* Global Navbar - Mobile */}
+      <div className="md:hidden">
+        <MusicStudioNavbar />
       </div>
 
       {/* Main Content - Scrollable */}
@@ -37,13 +43,7 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black/50 to-pink-900/20" />
           </div>
 
-          <main className="relative z-10 w-full">
-            <nav className="pt-safe px-5 py-3 backdrop-blur-xl bg-black/5 border-b border-white/5 md:hidden">
-              <div className="flex items-center justify-between">
-                <span className="text-[15px] font-medium tracking-tight text-white">DUA</span>
-              </div>
-            </nav>
-
+          <main className="relative z-10 w-full pt-[68px] md:pt-0">
             <div className="flex flex-col items-center justify-center px-5 py-10 md:px-8 md:py-16">
               {/* Hero Text */}
               <div className="text-center mb-10 md:mb-16 max-w-4xl">

@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useGeneration } from "@/contexts/generation-context"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
+import { MusicStudioNavbar } from "@/components/music-studio-navbar"
 
 const PRESETS = [
   {
@@ -211,16 +212,13 @@ export default function CreatePage() {
         <AppSidebar />
       </div>
 
-      <div className="flex-1 h-screen overflow-hidden md:overflow-auto">
-        <main className="h-[100dvh] flex flex-col md:h-auto md:min-h-screen overflow-hidden">
-          {/* Header - fixed height */}
-          <div className="pt-safe px-4 py-3 shrink-0 border-b border-border/20 backdrop-blur-xl bg-background/80 md:px-8 md:py-5">
-            <h1 className="text-sm font-semibold tracking-tight md:text-xl">Criar Música</h1>
-            <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-light md:text-xs">
-              Gere composições com DUA
-            </p>
-          </div>
+      {/* Global Navbar - Mobile */}
+      <div className="md:hidden">
+        <MusicStudioNavbar />
+      </div>
 
+      <div className="flex-1 h-screen overflow-hidden md:overflow-auto">
+        <main className="h-[100dvh] flex flex-col md:h-auto md:min-h-screen overflow-hidden pt-[68px] md:pt-0">
           {/* Error Alert - conditional */}
           {error && (
             <div className="mx-4 mt-2 shrink-0 md:mx-8 md:mt-3">
