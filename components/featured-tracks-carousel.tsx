@@ -2,16 +2,7 @@
 
 import { useState, useRef } from "react"
 import Image from "next/image"
-import { Play, Pause, Music2, Loader2, Headphones } from "lucide-react"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Play, Pause, Loader2 } from "lucide-react"
 
 // Músicas da comunidade DUA
 interface Track {
@@ -96,9 +87,6 @@ export function FeaturedTracksCarousel() {
       } catch (error) {
         console.error('Erro ao reproduzir áudio:', error)
         setLoadingAudio(null)
-        
-        // Mostra mensagem amigável ao usuário
-        alert('Desculpe, este áudio está temporariamente indisponível. Tente novamente em alguns segundos.')
       }
     }
   }
@@ -111,114 +99,97 @@ export function FeaturedTracksCarousel() {
 
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <h2 className="text-2xl font-light text-white mb-2">
-          Criado com DUA
-        </h2>
-        <p className="text-sm text-zinc-400 font-light">
-          Explore músicas criadas pela comunidade
-        </p>
-      </div>
-
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
+      {/* Horizontal Scroll Container - iOS Style */}
+      <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+        <div className="flex gap-3 pb-2">
           {FEATURED_TRACKS.map((track) => (
-            <CarouselItem key={track.id} className="pl-2 md:pl-4 basis-[280px] md:basis-[320px]">
-              <Card className="bg-white/5 border-white/10 overflow-hidden group hover:bg-white/10 transition-all">
-                <CardContent className="p-0">
-                  {/* Cover Image */}
-                  <div className="relative aspect-square overflow-hidden">
-                    <Image
-                      src={track.cover}
-                      alt={`Capa de ${track.title}`}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    
-                    {/* Play/Pause Overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button
-                        size="icon"
-                        className="w-14 h-14 rounded-full bg-white/90 hover:bg-white text-black"
-                        onClick={() => togglePlay(track.id)}
-                        disabled={loadingAudio === track.id}
-                      >
-                        {loadingAudio === track.id ? (
-                          <Loader2 className="w-6 h-6 animate-spin" />
-                        ) : playingId === track.id ? (
-                          <Pause className="w-6 h-6" fill="currentColor" />
-                        ) : (
-                          <Play className="w-6 h-6 ml-1" fill="currentColor" />
-                        )}
-                      </Button>
-                    </div>
+            <div
+              key={track.id}
+              className="flex-none w-[160px] active:scale-[0.97] transition-transform"
+            >
+              {/* Card Container */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
+                {/* Cover Image */}
+                <div className="relative aspect-square">
+                  <Image
+                    src={track.cover}
+                    alt={track.title}
+                    fill
+                    className="object-cover"
+                  />
+                  
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2">
+                    <button
+                      onClick={() => togglePlay(track.id)}
+                      disabled={loadingAudio === track.id}
+                      className="w-12 h-12 rounded-full bg-white/95 hover:bg-white flex items-center justify-center active:scale-90 transition-all shadow-lg"
+                    >
+                      {loadingAudio === track.id ? (
+                        <Loader2 className="w-5 h-5 text-black animate-spin" strokeWidth={2.5} />
+                      ) : playingId === track.id ? (
+                        <Pause className="w-5 h-5 text-black" fill="currentColor" strokeWidth={0} />
+                      ) : (
+                        <Play className="w-5 h-5 text-black ml-0.5" fill="currentColor" strokeWidth={0} />
+                      )}
+                    </button>
+                  </div>
+                  
+                  {/* Genre Badge */}
+                  <div className="absolute top-2 left-2">
+                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white border border-white/20">
+                      {track.genre}
+                    </span>
+                  </div>
 
-                    {/* Genre Badge */}
-                    <div className="absolute top-3 right-3">
-                      <div className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10">
-                        <span className="text-xs font-light text-white">
-                          {track.genre}
+                  {/* Playing Indicator */}
+                  {playingId === track.id && (
+                    <div className="absolute top-2 right-2">
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/90 backdrop-blur-sm">
+                        <div className="w-1 h-1 bg-white rounded-full animate-pulse" />
+                        <span className="text-[10px] font-semibold text-white">
+                          Playing
                         </span>
                       </div>
                     </div>
+                  )}
+                </div>
 
-                    {/* Playing Indicator */}
-                    {playingId === track.id && (
-                      <div className="absolute bottom-3 left-3">
-                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-green-500/90 backdrop-blur-sm">
-                          <Music2 className="w-3.5 h-3.5 text-white animate-pulse" />
-                          <span className="text-xs font-medium text-white">
-                            Tocando
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                {/* Track Info */}
+                <div className="p-3">
+                  <h4 className="text-sm font-semibold text-white truncate mb-0.5">
+                    {track.title}
+                  </h4>
+                  <p className="text-xs text-zinc-400 truncate">
+                    {track.artist}
+                  </p>
+                </div>
 
-                  {/* Track Info */}
-                  <div className="p-4">
-                    <h3 className="font-medium text-white mb-1 truncate">
-                      {track.title}
-                    </h3>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm text-zinc-400 font-light truncate">
-                        {track.artist}
-                      </p>
-                      {playingId === track.id && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30">
-                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-xs text-green-400">Tocando</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Hidden Audio Element */}
-                  <audio
-                    ref={(el) => {
-                      if (el) audioRefs.current[track.id] = el
-                    }}
-                    src={track.audioUrl}
-                    onEnded={() => handleAudioEnd(track.id)}
-                    preload="metadata"
-                  />
-                </CardContent>
-              </Card>
-            </CarouselItem>
+                {/* Hidden Audio Element */}
+                <audio
+                  ref={(el) => {
+                    if (el) audioRefs.current[track.id] = el
+                  }}
+                  src={track.audioUrl}
+                  onEnded={() => handleAudioEnd(track.id)}
+                  preload="metadata"
+                />
+              </div>
+            </div>
           ))}
-        </CarouselContent>
-        
-        <div className="flex justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 bg-white/5 border-white/10 hover:bg-white/10 text-white" />
-          <CarouselNext className="static translate-y-0 bg-white/5 border-white/10 hover:bg-white/10 text-white" />
         </div>
-      </Carousel>
+      </div>
+
+      {/* Custom Scrollbar Hide CSS */}
+      <style jsx global>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   )
 }
