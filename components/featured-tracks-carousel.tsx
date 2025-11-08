@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import Image from "next/image"
-import { Play, Pause, Music2 } from "lucide-react"
+import { Play, Pause, Music2, Loader2, Headphones } from "lucide-react"
 import {
   Carousel,
   CarouselContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/carousel"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { SunoEmbedPlayer } from "./suno-embed-player"
 
 // Músicas reais do Suno - JubilantHarmonic3057
 interface Track {
@@ -83,9 +84,23 @@ const FEATURED_TRACKS: Track[] = [
 
 export function FeaturedTracksCarousel() {
   const [playingId, setPlayingId] = useState<string | null>(null)
+  const [loadingAudio, setLoadingAudio] = useState<string | null>(null)
+  const [embedTrack, setEmbedTrack] = useState<{ id: string; title: string } | null>(null)
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({})
 
-  const togglePlay = (trackId: string) => {
+  // Busca URL real do áudio via API proxy
+  const fetchAudioUrl = async (trackId: string): Promise<string> => {
+    try {
+      const response = await fetch(`/api/suno-audio?id=${trackId}`)
+      const data = await response.json()
+      return data.audioUrl || `https://cdn1.suno.ai/${trackId}.mp3`
+    } catch (error) {
+      console.error('Error fetching audio URL:', error)
+      return `https://cdn1.suno.ai/${trackId}.mp3`
+    }
+  }
+
+  const togglePlay = async (trackId: string) => {
     // Pausa todas as outras músicas
     Object.entries(audioRefs.current).forEach(([id, audio]) => {
       if (id !== trackId && audio) {
@@ -101,17 +116,48 @@ export function FeaturedTracksCarousel() {
       audio.pause()
       setPlayingId(null)
     } else {
+      setLoadingAudio(trackId)
+      
+      // Tenta buscar URL real se ainda não tiver
+      if (!audio.src || audio.src.includes('placeholder')) {
+        const realUrl = await fetchAudioUrl(trackId)
+        audio.src = realUrl
+      }
+
       const playPromise = audio.play()
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             setPlayingId(trackId)
+            setLoadingAudio(null)
           })
-          .catch(err => {
-            console.log("⚠️ Áudio do Suno não disponível:", err.message)
-            // Fallback: usar som da biblioteca local
-            console.log("🔄 Tentando fonte alternativa...")
-            // Você pode adicionar URL de fallback aqui se necessário
+          .catch(async (err) => {
+            console.log("⚠️ Tentativa 1 falhou, tentando URL alternativa...")
+            
+            // Tenta URLs alternativas do CDN do Suno
+            const alternativeUrls = [
+              `https://cdn1.suno.ai/${trackId}.mp3`,
+              `https://cdn2.suno.ai/${trackId}.mp3`,
+              `https://suno.com/song/${trackId}`, // Fallback para página do Suno
+            ]
+            
+            for (const url of alternativeUrls) {
+              try {
+                audio.src = url
+                await audio.play()
+                setPlayingId(trackId)
+                setLoadingAudio(null)
+                console.log(`✅ Áudio carregado de: ${url}`)
+                return
+              } catch {
+                continue
+              }
+            }
+            
+            // Se tudo falhar, abre no Suno
+            console.log("❌ Não foi possível reproduzir. Abrindo no Suno...")
+            window.open(`https://suno.com/song/${trackId}`, '_blank')
+            setLoadingAudio(null)
           })
       }
     }
@@ -161,8 +207,11 @@ export function FeaturedTracksCarousel() {
                         size="icon"
                         className="w-14 h-14 rounded-full bg-white/90 hover:bg-white text-black"
                         onClick={() => togglePlay(track.id)}
+                        disabled={loadingAudio === track.id}
                       >
-                        {playingId === track.id ? (
+                        {loadingAudio === track.id ? (
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        ) : playingId === track.id ? (
                           <Pause className="w-6 h-6" fill="currentColor" />
                         ) : (
                           <Play className="w-6 h-6 ml-1" fill="currentColor" />
@@ -197,18 +246,27 @@ export function FeaturedTracksCarousel() {
                     <h3 className="font-medium text-white mb-1 truncate">
                       {track.title}
                     </h3>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <p className="text-sm text-zinc-400 font-light truncate">
                         {track.artist}
                       </p>
-                      <a 
-                        href={track.sunoUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-xs text-purple-400 hover:text-purple-300 font-light"
-                      >
-                        Suno ↗
-                      </a>
+                      <div className="flex items-center gap-2">
+                        {playingId === track.id && (
+                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                            <span className="text-xs text-green-400">Live</span>
+                          </div>
+                        )}
+                        <a 
+                          href={track.sunoUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs text-purple-400 hover:text-purple-300 font-light hover:underline"
+                          title="Abrir no Suno"
+                        >
+                          Suno ↗
+                        </a>
+                      </div>
                     </div>
                   </div>
 
@@ -232,6 +290,23 @@ export function FeaturedTracksCarousel() {
           <CarouselNext className="static translate-y-0 bg-white/5 border-white/10 hover:bg-white/10 text-white" />
         </div>
       </Carousel>
+
+      {/* Suno Embed Player Modal */}
+      {embedTrack && (
+        <SunoEmbedPlayer
+          trackId={embedTrack.id}
+          title={embedTrack.title}
+          open={!!embedTrack}
+          onClose={() => setEmbedTrack(null)}
+        />
+      )}
+
+      {/* Helper Text */}
+      <div className="mt-4 text-center">
+        <p className="text-xs text-zinc-500 font-light">
+          💡 Clique em <span className="text-purple-400">"Suno ↗"</span> para garantir reprodução no site original
+        </p>
+      </div>
     </div>
   )
 }
