@@ -3,7 +3,9 @@ import type { Metadata } from "next"
 import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { VideoGenerationProvider } from "@/contexts/video-generation-context"
+import { GlobalPlayerProvider } from "@/contexts/global-player-context"
 import { VideoGenerationNotifications } from "@/components/ui/video-generation-notifications"
+import { GlobalMusicPlayer } from "@/components/global-music-player"
 import { StagewiseToolbar } from "@/components/stagewise-toolbar"
 import { PremiumToaster } from "@/components/ui/premium-toaster"
 import { PremiumLoading } from "@/components/ui/premium-loading"
@@ -59,22 +61,27 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
-        <VideoGenerationProvider>
-          {children}
-          <VideoGenerationNotifications />
-          
-          {/* Stagewise Toolbar - Dev Mode Only */}
-          <StagewiseToolbar />
-          
-          {/* PWA Components */}
-          <PWAInstallPrompt />
-          <ConnectionStatus />
-          
-          {/* Premium Components */}
-          <PremiumToaster />
-          
-          <Analytics />
-        </VideoGenerationProvider>
+        <GlobalPlayerProvider>
+          <VideoGenerationProvider>
+            {children}
+            <VideoGenerationNotifications />
+            
+            {/* Global Music Player */}
+            <GlobalMusicPlayer />
+            
+            {/* Stagewise Toolbar - Dev Mode Only */}
+            <StagewiseToolbar />
+            
+            {/* PWA Components */}
+            <PWAInstallPrompt />
+            <ConnectionStatus />
+            
+            {/* Premium Components */}
+            <PremiumToaster />
+            
+            <Analytics />
+          </VideoGenerationProvider>
+        </GlobalPlayerProvider>
       </body>
     </html>
   )

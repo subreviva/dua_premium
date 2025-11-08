@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import Image from "next/image"
-import { Play, Pause, Music2, Loader2, Headphones } from "lucide-react"
+import { Play, Pause, Loader2, Headphones } from "lucide-react"
 import {
   Carousel,
   CarouselContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/carousel"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { useGlobalPlayer } from "@/contexts/global-player-context"
 
 // Músicas da comunidade DUA
 interface Track {
@@ -53,7 +54,7 @@ const FEATURED_TRACKS: Track[] = [
     title: "Amor e Paz",
     artist: "Riicky",
     genre: "Reggae",
-    cover: "https://cdn2.suno.ai/image_4888bcf5-8414-4d77-a178-af2a2338fa78.jpeg",
+    cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
     audioUrl: `/audio/featured/amor-e-paz.mp3`,
   },
   {
@@ -67,45 +68,25 @@ const FEATURED_TRACKS: Track[] = [
 ]
 
 export function FeaturedTracksCarousel() {
-  const [playingId, setPlayingId] = useState<string | null>(null)
-  const [loadingAudio, setLoadingAudio] = useState<string | null>(null)
-  const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({})
+  const [loadingTrackId, setLoadingTrackId] = useState<string | null>(null)
+  const { currentTrack, isPlaying, play, pause } = useGlobalPlayer()
 
-  const togglePlay = async (trackId: string) => {
-    // Pausa todas as outras músicas
-    Object.entries(audioRefs.current).forEach(([id, audio]) => {
-      if (id !== trackId && audio) {
-        audio.pause()
-        audio.currentTime = 0
-      }
-    })
-
-    const audio = audioRefs.current[trackId]
-    if (!audio) return
-
-    if (playingId === trackId) {
-      audio.pause()
-      setPlayingId(null)
-    } else {
-      setLoadingAudio(trackId)
-      
-      try {
-        await audio.play()
-        setPlayingId(trackId)
-        setLoadingAudio(null)
-      } catch (error) {
-        console.error('Erro ao reproduzir áudio:', error)
-        setLoadingAudio(null)
-        
-        // Mostra mensagem amigável ao usuário
-        alert('Desculpe, este áudio está temporariamente indisponível. Tente novamente em alguns segundos.')
-      }
+  const togglePlay = async (track: Track) => {
+    // Se é a música atual tocando, pausa
+    if (currentTrack?.id === track.id && isPlaying) {
+      pause()
+      return
     }
-  }
 
-  const handleAudioEnd = (trackId: string) => {
-    if (playingId === trackId) {
-      setPlayingId(null)
+    // Toca a música
+    setLoadingTrackId(track.id)
+    try {
+      await play(track)
+    } catch (error) {
+      console.error('Erro ao reproduzir áudio:', error)
+      alert('Desculpe, este áudio está temporariamente indisponível.')
+    } finally {
+      setLoadingTrackId(null)
     }
   }
 
@@ -146,12 +127,12 @@ export function FeaturedTracksCarousel() {
                       <Button
                         size="icon"
                         className="w-14 h-14 rounded-full bg-white/95 hover:bg-white text-black active:scale-95 transition-transform shadow-xl"
-                        onClick={() => togglePlay(track.id)}
-                        disabled={loadingAudio === track.id}
+                        onClick={() => togglePlay(track)}
+                        disabled={loadingTrackId === track.id}
                       >
-                        {loadingAudio === track.id ? (
+                        {loadingTrackId === track.id ? (
                           <Loader2 className="w-6 h-6 animate-spin" />
-                        ) : playingId === track.id ? (
+                        ) : currentTrack?.id === track.id && isPlaying ? (
                           <Pause className="w-6 h-6" fill="currentColor" />
                         ) : (
                           <Play className="w-6 h-6 ml-1" fill="currentColor" />
@@ -169,7 +150,7 @@ export function FeaturedTracksCarousel() {
                     </div>
 
                     {/* Playing Indicator */}
-                    {playingId === track.id && (
+                    {currentTrack?.id === track.id && isPlaying && (
                       <div className="absolute bottom-2.5 left-2.5">
                         <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-green-500/95 backdrop-blur-md shadow-lg">
                           <Headphones className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
@@ -190,16 +171,6 @@ export function FeaturedTracksCarousel() {
                       {track.artist}
                     </p>
                   </div>
-
-                  {/* Hidden Audio Element */}
-                  <audio
-                    ref={(el) => {
-                      if (el) audioRefs.current[track.id] = el
-                    }}
-                    src={track.audioUrl}
-                    onEnded={() => handleAudioEnd(track.id)}
-                    preload="metadata"
-                  />
                 </CardContent>
               </Card>
             </CarouselItem>
