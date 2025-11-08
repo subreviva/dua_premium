@@ -41,21 +41,34 @@ export default function HomePage() {
           }}
           className="absolute inset-0 z-0"
         >
-          {/* Video Background - Always visible, mobile optimized */}
+          {/* Video Background - FORCED AUTOPLAY */}
           <video 
             autoPlay 
             loop 
             muted 
             playsInline
             preload="auto"
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
             className="absolute inset-0 w-full h-full object-cover"
             style={{ filter: 'brightness(1.1) contrast(1.05) saturate(1.1)' }}
+            onLoadedData={(e) => {
+              const video = e.currentTarget
+              video.play().catch(() => {
+                console.log('Video autoplay blocked, trying again...')
+                setTimeout(() => video.play(), 100)
+              })
+            }}
           >
             <source
               src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-2225-ultra%20premium%20loop%20para%20hero%20-%20sem%20objet....mp4"
               type="video/mp4"
             />
           </video>
+          
+          {/* Fallback gradient se vídeo não carregar */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-black to-pink-900/30" style={{ zIndex: -1 }} />
           
           {/* Gradient overlays para depth e elegância */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />

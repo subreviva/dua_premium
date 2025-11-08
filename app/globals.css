@@ -1275,16 +1275,8 @@ select {
 
 /* Enhanced mobile-specific optimizations for premium iOS-like experience */
 @media (max-width: 768px) {
-  /* Forcing mobile-only layout with no scrolling on main pages */
-  html,
-  body {
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile browsers */
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-  }
-
+  /* REMOVIDO: overflow: hidden e position: fixed - BLOQUEAVAM O SCROLL */
+  
   * {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
