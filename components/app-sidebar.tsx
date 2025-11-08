@@ -12,6 +12,7 @@ const navigation = [
   { name: "Criar", href: "/create", icon: null },
   { name: "Melodia", href: "/melody", icon: null },
   { name: "Biblioteca", href: "/library", icon: null },
+  { name: "Estúdio", href: "/studio", icon: Scissors },
 ]
 
 const exitNav = [
@@ -128,13 +129,13 @@ export function AppSidebar() {
           </div>
         )}
         {navigation.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href || (item.href === "/studio" && pathname.startsWith("/stems"))
           return (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
-                "group relative flex items-center rounded-xl px-4 py-3.5 text-sm font-light tracking-wide transition-all duration-300",
+                "group relative flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-light tracking-wide transition-all duration-300",
                 isActive
                   ? "bg-gradient-to-r from-primary/10 to-accent/10 text-foreground shadow-lg shadow-primary/5"
                   : "text-muted-foreground/70 hover:bg-sidebar-accent/30 hover:text-foreground",
@@ -144,6 +145,7 @@ export function AppSidebar() {
               {isActive && (
                 <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-primary to-accent" />
               )}
+              {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
               {!isCollapsed && (
                 <span className="relative">
                   {item.name}
@@ -152,36 +154,10 @@ export function AppSidebar() {
                   )}
                 </span>
               )}
-              {isCollapsed && <span className="text-xs">{item.name.charAt(0)}</span>}
+              {isCollapsed && !item.icon && <span className="text-xs">{item.name.charAt(0)}</span>}
             </Link>
           )
         })}
-
-        {stemsTrackId && (
-          <Link
-            href={`/stems/${stemsTrackId}`}
-            className={cn(
-              "group relative flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-light tracking-wide transition-all duration-300",
-              pathname.startsWith("/stems")
-                ? "bg-gradient-to-r from-primary/10 to-accent/10 text-foreground shadow-lg shadow-primary/5"
-                : "text-muted-foreground/70 hover:bg-sidebar-accent/30 hover:text-foreground",
-            )}
-            title={isCollapsed ? "Stems" : undefined}
-          >
-            {pathname.startsWith("/stems") && (
-              <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-primary to-accent" />
-            )}
-            <Scissors className="h-4 w-4 flex-shrink-0" />
-            {!isCollapsed && (
-              <span className="relative">
-                Stems
-                {pathname.startsWith("/stems") && (
-                  <div className="absolute -bottom-0.5 left-0 h-px w-full bg-gradient-to-r from-primary/50 to-transparent" />
-                )}
-              </span>
-            )}
-          </Link>
-        )}
       </nav>
 
       <div className="border-t border-border/30 px-6 py-4">
