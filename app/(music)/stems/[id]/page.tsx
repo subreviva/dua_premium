@@ -894,6 +894,15 @@ export default function StemsPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     try {
+      // Allow free access - studio can open empty for new projects
+      if (trackId === 'demo' || trackId === 'new') {
+        console.log("[v0] Opening studio in free mode - no stems required")
+        setTrackTitle("Projeto Novo")
+        setStems([])
+        setLoading(false)
+        return
+      }
+
       const existingStems = JSON.parse(localStorage.getItem("track-stems") || "{}")
       const savedStems: SavedStems | undefined = existingStems[trackId]
 
@@ -926,13 +935,15 @@ export default function StemsPage({ params }: { params: { id: string } }) {
         }))
         setStems(extendedStems)
       } else {
-        console.log("[v0] No stems found for this track")
+        console.log("[v0] No stems found for this track - opening in free mode")
       }
 
       const tracks = JSON.parse(localStorage.getItem("tracks") || "[]")
       const track = tracks.find((t: any) => t.id === trackId)
       if (track) {
         setTrackTitle(track.title || "Unknown Track")
+      } else if (trackId !== 'demo' && trackId !== 'new') {
+        setTrackTitle("Projeto Sem Título")
       }
     } catch (error) {
       console.error("[v0] Error loading stems:", error)
@@ -1897,21 +1908,6 @@ export default function StemsPage({ params }: { params: { id: string } }) {
     )
   }
 
-  if (stems.length === 0) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Music2 className="h-12 w-12 text-zinc-600 mx-auto" />
-          <p className="text-zinc-400 text-sm">No stems found for this track</p>
-          <Button onClick={() => router.push("/library")} variant="outline">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Library
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   const anyPlaying = playingStems.size > 0
   // const maxDuration = Math.max(0, ...Array.from(stemDurations.values())) // Removed duplicate declaration
 
@@ -2126,6 +2122,57 @@ export default function StemsPage({ params }: { params: { id: string } }) {
 
         {/* Tracks area - each track is a single row with enhanced styling */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+          {stems.length === 0 ? (
+            /* Empty state - Studio ready for use */
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center space-y-6 max-w-md px-6">
+                <div className="space-y-3">
+                  <div className="flex justify-center">
+                    <div className="h-20 w-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                      <Music2 className="h-10 w-10 text-zinc-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-light text-white">Estúdio Pronto</h3>
+                  <p className="text-sm text-zinc-400 font-light leading-relaxed">
+                    Comece a criar. Grave sua voz, importe áudio, gere com IA ou adicione sons da biblioteca.
+                  </p>
+                </div>
+                
+                <div className="flex flex-col gap-3">
+                  <Button
+                    onClick={() => setAddTrackModalOpen(true)}
+                    className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-lg h-12 font-light transition-all duration-300"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Pista
+                  </Button>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      onClick={() => setDuaPanelOpen(true)}
+                      variant="ghost"
+                      className="bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5 rounded-lg h-11 font-light"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Gerar IA
+                    </Button>
+                    <Button
+                      onClick={() => setSoundLibraryOpen(true)}
+                      variant="ghost"
+                      className="bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5 rounded-lg h-11 font-light"
+                    >
+                      <Volume2 className="h-4 w-4 mr-2" />
+                      Sons
+                    </Button>
+                  </div>
+                </div>
+
+                <p className="text-xs text-zinc-600 font-light">
+                  Todas as ferramentas profissionais disponíveis: mixer, efeitos, automação e mais
+                </p>
+              </div>
+            </div>
+          ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={stems.map((s) => s.id)} strategy={verticalListSortingStrategy}>
               {stems.map((stem, index) => (
@@ -2199,8 +2246,10 @@ export default function StemsPage({ params }: { params: { id: string } }) {
               ))}
             </SortableContext>
           </DndContext>
+          )}
 
-          {/* Add track button - Enhanced with better styling */}
+          {/* Add track button - Enhanced with better styling - Only show when there are stems */}
+          {stems.length > 0 && (
           <div className="h-24 border-b border-zinc-800/30 hover:bg-zinc-900/20 transition-all duration-300 flex items-center justify-center group">
             <Button
               onClick={() => setAddTrackModalOpen(true)}
@@ -2210,6 +2259,7 @@ export default function StemsPage({ params }: { params: { id: string } }) {
               <Plus className="h-7 w-7" />
             </Button>
           </div>
+          )}
         </div>
       </div>
 
