@@ -1,20 +1,27 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
-import { Scissors } from "lucide-react"
+import { Scissors, Home, MessageSquare, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const navigation = [
-  { name: "Início", href: "/" },
-  { name: "Criar", href: "/create" },
-  { name: "Melodia", href: "/melody" },
-  { name: "Biblioteca", href: "/library" },
+  { name: "Início", href: "/musicstudio", icon: null },
+  { name: "Criar", href: "/create", icon: null },
+  { name: "Melodia", href: "/melody", icon: null },
+  { name: "Biblioteca", href: "/library", icon: null },
+]
+
+const exitNav = [
+  { name: "Home", href: "/", icon: Home, description: "Página principal do site" },
+  { name: "Chat", href: "/chat", icon: MessageSquare, description: "Conversar com DUA" },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [availableStems, setAvailableStems] = useState<string[]>([])
 
@@ -82,6 +89,44 @@ export function AppSidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 px-4 py-8">
+        {/* Exit Navigation - Sair do Music Studio */}
+        <div className="mb-6 pb-6 border-b border-border/20">
+          {!isCollapsed && (
+            <div className="mb-3 px-4">
+              <span className="text-xs font-light text-muted-foreground/40 tracking-widest">SAIR DO ESTÚDIO</span>
+            </div>
+          )}
+          {exitNav.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "group relative flex items-center gap-3 rounded-xl px-4 py-3 mb-2 text-sm font-light tracking-wide transition-all duration-300",
+                "text-muted-foreground/70 hover:bg-sidebar-accent/30 hover:text-foreground",
+                "border border-transparent hover:border-primary/20"
+              )}
+              title={isCollapsed ? item.description : undefined}
+            >
+              <item.icon className="h-4 w-4 flex-shrink-0" />
+              {!isCollapsed && (
+                <div className="flex flex-col flex-1">
+                  <span className="font-medium">{item.name}</span>
+                  <span className="text-xs text-muted-foreground/50">{item.description}</span>
+                </div>
+              )}
+              {!isCollapsed && (
+                <ArrowLeft className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              )}
+            </Link>
+          ))}
+        </div>
+
+        {/* Music Studio Navigation */}
+        {!isCollapsed && (
+          <div className="mb-3 px-4">
+            <span className="text-xs font-light text-muted-foreground/40 tracking-widest">MUSIC STUDIO</span>
+          </div>
+        )}
         {navigation.map((item) => {
           const isActive = pathname === item.href
           return (

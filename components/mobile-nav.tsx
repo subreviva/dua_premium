@@ -13,7 +13,7 @@ export function MobileNav() {
 
   const navItems = [
     {
-      href: "/",
+      href: "/musicstudio",
       label: "Início",
       icon: (
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,6 +63,36 @@ export function MobileNav() {
         </svg>
       ),
     },
+    {
+      href: "/home",
+      label: "Home",
+      icon: (
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      ),
+      isExit: true,
+    },
+    {
+      href: "/chat",
+      label: "Chat",
+      icon: (
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+          />
+        </svg>
+      ),
+      isExit: true,
+    },
   ]
 
   return (
@@ -73,32 +103,39 @@ export function MobileNav() {
           <div className="h-full w-full bg-slate-900/98 backdrop-blur-2xl rounded-[1.5rem]" />
         </div>
 
-        {/* Content */}
-        <div className="relative grid grid-cols-4 gap-0 h-full items-center px-2">
+        {/* Content - Grid with 6 items */}
+        <div className="relative grid grid-cols-6 gap-0 h-full items-center px-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href
+            const isExitButton = item.isExit
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 rounded-xl py-2 transition-all duration-200 active:scale-95 touch-manipulation",
-                  isActive ? "text-primary" : "text-slate-400 active:text-slate-100",
+                  isActive && !isExitButton ? "text-primary" : "text-slate-400 active:text-slate-100",
+                  isExitButton && "text-orange-400 hover:text-orange-300"
                 )}
               >
-                <div className={cn("transition-all duration-200 relative", isActive && "scale-105")}>
-                  {isActive && (
+                <div className={cn("transition-all duration-200 relative", isActive && !isExitButton && "scale-105")}>
+                  {isActive && !isExitButton && (
                     <div
                       className="absolute inset-0 bg-primary/20 blur-lg rounded-full animate-pulse"
                       style={{ animationDuration: "2s" }}
+                    />
+                  )}
+                  {isExitButton && (
+                    <div
+                      className="absolute inset-0 bg-orange-500/20 blur-md rounded-full"
                     />
                   )}
                   <div className="relative">{item.icon}</div>
                 </div>
                 <span
                   className={cn(
-                    "text-[9px] tracking-wide transition-all duration-200",
-                    isActive ? "font-medium" : "font-light",
+                    "text-[8px] tracking-wide transition-all duration-200",
+                    isActive && !isExitButton ? "font-medium" : "font-light",
                   )}
                 >
                   {item.label}
