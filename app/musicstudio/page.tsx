@@ -3,6 +3,7 @@ import { Music, Library, Mic, ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { FeaturedTracksCarousel } from "@/components/featured-tracks-carousel"
+import { MusicStudioNavbar } from "@/components/music-studio-navbar"
 import { Button } from "@/components/ui/button"
 
 export default function MusicStudioMobile() {
@@ -10,20 +11,11 @@ export default function MusicStudioMobile() {
 
   return (
     <div className="min-h-screen bg-black overflow-x-hidden">
-      {/* iOS-style Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/5">
-        <div className="px-4 py-3 safe-area-inset-top">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-white tracking-tight">Music Studio</h1>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Elegant Transparent Navbar */}
+      <MusicStudioNavbar transparent />
 
-      {/* Main Scrollable Content */}
-      <main className="pb-safe">
+      {/* Main Scrollable Content - With top padding to prevent overlap */}
+      <main className="pt-[68px] pb-safe">{/* pt-[68px] accounts for fixed header height */}
         {/* Hero Section - Mobile Optimized */}
         <section className="px-4 pt-8 pb-6">
           <div className="text-center space-y-4">
