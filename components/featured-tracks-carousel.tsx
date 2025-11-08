@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import Image from "next/image"
-import { Play, Pause, Music2, Loader2 } from "lucide-react"
+import { Play, Pause, Music2, Loader2, Headphones } from "lucide-react"
 import {
   Carousel,
   CarouselContent,
@@ -30,7 +30,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Portuguese Pop",
     cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
-    audioUrl: `https://cdn1.suno.ai/xJqFtvSGsgcaNczS.mp3`
+    audioUrl: `https://cdn1.suno.ai/xJqFtvSGsgcaNczS.mp3`,
   },
   {
     id: "J9z2aqpTWcknLPil",
@@ -38,7 +38,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Orchestral Rock",
     cover: "https://cdn2.suno.ai/image_cb01ecb0-2e67-430c-bdae-d235fa14808a.jpeg",
-    audioUrl: `https://cdn1.suno.ai/J9z2aqpTWcknLPil.mp3`
+    audioUrl: `https://cdn1.suno.ai/J9z2aqpTWcknLPil.mp3`,
   },
   {
     id: "EzOHEKgUHyGshDNR",
@@ -46,7 +46,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Cabo Verde",
     cover: "https://cdn2.suno.ai/image_5de28091-36c4-4d33-8c15-af93d6c0a220.jpeg",
-    audioUrl: `https://cdn1.suno.ai/EzOHEKgUHyGshDNR.mp3`
+    audioUrl: `https://cdn1.suno.ai/EzOHEKgUHyGshDNR.mp3`,
   },
   {
     id: "Lq50KP37gz9hwLv0",
@@ -54,7 +54,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Reggae",
     cover: "https://cdn2.suno.ai/image_4888bcf5-8414-4d77-a178-af2a2338fa78.jpeg",
-    audioUrl: `https://cdn1.suno.ai/Lq50KP37gz9hwLv0.mp3`
+    audioUrl: `https://cdn1.suno.ai/Lq50KP37gz9hwLv0.mp3`,
   },
   {
     id: "xmQohTCXLLxIjOc4",
@@ -62,7 +62,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Rap Fado",
     cover: "https://cdn2.suno.ai/image_0a031014-6dfd-419d-879c-bf5955f79e9f.jpeg",
-    audioUrl: `https://cdn1.suno.ai/xmQohTCXLLxIjOc4.mp3`
+    audioUrl: `https://cdn1.suno.ai/xmQohTCXLLxIjOc4.mp3`,
   },
   {
     id: "zKgQ4mbyGiLCkqqo",
@@ -70,7 +70,7 @@ const FEATURED_TRACKS: Track[] = [
     artist: "JubilantHarmonic3057",
     genre: "Rock Anthem",
     cover: "https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg",
-    audioUrl: `https://cdn1.suno.ai/zKgQ4mbyGiLCkqqo.mp3`
+    audioUrl: `https://cdn1.suno.ai/zKgQ4mbyGiLCkqqo.mp3`,
   }
 ]
 
@@ -86,7 +86,7 @@ export function FeaturedTracksCarousel() {
       const data = await response.json()
       return data.audioUrl || `https://cdn1.suno.ai/${trackId}.mp3`
     } catch (error) {
-      console.error('Erro ao buscar áudio:', error)
+      console.error('Error fetching audio URL:', error)
       return `https://cdn1.suno.ai/${trackId}.mp3`
     }
   }
@@ -123,12 +123,13 @@ export function FeaturedTracksCarousel() {
             setLoadingAudio(null)
           })
           .catch(async (err) => {
-            console.log("⚠️ Tentando URLs alternativas...")
+            console.log("⚠️ Tentativa 1 falhou, tentando URL alternativa...")
             
-            // Tenta URLs alternativas do CDN
+            // Tenta URLs alternativas do CDN do Suno
             const alternativeUrls = [
               `https://cdn1.suno.ai/${trackId}.mp3`,
               `https://cdn2.suno.ai/${trackId}.mp3`,
+              `https://suno.com/song/${trackId}`, // Fallback para página do Suno
             ]
             
             for (const url of alternativeUrls) {
@@ -137,15 +138,15 @@ export function FeaturedTracksCarousel() {
                 await audio.play()
                 setPlayingId(trackId)
                 setLoadingAudio(null)
-                console.log(`✅ Áudio carregado: ${url}`)
+                console.log(`✅ Áudio carregado de: ${url}`)
                 return
               } catch {
                 continue
               }
             }
             
-            // Se falhar, mostra mensagem
-            console.log("❌ Áudio temporariamente indisponível")
+            // Se tudo falhar, mostra erro silencioso
+            console.log("⚠️ Áudio temporariamente indisponível")
             setLoadingAudio(null)
           })
       }

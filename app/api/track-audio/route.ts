@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * API Proxy para obter URLs de áudio
- * Busca áudios de fontes externas e retorna URLs de streaming
+ * API Proxy para obter URLs de áudio de tracks externas
+ * Busca múltiplas fontes CDN para garantir disponibilidade
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Busca URLs alternativas de CDN
+    // Tenta diferentes CDNs automaticamente
     const cdnUrls = [
       `https://cdn1.suno.ai/${trackId}.mp3`,
       `https://cdn2.suno.ai/${trackId}.mp3`,
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Fallback: retorna primeira URL mesmo sem verificação
+    // Fallback: retorna URL padrão mesmo se não validado
     return NextResponse.json({ 
       success: true,
       audioUrl: cdnUrls[0],
@@ -43,14 +43,14 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro ao buscar áudio:', error)
+    console.error('Error fetching audio URL:', error)
     return NextResponse.json(
       { 
-        error: 'Falha ao buscar URL de áudio',
+        error: 'Failed to fetch audio URL',
         trackId: trackId,
         audioUrl: `https://cdn1.suno.ai/${trackId}.mp3`
       },
-      { status: 500 }
+      { status: 200 } // Retorna 200 com fallback URL
     )
   }
 }
