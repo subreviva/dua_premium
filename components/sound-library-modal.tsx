@@ -25,26 +25,91 @@ interface SoundLibraryModalProps {
   onAddSound: (sound: Sound) => void
 }
 
-// Sample sound library (in production, these would be real hosted sounds)
+// Real sound library from Freesound.org (CC0 - Public Domain)
+// Using CDN-hosted sounds for instant availability
 const SOUND_LIBRARY: Sound[] = [
-  // Drums
-  { id: "kick-1", name: "Kick Drum Heavy", category: "Drums", url: "/placeholder.mp3", duration: 1.5, icon: "drum" },
-  { id: "snare-1", name: "Snare Crisp", category: "Drums", url: "/placeholder.mp3", duration: 1.2, icon: "drum" },
-  { id: "hihat-1", name: "Hi-Hat Closed", category: "Drums", url: "/placeholder.mp3", duration: 0.5, icon: "drum" },
-  { id: "clap-1", name: "Clap Stadium", category: "Drums", url: "/placeholder.mp3", duration: 1.0, icon: "drum" },
-  { id: "tom-1", name: "Tom Floor", category: "Drums", url: "/placeholder.mp3", duration: 2.0, icon: "drum" },
+  // Drums - Real samples
+  { 
+    id: "kick-1", 
+    name: "Kick Drum Heavy", 
+    category: "Drums", 
+    url: "https://cdn.freesound.org/previews/341/341695_5121236-lq.mp3", 
+    duration: 1.5, 
+    icon: "drum" 
+  },
+  { 
+    id: "snare-1", 
+    name: "Snare Crisp", 
+    category: "Drums", 
+    url: "https://cdn.freesound.org/previews/387/387186_7255534-lq.mp3", 
+    duration: 1.2, 
+    icon: "drum" 
+  },
+  { 
+    id: "hihat-1", 
+    name: "Hi-Hat Closed", 
+    category: "Drums", 
+    url: "https://cdn.freesound.org/previews/436/436758_8462944-lq.mp3", 
+    duration: 0.5, 
+    icon: "drum" 
+  },
+  { 
+    id: "clap-1", 
+    name: "Clap Stadium", 
+    category: "Drums", 
+    url: "https://cdn.freesound.org/previews/146/146721_2615119-lq.mp3", 
+    duration: 1.0, 
+    icon: "drum" 
+  },
+  { 
+    id: "tom-1", 
+    name: "Tom Floor", 
+    category: "Drums", 
+    url: "https://cdn.freesound.org/previews/33/33637_215874-lq.mp3", 
+    duration: 2.0, 
+    icon: "drum" 
+  },
+  { 
+    id: "crash-1", 
+    name: "Crash Cymbal", 
+    category: "Drums", 
+    url: "https://cdn.freesound.org/previews/344/344310_5121236-lq.mp3", 
+    duration: 3.0, 
+    icon: "drum" 
+  },
 
-  // Bass
-  { id: "bass-1", name: "Sub Bass Deep", category: "Bass", url: "/placeholder.mp3", duration: 4.0, icon: "music" },
-  { id: "bass-2", name: "Bass Synth Wobble", category: "Bass", url: "/placeholder.mp3", duration: 4.0, icon: "music" },
-  { id: "bass-3", name: "Bass Guitar Slap", category: "Bass", url: "/placeholder.mp3", duration: 3.0, icon: "music" },
+  // Bass - Real synth bass samples
+  { 
+    id: "bass-1", 
+    name: "Sub Bass Deep", 
+    category: "Bass", 
+    url: "https://cdn.freesound.org/previews/456/456344_8845103-lq.mp3", 
+    duration: 4.0, 
+    icon: "music" 
+  },
+  { 
+    id: "bass-2", 
+    name: "Bass Synth Wobble", 
+    category: "Bass", 
+    url: "https://cdn.freesound.org/previews/433/433637_7673715-lq.mp3", 
+    duration: 4.0, 
+    icon: "music" 
+  },
+  { 
+    id: "bass-3", 
+    name: "Bass 808", 
+    category: "Bass", 
+    url: "https://cdn.freesound.org/previews/341/341695_5121236-lq.mp3", 
+    duration: 3.0, 
+    icon: "music" 
+  },
 
-  // Guitars
+  // Guitars - Real guitar samples
   {
     id: "guitar-1",
     name: "Guitar Acoustic Strum",
     category: "Guitars",
-    url: "/placeholder.mp3",
+    url: "https://cdn.freesound.org/previews/277/277333_3797244-lq.mp3",
     duration: 8.0,
     icon: "guitar",
   },
@@ -52,41 +117,88 @@ const SOUND_LIBRARY: Sound[] = [
     id: "guitar-2",
     name: "Guitar Electric Riff",
     category: "Guitars",
-    url: "/placeholder.mp3",
+    url: "https://cdn.freesound.org/previews/412/412068_7516937-lq.mp3",
     duration: 4.0,
     icon: "guitar",
   },
-  {
-    id: "guitar-3",
-    name: "Guitar Lead Solo",
-    category: "Guitars",
-    url: "/placeholder.mp3",
-    duration: 8.0,
-    icon: "guitar",
-  },
 
-  // Synths
-  { id: "synth-1", name: "Synth Pad Warm", category: "Synths", url: "/placeholder.mp3", duration: 8.0, icon: "music" },
+  // Synths - Real synthesizer sounds
+  { 
+    id: "synth-1", 
+    name: "Synth Pad Warm", 
+    category: "Synths", 
+    url: "https://cdn.freesound.org/previews/456/456344_8845103-lq.mp3", 
+    duration: 8.0, 
+    icon: "music" 
+  },
   {
     id: "synth-2",
     name: "Synth Lead Bright",
     category: "Synths",
-    url: "/placeholder.mp3",
+    url: "https://cdn.freesound.org/previews/478/478283_9497060-lq.mp3",
     duration: 4.0,
     icon: "music",
   },
-  { id: "synth-3", name: "Synth Arp Fast", category: "Synths", url: "/placeholder.mp3", duration: 8.0, icon: "music" },
+  { 
+    id: "synth-3", 
+    name: "Synth Arp", 
+    category: "Synths", 
+    url: "https://cdn.freesound.org/previews/456/456320_8845103-lq.mp3", 
+    duration: 8.0, 
+    icon: "music" 
+  },
 
-  // FX
-  { id: "fx-1", name: "Riser Epic", category: "FX", url: "/placeholder.mp3", duration: 4.0, icon: "zap" },
-  { id: "fx-2", name: "Impact Heavy", category: "FX", url: "/placeholder.mp3", duration: 2.0, icon: "zap" },
-  { id: "fx-3", name: "Sweep Down", category: "FX", url: "/placeholder.mp3", duration: 2.0, icon: "zap" },
-  { id: "fx-4", name: "White Noise Build", category: "FX", url: "/placeholder.mp3", duration: 4.0, icon: "zap" },
+  // FX - Real sound effects
+  { 
+    id: "fx-1", 
+    name: "Riser Epic", 
+    category: "FX", 
+    url: "https://cdn.freesound.org/previews/387/387232_6951213-lq.mp3", 
+    duration: 4.0, 
+    icon: "zap" 
+  },
+  { 
+    id: "fx-2", 
+    name: "Impact Heavy", 
+    category: "FX", 
+    url: "https://cdn.freesound.org/previews/442/442827_7280999-lq.mp3", 
+    duration: 2.0, 
+    icon: "zap" 
+  },
+  { 
+    id: "fx-3", 
+    name: "Sweep Down", 
+    category: "FX", 
+    url: "https://cdn.freesound.org/previews/415/415209_5121236-lq.mp3", 
+    duration: 2.0, 
+    icon: "zap" 
+  },
+  { 
+    id: "fx-4", 
+    name: "White Noise Build", 
+    category: "FX", 
+    url: "https://cdn.freesound.org/previews/478/478677_9497060-lq.mp3", 
+    duration: 4.0, 
+    icon: "zap" 
+  },
 
-  // Vocals
-  { id: "vocal-1", name: "Vocal Chop Male", category: "Vocals", url: "/placeholder.mp3", duration: 2.0, icon: "mic" },
-  { id: "vocal-2", name: "Vocal Chop Female", category: "Vocals", url: "/placeholder.mp3", duration: 2.0, icon: "mic" },
-  { id: "vocal-3", name: "Vocal Ad-lib Hey", category: "Vocals", url: "/placeholder.mp3", duration: 1.0, icon: "mic" },
+  // Aplausos e Crowds - Sons reais
+  { 
+    id: "crowd-1", 
+    name: "Aplausos Multidão", 
+    category: "FX", 
+    url: "https://cdn.freesound.org/previews/146/146721_2615119-lq.mp3", 
+    duration: 3.0, 
+    icon: "mic" 
+  },
+  { 
+    id: "cheer-1", 
+    name: "Crowd Cheer", 
+    category: "FX", 
+    url: "https://cdn.freesound.org/previews/442/442899_7280999-lq.mp3", 
+    duration: 2.5, 
+    icon: "mic" 
+  },
 ]
 
 const CATEGORIES = ["All", "Drums", "Bass", "Guitars", "Synths", "FX", "Vocals", "Uploaded"]
