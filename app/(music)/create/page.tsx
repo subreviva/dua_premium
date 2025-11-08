@@ -206,64 +206,77 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-background via-background to-muted/10">
       <div className="hidden md:block">
         <AppSidebar />
       </div>
 
       <div className="flex-1 h-screen overflow-hidden md:overflow-auto">
         <main className="h-[100dvh] flex flex-col md:h-auto md:min-h-screen overflow-hidden">
-          {/* Header - fixed height */}
-          <div className="pt-safe px-4 py-3 shrink-0 border-b border-border/20 backdrop-blur-xl bg-background/80 md:px-8 md:py-5">
-            <h1 className="text-sm font-semibold tracking-tight md:text-xl">Criar Música</h1>
-            <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-light md:text-xs">
-              Gere composições com DUA
-            </p>
+          {/* Header - Ultra Premium iOS Style */}
+          <div className="pt-safe px-4 py-4 shrink-0 border-b border-border/10 backdrop-blur-2xl bg-background/60 md:px-8 md:py-6">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg shadow-purple-500/25 md:h-12 md:w-12">
+                <svg className="h-5 w-5 text-white md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold tracking-tight text-foreground md:text-2xl">Criar Música</h1>
+                <p className="text-xs text-muted-foreground mt-0.5 font-light md:text-sm">
+                  Gere composições originais com IA
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Error Alert - conditional */}
+          {/* Error Alert - iOS Style */}
           {error && (
-            <div className="mx-4 mt-2 shrink-0 md:mx-8 md:mt-3">
+            <div className="mx-4 mt-3 shrink-0 md:mx-8 md:mt-4">
               <Alert
                 variant="destructive"
-                className="animate-in fade-in slide-in-from-top-2 rounded-xl py-2 border-destructive/50 md:py-2.5"
+                className="animate-in fade-in slide-in-from-top-2 rounded-2xl py-3 border-destructive/20 bg-destructive/5 backdrop-blur-xl md:py-3.5"
               >
-                <AlertCircle className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                <AlertDescription className="text-[10px] leading-relaxed md:text-[11px]">{error}</AlertDescription>
+                <AlertCircle className="h-4 w-4 md:h-4 md:w-4" />
+                <AlertDescription className="text-xs leading-relaxed md:text-sm">{error}</AlertDescription>
               </Alert>
             </div>
           )}
 
-          {/* Scrollable Content - with precise bottom padding for nav */}
-          <div className="flex-1 overflow-y-auto smooth-scroll px-4 py-3 pb-[96px] md:px-8 md:py-5 md:pb-8">
-            <Tabs defaultValue="simple" className="w-full">
-              <TabsList className="mb-3 grid w-full grid-cols-2 bg-transparent gap-6 h-auto p-0 border-0 md:mb-4 md:gap-8">
+          {/* Scrollable Content - iOS smooth scrolling */}
+          <div className="flex-1 overflow-y-auto smooth-scroll px-4 py-4 pb-[96px] md:px-8 md:py-6 md:pb-8">
+            <Tabs defaultValue="simple" className="w-full max-w-3xl mx-auto">
+              <TabsList className="mb-6 grid w-full grid-cols-2 bg-muted/30 backdrop-blur-xl rounded-2xl h-12 p-1.5 border border-border/10 md:mb-8 md:h-14 md:p-2">
                 <TabsTrigger
                   value="simple"
-                  className="bg-transparent border-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground font-semibold text-sm pb-2 px-0 transition-all shadow-none data-[state=active]:shadow-none md:text-base md:pb-2.5"
+                  className="rounded-xl data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-black/5 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground font-semibold text-sm transition-all md:text-base"
                 >
                   Simples
                 </TabsTrigger>
                 <TabsTrigger
                   value="custom"
-                  className="bg-transparent border-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground font-semibold text-sm pb-2 px-0 transition-all shadow-none data-[state=active]:shadow-none md:text-base md:pb-2.5"
+                  className="rounded-xl data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-black/5 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground font-semibold text-sm transition-all md:text-base"
                 >
                   Personalizado
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="simple" className="space-y-3 mt-0 md:space-y-4">
-                <div className="space-y-2 md:space-y-2.5">
-                  <Label className="text-[11px] font-semibold text-foreground md:text-xs">Início Rápido</Label>
-                  <div className="grid grid-cols-2 gap-2 md:gap-2.5">
+              <TabsContent value="simple" className="space-y-5 mt-0 md:space-y-6">
+                {/* Quick Start Presets - iOS Card Style */}
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-1 rounded-full bg-primary"></div>
+                    <Label className="text-sm font-semibold text-foreground md:text-base">Início Rápido</Label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
                     {PRESETS.map((preset) => (
                       <button
                         key={preset.id}
                         onClick={() => applyPreset(preset)}
-                        className="group relative overflow-hidden rounded-lg border border-border/30 glass-effect p-2.5 text-left transition-all active:scale-[0.97] touch-manipulation hover:border-primary/30 min-h-[40px] flex items-center justify-center md:rounded-xl md:p-3 md:min-h-[44px]"
+                        className="group relative overflow-hidden rounded-2xl border border-border/10 bg-gradient-to-br from-muted/50 to-muted/30 backdrop-blur-xl p-4 text-left transition-all active:scale-[0.97] touch-manipulation hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 min-h-[68px] flex items-center justify-center md:rounded-3xl md:p-5 md:min-h-[76px]"
                       >
-                        <div className="absolute inset-0 gradient-primary opacity-0 transition-opacity group-active:opacity-10" />
-                        <span className="relative text-[11px] font-medium block text-center md:text-xs">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                        <span className="relative text-sm font-semibold block text-center leading-snug md:text-base">
                           {preset.name}
                         </span>
                       </button>
@@ -271,109 +284,115 @@ export default function CreatePage() {
                   </div>
                 </div>
 
-                <div className="space-y-3 rounded-xl glass-effect border border-border/30 p-3 md:space-y-4 md:p-4">
-                  <div className="space-y-1.5 md:space-y-2">
+                {/* Main Form - iOS Glass Card */}
+                <div className="space-y-5 rounded-3xl bg-gradient-to-br from-muted/40 to-muted/20 backdrop-blur-2xl border border-border/10 p-5 shadow-2xl shadow-black/5 md:space-y-6 md:p-6 md:rounded-[32px]">
+                  <div className="space-y-3 md:space-y-3.5">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="simple-prompt" className="text-[11px] font-semibold md:text-xs">
+                      <Label htmlFor="simple-prompt" className="text-sm font-semibold md:text-base">
                         Descreva a Sua Música
                       </Label>
                       <span
-                        className={`text-[9px] tabular-nums font-medium md:text-[10px] ${getCharUsage(prompt.length, limits.promptSimple)}`}
+                        className={`text-xs tabular-nums font-semibold md:text-sm ${getCharUsage(prompt.length, limits.promptSimple)}`}
                       >
                         {prompt.length}/{limits.promptSimple}
                       </span>
                     </div>
                     <Textarea
                       id="simple-prompt"
-                      placeholder="Uma faixa eletrónica animada com sintetizadores brilhantes..."
+                      placeholder="Uma faixa eletrónica animada com sintetizadores brilhantes e ritmo envolvente..."
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      className="min-h-[70px] resize-none border-border/30 bg-background/50 text-[11px] leading-relaxed backdrop-blur-sm rounded-lg touch-manipulation focus:border-primary/50 transition-colors px-2.5 py-2 md:min-h-[80px] md:rounded-xl md:text-xs md:px-3 md:py-2.5"
+                      className="min-h-[100px] resize-none border-border/10 bg-background/60 backdrop-blur-sm text-sm leading-relaxed rounded-2xl touch-manipulation focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all px-4 py-3 md:min-h-[120px] md:rounded-3xl md:text-base md:px-5 md:py-4"
                       maxLength={limits.promptSimple}
                     />
                   </div>
 
-                  <div className="space-y-1.5 md:space-y-2">
-                    <Label htmlFor="model" className="text-[11px] font-semibold md:text-xs">
-                      Modelo
+                  <div className="space-y-3 md:space-y-3.5">
+                    <Label htmlFor="model" className="text-sm font-semibold md:text-base">
+                      Modelo IA
                     </Label>
                     <Select value={model} onValueChange={(v) => setModel(v as any)}>
                       <SelectTrigger
                         id="model"
-                        className="border-border/30 bg-background/50 font-medium h-9 rounded-lg text-[11px] touch-manipulation md:h-10 md:rounded-xl md:text-xs"
+                        className="border-border/10 bg-background/60 backdrop-blur-sm font-semibold h-12 rounded-2xl text-sm touch-manipulation focus:ring-2 focus:ring-primary/10 md:h-14 md:rounded-3xl md:text-base"
                       >
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="V3_5">V3.5 — Estrutura (4 min)</SelectItem>
-                        <SelectItem value="V4">V4 — Vocais (4 min)</SelectItem>
-                        <SelectItem value="V4_5">V4.5 — Inteligente (8 min)</SelectItem>
-                        <SelectItem value="V4_5PLUS">V4.5 Plus — Rico (8 min)</SelectItem>
-                        <SelectItem value="V5">V5 — Rápido (8 min)</SelectItem>
+                      <SelectContent className="rounded-2xl border-border/10 backdrop-blur-2xl">
+                        <SelectItem value="V3_5" className="rounded-xl text-sm md:text-base">V3.5 — Estrutura (4 min)</SelectItem>
+                        <SelectItem value="V4" className="rounded-xl text-sm md:text-base">V4 — Vocais (4 min)</SelectItem>
+                        <SelectItem value="V4_5" className="rounded-xl text-sm md:text-base">V4.5 — Inteligente (8 min)</SelectItem>
+                        <SelectItem value="V4_5PLUS" className="rounded-xl text-sm md:text-base">V4.5 Plus — Rico (8 min)</SelectItem>
+                        <SelectItem value="V5" className="rounded-xl text-sm md:text-base">V5 — Rápido (8 min)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-lg border border-border/30 bg-muted/20 p-2.5 touch-manipulation md:rounded-xl md:p-3">
-                    <div className="space-y-0.5">
-                      <Label className="text-[11px] font-semibold md:text-xs">Instrumental</Label>
-                      <p className="text-[9px] text-muted-foreground/80 font-light md:text-[10px]">Sem vocais</p>
+                  <div className="flex items-center justify-between rounded-2xl border border-border/10 bg-background/40 backdrop-blur-sm p-4 touch-manipulation md:rounded-3xl md:p-5">
+                    <div className="space-y-1">
+                      <Label className="text-sm font-semibold md:text-base">Instrumental</Label>
+                      <p className="text-xs text-muted-foreground font-light md:text-sm">Música sem vocais</p>
                     </div>
-                    <Switch checked={instrumental} onCheckedChange={setInstrumental} />
+                    <Switch checked={instrumental} onCheckedChange={setInstrumental} className="scale-110" />
                   </div>
 
                   <Button
                     onClick={() => handleGenerate(false)}
                     disabled={!prompt.trim() || isGenerating}
-                    className="w-full rounded-lg h-10 text-xs font-semibold gradient-primary text-white hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 glow-primary touch-manipulation shadow-md mt-0.5 md:rounded-xl md:h-11 md:text-sm md:mt-1"
+                    className="w-full rounded-2xl h-14 text-base font-bold bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-size-200 bg-pos-0 hover:bg-pos-100 text-white transition-all duration-500 active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-purple-500/25 touch-manipulation mt-2 md:rounded-3xl md:h-16 md:text-lg md:mt-3"
                   >
                     {isGenerating ? (
                       <>
-                        <div className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent md:h-4 md:w-4" />
-                        A Gerar...
+                        <div className="mr-2.5 h-5 w-5 animate-spin rounded-full border-3 border-current border-t-transparent md:h-6 md:w-6" />
+                        A Gerar Música...
                       </>
                     ) : (
-                      "Criar Música"
+                      <>
+                        <svg className="mr-2 h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Criar Música
+                      </>
                     )}
                   </Button>
                 </div>
               </TabsContent>
 
-              <TabsContent value="custom" className="space-y-3 mt-0 md:space-y-4">
-                <div className="space-y-3 rounded-xl glass-effect border border-border/30 p-3 md:space-y-4 md:p-4">
-                  <div className="space-y-1.5 md:space-y-2">
-                    <Label htmlFor="model-custom" className="text-[11px] font-semibold md:text-xs">
-                      Modelo
+              <TabsContent value="custom" className="space-y-5 mt-0 md:space-y-6">
+                <div className="space-y-5 rounded-3xl bg-gradient-to-br from-muted/40 to-muted/20 backdrop-blur-2xl border border-border/10 p-5 shadow-2xl shadow-black/5 md:space-y-6 md:p-6 md:rounded-[32px]">
+                  <div className="space-y-3 md:space-y-3.5">
+                    <Label htmlFor="model-custom" className="text-sm font-semibold md:text-base">
+                      Modelo IA
                     </Label>
                     <Select value={model} onValueChange={(v) => setModel(v as any)}>
                       <SelectTrigger
                         id="model-custom"
-                        className="border-border/30 bg-background/50 font-medium h-9 rounded-lg text-[11px] touch-manipulation md:h-10 md:rounded-xl md:text-xs"
+                        className="border-border/10 bg-background/60 backdrop-blur-sm font-semibold h-12 rounded-2xl text-sm touch-manipulation focus:ring-2 focus:ring-primary/10 md:h-14 md:rounded-3xl md:text-base"
                       >
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="V3_5">V3.5</SelectItem>
-                        <SelectItem value="V4">V4</SelectItem>
-                        <SelectItem value="V4_5">V4.5</SelectItem>
-                        <SelectItem value="V4_5PLUS">V4.5 Plus</SelectItem>
-                        <SelectItem value="V5">V5</SelectItem>
+                      <SelectContent className="rounded-2xl border-border/10 backdrop-blur-2xl">
+                        <SelectItem value="V3_5" className="rounded-xl text-sm md:text-base">V3.5</SelectItem>
+                        <SelectItem value="V4" className="rounded-xl text-sm md:text-base">V4</SelectItem>
+                        <SelectItem value="V4_5" className="rounded-xl text-sm md:text-base">V4.5</SelectItem>
+                        <SelectItem value="V4_5PLUS" className="rounded-xl text-sm md:text-base">V4.5 Plus</SelectItem>
+                        <SelectItem value="V5" className="rounded-xl text-sm md:text-base">V5</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-lg border border-border/30 bg-muted/20 p-2.5 touch-manipulation md:rounded-xl md:p-3">
-                    <Label className="text-[11px] font-semibold md:text-xs">Instrumental</Label>
-                    <Switch checked={instrumental} onCheckedChange={setInstrumental} />
+                  <div className="flex items-center justify-between rounded-2xl border border-border/10 bg-background/40 backdrop-blur-sm p-4 touch-manipulation md:rounded-3xl md:p-5">
+                    <Label className="text-sm font-semibold md:text-base">Instrumental</Label>
+                    <Switch checked={instrumental} onCheckedChange={setInstrumental} className="scale-110" />
                   </div>
 
-                  <div className="space-y-1.5 md:space-y-2">
+                  <div className="space-y-3 md:space-y-3.5">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="custom-prompt" className="text-[11px] font-semibold md:text-xs">
+                      <Label htmlFor="custom-prompt" className="text-sm font-semibold md:text-base">
                         {instrumental ? "Prompt" : "Letras"} <span className="text-destructive">*</span>
                       </Label>
                       <span
-                        className={`text-[9px] tabular-nums font-medium md:text-[10px] ${getCharUsage(prompt.length, limits.promptCustom)}`}
+                        className={`text-xs tabular-nums font-semibold md:text-sm ${getCharUsage(prompt.length, limits.promptCustom)}`}
                       >
                         {prompt.length}/{limits.promptCustom}
                       </span>
@@ -385,18 +404,18 @@ export default function CreatePage() {
                       }
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      className="min-h-[70px] resize-none border-border/30 bg-background/50 font-mono text-[11px] leading-relaxed backdrop-blur-sm rounded-lg touch-manipulation focus:border-primary/50 transition-colors px-2.5 py-2 md:min-h-[88px] md:rounded-xl md:text-xs md:px-3 md:py-2.5"
+                      className="min-h-[100px] resize-none border-border/10 bg-background/60 backdrop-blur-sm font-mono text-sm leading-relaxed rounded-2xl touch-manipulation focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all px-4 py-3 md:min-h-[120px] md:rounded-3xl md:text-base md:px-5 md:py-4"
                       maxLength={limits.promptCustom}
                     />
                   </div>
 
-                  <div className="space-y-1.5 md:space-y-2">
+                  <div className="space-y-3 md:space-y-3.5">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="custom-style" className="text-[11px] font-semibold md:text-xs">
+                      <Label htmlFor="custom-style" className="text-sm font-semibold md:text-base">
                         Estilo <span className="text-destructive">*</span>
                       </Label>
                       <span
-                        className={`text-[9px] tabular-nums font-medium md:text-[10px] ${getCharUsage(style.length, limits.style)}`}
+                        className={`text-xs tabular-nums font-semibold md:text-sm ${getCharUsage(style.length, limits.style)}`}
                       >
                         {style.length}/{limits.style}
                       </span>
@@ -406,31 +425,31 @@ export default function CreatePage() {
                       placeholder="indie, eletrónica, dreamy..."
                       value={style}
                       onChange={(e) => setStyle(e.target.value)}
-                      className="border-border/30 bg-background/50 h-9 rounded-lg text-[11px] touch-manipulation focus:border-primary/50 transition-colors px-3 md:h-10 md:rounded-xl md:text-xs"
+                      className="border-border/10 bg-background/60 backdrop-blur-sm h-12 rounded-2xl text-sm touch-manipulation focus:ring-2 focus:ring-primary/10 transition-all px-4 md:h-14 md:rounded-3xl md:text-base md:px-5"
                       maxLength={limits.style}
                     />
 
                     {inspirationTags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      <div className="flex flex-wrap gap-2 pt-1">
                         {inspirationTags.map((tag) => (
                           <Badge
                             key={tag}
                             variant="secondary"
-                            className="gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 hover:bg-primary/20 text-[10px] font-medium touch-manipulation border border-primary/20 md:text-[11px]"
+                            className="gap-2 rounded-full bg-primary/10 backdrop-blur-sm px-3.5 py-1.5 hover:bg-primary/20 text-xs font-semibold touch-manipulation border border-primary/20 transition-all md:text-sm md:px-4 md:py-2"
                           >
                             {tag}
                             <button
                               onClick={() => removeInspirationTag(tag)}
-                              className="ml-0.5 rounded-full hover:bg-primary/30 p-0.5 touch-manipulation transition-colors md:ml-1"
+                              className="ml-1 rounded-full hover:bg-primary/30 p-1 touch-manipulation transition-colors"
                             >
-                              <X className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                              <X className="h-3 w-3 md:h-3.5 md:w-3.5" />
                             </button>
                           </Badge>
                         ))}
                       </div>
                     )}
 
-                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                    <div className="flex flex-wrap gap-2 pt-1">
                       {availableTags.slice(0, 10).map((tag) => (
                         <Button
                           key={tag}
@@ -439,7 +458,7 @@ export default function CreatePage() {
                           size="sm"
                           onClick={() => addInspirationTag(tag)}
                           disabled={inspirationTags.includes(tag)}
-                          className="h-7 rounded-full border border-border/30 text-[10px] font-medium transition-all active:scale-95 touch-manipulation px-3 md:h-8 md:text-[11px]"
+                          className="h-9 rounded-full border border-border/10 bg-background/40 backdrop-blur-sm text-xs font-semibold transition-all active:scale-95 touch-manipulation px-4 md:h-10 md:text-sm md:px-5"
                         >
                           {tag}
                         </Button>
@@ -447,13 +466,13 @@ export default function CreatePage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 md:space-y-2">
+                  <div className="space-y-3 md:space-y-3.5">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="custom-title" className="text-[11px] font-semibold md:text-xs">
+                      <Label htmlFor="custom-title" className="text-sm font-semibold md:text-base">
                         Título <span className="text-destructive">*</span>
                       </Label>
                       <span
-                        className={`text-[9px] tabular-nums font-medium md:text-[10px] ${getCharUsage(title.length, limits.title)}`}
+                        className={`text-xs tabular-nums font-semibold md:text-sm ${getCharUsage(title.length, limits.title)}`}
                       >
                         {title.length}/{limits.title}
                       </span>
@@ -463,28 +482,28 @@ export default function CreatePage() {
                       placeholder="Nome da música"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="border-border/30 bg-background/50 h-9 rounded-lg text-[11px] touch-manipulation focus:border-primary/50 transition-colors px-3 md:h-10 md:rounded-xl md:text-xs"
+                      className="border-border/10 bg-background/60 backdrop-blur-sm h-12 rounded-2xl text-sm touch-manipulation focus:ring-2 focus:ring-primary/10 transition-all px-4 md:h-14 md:rounded-3xl md:text-base md:px-5"
                       maxLength={limits.title}
                     />
                   </div>
 
-                  <div className="space-y-2.5 md:space-y-3">
+                  <div className="space-y-3 md:space-y-4">
                     <button
                       onClick={() => setShowAdvanced(!showAdvanced)}
-                      className="flex w-full items-center justify-between rounded-lg border border-border/30 bg-muted/20 p-2.5 transition-all active:bg-muted/30 touch-manipulation hover:border-primary/30 md:rounded-xl md:p-3"
+                      className="flex w-full items-center justify-between rounded-2xl border border-border/10 bg-background/40 backdrop-blur-sm p-4 transition-all active:bg-background/60 touch-manipulation hover:border-primary/20 md:rounded-3xl md:p-5"
                     >
-                      <Label className="cursor-pointer text-[11px] font-semibold md:text-xs">Opções Avançadas</Label>
+                      <Label className="cursor-pointer text-sm font-semibold md:text-base">Opções Avançadas</Label>
                       {showAdvanced ? (
-                        <ChevronUp className="h-3.5 w-3.5 text-muted-foreground transition-transform md:h-4 md:w-4" />
+                        <ChevronUp className="h-5 w-5 text-muted-foreground transition-transform md:h-6 md:w-6" />
                       ) : (
-                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform md:h-4 md:w-4" />
+                        <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform md:h-6 md:w-6" />
                       )}
                     </button>
 
                     {showAdvanced && (
-                      <div className="space-y-3 rounded-lg border border-border/30 bg-muted/20 p-3.5 animate-in fade-in slide-in-from-top-2 duration-200 md:rounded-xl md:p-4">
-                        <div className="space-y-1.5 md:space-y-2">
-                          <Label htmlFor="negative-tags" className="text-[11px] font-medium md:text-xs">
+                      <div className="space-y-4 rounded-2xl border border-border/10 bg-muted/30 backdrop-blur-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300 md:space-y-5 md:rounded-3xl md:p-5">
+                        <div className="space-y-3 md:space-y-3.5">
+                          <Label htmlFor="negative-tags" className="text-sm font-semibold md:text-base">
                             Excluir Estilos
                           </Label>
                           <Input
@@ -492,34 +511,34 @@ export default function CreatePage() {
                             placeholder="Metal, Baterias..."
                             value={negativeTags}
                             onChange={(e) => setNegativeTags(e.target.value)}
-                            className="border-border/30 bg-background/50 h-8 rounded-lg text-[11px] touch-manipulation px-3 md:h-9 md:rounded-xl md:text-xs"
+                            className="border-border/10 bg-background/60 backdrop-blur-sm h-11 rounded-2xl text-sm touch-manipulation px-4 md:h-12 md:rounded-3xl md:text-base md:px-5"
                           />
                         </div>
 
                         {!instrumental && (
-                          <div className="space-y-1.5 md:space-y-2">
-                            <Label htmlFor="vocal-gender" className="text-[11px] font-medium md:text-xs">
+                          <div className="space-y-3 md:space-y-3.5">
+                            <Label htmlFor="vocal-gender" className="text-sm font-semibold md:text-base">
                               Género Vocal
                             </Label>
                             <Select value={vocalGender} onValueChange={(v) => setVocalGender(v as any)}>
                               <SelectTrigger
                                 id="vocal-gender"
-                                className="border-border/30 bg-background/50 font-medium h-8 rounded-lg text-[11px] touch-manipulation md:h-9 md:rounded-xl md:text-xs"
+                                className="border-border/10 bg-background/60 backdrop-blur-sm font-semibold h-11 rounded-2xl text-sm touch-manipulation md:h-12 md:rounded-3xl md:text-base"
                               >
                                 <SelectValue placeholder="Automático" />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="m">Masculino</SelectItem>
-                                <SelectItem value="f">Feminino</SelectItem>
+                              <SelectContent className="rounded-2xl border-border/10 backdrop-blur-2xl">
+                                <SelectItem value="m" className="rounded-xl text-sm md:text-base">Masculino</SelectItem>
+                                <SelectItem value="f" className="rounded-xl text-sm md:text-base">Feminino</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                         )}
 
-                        <div className="space-y-1.5 md:space-y-2">
+                        <div className="space-y-3 md:space-y-3.5">
                           <div className="flex items-center justify-between">
-                            <Label className="text-[11px] font-medium md:text-xs">Influência Estilo</Label>
-                            <span className="text-[10px] tabular-nums text-muted-foreground font-medium md:text-[11px]">
+                            <Label className="text-sm font-semibold md:text-base">Influência Estilo</Label>
+                            <span className="text-sm tabular-nums text-muted-foreground font-semibold md:text-base">
                               {Math.round(styleWeight[0] * 100)}%
                             </span>
                           </div>
@@ -533,10 +552,10 @@ export default function CreatePage() {
                           />
                         </div>
 
-                        <div className="space-y-1.5 md:space-y-2">
+                        <div className="space-y-3 md:space-y-3.5">
                           <div className="flex items-center justify-between">
-                            <Label className="text-[11px] font-medium md:text-xs">Criatividade</Label>
-                            <span className="text-[10px] tabular-nums text-muted-foreground font-medium md:text-[11px]">
+                            <Label className="text-sm font-semibold md:text-base">Criatividade</Label>
+                            <span className="text-sm tabular-nums text-muted-foreground font-semibold md:text-base">
                               {Math.round(weirdnessConstraint[0] * 100)}%
                             </span>
                           </div>
@@ -550,10 +569,10 @@ export default function CreatePage() {
                           />
                         </div>
 
-                        <div className="space-y-1.5 md:space-y-2">
+                        <div className="space-y-3 md:space-y-3.5">
                           <div className="flex items-center justify-between">
-                            <Label className="text-[11px] font-medium md:text-xs">Peso Áudio</Label>
-                            <span className="text-[10px] tabular-nums text-muted-foreground font-medium md:text-[11px]">
+                            <Label className="text-sm font-semibold md:text-base">Peso Áudio</Label>
+                            <span className="text-sm tabular-nums text-muted-foreground font-semibold md:text-base">
                               {Math.round(audioWeight[0] * 100)}%
                             </span>
                           </div>
@@ -573,15 +592,20 @@ export default function CreatePage() {
                   <Button
                     onClick={() => handleGenerate(true)}
                     disabled={!prompt.trim() || !style.trim() || !title.trim() || isGenerating}
-                    className="w-full rounded-lg h-10 text-xs font-semibold gradient-primary text-white hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 glow-primary touch-manipulation shadow-md mt-0.5 md:rounded-xl md:h-11 md:text-sm md:mt-1"
+                    className="w-full rounded-2xl h-14 text-base font-bold bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-size-200 bg-pos-0 hover:bg-pos-100 text-white transition-all duration-500 active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-purple-500/25 touch-manipulation mt-2 md:rounded-3xl md:h-16 md:text-lg md:mt-3"
                   >
                     {isGenerating ? (
                       <>
-                        <div className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent md:h-4 md:w-4" />
-                        A Gerar...
+                        <div className="mr-2.5 h-5 w-5 animate-spin rounded-full border-3 border-current border-t-transparent md:h-6 md:w-6" />
+                        A Gerar Música...
                       </>
                     ) : (
-                      "Criar Música"
+                      <>
+                        <svg className="mr-2 h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Criar Música
+                      </>
                     )}
                   </Button>
                 </div>

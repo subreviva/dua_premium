@@ -1408,3 +1408,48 @@ select {
   background-size: 200% 100%;
   animation: shimmer-mobile 1.5s infinite;
 }
+
+/* Premium gradient button animations - iOS Style */
+.bg-size-200 {
+  background-size: 200% auto;
+}
+
+.bg-pos-0 {
+  background-position: 0% center;
+}
+
+.bg-pos-100 {
+  background-position: 100% center;
+}
+
+/* iOS-style glass morphism */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+  .backdrop-blur-2xl {
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+  }
+}
+
+/* Premium focus rings - iOS style */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Smooth transitions for all interactive elements */
+button,
+a,
+input,
+textarea,
+select {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
