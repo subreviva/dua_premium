@@ -34,16 +34,21 @@ export default function HomePage() {
       {/* HERO SECTION - Ultra Premium */}
       <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
         <motion.div 
-          style={{ scale: heroScale, y: heroY, opacity: heroOpacity }}
+          style={{ 
+            scale: heroScale, 
+            y: heroY, 
+            opacity: heroOpacity 
+          }}
           className="absolute inset-0 z-0"
         >
-          {/* Video Background com overlay ultra premium */}
+          {/* Video Background - Desktop Only */}
           <video 
             autoPlay 
             loop 
             muted 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover"
+            playsInline
+            preload="metadata"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover"
             style={{ filter: 'brightness(1.1) contrast(1.05) saturate(1.1)' }}
           >
             <source
@@ -51,6 +56,9 @@ export default function HomePage() {
               type="video/mp4"
             />
           </video>
+
+          {/* Mobile Background - Gradient only */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-pink-900/20" />
           
           {/* Gradient overlays para depth e elegância */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
@@ -58,45 +66,39 @@ export default function HomePage() {
           
           {/* Vignette effect premium */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0.6)_100%)]" />
-          
-          {/* Subtle grain texture para cinematográfico */}
-          <div className="absolute inset-0 opacity-[0.015] mix-blend-overlay pointer-events-none" 
-               style={{ backgroundImage: 'url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=)' }} 
-          />
         </motion.div>
 
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
-          <div className="flex flex-col gap-12 sm:gap-16 lg:gap-20 items-center justify-center max-w-7xl w-full mx-auto text-center">
+          <div className="flex flex-col gap-8 sm:gap-12 lg:gap-20 items-center justify-center max-w-7xl w-full mx-auto text-center">
             {/* Animated accent com glassmorphism premium */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_rgba(255,255,255,0.1)]"
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="inline-flex items-center gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full bg-white/10 backdrop-blur-xl border border-white/20"
             >
               <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse" />
-              <span className="text-sm font-medium text-white/95 tracking-wide">Plataforma de Criação com IA</span>
+              <span className="text-xs md:text-sm font-medium text-white/95 tracking-wide">Plataforma de Criação com IA</span>
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.4, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[20rem] xl:text-[24rem] font-extralight leading-[0.85] tracking-[-0.08em] text-white drop-shadow-[0_0_80px_rgba(255,255,255,0.3)]"
+              transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+              className="text-[12rem] sm:text-[16rem] md:text-[20rem] lg:text-[24rem] font-extralight leading-[0.85] tracking-[-0.08em] text-white"
               style={{ 
                 fontFamily: "var(--font-sans)", 
-                fontWeight: 100,
-                textShadow: '0 0 120px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)'
+                fontWeight: 100
               }}
             >
               DUA
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/95 font-light max-w-4xl leading-relaxed tracking-wide px-4 drop-shadow-lg"
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 font-light max-w-4xl leading-relaxed tracking-wide px-4"
             >
               Onde a próxima onda de criatividade
               <br className="hidden sm:block" /> 
@@ -106,18 +108,17 @@ export default function HomePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             >
               <Button
                 size="lg"
-                className="group w-full sm:w-auto rounded-full px-10 sm:px-14 py-6 sm:py-8 bg-white hover:bg-white text-black font-semibold text-base sm:text-lg transition-all duration-700 hover:scale-110 hover:shadow-[0_20px_100px_rgba(255,255,255,0.4)] active:scale-95 relative overflow-hidden"
+                className="group w-full sm:w-auto rounded-full px-8 sm:px-14 py-5 sm:py-8 bg-white hover:bg-white text-black font-semibold text-sm sm:text-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
                 onClick={() => router.push("/acesso")}
               >
-                <span className="relative z-10 flex items-center gap-3">
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
                   Obter Acesso Antecipado
-                  <ArrowRight className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-2" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-white via-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               </Button>
             </motion.div>
           </div>
@@ -133,20 +134,23 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 2: STUDIOS CAROUSEL - Premium Edition */}
-      <section className="relative py-32 sm:py-40 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-20 sm:py-32 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
             loop 
             muted 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
+            playsInline
+            preload="metadata"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
               src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
               type="video/mp4"
             />
           </video>
+          {/* Mobile gradient background */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-br from-zinc-900/50 via-black to-zinc-900/50" />
           <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
         </div>
         
@@ -172,14 +176,15 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 3: IDENTIDADE - Refined Premium */}
-      <section className="relative py-32 sm:py-40 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-20 sm:py-32 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
             loop 
             muted 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
+            playsInline
+            preload="metadata"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
               src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
@@ -187,6 +192,8 @@ export default function HomePage() {
             />
           </video>
           <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          {/* Mobile gradient background */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-900" />
         </div>
         
         {/* Enhanced gradient transition superior */}
@@ -256,14 +263,15 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 4: O ECOSSISTEMA 2 LADOS - Simple & Elegant */}
-      <section className="relative py-28 sm:py-32 lg:py-36 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
             loop 
             muted 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
+            playsInline
+            preload="metadata"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
               src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
@@ -271,6 +279,8 @@ export default function HomePage() {
             />
           </video>
           <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          {/* Mobile gradient background */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-900" />
         </div>
         
         {/* Enhanced gradient transition superior */}
@@ -320,14 +330,15 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 5: COMUNIDADE CRIATIVA - Premium Stories Carousel */}
-      <section className="relative py-32 sm:py-40 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-20 sm:py-32 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
             loop 
             muted 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
+            playsInline
+            preload="metadata"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
               src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
@@ -335,6 +346,8 @@ export default function HomePage() {
             />
           </video>
           <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          {/* Mobile gradient background */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-900" />
         </div>
         
         {/* Enhanced gradient transition superior */}
@@ -396,20 +409,23 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 6: CALL TO ACTION - Ultimate Premium */}
-      <section className="relative py-36 sm:py-48 lg:py-56 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-24 sm:py-36 lg:py-56 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
             loop 
             muted 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
+            playsInline
+            preload="metadata"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
               src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
               type="video/mp4"
             />
           </video>
+          {/* Mobile gradient background */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-pink-900/20" />
           <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
         </div>
         
