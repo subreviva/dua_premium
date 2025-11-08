@@ -13,7 +13,7 @@ import { useState, useMemo } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useGeneration } from "@/contexts/generation-context"
 import { useRouter } from "next/navigation"
-import { MusicStudioNavbar } from "@/components/music-studio-navbar"
+import { AppSidebar } from "@/components/app-sidebar"
 
 const PRESETS = [
   {
@@ -206,12 +206,21 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Elegant Navbar */}
-      <MusicStudioNavbar showBack />
+    <div className="flex h-screen overflow-hidden">
+      <div className="hidden md:block">
+        <AppSidebar />
+      </div>
 
-      <div className="flex-1 h-screen overflow-hidden">
-        <main className="h-[100dvh] flex flex-col overflow-hidden pt-[68px]">{/* pt-[68px] for navbar */}
+      <div className="flex-1 h-screen overflow-hidden md:overflow-auto">
+        <main className="h-[100dvh] flex flex-col md:h-auto md:min-h-screen overflow-hidden">
+          {/* Header - fixed height */}
+          <div className="pt-safe px-4 py-3 shrink-0 border-b border-border/20 backdrop-blur-xl bg-background/80 md:px-8 md:py-5">
+            <h1 className="text-sm font-semibold tracking-tight md:text-xl">Criar Música</h1>
+            <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-light md:text-xs">
+              Gere composições com DUA
+            </p>
+          </div>
+
           {/* Error Alert - conditional */}
           {error && (
             <div className="mx-4 mt-2 shrink-0 md:mx-8 md:mt-3">
