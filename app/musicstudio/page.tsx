@@ -25,7 +25,7 @@ export default function HomePage() {
       </div>
 
       {/* Main Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-[96px] md:pb-0">
         {/* Hero Section */}
         <div className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center overflow-hidden">
           {/* Background Image with Heavy Blur */}

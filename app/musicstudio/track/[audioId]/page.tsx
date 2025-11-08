@@ -95,7 +95,7 @@ export default function TrackDetailPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="flex-1 overflow-y-auto pb-[96px] md:pb-24">
         <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
           {/* Back Button */}
           <Button onClick={() => router.back()} variant="ghost" className="gap-2 hover:bg-secondary/80">

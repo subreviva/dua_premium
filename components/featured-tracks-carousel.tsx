@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/carousel"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useGlobalPlayer } from "@/contexts/global-player-context"
+import { useUnifiedMusic } from "@/contexts/unified-music-context"
 
 // Músicas da comunidade DUA
 interface Track {
@@ -69,7 +69,7 @@ const FEATURED_TRACKS: Track[] = [
 
 export function FeaturedTracksCarousel() {
   const [loadingTrackId, setLoadingTrackId] = useState<string | null>(null)
-  const { currentTrack, isPlaying, play, pause } = useGlobalPlayer()
+  const { currentTrack, isPlaying, playCarouselTrack, pause } = useUnifiedMusic()
 
   const togglePlay = async (track: Track) => {
     // Se é a música atual tocando, pausa
@@ -81,7 +81,7 @@ export function FeaturedTracksCarousel() {
     // Toca a música
     setLoadingTrackId(track.id)
     try {
-      await play(track)
+      await playCarouselTrack(track)
     } catch (error) {
       console.error('Erro ao reproduzir áudio:', error)
       alert('Desculpe, este áudio está temporariamente indisponível.')

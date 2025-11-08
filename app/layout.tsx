@@ -3,9 +3,9 @@ import type { Metadata } from "next"
 import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { VideoGenerationProvider } from "@/contexts/video-generation-context"
-import { GlobalPlayerProvider } from "@/contexts/global-player-context"
+import { UnifiedMusicProvider } from "@/contexts/unified-music-context"
 import { VideoGenerationNotifications } from "@/components/ui/video-generation-notifications"
-import { GlobalMusicPlayer } from "@/components/global-music-player"
+import { UnifiedMusicPlayer } from "@/components/unified-music-player"
 import { StagewiseToolbar } from "@/components/stagewise-toolbar"
 import { PremiumToaster } from "@/components/ui/premium-toaster"
 import { PremiumLoading } from "@/components/ui/premium-loading"
@@ -61,13 +61,13 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
-        <GlobalPlayerProvider>
+        <UnifiedMusicProvider>
           <VideoGenerationProvider>
             {children}
             <VideoGenerationNotifications />
             
-            {/* Global Music Player */}
-            <GlobalMusicPlayer />
+            {/* Unified Music Player - Funciona em TODO o site */}
+            <UnifiedMusicPlayer />
             
             {/* Stagewise Toolbar - Dev Mode Only */}
             <StagewiseToolbar />
@@ -81,7 +81,7 @@ export default function RootLayout({
             
             <Analytics />
           </VideoGenerationProvider>
-        </GlobalPlayerProvider>
+        </UnifiedMusicProvider>
       </body>
     </html>
   )

@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { useUnifiedMusic } from "@/contexts/unified-music-context"
 
 interface Track {
   id: string
@@ -38,6 +39,7 @@ interface GenerationContextType {
   updateTask: (taskId: string, updates: Partial<GenerationTask>) => void
   playTrack: (track: Track) => void
   clearCurrentTrack: () => void
+  isPlaying: boolean
 }
 
 const GenerationContext = createContext<GenerationContextType | undefined>(undefined)
@@ -46,6 +48,9 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<GenerationTask[]>([])
   const [completedTracks, setCompletedTracks] = useState<Track[]>([])
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
+  
+  // Integra com o UnifiedMusicContext
+  const { playGeneratedTrack, currentTrack: unifiedTrack, isPlaying, stop } = useUnifiedMusic()
 
   // Load completed tracks from localStorage on mount
   useEffect(() => {
@@ -227,15 +232,27 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
 
   const playTrack = (track: Track) => {
     setCurrentTrack(track)
+    playGeneratedTrack(track)
   }
 
   const clearCurrentTrack = () => {
     setCurrentTrack(null)
+    stop()
   }
 
   return (
     <GenerationContext.Provider
-      value={{ tasks, completedTracks, currentTrack, addTask, removeTask, updateTask, playTrack, clearCurrentTrack }}
+      value={{ 
+        tasks, 
+        completedTracks, 
+        currentTrack, 
+        addTask, 
+        removeTask, 
+        updateTask, 
+        playTrack, 
+        clearCurrentTrack,
+        isPlaying
+      }}
     >
       {children}
     </GenerationContext.Provider>
