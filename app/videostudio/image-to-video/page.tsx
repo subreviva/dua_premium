@@ -1,57 +1,32 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { ImageIcon, Upload, Sparkles, Download, Loader2, CheckCircle2, AlertCircle, Play, Pause, Film, Zap } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { ImageIcon, Upload, Sparkles, Download, Loader2, CheckCircle2, AlertCircle, Play, Pause, Film, RotateCw, X } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 
-export default function ImageToVideoPage() {
+export default function ImageToVideo() {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [promptText, setPromptText] = useState("")
-  const [model, setModel] = useState<"gen3a_turbo" | "gen4_turbo">("gen4_turbo")
-  const [duration, setDuration] = useState<4 | 5>(4)
-  const [aspectRatio, setAspectRatio] = useState<"1280:720" | "720:1280" | "1920:1080">("1280:720")
+  const [duration, setDuration] = useState<2|3|4|5|6|7|8|9|10>(5)
+  const [aspectRatio, setAspectRatio] = useState<"1280:720"|"720:1280"|"1104:832"|"832:1104"|"960:960"|"1584:672">("1280:720")
   const [isUploading, setIsUploading] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
-  const [taskId, setTaskId] = useState<string | null>(null)
   const [resultUrl, setResultUrl] = useState<string | null>(null)
   const [isPlayingResult, setIsPlayingResult] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const resultVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Exemplos de imagens para vídeo
-  const examples = [
-    {
-      video: "https://video.twimg.com/amplify_video/1958156406449651712/vid/avc1/1280x720/WwOxf6W6YxjiKYZD.mp4",
-      label: "Paisagem Dinâmica",
-      ratio: "16:9"
-    },
-    {
-      video: "https://video.twimg.com/amplify_video/1951076382114545664/vid/avc1/720x1280/ceGn4mLBDKedb48L.mp4",
-      label: "Vertical Cinematográfico",
-      ratio: "9:16"
-    },
-    {
-      video: "https://video.twimg.com/amplify_video/1953071976408297472/vid/avc1/1920x1080/qeSQZDkH6KcMKiIF.mp4",
-      label: "Full HD Premium",
-      ratio: "16:9"
-    }
-  ]
-
   const examplePrompts = [
     "Câmera se movendo suavemente para frente",
     "Zoom lento revelando detalhes",
     "Movimento panorâmico da esquerda para direita",
     "Efeito de parallax suave",
-    "Adicione movimento de nuvens no céu",
-    "Crie um efeito de dolly zoom cinematográfico",
   ]
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,96 +34,95 @@ export default function ImageToVideoPage() {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('Por favor, selecione um arquivo de imagem válido')
+      setError('Por favor, selecione uma imagem válida')
       return
     }
 
-    const maxSize = 20 * 1024 * 1024 // 20MB
-    if (file.size > maxSize) {
-      setError('A imagem deve ter no máximo 20MB')
+    if (file.size > 20 * 1024 * 1024) {
+      setError('Imagem muito grande (máximo 20MB)')
       return
     }
 
     setImageFile(file)
-    setError(null)
-
-    const url = URL.createObjectURL(file)
-    setImagePreview(url)
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string)
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleGenerate = async () => {
     if (!imageFile) return
 
-    setIsUploading(true)
     setError(null)
+    setIsUploading(true)
     setProgress(0)
 
     try {
-      // 1. Upload da imagem
-      const formData = new FormData()
-      formData.append('image', imageFile)
+      // Converter imagem para base64 ou fazer upload primeiro
+      setProgress(10)
+      
+      const reader = new FileReader()
+      const imageBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(imageFile)
+      })
 
       setProgress(20)
 
-      const uploadResponse = await fetch('/api/runway/upload-image', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!uploadResponse.ok) {
-        throw new Error('Erro ao fazer upload da imagem')
-      }
-
-      const { imageUri } = await uploadResponse.json()
-      setProgress(40)
-      setIsUploading(false)
-      setIsProcessing(true)
-
-      // 2. Iniciar geração
-      const generateResponse = await fetch('/api/runway/image-to-video', {
+      // Chamar API com JSON (não FormData)
+      const response = await fetch('/api/runway/image-to-video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          promptImage: imageUri,
+          promptImage: imageBase64, // Data URI ou HTTPS URL
           promptText: promptText.trim() || undefined,
-          model,
-          ratio: aspectRatio,
+          model: 'gen4_turbo', // ou gen3a_turbo
           duration,
-          seed: Math.floor(Math.random() * 4294967295), // Random seed
+          ratio: aspectRatio,
+          contentModeration: {
+            publicFigureThreshold: 'auto'
+          }
         }),
       })
 
-      if (!generateResponse.ok) {
-        throw new Error('Erro ao iniciar geração')
+      setProgress(40)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao enviar imagem')
       }
 
-      const { taskId: newTaskId } = await generateResponse.json()
-      setTaskId(newTaskId)
+      const data = await response.json()
+      
+      if (!data.success || !data.taskId) {
+        throw new Error('Resposta inválida da API')
+      }
+      
+      setIsUploading(false)
+      setIsProcessing(true)
       setProgress(60)
 
-      // 3. Polling do status
-      pollTaskStatus(newTaskId)
+      await pollTaskStatus(data.taskId)
     } catch (err) {
-      console.error('Erro ao gerar vídeo:', err)
-      setError(err instanceof Error ? err.message : 'Erro desconhecido')
+      console.error('Error generating video:', err)
+      setError(err instanceof Error ? err.message : 'Erro ao processar')
       setIsUploading(false)
       setIsProcessing(false)
     }
   }
 
   const pollTaskStatus = async (id: string) => {
-    const maxAttempts = 120 // 10 minutos
+    const maxAttempts = 120
     let attempts = 0
 
     const checkStatus = async () => {
       try {
         const response = await fetch(`/api/runway/task-status?taskId=${id}`)
-        
-        if (!response.ok) {
-          throw new Error('Erro ao verificar status')
-        }
+        if (!response.ok) throw new Error('Erro ao verificar status')
 
         const data = await response.json()
 
@@ -160,20 +134,17 @@ export default function ImageToVideoPage() {
           return
         }
 
-        if (data.status === 'FAILED') {
-          throw new Error('Falha no processamento do vídeo')
-        }
+        if (data.status === 'FAILED') throw new Error('Falha no processamento')
 
         setProgress(60 + (attempts / maxAttempts) * 35)
-
         attempts++
+        
         if (attempts < maxAttempts) {
           setTimeout(checkStatus, 5000)
         } else {
           throw new Error('Tempo limite excedido')
         }
       } catch (err) {
-        console.error('Erro ao verificar status:', err)
         setError(err instanceof Error ? err.message : 'Erro ao verificar status')
         setIsProcessing(false)
       }
@@ -191,162 +162,118 @@ export default function ImageToVideoPage() {
     setIsComplete(false)
     setError(null)
     setProgress(0)
-    setTaskId(null)
     setResultUrl(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
-  const togglePlayResult = () => {
-    if (resultVideoRef.current) {
-      if (isPlayingResult) {
-        resultVideoRef.current.pause()
-      } else {
-        resultVideoRef.current.play()
-      }
-      setIsPlayingResult(!isPlayingResult)
-    }
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
-      {/* Sidebar */}
       <div className="hidden md:block">
         <AppSidebar />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Header */}
-        <div className="border-b border-white/10 bg-black/50 backdrop-blur-xl sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-                <Film className="w-6 h-6 text-white" />
+        {/* Header Premium */}
+        <div className="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 flex items-center justify-center backdrop-blur-xl">
+                  <Film className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-2xl font-light text-white tracking-tight">Image to Video</h1>
+                  <p className="text-xs sm:text-sm text-white/40 font-light">Gen-4 Turbo</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">Imagem para Vídeo</h1>
-                <p className="text-sm text-zinc-400">Transforme fotos em vídeos cinematográficos</p>
-              </div>
+              {imagePreview && !isComplete && (
+                <button
+                  onClick={handleReset}
+                  className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300"
+                  disabled={isUploading || isProcessing}
+                >
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
+                </button>
+              )}
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
           
-          {/* Examples Section */}
-          {!imagePreview && !isComplete && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-12"
-            >
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20 mb-4">
-                  <Sparkles className="w-4 h-4 text-orange-400" />
-                  <span className="text-sm text-orange-400 font-medium">IA Generativa de Vídeo</span>
-                </div>
-                <h2 className="text-4xl font-bold text-white mb-3">
-                  Dê Vida às{" "}
-                  <span className="bg-gradient-to-r from-orange-400 to-pink-400 bg-clip-text text-transparent">
-                    Suas Imagens
-                  </span>
-                </h2>
-                <p className="text-lg text-zinc-400 max-w-3xl mx-auto">
-                  Transforme qualquer foto em um vídeo dinâmico com movimento cinematográfico e fluidez profissional
-                </p>
-              </div>
-
-              {/* Example Videos Grid */}
-              <div className="grid md:grid-cols-3 gap-6 mb-12">
-                {examples.map((example, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-xl"
-                  >
-                    <div className="aspect-video relative bg-black">
-                      <video
-                        src={example.video}
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                      />
-                    </div>
-                    <div className="p-4 bg-gradient-to-br from-orange-500/5 to-pink-500/5 border-t border-white/5">
-                      <h3 className="text-sm font-semibold text-white mb-1">{example.label}</h3>
-                      <p className="text-xs text-zinc-500">Proporção {example.ratio}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
           {/* Upload Area */}
           {!imagePreview && !isComplete && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mb-12"
+              className="min-h-[calc(100vh-12rem)] flex items-center justify-center"
             >
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="relative group cursor-pointer"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-pink-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all" />
-                
-                <div className="relative border-2 border-dashed border-white/20 rounded-3xl p-16 text-center hover:border-orange-500/50 transition-all bg-black/40 backdrop-blur-sm">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-orange-500/30">
-                    <Upload className="w-10 h-10 text-white" />
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold text-white mb-3">
-                    Faça upload da sua imagem
-                  </h3>
-                  <p className="text-zinc-400 mb-6 max-w-md mx-auto">
-                    Selecione uma foto e veja ela ganhar vida com movimento cinematográfico
+              <div className="w-full max-w-2xl">
+                <div className="text-center mb-8 sm:mb-12">
+                  <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extralight text-white mb-4 sm:mb-6 tracking-tight">
+                    Transform Images
+                    <br />
+                    <span className="bg-gradient-to-r from-white/90 to-white/50 bg-clip-text text-transparent">
+                      Into Motion
+                    </span>
+                  </h2>
+                  <p className="text-sm sm:text-base text-white/40 font-light max-w-lg mx-auto">
+                    AI-powered video generation with cinematic quality
                   </p>
+                </div>
+
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="group relative cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500" />
                   
-                  <div className="flex flex-wrap gap-3 justify-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                      <ImageIcon className="w-4 h-4 text-orange-400" />
-                      <span className="text-sm text-orange-400 font-medium">JPG, PNG, WebP</span>
+                  <div className="relative border border-white/10 rounded-3xl p-12 sm:p-16 lg:p-20 text-center hover:border-white/20 transition-all duration-500 bg-white/[0.02] backdrop-blur-xl">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6 sm:mb-8 group-hover:bg-white/10 transition-all duration-300">
+                      <Upload className="w-8 h-8 sm:w-10 sm:h-10 text-white/60 group-hover:text-white/80 transition-colors" />
                     </div>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-500/10 border border-pink-500/20">
-                      <Sparkles className="w-4 h-4 text-pink-400" />
-                      <span className="text-sm text-pink-400 font-medium">Máx 20MB</span>
+                    
+                    <h3 className="text-xl sm:text-2xl font-light text-white mb-3 sm:mb-4">
+                      Select Image
+                    </h3>
+                    <p className="text-sm sm:text-base text-white/40 mb-6 sm:mb-8 font-light">
+                      JPG, PNG, WebP up to 20MB
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 sm:gap-3 justify-center text-xs sm:text-sm">
+                      <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 font-light">
+                        <ImageIcon className="w-3 h-3 sm:w-4 sm:h-4 inline mr-2" />
+                        High Resolution
+                      </div>
+                      <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 font-light">
+                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 inline mr-2" />
+                        AI Enhanced
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
             </motion.div>
           )}
 
           {/* Generation Interface */}
           {imagePreview && !isComplete && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-6 sm:space-y-8"
             >
               {/* Image Preview */}
-              <div className="rounded-3xl overflow-hidden bg-zinc-900 border border-white/10">
+              <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-white/10 backdrop-blur-xl">
                 <div className="aspect-video relative bg-black flex items-center justify-center">
                   <img
                     src={imagePreview}
@@ -356,169 +283,174 @@ export default function ImageToVideoPage() {
                 </div>
               </div>
 
-              {/* Model Selection */}
-              <div className="rounded-2xl bg-zinc-900 border border-white/10 p-4">
-                <label className="block text-sm font-semibold text-white mb-3">Modelo de IA</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => {
-                      setModel('gen4_turbo')
-                      setDuration(4)
-                    }}
-                    className={`p-4 rounded-xl border transition-all ${
-                      model === 'gen4_turbo'
-                        ? 'border-orange-500 bg-orange-500/10'
-                        : 'border-white/10 bg-black/20 hover:border-white/20'
-                    }`}
-                    disabled={isUploading || isProcessing}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Zap className="w-5 h-5 text-orange-400" />
-                      <h3 className="text-sm font-semibold text-white">Gen-4 Turbo</h3>
-                    </div>
-                    <p className="text-xs text-zinc-400">Mais rápido • 4 segundos</p>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setModel('gen3a_turbo')
-                      setDuration(5)
-                    }}
-                    className={`p-4 rounded-xl border transition-all ${
-                      model === 'gen3a_turbo'
-                        ? 'border-pink-500 bg-pink-500/10'
-                        : 'border-white/10 bg-black/20 hover:border-white/20'
-                    }`}
-                    disabled={isUploading || isProcessing}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-5 h-5 text-pink-400" />
-                      <h3 className="text-sm font-semibold text-white">Gen-3A Turbo</h3>
-                    </div>
-                    <p className="text-xs text-zinc-400">Equilibrado • 5 segundos</p>
-                  </button>
-                </div>
-              </div>
-
-              {/* Prompt Input (Optional) */}
-              <div className="rounded-3xl bg-zinc-900 border border-white/10 p-6">
-                <label className="block text-sm font-semibold text-white mb-3">
-                  💫 Descreva o movimento desejado <span className="text-zinc-500">(opcional)</span>
-                </label>
-                <Textarea
-                  value={promptText}
-                  onChange={(e) => setPromptText(e.target.value)}
-                  placeholder="Ex: Câmera se movendo suavemente para frente, revelando mais detalhes..."
-                  className="min-h-[100px] bg-black/50 border-white/10 text-white placeholder:text-zinc-500 resize-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20"
-                  disabled={isUploading || isProcessing}
-                />
+              {/* Settings Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 
-                {/* Example Prompts */}
-                <div className="mt-4">
-                  <p className="text-xs text-zinc-500 mb-2">Sugestões:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {examplePrompts.map((example, idx) => (
+                {/* Duration */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-light text-white/60">Duration</label>
+                    <span className="text-2xl font-extralight text-white">{duration}s</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="2"
+                    max="10"
+                    step="1"
+                    value={duration}
+                    onChange={(e) => setDuration(Number(e.target.value) as any)}
+                    className="w-full h-px bg-white/10 appearance-none cursor-pointer 
+                      [&::-webkit-slider-thumb]:appearance-none 
+                      [&::-webkit-slider-thumb]:w-4 
+                      [&::-webkit-slider-thumb]:h-4 
+                      [&::-webkit-slider-thumb]:rounded-full 
+                      [&::-webkit-slider-thumb]:bg-white 
+                      [&::-webkit-slider-thumb]:border-2 
+                      [&::-webkit-slider-thumb]:border-white/20
+                      [&::-webkit-slider-thumb]:shadow-lg
+                      [&::-webkit-slider-thumb]:shadow-black/50
+                      [&::-moz-range-thumb]:w-4 
+                      [&::-moz-range-thumb]:h-4 
+                      [&::-moz-range-thumb]:rounded-full 
+                      [&::-moz-range-thumb]:bg-white 
+                      [&::-moz-range-thumb]:border-2 
+                      [&::-moz-range-thumb]:border-white/20
+                      [&::-moz-range-thumb]:shadow-lg
+                      [&::-moz-range-thumb]:shadow-black/50"
+                    disabled={isUploading || isProcessing}
+                  />
+                  <div className="flex justify-between text-xs text-white/30 font-light">
+                    <span>2s</span>
+                    <span>10s</span>
+                  </div>
+                </div>
+
+                {/* Aspect Ratio */}
+                <div className="space-y-4">
+                  <label className="text-sm font-light text-white/60">Aspect Ratio</label>
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    {[
+                      { value: '1280:720', label: '16:9' },
+                      { value: '720:1280', label: '9:16' },
+                      { value: '1104:832', label: '4:3' },
+                      { value: '832:1104', label: '3:4' },
+                      { value: '960:960', label: '1:1' },
+                      { value: '1584:672', label: '21:9' },
+                    ].map((ratio) => (
                       <button
-                        key={idx}
-                        onClick={() => setPromptText(example)}
-                        className="text-xs px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500/20 transition-colors"
+                        key={ratio.value}
+                        onClick={() => setAspectRatio(ratio.value as any)}
+                        className={`px-3 py-3 sm:px-4 sm:py-4 rounded-xl border transition-all duration-300 ${
+                          aspectRatio === ratio.value
+                            ? 'border-white/40 bg-white/10 text-white'
+                            : 'border-white/10 bg-white/[0.02] text-white/40 hover:border-white/20 hover:bg-white/5 hover:text-white/60'
+                        }`}
                         disabled={isUploading || isProcessing}
                       >
-                        {example}
+                        <div className="text-xs sm:text-sm font-light">{ratio.label}</div>
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Aspect Ratio */}
-              <div className="rounded-2xl bg-zinc-900 border border-white/10 p-4">
-                <label className="block text-sm font-semibold text-white mb-3">Proporção do Vídeo</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { value: '1280:720', label: '16:9 HD', icon: '📺' },
-                    { value: '720:1280', label: '9:16 Vertical', icon: '📱' },
-                    { value: '1920:1080', label: '16:9 Full HD', icon: '🎬' },
-                  ].map((ratio) => (
+              {/* Prompt */}
+              <div className="space-y-4">
+                <label className="text-sm font-light text-white/60">Motion Description (Optional)</label>
+                <textarea
+                  value={promptText}
+                  onChange={(e) => setPromptText(e.target.value)}
+                  placeholder="Describe the desired camera movement..."
+                  className="w-full min-h-[120px] px-4 sm:px-6 py-3 sm:py-4 bg-white/[0.02] border border-white/10 rounded-2xl text-white placeholder:text-white/20 resize-none focus:outline-none focus:border-white/30 transition-all duration-300 text-sm sm:text-base font-light backdrop-blur-xl"
+                  disabled={isUploading || isProcessing}
+                />
+                
+                <div className="flex flex-wrap gap-2">
+                  {examplePrompts.map((example, idx) => (
                     <button
-                      key={ratio.value}
-                      onClick={() => setAspectRatio(ratio.value as any)}
-                      className={`p-3 rounded-xl border transition-all ${
-                        aspectRatio === ratio.value
-                          ? 'border-orange-500 bg-orange-500/10'
-                          : 'border-white/10 bg-black/20 hover:border-white/20'
-                      }`}
+                      key={idx}
+                      onClick={() => setPromptText(example)}
+                      className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-white/10 hover:text-white/60 transition-all duration-300 font-light"
                       disabled={isUploading || isProcessing}
                     >
-                      <div className="text-2xl mb-1">{ratio.icon}</div>
-                      <div className="text-xs text-white font-medium">{ratio.label}</div>
+                      {example}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Error Message */}
-              {error && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-red-400 font-medium">Erro</p>
-                    <p className="text-red-300/80 text-sm">{error}</p>
-                  </div>
-                </div>
-              )}
+              {/* Error */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="p-4 rounded-2xl bg-red-500/5 border border-red-500/20 flex items-start gap-3"
+                  >
+                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-red-400 font-light text-sm">{error}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Progress */}
-              {(isUploading || isProcessing) && (
-                <div className="rounded-2xl bg-zinc-900 border border-white/10 p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-white">
-                      {isUploading ? 'Enviando imagem...' : 'Gerando vídeo com IA...'}
-                    </span>
-                    <span className="text-sm text-zinc-400">{Math.round(progress)}%</span>
-                  </div>
-                  <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-orange-500 to-pink-500"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progress}%` }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-                  <p className="text-xs text-zinc-500 mt-2">
-                    {isProcessing && "A IA está criando seu vídeo. Isso pode levar alguns minutos..."}
-                  </p>
-                </div>
-              )}
+              <AnimatePresence>
+                {(isUploading || isProcessing) && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-light text-white/60">
+                        {isUploading ? 'Uploading...' : 'Generating...'}
+                      </span>
+                      <span className="text-sm font-light text-white/40">{Math.round(progress)}%</span>
+                    </div>
+                    <div className="h-px bg-white/10 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-white/40"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Actions */}
-              <div className="flex gap-3">
-                <Button
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                <button
                   onClick={handleGenerate}
                   disabled={isUploading || isProcessing}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold h-14 rounded-xl shadow-lg shadow-orange-500/20 text-base"
+                  className="flex-1 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/[0.15] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 text-white font-light text-sm sm:text-base backdrop-blur-xl group"
                 >
                   {isUploading || isProcessing ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Processando...
-                    </>
+                    <span className="flex items-center justify-center gap-3">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing
+                    </span>
                   ) : (
-                    <>
-                      <Film className="w-5 h-5 mr-2" />
-                      Gerar Vídeo ({duration}s)
-                    </>
+                    <span className="flex items-center justify-center gap-3">
+                      <Film className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                      Generate Video
+                    </span>
                   )}
-                </Button>
+                </button>
                 
-                <Button
+                <button
                   onClick={handleReset}
-                  variant="outline"
                   disabled={isUploading || isProcessing}
-                  className="border-white/20 bg-white/5 hover:bg-white/10 text-white h-14 px-8 rounded-xl"
+                  className="px-6 sm:px-8 py-4 sm:py-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 text-white/60 hover:text-white font-light text-sm sm:text-base"
                 >
-                  Cancelar
-                </Button>
+                  <RotateCw className="w-5 h-5 inline mr-2" />
+                  Reset
+                </button>
               </div>
             </motion.div>
           )}
@@ -526,41 +458,18 @@ export default function ImageToVideoPage() {
           {/* Result */}
           {isComplete && resultUrl && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-6 sm:space-y-8"
             >
-              {/* Success Message */}
-              <div className="p-6 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-green-400 font-semibold text-lg">Vídeo gerado com sucesso!</p>
-                  <p className="text-green-300/80 text-sm">Sua imagem ganhou vida com IA</p>
-                </div>
-                <Button
-                  onClick={handleReset}
-                  variant="outline"
-                  className="border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-green-400"
-                >
-                  Nova Imagem
-                </Button>
+              {/* Success Badge */}
+              <div className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <p className="text-emerald-400 font-light text-sm sm:text-base">Video generated successfully</p>
               </div>
 
-              {/* Video Result */}
-              <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-orange-500/10 to-pink-500/10 border border-orange-500/30 shadow-2xl shadow-orange-500/10">
-                <div className="p-4 border-b border-orange-500/20 bg-orange-500/5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-white">Vídeo Gerado</h3>
-                      <p className="text-xs text-orange-400">Criado com {model === 'gen4_turbo' ? 'Gen-4' : 'Gen-3A'} Turbo • {duration}s</p>
-                    </div>
-                    <div className="px-3 py-1 rounded-full bg-orange-500/20 text-xs text-orange-400 font-medium">
-                      ✨ Novo
-                    </div>
-                  </div>
-                </div>
+              {/* Video Player */}
+              <div className="relative rounded-3xl overflow-hidden bg-black border border-white/10 backdrop-blur-xl">
                 <div className="aspect-video relative bg-black">
                   <video
                     ref={resultVideoRef}
@@ -570,10 +479,14 @@ export default function ImageToVideoPage() {
                     onPlay={() => setIsPlayingResult(true)}
                     onPause={() => setIsPlayingResult(false)}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <button
-                      onClick={togglePlayResult}
-                      className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/70 transition-all"
+                      onClick={() => {
+                        if (resultVideoRef.current) {
+                          isPlayingResult ? resultVideoRef.current.pause() : resultVideoRef.current.play()
+                        }
+                      }}
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition-all duration-300 pointer-events-auto"
                     >
                       {isPlayingResult ? (
                         <Pause className="w-8 h-8 text-white" />
@@ -583,44 +496,52 @@ export default function ImageToVideoPage() {
                     </button>
                   </div>
                 </div>
-                <div className="p-4">
-                  <Button
-                    onClick={() => {
-                      const a = document.createElement('a')
-                      a.href = resultUrl
-                      a.download = 'video-gerado.mp4'
-                      a.click()
-                    }}
-                    className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold h-11 rounded-xl"
-                  >
-                    <Download className="w-5 h-5 mr-2" />
-                    Baixar Vídeo
-                  </Button>
-                </div>
               </div>
 
-              {/* Original Image Reference */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10">
-                  <div className="p-3 border-b border-white/10">
-                    <h3 className="text-sm font-semibold text-white">Imagem Original</h3>
-                  </div>
-                  <div className="aspect-video relative bg-black flex items-center justify-center p-4">
-                    <img
-                      src={imagePreview || ''}
-                      alt="Original"
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-                </div>
-
-                {promptText && (
-                  <div className="rounded-2xl bg-zinc-900 border border-white/10 p-6 flex flex-col justify-center">
-                    <h3 className="text-sm font-semibold text-white mb-3">Prompt Utilizado</h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed">{promptText}</p>
-                  </div>
-                )}
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button
+                  onClick={() => {
+                    const a = document.createElement('a')
+                    a.href = resultUrl
+                    a.download = 'generated-video.mp4'
+                    a.click()
+                  }}
+                  className="flex-1 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/[0.15] transition-all duration-300 text-white font-light text-sm sm:text-base backdrop-blur-xl group"
+                >
+                  <Download className="w-5 h-5 inline mr-3 group-hover:translate-y-0.5 transition-transform" />
+                  Download Video
+                </button>
+                
+                <button
+                  onClick={handleReset}
+                  className="px-6 sm:px-8 py-4 sm:py-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 text-white/60 hover:text-white font-light text-sm sm:text-base"
+                >
+                  <RotateCw className="w-5 h-5 inline mr-2" />
+                  New Video
+                </button>
               </div>
+
+              {/* Original Preview */}
+              {imagePreview && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="rounded-2xl overflow-hidden bg-white/[0.02] border border-white/10 backdrop-blur-xl">
+                    <div className="p-3 sm:p-4 border-b border-white/10">
+                      <h3 className="text-sm font-light text-white/60">Original Image</h3>
+                    </div>
+                    <div className="aspect-video relative bg-black flex items-center justify-center p-4">
+                      <img src={imagePreview} alt="Original" className="max-w-full max-h-full object-contain" />
+                    </div>
+                  </div>
+
+                  {promptText && (
+                    <div className="rounded-2xl bg-white/[0.02] border border-white/10 backdrop-blur-xl p-4 sm:p-6 flex flex-col justify-center">
+                      <h3 className="text-sm font-light text-white/60 mb-3">Prompt Used</h3>
+                      <p className="text-white/80 text-sm font-light leading-relaxed">{promptText}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
           )}
         </div>

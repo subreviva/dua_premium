@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Call Runway ML API
-    const response = await fetch(`https://api.runwayml.com/v1/tasks/${taskId}`, {
+    // Call Runway ML API (usando URL dev como no exemplo)
+    const response = await fetch(`https://api.dev.runwayml.com/v1/tasks/${taskId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${runwayApiKey}`,
@@ -36,22 +36,30 @@ export async function GET(request: NextRequest) {
       },
     })
 
+    const responseText = await response.text()
+    console.log('🔍 Task Status Response:', response.status, responseText)
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Runway API error:', errorData);
+      let errorData
+      try {
+        errorData = JSON.parse(responseText)
+      } catch {
+        errorData = { message: responseText }
+      }
+      console.error('❌ Runway API error:', errorData);
       return NextResponse.json(
         { error: 'Failed to get task status', details: errorData },
         { status: response.status }
       );
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
 
     return NextResponse.json({
       taskId: data.id,
       status: data.status, // PENDING, RUNNING, SUCCEEDED, FAILED
       progress: data.progress || 0,
-      output: data.output || null,
+      output: data.output?.[0] || data.output || null, // output pode ser array
       createdAt: data.createdAt,
       error: data.failure?.message || null,
     });
