@@ -93,42 +93,30 @@ const Gallery6 = ({
   return (
     <section className="py-0">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="mb-10 sm:mb-12 md:mb-16 lg:mb-20 flex flex-col justify-between md:flex-row md:items-end gap-6">
-          <div className="max-w-3xl w-full">
-            {/* Destaque em Mobile - Linha decorativa */}
-            <div className="mb-6 sm:mb-8 h-1 w-12 sm:w-16 bg-gradient-to-r from-white/80 via-white/40 to-transparent rounded-full" />
-            
-            <h2 className="mb-4 text-6xl sm:text-7xl md:text-8xl lg:text-8xl font-extralight text-white tracking-tighter leading-[0.9] bg-gradient-to-br from-white via-white/95 to-white/70 bg-clip-text text-transparent md:bg-none md:text-white">
-              {heading}
-            </h2>
-            <p className="text-lg sm:text-xl md:text-2xl text-white/70 max-w-2xl font-light leading-relaxed">
-              Cinco estúdios especializados para a tua criatividade
-            </p>
-          </div>
-          <div className="mt-6 sm:mt-8 flex shrink-0 items-center justify-start gap-3">
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => {
-                carouselApi?.scrollPrev();
-              }}
-              disabled={!canScrollPrev}
-              className="disabled:pointer-events-auto bg-white/10 hover:bg-white/20 border-white/20 hover:border-white/30 text-white backdrop-blur-xl h-12 w-12 sm:h-14 sm:w-14 rounded-full transition-all duration-300"
-            >
-              <ArrowLeft className="size-5 sm:size-6" />
-            </Button>
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => {
-                carouselApi?.scrollNext();
-              }}
-              disabled={!canScrollNext}
-              className="disabled:pointer-events-auto bg-white/10 hover:bg-white/20 border-white/20 hover:border-white/30 text-white backdrop-blur-xl h-12 w-12 sm:h-14 sm:w-14 rounded-full transition-all duration-300"
-            >
-              <ArrowRight className="size-5 sm:size-6" />
-            </Button>
-          </div>
+        {/* Apenas botões de navegação - sem heading duplicado */}
+        <div className="mb-8 sm:mb-10 flex justify-end gap-3">
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => {
+              carouselApi?.scrollPrev();
+            }}
+            disabled={!canScrollPrev}
+            className="disabled:pointer-events-auto bg-white/10 hover:bg-white/20 border-white/20 hover:border-white/30 text-white backdrop-blur-xl h-12 w-12 sm:h-14 sm:w-14 rounded-full transition-all duration-300"
+          >
+            <ArrowLeft className="size-5 sm:size-6" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => {
+              carouselApi?.scrollNext();
+            }}
+            disabled={!canScrollNext}
+            className="disabled:pointer-events-auto bg-white/10 hover:bg-white/20 border-white/20 hover:border-white/30 text-white backdrop-blur-xl h-12 w-12 sm:h-14 sm:w-14 rounded-full transition-all duration-300"
+          >
+            <ArrowRight className="size-5 sm:size-6" />
+          </Button>
         </div>
       </div>
       <div className="w-full">

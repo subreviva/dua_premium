@@ -210,17 +210,17 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="font-extralight leading-[0.5] tracking-[-0.2em] text-white"
+              className="font-extralight leading-[0.75] tracking-[-0.12em] text-white"
               style={{ 
-                fontSize: 'clamp(20rem, 45vw, 40rem)',
+                fontSize: 'clamp(12rem, 35vw, 38rem)',
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 100,
-                textShadow: '0 50px 250px rgba(0,0,0,0.99), 0 25px 125px rgba(0,0,0,0.98), 0 12px 60px rgba(0,0,0,0.95)',
-                letterSpacing: '-0.2em',
+                textShadow: '0 30px 150px rgba(0,0,0,0.99), 0 15px 75px rgba(0,0,0,0.95), 0 8px 40px rgba(0,0,0,0.9)',
+                letterSpacing: '-0.12em',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
                 textRendering: 'optimizeLegibility',
-                lineHeight: '0.5'
+                lineHeight: '0.75'
               }}
             >
               DUA
@@ -234,7 +234,7 @@ export default function HomePage() {
               style={{ textShadow: '0 4px 30px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.7)' }}
             >
               Onde a próxima onda de criatividade
-              <br className="hidden sm:block" /> 
+              <br /> 
               lusófona acontece
             </motion.p>
 
