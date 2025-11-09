@@ -1,6 +1,6 @@
 "use client"
 
-import { Video, Sparkles, ArrowRight, Wand2, ArrowUpCircle } from "lucide-react"
+import { Video, Sparkles, ArrowRight, Wand2, ArrowUpCircle, Users } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -75,7 +75,7 @@ export default function VideoStudioHomePage() {
               </div>
 
               {/* Quick Actions Cards */}
-              <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Link href="/videostudio/upscale" className="group block transition-transform hover:scale-[1.02]">
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10 p-6 h-full backdrop-blur-sm">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -136,6 +136,28 @@ export default function VideoStudioHomePage() {
                       
                       <div className="mt-4 flex items-center text-pink-400 text-sm font-medium">
                         Criar agora
+                        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link href="/videostudio/performance" className="group block transition-transform hover:scale-[1.02]">
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-white/10 p-6 h-full backdrop-blur-sm">
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    <div className="relative">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30">
+                        <Users className="w-7 h-7 text-white" strokeWidth={2.5} />
+                      </div>
+                      
+                      <h3 className="text-xl font-semibold mb-2 text-white">Performance</h3>
+                      <p className="text-sm text-zinc-400 font-normal leading-relaxed">
+                        Anime personagens com expressões e gestos capturados
+                      </p>
+                      
+                      <div className="mt-4 flex items-center text-cyan-400 text-sm font-medium">
+                        Animar agora
                         <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
