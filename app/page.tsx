@@ -210,15 +210,17 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[24rem] sm:text-[22rem] md:text-[24rem] lg:text-[26rem] xl:text-[30rem] font-extralight leading-[0.65] tracking-[-0.15em] text-white"
+              className="font-extralight leading-[0.5] tracking-[-0.2em] text-white"
               style={{ 
+                fontSize: 'clamp(20rem, 45vw, 40rem)',
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 100,
-                textShadow: '0 28px 160px rgba(0,0,0,0.99), 0 14px 80px rgba(0,0,0,0.96), 0 7px 40px rgba(0,0,0,0.85)',
-                letterSpacing: '-0.15em',
+                textShadow: '0 50px 250px rgba(0,0,0,0.99), 0 25px 125px rgba(0,0,0,0.98), 0 12px 60px rgba(0,0,0,0.95)',
+                letterSpacing: '-0.2em',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
-                textRendering: 'optimizeLegibility'
+                textRendering: 'optimizeLegibility',
+                lineHeight: '0.5'
               }}
             >
               DUA
