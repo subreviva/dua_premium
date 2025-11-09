@@ -94,8 +94,11 @@ const Gallery6 = ({
     <section className="py-0">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="mb-10 sm:mb-12 md:mb-16 lg:mb-20 flex flex-col justify-between md:flex-row md:items-end gap-6">
-          <div className="max-w-3xl">
-            <h2 className="mb-3 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight text-white tracking-tight leading-[0.95]">
+          <div className="max-w-3xl w-full">
+            {/* Destaque em Mobile - Linha decorativa */}
+            <div className="mb-6 sm:mb-8 h-1 w-12 sm:w-16 bg-gradient-to-r from-white/80 via-white/40 to-transparent rounded-full" />
+            
+            <h2 className="mb-4 text-6xl sm:text-7xl md:text-8xl lg:text-8xl font-extralight text-white tracking-tighter leading-[0.9] bg-gradient-to-br from-white via-white/95 to-white/70 bg-clip-text text-transparent md:bg-none md:text-white">
               {heading}
             </h2>
             <p className="text-lg sm:text-xl md:text-2xl text-white/70 max-w-2xl font-light leading-relaxed">
@@ -135,44 +138,47 @@ const Gallery6 = ({
             align: "start",
             loop: true,
             dragFree: true,
+            skipSnaps: false,
             breakpoints: {
               "(max-width: 768px)": {
                 dragFree: true,
+                containScroll: "trimSnaps",
               },
             },
           }}
-          className="relative"
+          className="relative touch-pan-x"
         >
-          <CarouselContent className="ml-4 sm:ml-6 md:ml-8 2xl:ml-[max(8rem,calc(50vw-700px+1rem))]">
+          <CarouselContent className="ml-4 sm:ml-6 md:ml-8 2xl:ml-[max(8rem,calc(50vw-700px+1rem))] -webkit-overflow-scrolling-touch">
             {items.map((item) => (
-              <CarouselItem key={item.id} className="pl-4 sm:pl-5 basis-[90%] sm:basis-[75%] md:basis-auto md:max-w-[500px] lg:max-w-[550px]">
+              <CarouselItem key={item.id} className="pl-4 sm:pl-5 basis-[92%] sm:basis-[78%] md:basis-auto md:max-w-[500px] lg:max-w-[550px] touch-manipulation">
                 <div
                   onClick={() => router.push("/acesso")}
                   className="group flex flex-col justify-between cursor-pointer h-full"
                 >
                   <div>
-                    <div className="flex aspect-[3/2] overflow-clip rounded-3xl sm:rounded-2xl">
+                    <div className="flex aspect-[3/2] overflow-clip rounded-3xl sm:rounded-2xl shadow-2xl">
                       <div className="flex-1">
-                        <div className="relative h-full w-full origin-center transition duration-700 group-hover:scale-105">
+                        <div className="relative h-full w-full origin-center transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform">
                           <img
                             src={item.image}
                             alt={item.title}
                             className="h-full w-full object-cover object-center"
+                            loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="mb-4 line-clamp-2 break-words pt-8 text-3xl sm:text-4xl md:text-3xl font-extralight text-white tracking-tight leading-tight">
+                  <div className="mb-4 line-clamp-2 break-words pt-8 text-3xl sm:text-4xl md:text-3xl font-extralight text-white tracking-tight leading-tight antialiased">
                     {item.title}
                   </div>
-                  <div className="mb-10 line-clamp-4 text-lg sm:text-xl md:text-lg text-white/70 font-light leading-relaxed">
+                  <div className="mb-10 line-clamp-4 text-lg sm:text-xl md:text-lg text-white/75 font-light leading-relaxed antialiased">
                     {item.summary}
                   </div>
-                  <div className="flex items-center text-base sm:text-lg text-white/80 font-medium group-hover:text-white transition-all duration-300">
+                  <div className="flex items-center text-base sm:text-lg text-white/85 font-medium group-hover:text-white transition-all duration-300 min-h-[44px]">
                     Explorar
-                    <ArrowRight className="ml-2 size-5 sm:size-6 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="ml-2 size-5 sm:size-6 transition-transform duration-300 group-hover:translate-x-1" />
                   </div>
                 </div>
               </CarouselItem>

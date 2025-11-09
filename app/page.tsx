@@ -10,6 +10,7 @@ import { useRef, useState, useEffect } from "react"
 import { FeatureSteps } from "@/components/ui/feature-steps"
 import { Gallery6 } from "@/components/ui/gallery6"
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase"
+import SectionTitle from "@/components/ui/section-title"
 import { Bento3Section } from "@/components/ui/bento-monochrome-1"
 import { CommunityPreview } from "@/components/community-preview"
 import { EcosystemSimple } from "@/components/ui/ecosystem-simple"
@@ -77,60 +78,46 @@ export default function HomePage() {
     <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
       <Navbar />
 
-      {/* iOS APP BANNER - APENAS MOBILE com AnimatePresence */}
+      {/* iOS APP BANNER - PILL DISCRETO */}
       <AnimatePresence>
         {showIOSBanner && isMobile && (
           <motion.div
-            initial={{ y: -100, opacity: 0 }}
+            initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-16 left-0 right-0 z-50 px-4 pointer-events-none"
+            exit={{ y: -50, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
           >
-            <div className="max-w-md mx-auto pointer-events-auto">
-              <div className="relative group">
-                {/* Glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
-                
-                {/* Banner Card */}
-                <div className="relative bg-black/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-4 shadow-2xl">
-                  <div className="flex items-center gap-3">
-                    {/* App Icon */}
-                    <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 p-0.5 shadow-lg">
-                      <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center">
-                        <span className="text-2xl font-bold bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent">
-                          D
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Text Content */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm mb-0.5 truncate">
-                        DUA - AI Creative Studio
-                      </p>
-                      <p className="text-white/60 text-xs truncate">
-                        Disponível para iOS e Android
-                      </p>
-                    </div>
-
-                    {/* Install Button */}
-                    <button
-                      onClick={handleInstallPWA}
-                      className="flex-shrink-0 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
-                    >
-                      Instalar
-                    </button>
-
-                    {/* Close Button */}
-                    <button
-                      onClick={() => setShowIOSBanner(false)}
-                      className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-300"
-                      aria-label="Fechar"
-                    >
-                      <X className="w-4 h-4 text-white/60" />
-                    </button>
+            <div className="pointer-events-auto">
+              {/* Pill ultra-discreto */}
+              <div className="relative bg-black/70 backdrop-blur-xl border border-white/20 rounded-full px-3 py-1.5 shadow-lg">
+                <div className="flex items-center gap-2">
+                  {/* Ícone mini */}
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[9px] font-bold text-white">D</span>
                   </div>
+
+                  {/* Texto compacto */}
+                  <span className="text-white/90 text-xs font-medium">
+                    Instalar App
+                  </span>
+
+                  {/* Botão compacto */}
+                  <button
+                    onClick={handleInstallPWA}
+                    className="px-3 py-1 bg-blue-500/90 hover:bg-blue-600 text-white text-[11px] font-semibold rounded-full transition-all"
+                  >
+                    OK
+                  </button>
+
+                  {/* Close mini */}
+                  <button
+                    onClick={() => setShowIOSBanner(false)}
+                    className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+                    aria-label="Fechar"
+                  >
+                    <X className="w-3 h-3 text-white/70" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -223,12 +210,12 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[18rem] sm:text-[20rem] md:text-[22rem] lg:text-[24rem] xl:text-[28rem] font-extralight leading-[0.75] tracking-[-0.12em] text-white"
+              className="text-[20rem] sm:text-[22rem] md:text-[24rem] lg:text-[26rem] xl:text-[30rem] font-extralight leading-[0.7] tracking-[-0.14em] text-white"
               style={{ 
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 100,
-                textShadow: '0 20px 120px rgba(0,0,0,0.98), 0 10px 60px rgba(0,0,0,0.9), 0 5px 30px rgba(0,0,0,0.7)',
-                letterSpacing: '-0.12em',
+                textShadow: '0 24px 140px rgba(0,0,0,0.99), 0 12px 70px rgba(0,0,0,0.95), 0 6px 35px rgba(0,0,0,0.8)',
+                letterSpacing: '-0.14em',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
                 textRendering: 'optimizeLegibility'
@@ -318,7 +305,8 @@ export default function HomePage() {
         />
         
         <div className="relative z-10">
-          <Gallery6 heading="Estúdios Criativos" />
+          <SectionTitle eyebrow="Explore" title="Estúdios Criativos" kicker="Cinco estúdios especializados para a tua criatividade" />
+          <Gallery6 heading="" />
         </div>
 
         {/* Enhanced gradient transition inferior */}
@@ -360,10 +348,25 @@ export default function HomePage() {
         />
         
         <div className="max-w-7xl mx-auto relative z-10">
+          {/* Destaque em Mobile - Linha decorativa */}
+          <div className="mb-8 sm:mb-12 px-4 sm:px-0">
+            <div className="h-1 w-12 sm:w-16 bg-gradient-to-r from-white/80 via-white/40 to-transparent rounded-full mb-6 sm:mb-8" />
+            
+            <div>
+              <p className="text-sm sm:text-base text-white/50 font-light mb-2 uppercase tracking-widest">Identidade</p>
+              <h3 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight text-white tracking-tighter leading-[0.9] bg-gradient-to-br from-white via-white/95 to-white/70 bg-clip-text text-transparent md:bg-none md:text-white mb-4">
+                A Identidade Visual da DUA
+              </h3>
+              <p className="text-lg sm:text-xl text-white/60 font-light">
+                Não é só código. É uma presença. A DUA tem rosto, voz e história.
+              </p>
+            </div>
+          </div>
+          
           <FeatureShowcase
             eyebrow="Identidade"
-            title="A Identidade Visual da DUA"
-            description="Não é só código. É uma presença. A DUA tem rosto, voz e história."
+            title=""
+            description=""
             stats={["Identidade única", "Comunicação próxima", "Propósito claro"]}
             steps={[
               {
