@@ -3,6 +3,12 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Building2, Music, Coins } from "lucide-react";
+import {
+  Carousel,
+  CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 interface EcosystemPillar {
   icon: React.ElementType;
@@ -19,6 +25,7 @@ interface EcosystemSimpleProps {
 
 export const EcosystemSimple = ({ pillars }: EcosystemSimpleProps) => {
   const [mounted, setMounted] = React.useState(false);
+  const [carouselApi, setCarouselApi] = React.useState<CarouselApi>();
 
   React.useEffect(() => {
     setMounted(true);
@@ -42,7 +49,7 @@ export const EcosystemSimple = ({ pillars }: EcosystemSimpleProps) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="text-center space-y-6 sm:space-y-8 mb-12 sm:mb-16 lg:mb-20">
+      <div className="text-center space-y-6 sm:space-y-8 mb-10 sm:mb-12 lg:mb-16">
         <motion.h2
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -63,8 +70,84 @@ export const EcosystemSimple = ({ pillars }: EcosystemSimpleProps) => {
         </motion.p>
       </div>
 
-      {/* Grid of 3 Pillars */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      {/* MOBILE VERSION - Carrossel horizontal */}
+      <div className="md:hidden mb-10">
+        <Carousel
+          setApi={setCarouselApi}
+          opts={{
+            align: "start",
+            loop: true,
+            dragFree: true,
+            skipSnaps: false,
+          }}
+          className="w-full touch-pan-x"
+        >
+          <CarouselContent className="ml-4">
+            {pillars.map((pillar, index) => (
+              <CarouselItem key={index} className="pl-4 basis-[90%] sm:basis-[85%]">
+                <motion.a
+                  href="#"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 1,
+                    ease: [0.22, 1, 0.36, 1],
+                    delay: index * 0.1,
+                  }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-white/20 shadow-2xl h-[580px]"
+                >
+                  {/* Image */}
+                  <div className="relative h-[280px] overflow-hidden flex-shrink-0">
+                    <img
+                      src={pillar.image}
+                      alt={pillar.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+
+                    {/* Icon Badge */}
+                    <div className="absolute top-4 left-4 w-14 h-14 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-lg">
+                      <pillar.icon className="w-7 h-7 text-white" />
+                    </div>
+
+                    {/* Phase Badge */}
+                    {pillar.phase && (
+                      <div className="absolute top-4 right-4 px-4 py-2 rounded-full bg-white/15 backdrop-blur-xl border border-white/20 text-sm font-light text-white shadow-lg">
+                        {pillar.phase}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-8 flex flex-col flex-1 justify-between">
+                    <div className="space-y-5">
+                      <h3 className="text-2xl sm:text-3xl font-extralight text-white tracking-tight leading-tight">
+                        {pillar.title}
+                      </h3>
+                      <p className="text-base text-white/70 font-light leading-relaxed">
+                        {pillar.description}
+                      </p>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="flex items-center gap-2 text-base font-light text-white/80 mt-6 group-hover:text-white transition-colors duration-300">
+                      Saber Mais
+                      <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                    </div>
+                  </div>
+
+                  {/* Hover gradient */}
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                </motion.a>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+
+      {/* DESKTOP VERSION - Grid of 3 Pillars */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {pillars.map((pillar, index) => (
           <motion.a
             key={index}
