@@ -87,9 +87,9 @@ export function FeatureShowcase({
   return (
     <section className={cn("w-full text-white", className)}>
       {/* MOBILE VERSION - Carrossel horizontal */}
-      <div className="md:hidden w-full px-4 py-16">
+      <div className="md:hidden w-full py-16">
         {/* Header mobile */}
-        <div className="mb-10 space-y-6">
+        <div className="px-4 mb-12 space-y-8">
           {eyebrow && (
             <Badge variant="outline" className="border-white/20 bg-white/5 text-white backdrop-blur-sm text-sm px-4 py-1.5">
               {eyebrow}
@@ -101,7 +101,9 @@ export function FeatureShowcase({
             </h2>
           )}
           {description && (
-            <p className="text-lg text-white/70 font-light leading-relaxed">{description}</p>
+            <p className="text-lg text-white/70 font-light leading-relaxed">
+              {description}
+            </p>
           )}
           {stats.length > 0 && (
             <div className="flex flex-wrap gap-3">
@@ -129,14 +131,14 @@ export function FeatureShowcase({
           }}
           className="w-full touch-pan-x"
         >
-          <CarouselContent className="-ml-4">
+          <CarouselContent className="ml-4">
             {steps.map((step, idx) => {
               const tab = tabs[idx] || tabs[0];
               return (
-                <CarouselItem key={step.id} className="pl-4 basis-[92%]">
-                  <Card className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl">
-                    {/* Imagem */}
-                    <div className="relative aspect-[3/2] overflow-hidden">
+                <CarouselItem key={step.id} className="pl-4 basis-[90%] sm:basis-[85%]">
+                  <Card className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl h-[520px] flex flex-col">
+                    {/* Imagem - altura fixa */}
+                    <div className="relative h-[280px] overflow-hidden flex-shrink-0">
                       <img
                         src={tab.src}
                         alt={tab.alt ?? tab.label}
@@ -145,21 +147,27 @@ export function FeatureShowcase({
                         loading={idx === 0 ? "eager" : "lazy"}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      
+                      {/* Badge sobre a imagem */}
+                      {tab.label && (
+                        <div className="absolute top-4 right-4">
+                          <Badge className="bg-white/15 text-white/95 backdrop-blur-xl border border-white/20 text-xs px-3 py-1.5 shadow-lg">
+                            {tab.label}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Conteúdo do step */}
-                    <div className="p-6 space-y-4">
-                      <h3 className="text-2xl font-medium text-white">
-                        {step.title}
-                      </h3>
-                      <p className="text-base text-white/70 font-light leading-relaxed">
-                        {step.text}
-                      </p>
-                      {tab.label && (
-                        <Badge className="bg-white/10 text-white/90 backdrop-blur-sm border border-white/10 text-xs px-3 py-1">
-                          {tab.label}
-                        </Badge>
-                      )}
+                    {/* Conteúdo do step - altura fixa */}
+                    <div className="p-8 flex flex-col justify-between flex-1">
+                      <div className="space-y-4">
+                        <h3 className="text-2xl sm:text-3xl font-extralight text-white tracking-tight leading-tight">
+                          {step.title}
+                        </h3>
+                        <p className="text-base text-white/70 font-light leading-relaxed line-clamp-5">
+                          {step.text}
+                        </p>
+                      </div>
                     </div>
                   </Card>
                 </CarouselItem>
@@ -169,8 +177,8 @@ export function FeatureShowcase({
         </Carousel>
 
         {/* CTAs mobile */}
-        <div className="mt-10 flex flex-col gap-4">
-          <Button asChild size="lg" className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-full text-base h-12 px-8 min-h-[48px] touch-manipulation">
+        <div className="px-4 mt-12 flex flex-col gap-4">
+          <Button asChild size="lg" className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-full text-base h-12 px-8 min-h-[48px] touch-manipulation shadow-lg">
             <Link href="#start">Começar</Link>
           </Button>
           <Button
