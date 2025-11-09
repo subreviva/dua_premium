@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Building2, Coins } from "lucide-react"
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
+import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Building2, Coins, X } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { FeatureSteps } from "@/components/ui/feature-steps"
 import { Gallery6 } from "@/components/ui/gallery6"
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase"
@@ -18,6 +18,35 @@ import { HeroFounder } from "@/components/ui/hero-founder"
 export default function HomePage() {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
+  const [showIOSBanner, setShowIOSBanner] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detectar mobile e verificar se já instalou
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768
+      setIsMobile(mobile)
+      
+      // Mostrar banner apenas em mobile e se não instalou antes
+      if (mobile && !localStorage.getItem('dua-app-installed')) {
+        setShowIOSBanner(true)
+      }
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Função para instalar PWA
+  const handleInstallPWA = () => {
+    // Marcar como instalado
+    localStorage.setItem('dua-app-installed', 'true')
+    setShowIOSBanner(false)
+    
+    // Redirecionar para mobile-login (ponto de entrada da PWA)
+    router.push('/mobile-login')
+  }
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
@@ -31,52 +60,66 @@ export default function HomePage() {
     <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
       <Navbar />
 
-      {/* iOS APP BANNER - Ultra Premium & Elegante */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-20 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none"
-      >
-        <div className="max-w-md mx-auto pointer-events-auto">
-          <div className="relative group">
-            {/* Glow effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
-            
-            {/* Banner Card */}
-            <div className="relative bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-4 shadow-2xl">
-              <div className="flex items-center gap-4">
-                {/* App Icon */}
-                <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 p-0.5 shadow-lg">
-                  <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center">
-                    <span className="text-2xl font-bold bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent">
-                      D
-                    </span>
+      {/* iOS APP BANNER - APENAS MOBILE com AnimatePresence */}
+      <AnimatePresence>
+        {showIOSBanner && isMobile && (
+          <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed top-16 left-0 right-0 z-50 px-4 pointer-events-none"
+          >
+            <div className="max-w-md mx-auto pointer-events-auto">
+              <div className="relative group">
+                {/* Glow effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
+                
+                {/* Banner Card */}
+                <div className="relative bg-black/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-4 shadow-2xl">
+                  <div className="flex items-center gap-3">
+                    {/* App Icon */}
+                    <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 p-0.5 shadow-lg">
+                      <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center">
+                        <span className="text-2xl font-bold bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent">
+                          D
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Text Content */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm mb-0.5 truncate">
+                        DUA - AI Creative Studio
+                      </p>
+                      <p className="text-white/60 text-xs truncate">
+                        Disponível para iOS e Android
+                      </p>
+                    </div>
+
+                    {/* Install Button */}
+                    <button
+                      onClick={handleInstallPWA}
+                      className="flex-shrink-0 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
+                    >
+                      Instalar
+                    </button>
+
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setShowIOSBanner(false)}
+                      className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-300"
+                      aria-label="Fechar"
+                    >
+                      <X className="w-4 h-4 text-white/60" />
+                    </button>
                   </div>
                 </div>
-
-                {/* Text Content */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold text-sm mb-0.5 truncate">
-                    DUA - AI Creative Studio
-                  </p>
-                  <p className="text-white/60 text-xs truncate">
-                    Disponível para iOS e Android
-                  </p>
-                </div>
-
-                {/* Install Button */}
-                <button
-                  onClick={() => router.push("/mobile-login")}
-                  className="flex-shrink-0 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
-                >
-                  Instalar
-                </button>
               </div>
             </div>
-          </div>
-        </div>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* HERO SECTION - Ultra Premium iOS-like */}
       <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">

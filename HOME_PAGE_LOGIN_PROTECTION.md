@@ -14,11 +14,12 @@ Nenhum usuário não autenticado pode aceder a:
 
 ---
 
-## 📱 BANNER iOS - ULTRA ELEGANTE
+## 📱 BANNER iOS - ULTRA ELEGANTE (APENAS MOBILE)
 
 ### Localização
 **Posição:** Fixo no topo da página (abaixo do Navbar)
-**Arquivo:** `app/page.tsx` (linhas 35-79)
+**Arquivo:** `app/page.tsx` (linhas 35-130)
+**Visibilidade:** ⚠️ **APENAS MOBILE** (width ≤ 768px)
 
 ### Design Premium
 ```tsx
@@ -27,17 +28,49 @@ Nenhum usuário não autenticado pode aceder a:
 - Gradiente animado (blue → purple → pink)
 - App icon com efeito 3D
 - Botão "Instalar" com hover scale
-- Responsivo mobile/desktop
-- Animação de entrada suave (framer-motion)
+- Botão "Fechar" (X) para dispensar
+- Responsivo mobile ONLY
+- Animação de entrada/saída suave (AnimatePresence)
+- LocalStorage para não mostrar novamente após instalação
 ```
 
-### Comportamento
-- **Clique no botão "Instalar"** → Redireciona para `/mobile-login`
-- **Visual:**
-  - Ícone DUA com gradiente
-  - Texto: "DUA - AI Creative Studio"
-  - Subtítulo: "Disponível para iOS e Android"
-  - Botão azul com hover state
+### Comportamento Inteligente
+✅ **Detecção Mobile:**
+```typescript
+useEffect(() => {
+  const mobile = window.innerWidth <= 768
+  setIsMobile(mobile)
+  
+  // Mostrar APENAS em mobile E se não instalou antes
+  if (mobile && !localStorage.getItem('dua-app-installed')) {
+    setShowIOSBanner(true)
+  }
+}, [])
+```
+
+✅ **Instalação PWA:**
+- **Clique "Instalar"** → 
+  1. Salva `localStorage.setItem('dua-app-installed', 'true')`
+  2. Banner desaparece com animação suave
+  3. Redireciona para `/mobile-login` (entrada da PWA)
+  4. Não aparece mais (permanente)
+
+✅ **Fechar Banner:**
+- **Clique "X"** → 
+  1. Banner desaparece com animação
+  2. NÃO salva no localStorage (pode aparecer novamente)
+
+### Visual
+```
+┌─────────────────────────────────────────────┐
+│  ┌────┐  DUA - AI Creative Studio      [X]  │
+│  │ D  │  Disponível para iOS e Android      │
+│  └────┘                          [Instalar] │
+└─────────────────────────────────────────────┘
+   ↑                       ↑            ↑
+Gradiente              Botão azul   Fechar
+3D icon               hover scale   opcional
+```
 
 ---
 
