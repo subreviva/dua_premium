@@ -120,7 +120,7 @@ export default function VideoStudioHomePage() {
                   </div>
                 </Link>
 
-                <Link href="/videostudio/generate" className="group block transition-transform hover:scale-[1.02]">
+                <Link href="/videostudio/image-to-video" className="group block transition-transform hover:scale-[1.02]">
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500/10 to-orange-500/10 border border-white/10 p-6 h-full backdrop-blur-sm">
                     <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     
@@ -129,9 +129,9 @@ export default function VideoStudioHomePage() {
                         <Video className="w-7 h-7 text-white" strokeWidth={2.5} />
                       </div>
                       
-                      <h3 className="text-xl font-semibold mb-2 text-white">Texto → Vídeo</h3>
+                      <h3 className="text-xl font-semibold mb-2 text-white">Imagem → Vídeo</h3>
                       <p className="text-sm text-zinc-400 font-normal leading-relaxed">
-                        Descreva sua visão e veja ela ganhar vida em vídeo
+                        Transforme suas fotos em vídeos cinematográficos
                       </p>
                       
                       <div className="mt-4 flex items-center text-pink-400 text-sm font-medium">
