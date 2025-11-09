@@ -6,7 +6,7 @@
 - **Status:** PASSOU
 - **Localização:** `.env.local`
 - **Variável:** `NEXT_PUBLIC_GOOGLE_API_KEY`
-- **Primeiros caracteres:** `AIzaSyCqOO...`
+- **Primeiros caracteres:** `[REDACTED]...`
 - **Proteção:** Arquivo em `.gitignore` (NUNCA será commitado)
 
 ### Teste 2: Pacote Instalado ✅

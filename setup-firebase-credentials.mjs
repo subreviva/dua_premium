@@ -25,8 +25,17 @@ console.log(`   Client Email: ${serviceAccount.client_email}`);
 
 // Credenciais baseadas no project_id
 const projectId = serviceAccount.project_id;
+
+// SEGURANÇA: API Key deve ser configurada como variável de ambiente
+const apiKey = process.env.GOOGLE_API_KEY;
+if (!apiKey) {
+  console.error('\n❌ ERRO: GOOGLE_API_KEY não encontrada nas variáveis de ambiente!');
+  console.error('   Configure a variável GOOGLE_API_KEY no arquivo .env.local\n');
+  process.exit(1);
+}
+
 const credentials = {
-  apiKey: 'AIzaSyCqOOQHYQlhOkpFEgkJfAk1fenAxfyENPU', // Mesma do Google API já configurada
+  apiKey: apiKey,
   authDomain: `${projectId}.firebaseapp.com`,
   projectId: projectId,
   storageBucket: `${projectId}.firebasestorage.app`,

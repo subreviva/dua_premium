@@ -255,7 +255,7 @@ ai = new GoogleGenAI({ apiKey: API_KEY, vertexai: false });
 ✅ Armazenada em .env.local
 ✅ Protegida pelo .gitignore
 ✅ NUNCA commitada ao repositório
-✅ Primeiros 10 chars: AIzaSyCqOO...
+✅ Primeiros 10 chars: [REDACTED]...
 ```
 
 ### Modo de Operação
