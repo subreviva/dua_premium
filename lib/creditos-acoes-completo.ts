@@ -217,92 +217,110 @@ export const IMAGE_STUDIO_ACTIONS = {
 } as const;
 
 // ==========================================================================
-// 🎬 ESTÚDIO DE VÍDEO (Video Studio)
+// 🎬 ESTÚDIO DE VÍDEO (Video Studio) - RUNWAY ML
 // ==========================================================================
 
 export const VIDEO_STUDIO_ACTIONS = {
-  // API: /api/veo/generate
-  GENERATE_VIDEO_5S_FAST: {
-    endpoint: '/api/veo/generate',
-    nome: 'Gerar Vídeo 5s (Fast)',
-    descricao: 'Cria vídeo de 5 segundos com qualidade rápida (Veo 3.1 Fast)',
+  // API: /api/runway/text-to-video
+  TEXT_TO_VIDEO_4S: {
+    endpoint: '/api/runway/text-to-video',
+    nome: 'Gerar Vídeo 4s (Turbo)',
+    descricao: 'Cria vídeo de 4 segundos com Runway Gen-4 Turbo',
     creditos: 30,
     precoEUR: 0.900,
-    custoRealEUR: 0.675, // Veo 3.1 Fast: $0.15/s × 5s = $0.75
-    markup: '33%',
-    parametros: ['prompt', 'duration: 5', 'quality: fast'],
-    resolucao: '1080p',
+    custoRealEUR: 0.20, // Runway Gen-4 Turbo estimado
+    markup: '350%',
+    parametros: ['promptText', 'model: gen4_turbo', 'ratio', 'duration: 4'],
+    resolucao: '1280x720',
     exemplo: {
-      prompt: 'sunset over ocean waves',
-      duration: 5,
-      quality: 'fast',
+      promptText: 'sunset over ocean waves',
+      model: 'gen4_turbo',
+      ratio: '1280:720',
+      duration: 4,
       creditos_debitados: 30
     }
   },
 
-  GENERATE_VIDEO_15S_FAST: {
-    endpoint: '/api/veo/generate',
-    nome: 'Gerar Vídeo 15s (Fast)',
-    descricao: 'Cria vídeo de 15 segundos com qualidade rápida',
-    creditos: 90,
-    precoEUR: 2.700,
-    custoRealEUR: 2.025, // Veo 3.1 Fast: $0.15/s × 15s = $2.25
-    markup: '33%',
-    parametros: ['prompt', 'duration: 15', 'quality: fast'],
-    resolucao: '1080p',
+  TEXT_TO_VIDEO_5S: {
+    endpoint: '/api/runway/text-to-video',
+    nome: 'Gerar Vídeo 5s (Gen-3a)',
+    descricao: 'Cria vídeo de 5 segundos com Runway Gen-3a Turbo',
+    creditos: 35,
+    precoEUR: 1.050,
+    custoRealEUR: 0.25,
+    markup: '320%',
+    parametros: ['promptText', 'model: gen3a_turbo', 'ratio', 'duration: 5'],
+    resolucao: '1280x720',
     exemplo: {
-      prompt: 'person walking in city',
-      duration: 15,
-      quality: 'fast',
-      creditos_debitados: 90
-    }
-  },
-
-  GENERATE_VIDEO_5S_STANDARD: {
-    endpoint: '/api/veo/generate',
-    nome: 'Gerar Vídeo 5s (Standard)',
-    descricao: 'Cria vídeo de 5 segundos com qualidade máxima (Veo 3.1 Standard)',
-    creditos: 60,
-    precoEUR: 1.800,
-    custoRealEUR: 1.800, // Veo 3.1 Standard: $0.40/s × 5s = $2.00
-    markup: '0%',
-    parametros: ['prompt', 'duration: 5', 'quality: standard'],
-    resolucao: '4K',
-    exemplo: {
-      prompt: 'cinematic drone shot',
+      promptText: 'person walking in city',
+      model: 'gen3a_turbo',
+      ratio: '1280:720',
       duration: 5,
-      quality: 'standard',
-      creditos_debitados: 60
+      creditos_debitados: 35
     }
   },
 
-  GENERATE_VIDEO_15S_STANDARD: {
-    endpoint: '/api/veo/generate',
-    nome: 'Gerar Vídeo 15s (Standard)',
-    descricao: 'Cria vídeo de 15 segundos com qualidade máxima',
-    creditos: 180,
-    precoEUR: 5.400,
-    custoRealEUR: 5.400, // Veo 3.1 Standard: $0.40/s × 15s = $6.00
-    markup: '0%',
-    parametros: ['prompt', 'duration: 15', 'quality: standard'],
-    resolucao: '4K',
+  VIDEO_QUALITY_10S: {
+    endpoint: '/api/runway/text-to-video',
+    nome: 'Gerar Vídeo 10s (Aleph)',
+    descricao: 'Cria vídeo de 10 segundos com qualidade máxima (Gen-4 Aleph)',
+    creditos: 100,
+    precoEUR: 3.000,
+    custoRealEUR: 0.90,
+    markup: '233%',
+    parametros: ['promptText', 'model: gen4_aleph', 'ratio'],
+    resolucao: '1920x1080',
     exemplo: {
-      prompt: 'time-lapse of city night',
-      duration: 15,
-      quality: 'standard',
-      creditos_debitados: 180
+      promptText: 'cinematic drone shot',
+      model: 'gen4_aleph',
+      ratio: '1920:1080',
+      creditos_debitados: 100
+    }
+  },
+
+  // API: /api/runway/image-to-video
+  IMAGE_TO_VIDEO: {
+    endpoint: '/api/runway/image-to-video',
+    nome: 'Imagem → Vídeo',
+    descricao: 'Transforma imagem em vídeo animado',
+    creditos: 30,
+    precoEUR: 0.900,
+    custoRealEUR: 0.20,
+    markup: '350%',
+    parametros: ['promptImage', 'promptText', 'model', 'duration'],
+    exemplo: {
+      promptImage: 'https://example.com/image.jpg',
+      promptText: 'make the water flow gently',
+      creditos_debitados: 30
+    }
+  },
+
+  // API: /api/runway/video-to-video
+  VIDEO_TO_VIDEO: {
+    endpoint: '/api/runway/video-to-video',
+    nome: 'Vídeo → Vídeo',
+    descricao: 'Transforma vídeo aplicando estilos/efeitos',
+    creditos: 100,
+    precoEUR: 3.000,
+    custoRealEUR: 0.90,
+    markup: '233%',
+    parametros: ['videoUri', 'promptText', 'model: gen4_aleph'],
+    exemplo: {
+      videoUri: 'https://example.com/video.mp4',
+      promptText: 'transform into anime style',
+      creditos_debitados: 100
     }
   },
 
   // Futuro: Estender vídeo
   EXTEND_VIDEO: {
-    endpoint: '/api/veo/extend',
+    endpoint: '/api/runway/extend',
     nome: 'Estender Vídeo',
     descricao: 'Estende vídeo existente +5s',
     creditos: 15,
     precoEUR: 0.450,
-    custoRealEUR: 0.337, // Estimado: $0.15/s × 5s × 0.5 (extends use less compute)
-    markup: '33%',
+    custoRealEUR: 0.10,
+    markup: '350%',
     parametros: ['videoId', 'direction'],
     status: 'PLANEJADO',
     exemplo: {
@@ -314,13 +332,13 @@ export const VIDEO_STUDIO_ACTIONS = {
 
   // Futuro: Interpolação
   VIDEO_INTERPOLATION: {
-    endpoint: '/api/veo/interpolate',
+    endpoint: '/api/runway/interpolate',
     nome: 'Interpolação de Frames',
     descricao: 'Suaviza vídeo aumentando FPS (30fps → 60fps)',
     creditos: 20,
     precoEUR: 0.600,
-    custoRealEUR: 0.450,
-    markup: '33%',
+    custoRealEUR: 0.12,
+    markup: '400%',
     parametros: ['videoId', 'targetFps'],
     status: 'PLANEJADO',
     exemplo: {

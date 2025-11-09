@@ -17,9 +17,9 @@ export const CREDITOS_CONFIG = {
     CHAT_GEMINI: 0.00005,        // Gemini 2.5 Flash (100 tokens)
     MUSICA_SUNO_V5: 0.054,       // Suno V5 (12 créditos Suno)
     MUSICA_FULL: 0.162,          // V5 + Instrumental + Vocals
-    VIDEO_5S_FAST: 0.675,        // Veo 3.1 Fast (5s)
-    VIDEO_15S_FAST: 2.025,       // Veo 3.1 Fast (15s)
-    VIDEO_5S_STANDARD: 1.800,    // Veo 3.1 Standard (5s)
+    VIDEO_RUNWAY_4S: 0.20,       // Runway Gen-4 Turbo (4s) ~$0.22
+    VIDEO_RUNWAY_5S: 0.25,       // Runway Gen-3a Turbo (5s) ~$0.28
+    VIDEO_RUNWAY_10S: 0.90,      // Runway Gen-4 Aleph (10s) ~$1.00
     WAV_CONVERT: 0.0018,         // Suno WAV
     SEPARATE_VOCALS: 0.045,      // Suno Vocals
     STEM_SPLIT: 0.225,           // Suno Stem Split
@@ -43,11 +43,12 @@ export const CREDITOS_CONFIG = {
     STEM_SPLIT: 25,              // €0,750 (markup: 233%)
     MUSICA_EXTEND: 8,            // €0,240 (estender música)
     
-    // ESTÚDIO DE VÍDEO
-    VIDEO_5S_FAST: 30,           // €0,900 (custo real: €0,675, markup: 33%)
-    VIDEO_15S_FAST: 90,          // €2,700 (custo real: €2,025, markup: 33%)
-    VIDEO_5S_STANDARD: 60,       // €1,800 (custo real: €1,800, markup: 0%)
-    VIDEO_15S_STANDARD: 180,     // €5,400 (custo real: €5,400, markup: 0%)
+    // ESTÚDIO DE VÍDEO (Runway ML)
+    VIDEO_4S_TURBO: 30,          // €0,900 (custo real: €0,20, markup: 350%)
+    VIDEO_5S_TURBO: 35,          // €1,050 (custo real: €0,25, markup: 320%)
+    VIDEO_10S_ALEPH: 100,        // €3,000 (custo real: €0,90, markup: 233%)
+    VIDEO_TO_VIDEO: 100,         // €3,000 (transformações de vídeo)
+    VIDEO_IMAGE_TO_VIDEO: 30,    // €0,900 (imagem para vídeo)
     VIDEO_EXTEND: 15,            // Estender vídeo
     VIDEO_UPSCALE: 10,           // Upscale qualidade
     VIDEO_INTERPOLATION: 20,     // Interpolação de frames
