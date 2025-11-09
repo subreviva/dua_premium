@@ -105,19 +105,6 @@ export function FeatureShowcase({
               {description}
             </p>
           )}
-          {stats.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              {stats.map((s, i) => (
-                <Badge
-                  key={i}
-                  variant="secondary"
-                  className="bg-white/10 text-white/90 backdrop-blur-sm border border-white/10 text-sm px-4 py-2"
-                >
-                  {s}
-                </Badge>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Carrossel mobile - cada step com sua imagem */}
@@ -136,7 +123,7 @@ export function FeatureShowcase({
               const tab = tabs[idx] || tabs[0];
               return (
                 <CarouselItem key={step.id} className="pl-4 basis-[90%] sm:basis-[85%]">
-                  <Card className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl h-[520px] flex flex-col">
+                  <Card className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl h-[580px] flex flex-col">
                     {/* Imagem - altura fixa */}
                     <div className="relative h-[280px] overflow-hidden flex-shrink-0">
                       <img
@@ -160,11 +147,11 @@ export function FeatureShowcase({
 
                     {/* Conteúdo do step - altura fixa */}
                     <div className="p-8 flex flex-col justify-between flex-1">
-                      <div className="space-y-4">
+                      <div className="space-y-5">
                         <h3 className="text-2xl sm:text-3xl font-extralight text-white tracking-tight leading-tight">
                           {step.title}
                         </h3>
-                        <p className="text-base text-white/70 font-light leading-relaxed line-clamp-5">
+                        <p className="text-base text-white/70 font-light leading-relaxed">
                           {step.text}
                         </p>
                       </div>
