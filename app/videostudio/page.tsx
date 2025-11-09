@@ -1,564 +1,208 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
-import { Video, Loader2, PlayCircle, Clock, Image as ImageIcon, Film, Settings, Wand2, CheckCircle2 } from "lucide-react"
-import { BeamsBackground } from "@/components/ui/beams-background"
-import { PremiumNavbar } from "@/components/ui/premium-navbar"
-import { VideoModal } from "@/components/ui/video-modal"
-import { useIsMobile } from "@/lib/hooks"
-import { useVeoApi, VEO_MODELS, type VeoModel, type VeoMode } from "@/hooks/useVeoApi"
+import { useState } from "react"
+import { Film, ImagePlay, Wand2, ArrowUpCircle, Sparkles, ArrowRight } from "lucide-react"
+import { CinemaSidebar } from "@/components/cinema-sidebar"
+import { motion } from "framer-motion"
+import { useRouter } from "next/navigation"
 
-export default function VideoStudioPage() {
-  const isMobile = useIsMobile()
-  const veoApi = useVeoApi()
+export default function VideoStudioHub() {
+  const router = useRouter()
+  const [hoveredTool, setHoveredTool] = useState<string | null>(null)
 
-  // Form state
-  const [prompt, setPrompt] = useState("")
-  const [negativePrompt, setNegativePrompt] = useState("")
-  const [selectedModel, setSelectedModel] = useState<VeoModel>("veo-3.1-preview")
-  const [mode, setMode] = useState<VeoMode>("text-to-video")
-  const [resolution, setResolution] = useState<"720p" | "1080p">("720p")
-  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("16:9")
-  const [duration, setDuration] = useState<4 | 5 | 6 | 8>(8)
-  const [seed, setSeed] = useState<number | undefined>(undefined)
-  const [personGeneration, setPersonGeneration] = useState<"allow_all" | "allow_adult" | "dont_allow">("allow_all")
-  const [showAdvanced, setShowAdvanced] = useState(false)
-  const [showVideoModal, setShowVideoModal] = useState(false)
-
-  // File inputs
-  const [firstFrameImage, setFirstFrameImage] = useState<File | null>(null)
-  const [lastFrameImage, setLastFrameImage] = useState<File | null>(null)
-  const [inputVideo, setInputVideo] = useState<File | null>(null)
-  const [referenceImages, setReferenceImages] = useState<Array<{ file: File; type: "asset" | "style" }>>([])
-
-  const firstFrameRef = useRef<HTMLInputElement>(null)
-  const lastFrameRef = useRef<HTMLInputElement>(null)
-  const inputVideoRef = useRef<HTMLInputElement>(null)
-  const referenceImageRef = useRef<HTMLInputElement>(null)
-
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return
-
-    try {
-      await veoApi.generateVideo({
-        model: selectedModel,
-        mode,
-        prompt,
-        negativePrompt: negativePrompt || undefined,
-        firstFrameImage: firstFrameImage || undefined,
-        lastFrameImage: lastFrameImage || undefined,
-        inputVideo: inputVideo || undefined,
-        referenceImages:
-          referenceImages.length > 0
-            ? referenceImages.map((ref) => ({ image: ref.file, referenceType: ref.type }))
-            : undefined,
-        resolution,
-        aspectRatio,
-        durationSeconds: duration,
-        personGeneration,
-        seed,
-        numberOfVideos: 1,
-      })
-    } catch (error) {
-      // console.error("Error generating video:", error)
+  const tools = [
+    {
+      id: "criar",
+      name: "Imagem para Vídeo",
+      description: "Transforme imagens estáticas em vídeos cinematográficos com movimento e vida",
+      icon: ImagePlay,
+      path: "/videostudio/criar",
+      features: ["Duração 2-10s", "6 proporções", "Controle de câmera"],
+      gradient: "from-blue-500/20 to-purple-500/20",
+      examples: [
+        "Câmera se movendo para frente",
+        "Zoom revelando detalhes",
+        "Movimento panorâmico"
+      ]
+    },
+    {
+      id: "editar",
+      name: "Editor Criativo",
+      description: "Edite e transforme vídeos com IA - ajuste câmera, objetos, iluminação e cenários",
+      icon: Wand2,
+      path: "/videostudio/editar",
+      features: ["Vídeo para vídeo", "Transformação criativa", "8 proporções"],
+      gradient: "from-purple-500/20 to-pink-500/20",
+      examples: [
+        "Transformar estilo",
+        "Modificar cena",
+        "Efeitos criativos"
+      ]
+    },
+    {
+      id: "qualidade",
+      name: "Qualidade 4K",
+      description: "Melhore a resolução do seu vídeo até 4K com processamento inteligente",
+      icon: ArrowUpCircle,
+      path: "/videostudio/qualidade",
+      features: ["Resolução 4K", "Melhoria com IA", "Qualidade profissional"],
+      gradient: "from-orange-500/20 to-red-500/20",
+      examples: [
+        "Upscale para 4K",
+        "Melhorar detalhes",
+        "Qualidade profissional"
+      ]
     }
-  }
-
-  const handleFirstFrameSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setFirstFrameImage(e.target.files[0])
-  }
-
-  const handleLastFrameSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setLastFrameImage(e.target.files[0])
-  }
-
-  const handleInputVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setInputVideo(e.target.files[0])
-  }
-
-  const handleReferenceImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0] && referenceImages.length < 3) {
-      setReferenceImages([...referenceImages, { file: e.target.files[0], type: "asset" }])
-    }
-  }
-
-  const removeReferenceImage = (index: number) => {
-    setReferenceImages(referenceImages.filter((_, i) => i !== index))
-  }
-
-  const modelInfo = VEO_MODELS[selectedModel]
-  const canUseMode = modelInfo.features.includes(mode as any)
+  ]
 
   return (
-    <BeamsBackground>
-      <PremiumNavbar />
+    <div className="flex h-screen overflow-hidden bg-black">
+      <CinemaSidebar />
 
-      <div className={cn("relative z-10 w-full", isMobile ? "px-4 pt-24 pb-20" : "px-6 pt-28 pb-16")}>
-        {/* Header - Ultra Elegante */}
-        <div className={cn("text-center", isMobile ? "mb-6" : "mb-10")}>
-          <h1 className={cn("font-bold text-white mb-2", isMobile ? "text-2xl" : "text-3xl sm:text-4xl")}>
-            Video Studio
-          </h1>
-          <p className={cn("text-white/50", isMobile ? "text-xs" : "text-sm")}>
-            Geração cinematográfica com Veo 3.1
-          </p>
-        </div>
-
-        {/* Main Card - Compacto e Elegante */}
-        <main className="w-full max-w-4xl mx-auto">
-          <div
-            className={cn(
-              "bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden",
-              isMobile ? "p-4" : "p-5 sm:p-6",
-            )}
-          >
-            {/* Prompt - Compacto */}
-            <div className="mb-3">
-              <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Descreva seu vídeo cinematográfico..."
-                className={cn(
-                  "bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl resize-none focus:ring-1 focus:ring-purple-500/50 transition-all",
-                  isMobile ? "min-h-[100px] text-sm p-3" : "min-h-[80px] text-sm p-3",
-                )}
-                maxLength={1024}
-              />
-              <div className="flex justify-end mt-1 px-1">
-                <span className="text-[10px] text-white/30">{prompt.length}/1024</span>
+      <div className="flex-1 overflow-y-auto">
+        {/* Header */}
+        <div className="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-xl">
+                <Film className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </div>
-            </div>
-
-            {/* Negative Prompt - Só quando Advanced */}
-            {showAdvanced && (
-              <div className="mb-3 space-y-3">
-                <div>
-                  <Textarea
-                    value={negativePrompt}
-                    onChange={(e) => setNegativePrompt(e.target.value)}
-                    placeholder="O que evitar (cartoon, drawing, low quality...)"
-                    className={cn(
-                      "bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl resize-none focus:ring-1 focus:ring-orange-500/50 transition-all",
-                      isMobile ? "min-h-[60px] text-sm p-3" : "min-h-[50px] text-xs p-3",
-                    )}
-                    maxLength={512}
-                  />
-                  <div className="flex justify-between items-center mt-1 px-1">
-                    <span className="text-[10px] text-orange-400/50">Negative Prompt</span>
-                    <span className="text-[10px] text-white/30">{negativePrompt.length}/512</span>
-                  </div>
-                </div>
-
-                {/* Google Veo 3 New Parameters */}
-                <div className={cn("grid gap-2", isMobile ? "grid-cols-1" : "grid-cols-2")}>
-                  <div>
-                    <label className="text-[10px] text-gray-400 mb-1 block px-1">Seed (Determinismo)</label>
-                    <input
-                      type="number"
-                      value={seed || ""}
-                      onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : undefined)}
-                      placeholder="Ex: 42"
-                      className={cn(
-                        "w-full bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-xl focus:ring-1 focus:ring-purple-500/50 transition-all",
-                        isMobile ? "h-11 text-sm px-3" : "h-9 text-xs px-3"
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-gray-400 mb-1 block px-1">Geração de Pessoas</label>
-                    <Select value={personGeneration} onValueChange={(v) => setPersonGeneration(v as typeof personGeneration)}>
-                      <SelectTrigger className={cn(
-                        "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl",
-                        isMobile ? "h-11 px-3 text-sm" : "h-9 px-3 text-xs"
-                      )}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                        <SelectItem value="allow_all">Permitir Todos</SelectItem>
-                        <SelectItem value="allow_adult">Apenas Adultos</SelectItem>
-                        <SelectItem value="dont_allow">Não Permitir</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extralight text-white tracking-tight">
+                  DUA Cinema
+                </h1>
+                <p className="text-sm sm:text-base text-white/40 font-light mt-1">
+                  Estúdio Profissional de Vídeo • 3 Ferramentas Poderosas
+                </p>
               </div>
-            )}
-
-            {/* Controls - Ultra Compacto */}
-            <div className="space-y-3">
-              {/* Row 1: Mode & Model - Desktop horizontal, Mobile 2 col grid */}
-              {isMobile ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl px-3 h-11 flex items-center justify-center text-xs font-medium">
-                    <Video className="w-3.5 h-3.5 mr-1.5" />
-                    <span>Vídeo</span>
-                  </div>
-
-                  <Select value={mode} onValueChange={(v) => setMode(v as VeoMode)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="text-to-video">Texto → Vídeo</SelectItem>
-                      <SelectItem value="image-to-video">Imagem → Vídeo</SelectItem>
-                      <SelectItem value="reference-images">Refs</SelectItem>
-                      <SelectItem value="interpolation">Interpolação</SelectItem>
-                      <SelectItem value="extension">Extensão</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-lg px-2.5 h-9 flex items-center text-xs font-medium flex-shrink-0">
-                    <Video className="w-3.5 h-3.5 mr-1.5" />
-                    <span>Vídeo</span>
-                  </div>
-
-                  <Select value={mode} onValueChange={(v) => setMode(v as VeoMode)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[130px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="text-to-video">Texto → Vídeo</SelectItem>
-                      <SelectItem value="image-to-video">Imagem → Vídeo</SelectItem>
-                      <SelectItem value="reference-images">Refs</SelectItem>
-                      <SelectItem value="interpolation">Interpolação</SelectItem>
-                      <SelectItem value="extension">Extensão</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as VeoModel)}>
-                    <SelectTrigger
-                      className={cn(
-                        "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[130px]",
-                        !canUseMode && "opacity-40",
-                      )}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="veo-3.1-preview">Veo 3.1</SelectItem>
-                      <SelectItem value="veo-3.1-fast">Veo 3.1 Fast</SelectItem>
-                      <SelectItem value="veo-3.0">Veo 3.0</SelectItem>
-                      <SelectItem value="veo-3.0-fast">Veo 3.0 Fast</SelectItem>
-                      <SelectItem value="veo-2.0">Veo 2.0</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Row 2: Model (mobile only) */}
-              {isMobile && (
-                <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as VeoModel)}>
-                  <SelectTrigger
-                    className={cn(
-                      "bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-3 text-xs w-full",
-                      !canUseMode && "opacity-40",
-                    )}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                    <SelectItem value="veo-3.1-preview">Veo 3.1 Preview</SelectItem>
-                    <SelectItem value="veo-3.1-fast">Veo 3.1 Fast</SelectItem>
-                    <SelectItem value="veo-3.0">Veo 3.0</SelectItem>
-                    <SelectItem value="veo-3.0-fast">Veo 3.0 Fast</SelectItem>
-                    <SelectItem value="veo-2.0">Veo 2.0</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-
-              {/* Row 3: Settings - Desktop horizontal, Mobile 3 col grid */}
-              {isMobile ? (
-                <div className="grid grid-cols-3 gap-2">
-                  <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-2 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="16:9">16:9</SelectItem>
-                      <SelectItem value="9:16">9:16</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={resolution} onValueChange={(v) => setResolution(v as typeof resolution)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-2 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="720p">720p</SelectItem>
-                      <SelectItem value="1080p">1080p</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v) as 4 | 5 | 6 | 8)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl h-11 px-2 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="4">4s</SelectItem>
-                      <SelectItem value="5">5s</SelectItem>
-                      <SelectItem value="6">6s</SelectItem>
-                      <SelectItem value="8">8s</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Select value={aspectRatio} onValueChange={(v) => setAspectRatio(v as typeof aspectRatio)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[75px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="16:9">16:9</SelectItem>
-                      <SelectItem value="9:16">9:16</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={resolution} onValueChange={(v) => setResolution(v as typeof resolution)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[85px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="720p">720p</SelectItem>
-                      <SelectItem value="1080p">1080p</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v) as 4 | 5 | 6 | 8)}>
-                    <SelectTrigger className="bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-lg h-9 px-2.5 text-xs flex-shrink-0 w-[65px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                      <SelectItem value="4">4s</SelectItem>
-                      <SelectItem value="5">5s</SelectItem>
-                      <SelectItem value="6">6s</SelectItem>
-                      <SelectItem value="8">8s</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* File Uploads - Baseado no modo */}
-              {(mode === "image-to-video" || mode === "interpolation") && (
-                <div className={cn("flex gap-2", isMobile ? "flex-col" : "flex-row")}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => firstFrameRef.current?.click()}
-                    className={cn(
-                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95",
-                      isMobile ? "h-11 text-xs" : "h-9 px-3 text-xs",
-                      firstFrameImage && "border-purple-500/30 bg-purple-500/10 text-purple-400",
-                    )}
-                  >
-                    <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                    {firstFrameImage ? "Primeiro Frame" : "Primeiro Frame"}
-                  </Button>
-                  <input ref={firstFrameRef} type="file" accept="image/*" onChange={handleFirstFrameSelect} className="hidden" />
-
-                  {mode === "interpolation" && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => lastFrameRef.current?.click()}
-                        className={cn(
-                          "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95",
-                          isMobile ? "h-11 text-xs" : "h-9 px-3 text-xs",
-                          lastFrameImage && "border-purple-500/30 bg-purple-500/10 text-purple-400",
-                        )}
-                      >
-                        <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                        {lastFrameImage ? "Último Frame" : "Último Frame"}
-                      </Button>
-                      <input ref={lastFrameRef} type="file" accept="image/*" onChange={handleLastFrameSelect} className="hidden" />
-                    </>
-                  )}
-                </div>
-              )}
-
-              {mode === "reference-images" && (
-                <div className="space-y-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => referenceImageRef.current?.click()}
-                    disabled={referenceImages.length >= 3}
-                    className={cn(
-                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95 w-full",
-                      isMobile ? "h-11 text-xs" : "h-9 text-xs",
-                    )}
-                  >
-                    <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                    Refs ({referenceImages.length}/3)
-                  </Button>
-                  <input ref={referenceImageRef} type="file" accept="image/*" onChange={handleReferenceImageSelect} className="hidden" />
-                  {referenceImages.length > 0 && (
-                    <div className="flex gap-2 flex-wrap">
-                      {referenceImages.map((ref, index) => (
-                        <div key={index} className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-2.5 py-1.5 text-[10px] text-purple-400 flex items-center gap-1.5">
-                          <span className="truncate max-w-[80px]">{ref.file.name}</span>
-                          <button onClick={() => removeReferenceImage(index)} className="text-purple-400 hover:text-purple-300">
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {mode === "extension" && (
-                <div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => inputVideoRef.current?.click()}
-                    className={cn(
-                      "bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all active:scale-95 w-full",
-                      isMobile ? "h-11 text-xs" : "h-9 text-xs",
-                      inputVideo && "border-purple-500/30 bg-purple-500/10 text-purple-400",
-                    )}
-                  >
-                    <Film className="w-3.5 h-3.5 mr-1.5" />
-                    {inputVideo ? `${inputVideo.name}` : "Selecionar Vídeo"}
-                  </Button>
-                  <input ref={inputVideoRef} type="file" accept="video/*" onChange={handleInputVideoSelect} className="hidden" />
-                </div>
-              )}
-
-              {/* Generate Button - Premium */}
-              <div className="flex items-center justify-between gap-2 pt-1">
-                <div className="flex items-center gap-2">
-                  {veoApi.operation && (
-                    <div className="flex items-center gap-1.5 text-white/60 text-[10px]">
-                      <Clock className="w-3 h-3 animate-pulse" />
-                      <span>
-                        {veoApi.operation.status === "processing"
-                          ? `${veoApi.operation.progress}%`
-                          : veoApi.operation.status}
-                      </span>
-                    </div>
-                  )}
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className={cn(
-                      "rounded-lg transition-all active:scale-95",
-                      isMobile ? "h-10 w-10 p-0" : "h-9 w-9 p-0",
-                      showAdvanced && "bg-purple-500/20 text-purple-400",
-                    )}
-                    title="Avançado"
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-
-                <Button
-                  disabled={!prompt.trim() || veoApi.isLoading || !canUseMode}
-                  size="sm"
-                  className={cn(
-                    "rounded-xl transition-all font-medium active:scale-95",
-                    isMobile ? "px-5 h-11 text-sm flex-1" : "px-4 h-9 text-xs ml-auto",
-                    prompt.trim() && !veoApi.isLoading && canUseMode
-                      ? "bg-gradient-to-r from-purple-500 via-purple-600 to-pink-500 hover:from-purple-600 hover:via-purple-700 hover:to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                      : "bg-white/5 text-white/30 cursor-not-allowed",
-                  )}
-                  onClick={handleGenerate}
-                >
-                  {veoApi.isLoading ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                      {isMobile ? "Gerando..." : "..."}
-                    </>
-                  ) : (
-                    <>
-                      <PlayCircle className="w-3.5 h-3.5 mr-1.5" />
-                      Gerar
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Error */}
-              {veoApi.error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-2.5 text-red-400 text-xs">
-                  {veoApi.error}
-                </div>
-              )}
-
-              {/* Success - Agora com Modal iOS Premium */}
-              {veoApi.operation?.status === "completed" && veoApi.operation.video && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
-                  <button
-                    onClick={() => setShowVideoModal(true)}
-                    className="w-full group"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Vídeo pronto! Toque para visualizar</span>
-                      </div>
-                      <PlayCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="relative rounded-lg overflow-hidden">
-                      {veoApi.operation.video.thumbnailUrl ? (
-                        <img 
-                          src={veoApi.operation.video.thumbnailUrl} 
-                          alt="Video thumbnail"
-                          className="w-full aspect-video object-cover"
-                        />
-                      ) : (
-                        <div className="w-full aspect-video bg-black/40 flex items-center justify-center">
-                          <Film className="w-8 h-8 text-white/40" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <PlayCircle className="w-12 h-12 text-white" />
-                      </div>
-                    </div>
-                    <div className="flex gap-2 text-[10px] text-white/40 mt-2">
-                      <span>{veoApi.operation.video.resolution}</span>
-                      <span>•</span>
-                      <span>{veoApi.operation.video.aspectRatio}</span>
-                      <span>•</span>
-                      <span>{veoApi.operation.video.duration}s</span>
-                    </div>
-                  </button>
-                </div>
-              )}
             </div>
           </div>
-        </main>
-      </div>
+        </div>
 
-      {/* Video Modal iOS Premium */}
-      {veoApi.operation?.video && (
-        <VideoModal
-          isOpen={showVideoModal}
-          onClose={() => setShowVideoModal(false)}
-          video={{
-            url: veoApi.operation.video.url,
-            thumbnailUrl: veoApi.operation.video.thumbnailUrl,
-            prompt: prompt,
-            resolution: veoApi.operation.video.resolution,
-            aspectRatio: veoApi.operation.video.aspectRatio,
-            duration: veoApi.operation.video.duration,
-            model: selectedModel,
-            settings: {
-              mode: mode,
-              negativePrompt: negativePrompt || undefined,
-            },
-          }}
-        />
-      )}
-    </BeamsBackground>
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          
+          {/* Hero Section */}
+          <div className="text-center mb-12 sm:mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-4xl sm:text-5xl lg:text-7xl font-extralight text-white mb-6 tracking-tight">
+                Crie
+                <br />
+                <span className="bg-gradient-to-r from-white/90 to-white/50 bg-clip-text text-transparent">
+                  Vídeos Profissionais
+                </span>
+              </h2>
+              <p className="text-base sm:text-lg text-white/40 font-light max-w-2xl mx-auto">
+                Suite completa de ferramentas de vídeo com inteligência artificial
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Tools Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-12">
+            {tools.map((tool, index) => (
+              <motion.div
+                key={tool.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                onMouseEnter={() => setHoveredTool(tool.id)}
+                onMouseLeave={() => setHoveredTool(null)}
+                onClick={() => router.push(tool.path)}
+                className="group relative cursor-pointer"
+              >
+                {/* Glow Effect */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${tool.gradient} rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500`} />
+                
+                {/* Card */}
+                <div className="relative border border-white/10 rounded-3xl p-6 sm:p-8 hover:border-white/20 transition-all duration-500 bg-white/[0.02] backdrop-blur-xl">
+                  
+                  {/* Icon & Title */}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all duration-300">
+                        <tool.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl sm:text-2xl font-light text-white">
+                          {tool.name}
+                        </h3>
+                      </div>
+                    </div>
+                    
+                    <ArrowRight className={`w-5 h-5 text-white/40 group-hover:text-white group-hover:translate-x-1 transition-all duration-300 ${hoveredTool === tool.id ? 'opacity-100' : 'opacity-0'}`} />
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm sm:text-base text-white/60 font-light mb-6">
+                    {tool.description}
+                  </p>
+
+                  {/* Features */}
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {tool.features.map((feature, idx) => (
+                      <div
+                        key={idx}
+                        className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/60 text-xs font-light"
+                      >
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Examples */}
+                  <div className="space-y-2">
+                    <p className="text-xs text-white/40 font-light mb-3">Exemplos:</p>
+                    {tool.examples.map((example, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 text-sm text-white/50 font-light"
+                      >
+                        <Sparkles className="w-3 h-3 text-white/30" />
+                        {example}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA Button */}
+                  <div className="mt-6 pt-6 border-t border-white/5">
+                    <button className="w-full px-6 py-3 rounded-xl bg-white/10 border border-white/20 hover:bg-white/[0.15] transition-all duration-300 text-white font-light text-sm group-hover:border-white/30">
+                      Começar
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Info Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 sm:p-8"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-5 h-5 text-white/60" />
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-light text-white mb-2">
+                  Tecnologia de IA Avançada
+                </h3>
+                <p className="text-sm sm:text-base text-white/60 font-light leading-relaxed">
+                  Nosso estúdio utiliza modelos de inteligência artificial de última geração para criar, editar e melhorar vídeos com qualidade profissional. Transforme suas ideias em realidade com ferramentas poderosas e intuitivas.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+    </div>
   )
 }

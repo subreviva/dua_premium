@@ -192,9 +192,9 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
   return (
     <>
       <audio ref={audioRef} preload="metadata" />
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/20 bg-card/95 backdrop-blur-2xl pb-safe md:pb-0">
+  <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.06] bg-black/80 backdrop-blur-3xl pb-safe-mobile md:pb-0">
         {audioError && (
-          <div className="bg-destructive/10 px-4 py-2 text-center text-xs font-light text-destructive">
+          <div className="bg-red-500/10 px-4 py-2 text-center text-xs font-light text-red-400/90 border-b border-red-500/20">
             {audioError}
           </div>
         )}
@@ -212,7 +212,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
         <div className="px-4 py-3 md:px-6 md:py-4">
           <div className="flex items-center gap-3 md:gap-6">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="h-12 w-12 md:h-16 md:w-16 flex-shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 shadow-lg shadow-black/20">
+              <div className="h-12 w-12 md:h-16 md:w-16 flex-shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl">
                 {track.imageUrl ? (
                   <img
                     src={track.imageUrl || "/placeholder.svg"}
@@ -222,7 +222,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
                     <svg
-                      className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground/30"
+                      className="h-5 w-5 md:h-6 md:w-6 text-white/30"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -238,8 +238,8 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-light text-sm md:text-base tracking-wide text-foreground">{track.title}</p>
-                <p className="truncate text-[10px] md:text-xs font-light text-muted-foreground/60">
+                <p className="truncate font-medium text-sm md:text-base tracking-tight text-white/95">{track.title}</p>
+                <p className="truncate text-[10px] md:text-xs font-light text-white/50">
                   {formatTime(currentTime)} / {formatTime(validDuration)}
                 </p>
               </div>
@@ -247,7 +247,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
 
             <div className="flex items-center gap-1 md:gap-2">
               <button
-                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-all hover:bg-sidebar-accent/50 hover:text-foreground active:scale-90 touch-manipulation"
+                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-white/60 transition-all hover:bg-white/[0.08] hover:text-white/90 active:scale-90 touch-manipulation"
                 onClick={skipBackward}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,7 +261,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
               </button>
 
               <button
-                className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-white shadow-xl shadow-primary/30 transition-all hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 active:scale-95 touch-manipulation"
+                className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-white/[0.12] border border-white/[0.15] text-white backdrop-blur-xl transition-all hover:bg-white/[0.15] hover:scale-105 active:scale-95 touch-manipulation"
                 onClick={togglePlay}
               >
                 {isPlaying ? (
@@ -276,7 +276,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
               </button>
 
               <button
-                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-all hover:bg-sidebar-accent/50 hover:text-foreground active:scale-90 touch-manipulation"
+                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-white/60 transition-all hover:bg-white/[0.08] hover:text-white/90 active:scale-90 touch-manipulation"
                 onClick={skipForward}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -292,7 +292,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
 
             <div className="flex items-center gap-1">
               <button
-                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-all hover:bg-sidebar-accent/50 hover:text-foreground active:scale-90 touch-manipulation"
+                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-white/60 transition-all hover:bg-white/[0.08] hover:text-white/90 active:scale-90 touch-manipulation"
                 onClick={handleOpenFullPlayer}
                 aria-label="Abrir player completo"
               >
@@ -306,7 +306,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
                 </svg>
               </button>
               <button
-                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-all hover:bg-sidebar-accent/50 hover:text-foreground active:scale-90 touch-manipulation"
+                className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full text-white/60 transition-all hover:bg-white/[0.08] hover:text-white/90 active:scale-90 touch-manipulation"
                 onClick={onClose}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -317,7 +317,7 @@ export function BottomPlayer({ track, onOpenFullPlayer, onClose }: BottomPlayerP
 
             <div className="hidden lg:flex items-center gap-3">
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-all hover:bg-sidebar-accent/50 hover:text-foreground active:scale-95"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-white/60 transition-all hover:bg-white/[0.08] hover:text-white/90 active:scale-95"
                 onClick={toggleMute}
               >
                 {isMuted || volume === 0 ? (

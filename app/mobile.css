@@ -1,0 +1,263 @@
+/* Mobile-specific styles */
+
+/* iOS Safe Areas */
+@supports (padding: max(0px)) {
+  .pt-safe {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+  
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+  
+  .pl-safe {
+    padding-left: max(env(safe-area-inset-left), 1rem);
+  }
+  
+  .pr-safe {
+    padding-right: max(env(safe-area-inset-right), 1rem);
+  }
+}
+
+/* Prevenir scroll bounce no iOS */
+body.mobile-app {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Remover highlight ao tocar (iOS) */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Botões mobile */
+button, a {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Input fields mobile */
+input, textarea {
+  font-size: 16px; /* Prevenir zoom no iOS */
+}
+
+/* Scroll suave */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Pull to refresh prevention */
+.no-pull-refresh {
+  overscroll-behavior-y: contain;
+}
+
+/* Hide scrollbar mas manter funcionalidade */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Active states mobile */
+.mobile-active:active {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+
+/* Haptic feedback visual */
+.haptic-light:active {
+  transform: scale(0.98);
+}
+
+.haptic-medium:active {
+  transform: scale(0.95);
+}
+
+.haptic-heavy:active {
+  transform: scale(0.92);
+}
+
+/* Bottom navigation safe area */
+.bottom-nav-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}
+
+/* Status bar overlay */
+.status-bar-overlay {
+  height: env(safe-area-inset-top);
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(20px);
+}
+
+/* Notch/Island support */
+@media (display-mode: standalone) {
+  .app-header {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+}
+
+/* Landscape mode adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .mobile-content {
+    padding-top: 0.5rem;
+  }
+}
+
+/* PWA display mode detection */
+@media (display-mode: standalone) {
+  body {
+    user-select: none;
+  }
+  
+  /* Full height para PWA */
+  .pwa-full-height {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+}
+
+/* Touch gestures */
+.swipeable {
+  touch-action: pan-y;
+}
+
+/* Card press effect */
+.card-press:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Loading states mobile */
+@keyframes mobile-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.mobile-loading {
+  animation: mobile-pulse 1.5s ease-in-out infinite;
+}
+
+/* Bottom sheet styles */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.95);
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  backdrop-filter: blur(20px);
+}
+
+/* Drawer handle */
+.drawer-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  margin: 0.5rem auto 1rem;
+}
+
+/* Toast notifications mobile */
+.mobile-toast {
+  position: fixed;
+  top: max(env(safe-area-inset-top), 1rem);
+  left: 1rem;
+  right: 1rem;
+  z-index: 9999;
+}
+
+/* Context menu mobile */
+.mobile-context-menu {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.95);
+  border-radius: 1rem;
+  backdrop-filter: blur(20px);
+  padding: 0.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Floating action button */
+.fab {
+  position: fixed;
+  bottom: max(calc(env(safe-area-inset-bottom) + 5rem), 6rem);
+  right: 1.5rem;
+  z-index: 40;
+}
+
+/* Pull to refresh indicator */
+.ptr-indicator {
+  position: absolute;
+  top: max(env(safe-area-inset-top), 0);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem;
+}
+
+/* Modal mobile */
+.mobile-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  padding: max(env(safe-area-inset-top), 1rem) 1rem max(env(safe-area-inset-bottom), 1rem);
+}
+
+/* Tab bar blur effect */
+.tab-bar-blur {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Skeleton loading mobile */
+.skeleton-mobile {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Haptic feedback classes (visual only, requires JS for actual haptics) */
+@keyframes haptic-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+}
+
+.trigger-haptic {
+  animation: haptic-bounce 0.15s ease;
+}

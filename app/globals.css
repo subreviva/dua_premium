@@ -372,6 +372,16 @@ html {
     .pb-safe-offset-6 {
       padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
     }
+
+    /* Mobile-safe bottom padding for fixed footers/navs.
+       Uses a base of 96px (typical height of our bottom player/nav) plus the
+       environment safe-area inset so buttons are not cut on iOS devices.
+       On larger screens (md+) this helper resets to 0 so desktop layout is
+       unaffected. Use the utility class `pb-safe-mobile` on mobile-only
+       fixed footers and nav containers. */
+    .pb-safe-mobile {
+      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    }
   }
 
   /* Premium typography with refined line heights and dramatic letter spacing */

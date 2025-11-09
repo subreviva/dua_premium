@@ -2,7 +2,7 @@
   "name": "DUA - AI Creative Studio",
   "short_name": "DUA AI",
   "description": "Estúdio criativo com IA - Chat, Música, Vídeo, Design e muito mais",
-  "start_url": "/",
+  "start_url": "/mobile-login",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",

@@ -28,11 +28,13 @@ import {
   Play,
   Volume2,
   Trash,
+  Mic,
 } from "lucide-react"
 import { useGeneration } from "@/contexts/generation-context"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { MobileNav } from "@/components/mobile-nav"
 
 const AVAILABLE_STYLES = [
   "ambient",
@@ -484,117 +486,97 @@ export default function MelodyPage() {
   }
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden">
-      <div className="fixed inset-0 z-0">
-        <img
-          src="/images/cosmic-background.jpg"
-          alt=""
-          className="w-full h-full object-cover scale-110"
-          style={{ filter: "blur(80px)" }}
-        />
-        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" />
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black">
+      {/* Elegant gradient overlays */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-3xl" />
       </div>
-
+      
       <audio ref={audioRef} className="hidden" preload="auto" />
 
       {/* Mobile Main Screen */}
       <div className="lg:hidden relative z-10 flex h-[100dvh] flex-col">
-        <div className="flex items-center justify-between px-6 py-4 pt-safe shrink-0">
-          <button
-            onClick={() => setShowSettings(true)}
-            className="group flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/40 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-300 shadow-2xl shadow-black/20 hover:bg-slate-900/60 hover:border-white/20"
-          >
-            <Settings
-              className="h-4 w-4 text-slate-300 group-hover:text-white transition-colors duration-300"
-              strokeWidth={1.5}
-            />
-          </button>
-          <button
-            onClick={() => router.push("/")}
-            className="group flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/40 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-300 shadow-2xl shadow-black/20 hover:bg-slate-900/60 hover:border-white/20"
-          >
-            <X
-              className="h-4 w-4 text-slate-300 group-hover:text-white transition-colors duration-300"
-              strokeWidth={1.5}
-            />
-          </button>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center px-6 overflow-hidden">
-          <Card className="w-full max-w-[360px] bg-gradient-to-br from-slate-900/50 via-slate-800/40 to-slate-900/50 backdrop-blur-3xl border border-white/10 p-[2px] rounded-[36px] shadow-2xl shadow-black/40 relative overflow-hidden">
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15 rounded-[36px] animate-pulse"
-              style={{ animationDuration: "3s" }}
-            />
-            <div className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-3xl rounded-[35px] p-7">
-              <div className="aspect-square w-full max-w-[260px] mx-auto bg-slate-800/20 rounded-[32px] flex items-center justify-center mb-6 overflow-hidden relative border border-white/10 shadow-2xl shadow-black/30">
-                <img
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dreamina-2025-11-04-2343-homem%20a%20gravar%20uma%20mensagem%20de%20audio%20no%20...-vbUzBtujrVIUBzEVVjKDxgOoOnXUVY.jpeg"
-                  alt="Studio Recording"
-                  className="relative w-full h-full object-cover rounded-[32px]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent rounded-[32px]" />
-              </div>
-
-              <h2 className="text-xl font-light text-center bg-gradient-to-r from-white via-slate-50 to-white bg-clip-text text-transparent mb-3 tracking-tight leading-tight">
-                Cantarole uma melodia
-              </h2>
-
-              <div className="flex items-center justify-center gap-2 text-slate-300 text-xs font-light">
-                <span>Toque para gravar</span>
-                <Info className="h-3.5 w-3.5" strokeWidth={1.5} />
-              </div>
+        {/* Top Navbar */}
+        <div className="fixed top-0 left-0 right-0 z-50 pt-safe">
+          <div className="backdrop-blur-2xl bg-black/60 border-b border-white/[0.06]">
+            <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
+              <button
+                onClick={() => router.push("/musicstudio")}
+                className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
+              >
+                <X className="w-4 h-4" strokeWidth={2} />
+              </button>
+              <span className="text-[15px] font-medium text-white/90">Melodia</span>
+              <button
+                onClick={() => setShowSettings(true)}
+                className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
+              >
+                <Settings className="w-4 h-4" strokeWidth={2} />
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
 
-        <div className="px-6 pb-6 pb-safe space-y-3 shrink-0">
-          <div className="flex items-center justify-center gap-10">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 pt-[80px] pb-safe-mobile md:pb-0">
+          {/* Cover Art */}
+          <div className="w-full max-w-[280px] mb-8">
+            <div className="aspect-square w-full bg-white/[0.03] rounded-2xl flex items-center justify-center overflow-hidden relative border border-white/[0.06] backdrop-blur-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent" />
+              <Mic className="relative w-20 h-20 text-white/30" strokeWidth={1.5} />
+            </div>
+          </div>
+
+          {/* Title */}
+          <h2 className="text-2xl font-medium text-center text-white/95 mb-2 tracking-tight">
+            Cantarole uma melodia
+          </h2>
+
+          <p className="text-center text-sm text-white/50 font-light mb-8 max-w-[280px]">
+            Grave ou carregue um áudio para criar música profissional
+          </p>
+
+          {/* Main Record Button */}
+          <button
+            onClick={() => {
+              setShowRecorder(true)
+              startRecording()
+            }}
+            className="group relative mb-6 active:scale-95 transition-all"
+          >
+            <div className="h-20 w-20 rounded-full bg-white/[0.12] border-2 border-white/[0.20] backdrop-blur-xl flex items-center justify-center hover:bg-white/[0.15] active:bg-white/[0.18] transition-all shadow-lg shadow-black/30">
+              <div className="h-6 w-6 rounded-full bg-white/95" />
+            </div>
+          </button>
+
+          {/* Secondary Actions */}
+          <div className="flex items-center justify-center gap-8">
             {/* Upload button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="group flex flex-col items-center gap-2 active:scale-95 transition-all duration-300"
+              className="group flex flex-col items-center gap-2 active:scale-95 transition-all"
             >
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-slate-900/60 to-slate-800/60 backdrop-blur-2xl border border-white/10 flex items-center justify-center shadow-2xl shadow-black/20 group-hover:border-primary/40 group-active:shadow-xl transition-all duration-300 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-accent/0 group-hover:from-primary/15 group-hover:to-accent/15 transition-all duration-500" />
-                <Upload
-                  className="relative h-[18px] w-[18px] text-slate-300 group-hover:text-white transition-colors duration-300"
-                  strokeWidth={1.5}
-                />
+              <div className="h-12 w-12 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl flex items-center justify-center hover:bg-white/[0.10] active:bg-white/[0.12] transition-all">
+                <Upload className="h-5 w-5 text-white/70" strokeWidth={2} />
               </div>
-            </button>
-
-            {/* Record button - main CTA with ultra-premium design */}
-            <button
-              onClick={() => {
-                setShowRecorder(true)
-                startRecording()
-              }}
-              className="group relative h-20 w-20 rounded-[28px] active:scale-95 transition-all duration-500"
-              style={{ transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
-            >
-              <div
-                className="absolute -inset-3 rounded-[31px] bg-gradient-to-br from-primary/40 to-accent/40 blur-3xl opacity-70 group-hover:opacity-90 transition-opacity duration-500 animate-pulse"
-                style={{ animationDuration: "2s" }}
-              />
-              <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-primary via-primary/90 to-accent shadow-2xl shadow-primary/40" />
-              <div className="absolute inset-[3px] rounded-[25px] bg-slate-900/20 backdrop-blur-sm" />
-              <div className="absolute inset-0 rounded-[28px] bg-gradient-to-t from-white/10 to-transparent" />
+              <span className="text-[11px] text-white/40 font-light">Carregar</span>
             </button>
 
             {/* Library button */}
-            <button className="group flex flex-col items-center gap-2 active:scale-95 transition-all duration-300">
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-slate-900/60 to-slate-800/60 backdrop-blur-2xl border border-white/10 flex items-center justify-center shadow-2xl shadow-black/20 group-hover:border-accent/40 group-active:shadow-xl transition-all duration-300 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/0 to-primary/0 group-hover:from-accent/15 group-hover:to-primary/15 transition-all duration-500" />
-                <Music
-                  className="relative h-[18px] w-[18px] text-slate-300 group-hover:text-white transition-colors duration-300"
-                  strokeWidth={1.5}
-                />
+            <button
+              onClick={() => router.push("/library")}
+              className="group flex flex-col items-center gap-2 active:scale-95 transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl flex items-center justify-center hover:bg-white/[0.10] active:bg-white/[0.12] transition-all">
+                <Music className="h-5 w-5 text-white/70" strokeWidth={2} />
               </div>
+              <span className="text-[11px] text-white/40 font-light">Biblioteca</span>
             </button>
           </div>
 
-          <p className="text-center text-[10px] text-slate-400 font-mono tracking-wider uppercase font-light">
+          {/* Info text */}
+          <p className="text-center text-[10px] text-white/30 font-light mt-6">
             Limite de 8 min para uploads de áudio
           </p>
         </div>
@@ -604,53 +586,52 @@ export default function MelodyPage() {
 
       {/* Recording Modal */}
       {showRecorder && (
-        <div className="lg:hidden fixed inset-0 z-50 animate-in fade-in duration-500 flex flex-col h-[100dvh] overflow-hidden">
-          <div className="fixed inset-0 z-0">
-            <img
-              src="/images/cosmic-background.jpg"
-              alt=""
-              className="w-full h-full object-cover scale-110"
-              style={{ filter: "blur(80px)" }}
-            />
-            <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" />
+        <div className="lg:hidden fixed inset-0 z-50 animate-in fade-in duration-500 flex flex-col h-[100dvh] overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black">
+          {/* Elegant gradient overlays */}
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-3xl" />
           </div>
 
-          <div className="relative z-10 flex items-center justify-between px-6 py-4 pt-safe shrink-0">
-            <button
-              onClick={() => setShowSettings(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/60 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-200 shadow-xl shadow-black/20 hover:bg-slate-900/80"
-            >
-              <Settings
-                className="h-4 w-4 text-slate-300 hover:text-white transition-colors duration-200"
-                strokeWidth={1.5}
-              />
-            </button>
-            <button
-              onClick={deleteRecording}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/60 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-200 shadow-xl shadow-black/20 hover:bg-slate-900/80"
-            >
-              <X className="h-4 w-4 text-slate-300 hover:text-white transition-colors duration-200" strokeWidth={1.5} />
-            </button>
+          {/* Top Navbar */}
+          <div className="fixed top-0 left-0 right-0 z-50 pt-safe">
+            <div className="backdrop-blur-2xl bg-black/60 border-b border-white/[0.06]">
+              <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
+                <button
+                  onClick={deleteRecording}
+                  className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" strokeWidth={2} />
+                </button>
+                <span className="text-[15px] font-medium text-white/90">Gravando</span>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
+                >
+                  <Settings className="w-4 h-4" strokeWidth={2} />
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="relative z-10 flex-1 flex items-center justify-center px-6 overflow-hidden">
-            <Card className="w-full max-w-sm bg-slate-900/50 backdrop-blur-3xl border border-white/10 p-7 rounded-[36px] shadow-2xl shadow-black/30">
+          <div className="relative z-10 flex-1 flex items-center justify-center px-6 pt-[68px] pb-safe-mobile md:pb-0">
+            <div className="w-full max-w-sm backdrop-blur-xl bg-white/[0.06] border border-white/[0.08] p-8 rounded-3xl">
               {recordingSuccess && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-900/95 backdrop-blur-xl rounded-[36px] z-10 animate-in fade-in duration-300">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/95 backdrop-blur-xl rounded-3xl z-10 animate-in fade-in duration-300">
                   <div className="flex flex-col items-center gap-3">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center animate-in zoom-in duration-300 shadow-2xl shadow-primary/40">
-                      <Check className="h-8 w-8 text-white" strokeWidth={2.5} />
+                    <div className="h-16 w-16 rounded-full bg-white/[0.12] border border-white/[0.15] flex items-center justify-center animate-in zoom-in duration-300">
+                      <Check className="h-8 w-8 text-white/90" strokeWidth={2.5} />
                     </div>
-                    <p className="text-slate-100 font-light text-sm">Gravação concluída</p>
+                    <p className="text-white/90 font-light text-sm">Gravação concluída</p>
                   </div>
                 </div>
               )}
 
               <div className="relative h-56 flex items-center justify-center px-3">
                 {isRecording && (
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-red-500/20 backdrop-blur-xl rounded-full border border-red-500/30 animate-in fade-in duration-300 shadow-lg shadow-red-500/20">
-                    <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse shadow-lg shadow-red-500/50" />
-                    <span className="text-xs text-red-300 font-light">Gravando</span>
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-white/[0.08] backdrop-blur-xl rounded-full border border-white/[0.10] animate-in fade-in duration-300">
+                    <div className="h-2 w-2 rounded-full bg-white/90 animate-pulse" />
+                    <span className="text-xs text-white/80 font-light">Gravando</span>
                   </div>
                 )}
 
@@ -658,10 +639,10 @@ export default function MelodyPage() {
                   {waveformData.map((height, i) => (
                     <div
                       key={i}
-                      className="flex-1 max-w-[3px] rounded-full bg-gradient-to-t from-primary/90 via-primary to-accent shadow-lg shadow-primary/30"
+                      className="flex-1 max-w-[3px] rounded-full bg-white/90"
                       style={{
                         height: `${height}%`,
-                        opacity: 0.5 + (height / 100) * 0.5,
+                        opacity: 0.4 + (height / 100) * 0.6,
                         transition: "all 120ms cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
                     />
@@ -669,123 +650,113 @@ export default function MelodyPage() {
                 </div>
               </div>
 
-              <div className="text-center text-2xl font-light text-slate-50 mt-4 tracking-wider tabular-nums">
+              <div className="text-center text-2xl font-light text-white/95 mt-4 tracking-wider tabular-nums">
                 {formatTime(recordingTime)}
               </div>
-            </Card>
+            </div>
           </div>
 
-          <div className="relative z-10 px-6 pb-8 pb-safe shrink-0">
-            <div className="flex items-center justify-center gap-10">
-              <button
-                onClick={resetRecording}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/60 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-200 shadow-xl shadow-black/20 hover:bg-slate-900/80 hover:border-white/20"
-              >
-                <RotateCcw
-                  className="h-4 w-4 text-slate-300 hover:text-white transition-colors duration-200"
-                  strokeWidth={1.5}
-                />
-              </button>
+          <div className="px-6 pb-8 pb-safe-mobile md:pb-0 flex items-center justify-center gap-8">
+            <button
+              onClick={resetRecording}
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl active:scale-95 transition-all hover:bg-white/[0.10]"
+            >
+              <RotateCcw className="h-5 w-5 text-white/80" strokeWidth={2} />
+            </button>
 
-              <button
-                onClick={stopRecording}
-                className="relative h-14 w-14 rounded-xl bg-slate-900/60 backdrop-blur-2xl border-2 border-white/20 flex items-center justify-center active:scale-95 transition-all duration-200 shadow-2xl shadow-black/30 hover:bg-slate-900/80"
-              >
-                <div className="h-5 w-5 rounded bg-gradient-to-br from-primary to-accent shadow-xl shadow-primary/40" />
-              </button>
+            <button
+              onClick={stopRecording}
+              className="h-16 w-16 rounded-xl bg-white/[0.12] border-2 border-white/[0.20] backdrop-blur-xl flex items-center justify-center active:scale-95 transition-all hover:bg-white/[0.15]"
+            >
+              <div className="h-5 w-5 rounded bg-white/90" />
+            </button>
 
-              <button
-                onClick={deleteRecording}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/60 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-200 shadow-xl shadow-black/20 hover:bg-slate-900/80 hover:border-red-500/30"
-              >
-                <Trash2
-                  className="h-4 w-4 text-slate-300 hover:text-red-400 transition-colors duration-200"
-                  strokeWidth={1.5}
-                />
-              </button>
-            </div>
+            <button
+              onClick={deleteRecording}
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl active:scale-95 transition-all hover:bg-white/[0.10]"
+            >
+              <Trash2 className="h-5 w-5 text-white/80" strokeWidth={2} />
+            </button>
           </div>
         </div>
       )}
 
       {/* Config Modal */}
+
+      {/* Config Modal */}
       {showConfig && (
-        <div className="lg:hidden fixed inset-0 z-50 animate-in fade-in duration-500 flex flex-col h-[100dvh] overflow-hidden">
-          <div className="fixed inset-0 z-0">
-            <img
-              src="/images/cosmic-background.jpg"
-              alt=""
-              className="w-full h-full object-cover scale-110"
-              style={{ filter: "blur(80px)" }}
-            />
-            <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" />
+        <div className="lg:hidden fixed inset-0 z-50 animate-in fade-in duration-500 flex flex-col h-[100dvh] overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black">
+          {/* Elegant gradient overlays */}
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-3xl" />
           </div>
 
-          <div className="relative z-10 flex items-center justify-between px-6 py-4 pt-safe shrink-0">
+          <div className="relative z-10 flex items-center justify-between px-6 py-4 pt-safe shrink-0 backdrop-blur-2xl bg-black/60 border-b border-white/[0.08]">
             <button
               onClick={() => setShowSettings(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/60 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-200 shadow-xl shadow-black/20 hover:bg-slate-900/80"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] active:scale-95 transition-all duration-200 hover:bg-white/[0.10]"
             >
-              <Settings className="h-4 w-4 text-slate-300" strokeWidth={1.5} />
+              <Settings className="h-4 w-4 text-white/80" strokeWidth={2} />
             </button>
-            <h2 className="text-base font-light text-slate-50 tracking-tight">Áudio</h2>
+            <h2 className="text-base font-light text-white/95 tracking-tight">Áudio</h2>
             <button
               onClick={() => {
                 setShowConfig(false)
                 resetRecording()
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/60 backdrop-blur-2xl border border-white/10 active:scale-95 transition-all duration-200 shadow-xl shadow-black/20 hover:bg-slate-900/80"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] active:scale-95 transition-all duration-200 hover:bg-white/[0.10]"
             >
-              <X className="h-4 w-4 text-slate-300" strokeWidth={1.5} />
+              <X className="h-4 w-4 text-white/80" strokeWidth={2} />
             </button>
           </div>
 
           <div className="relative z-10 flex-1 overflow-y-auto smooth-scroll">
             <div className="px-5 py-4 pb-[calc(24px+env(safe-area-inset-bottom))] space-y-4">
               {isUploading && (
-                <Card className="bg-slate-900/50 backdrop-blur-3xl border border-white/10 p-5 rounded-[32px] shadow-2xl shadow-black/20 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl p-5 rounded-[32px] animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center justify-between mb-2.5">
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center">
-                        <Upload className="h-3.5 w-3.5 text-primary animate-pulse" strokeWidth={1.5} />
+                      <div className="h-7 w-7 rounded-full bg-white/[0.08] flex items-center justify-center">
+                        <Upload className="h-3.5 w-3.5 text-white/90 animate-pulse" strokeWidth={2} />
                       </div>
-                      <span className="text-xs text-slate-300 font-light">Carregando áudio</span>
+                      <span className="text-xs text-white/80 font-light">Carregando áudio</span>
                     </div>
-                    <span className="text-[11px] text-slate-400 tabular-nums font-light">{uploadProgress}%</span>
+                    <span className="text-[11px] text-white/60 tabular-nums font-light">{uploadProgress}%</span>
                   </div>
                   <Progress value={uploadProgress} className="h-1.5" />
                   {uploadProgress === 100 && (
-                    <div className="flex items-center gap-1.5 mt-2.5 text-[11px] text-primary animate-in fade-in duration-300">
-                      <Check className="h-3 w-3" strokeWidth={1.5} />
+                    <div className="flex items-center gap-1.5 mt-2.5 text-[11px] text-white/90 animate-in fade-in duration-300">
+                      <Check className="h-3 w-3" strokeWidth={2} />
                       <span>Upload concluído</span>
                     </div>
                   )}
-                </Card>
+                </div>
               )}
 
               {audioUrl && !isUploading && (
-                <Card className="bg-slate-900/50 backdrop-blur-3xl border border-white/10 p-5 rounded-[32px] shadow-2xl shadow-black/20 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl p-5 rounded-[32px] animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <button
                       onClick={togglePlayPause}
-                      className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/25 to-accent/25 flex items-center justify-center shrink-0 active:scale-95 transition-all duration-200 hover:from-primary/35 hover:to-accent/35"
+                      className="h-10 w-10 rounded-full bg-white/[0.12] border-2 border-white/[0.20] flex items-center justify-center shrink-0 active:scale-95 transition-all duration-200 hover:bg-white/[0.18]"
                     >
                       {isPlaying ? (
-                        <Pause className="h-4 w-4 text-slate-200" strokeWidth={1.5} />
+                        <Pause className="h-4 w-4 text-white/90" strokeWidth={2} />
                       ) : (
-                        <Play className="h-4 w-4 text-slate-200 ml-0.5" strokeWidth={1.5} />
+                        <Play className="h-4 w-4 text-white/90 ml-0.5" strokeWidth={2} />
                       )}
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-200 font-light mb-1">Áudio gravado</p>
+                      <p className="text-xs text-white/90 font-light mb-1">Áudio gravado</p>
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1 bg-slate-800/40 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1 bg-white/[0.08] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-100"
+                            className="h-full bg-white/90 transition-all duration-100"
                             style={{ width: `${audioProgress}%` }}
                           />
                         </div>
-                        <span className="text-[11px] text-slate-400 font-light tabular-nums">
+                        <span className="text-[11px] text-white/60 font-light tabular-nums">
                           {formatTime(recordingTime)}
                         </span>
                       </div>
@@ -794,128 +765,118 @@ export default function MelodyPage() {
                       onClick={handleDeleteAndRerecord}
                       className="h-9 w-9 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0 active:scale-95 transition-all duration-200 hover:bg-red-500/15"
                     >
-                      <Trash className="h-3.5 w-3.5 text-red-400" strokeWidth={1.5} />
+                      <Trash className="h-3.5 w-3.5 text-red-400" strokeWidth={2} />
                     </button>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                    <Volume2 className="h-3 w-3" strokeWidth={1.5} />
+                  <div className="flex items-center gap-1.5 text-[11px] text-white/50">
+                    <Volume2 className="h-3 w-3" strokeWidth={2} />
                     <span className="font-light">Toque para ouvir a gravação</span>
                   </div>
-                </Card>
+                </div>
               )}
 
-              <Card className="bg-gradient-to-br from-slate-900/70 to-slate-800/70 backdrop-blur-2xl border border-white/10 p-[2px] rounded-2xl shadow-xl shadow-black/15 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-2xl" />
-                <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-2xl p-3.5 space-y-2.5">
-                  <Label className="text-xs text-slate-200 font-light">Modelo</Label>
-                  <Select value={selectedModel} onValueChange={setSelectedModel}>
-                    <SelectTrigger className="bg-slate-800/25 backdrop-blur-sm border border-slate-700/25 text-slate-200 rounded-lg h-9 text-xs font-light hover:border-primary/25 transition-colors">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-900/98 backdrop-blur-xl border-slate-700/40">
-                      <SelectItem value="V4_5PLUS">V4.5 Plus (Recomendado)</SelectItem>
-                      <SelectItem value="V4">V4</SelectItem>
-                      <SelectItem value="V3_5">V3.5</SelectItem>
-                      <SelectItem value="V3">V3</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </Card>
+              <div className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-3.5 space-y-2.5">
+                <Label className="text-xs text-white/80 font-light">Modelo</Label>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="bg-white/[0.04] border border-white/[0.08] text-white/90 rounded-lg h-9 text-xs font-light hover:border-white/[0.15] transition-colors">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900/98 backdrop-blur-xl border-slate-700/40">
+                    <SelectItem value="V4_5PLUS">V4.5 Plus (Recomendado)</SelectItem>
+                    <SelectItem value="V4">V4</SelectItem>
+                    <SelectItem value="V3_5">V3.5</SelectItem>
+                    <SelectItem value="V3">V3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Card className="bg-gradient-to-br from-slate-900/70 to-slate-800/70 backdrop-blur-2xl border border-white/10 p-[2px] rounded-2xl shadow-xl shadow-black/15 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 rounded-2xl" />
-                <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-2xl p-3.5 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-xs text-slate-200 font-light">Letra da música</Label>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-400 font-light">Instrumental</span>
-                      <Switch checked={instrumental} onCheckedChange={setInstrumental} />
-                    </div>
+              <div className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-white/80 font-light">Letra da música</Label>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-white/60 font-light">Instrumental</span>
+                    <Switch checked={instrumental} onCheckedChange={setInstrumental} />
                   </div>
+                </div>
 
-                  <Textarea
-                    placeholder="Adicione suas próprias letras ou digite um assunto para gerar"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="min-h-20 bg-slate-800/15 backdrop-blur-sm border border-slate-700/25 text-slate-200 text-xs rounded-lg resize-none font-light placeholder:text-slate-500 focus:border-primary/25 focus:bg-slate-800/25 transition-all"
-                    disabled={instrumental}
-                  />
+                <Textarea
+                  placeholder="Adicione suas próprias letras ou digite um assunto para gerar"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="min-h-20 bg-white/[0.04] border border-white/[0.08] text-white/90 text-xs rounded-lg resize-none font-light placeholder:text-white/40 focus:border-white/[0.15] focus:bg-white/[0.06] transition-all"
+                  disabled={instrumental}
+                />
 
-                  <button
-                    className="w-full bg-gradient-to-r from-slate-800/35 to-slate-700/35 backdrop-blur-sm border border-slate-700/25 text-slate-200 rounded-lg h-9 text-xs font-light hover:from-slate-800/50 hover:to-slate-700/50 hover:border-primary/25 transition-all duration-200 active:scale-[0.98] disabled:opacity-50"
-                    disabled={instrumental}
-                  >
-                    Gerar Letras
+                <button
+                  className="w-full bg-white/[0.06] border border-white/[0.08] text-white/80 rounded-lg h-9 text-xs font-light hover:bg-white/[0.10] hover:border-white/[0.15] transition-all duration-200 active:scale-[0.98] disabled:opacity-50"
+                  disabled={instrumental}
+                >
+                  Gerar Letras
+                </button>
+              </div>
+
+              <div className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-3.5 space-y-2.5">
+                <Label className="text-xs text-white/80 font-light flex items-center gap-1.5">
+                  <Music className="h-3.5 w-3.5" strokeWidth={2} />
+                  Estilos
+                </Label>
+
+                <Textarea
+                  placeholder="Insira seus próprios estilos"
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
+                  className="min-h-16 bg-white/[0.04] border border-white/[0.08] text-white/90 text-xs rounded-lg resize-none font-light placeholder:text-white/40 focus:border-white/[0.15] focus:bg-white/[0.06] transition-all"
+                />
+
+                <div className="flex flex-wrap gap-1.5">
+                  <button className="h-8 w-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:scale-95 transition-all duration-200 hover:border-white/[0.15]">
+                    <RotateCcw className="h-3.5 w-3.5 text-white/60" strokeWidth={2} />
                   </button>
+                  {AVAILABLE_STYLES.map((styleTag) => (
+                    <Badge
+                      key={styleTag}
+                      variant={selectedStyles.includes(styleTag) ? "default" : "outline"}
+                      className={cn(
+                        "px-2.5 py-1 rounded-full cursor-pointer active:scale-95 transition-all duration-200 text-[11px] font-light",
+                        selectedStyles.includes(styleTag)
+                          ? "bg-white/[0.20] text-white border-white/[0.25] border-2"
+                          : "bg-white/[0.04] border-white/[0.08] text-white/70 hover:bg-white/[0.08] hover:border-white/[0.15]",
+                      )}
+                      onClick={() => toggleStyle(styleTag)}
+                    >
+                      {styleTag}
+                    </Badge>
+                  ))}
                 </div>
-              </Card>
+              </div>
 
-              <Card className="bg-gradient-to-br from-slate-900/70 to-slate-800/70 backdrop-blur-2xl border border-white/10 p-[2px] rounded-2xl shadow-xl shadow-black/15 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 rounded-2xl" />
-                <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-2xl p-3.5 space-y-2.5">
-                  <Label className="text-xs text-slate-200 font-light flex items-center gap-1.5">
-                    <Music className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    Estilos
-                  </Label>
-
-                  <Textarea
-                    placeholder="Insira seus próprios estilos"
-                    value={style}
-                    onChange={(e) => setStyle(e.target.value)}
-                    className="min-h-16 bg-slate-800/15 backdrop-blur-sm border border-slate-700/25 text-slate-200 text-xs rounded-lg resize-none font-light placeholder:text-slate-500 focus:border-accent/25 focus:bg-slate-800/25 transition-all"
-                  />
-
-                  <div className="flex flex-wrap gap-1.5">
-                    <button className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-800/35 to-slate-700/35 backdrop-blur-sm border border-slate-700/25 flex items-center justify-center active:scale-95 transition-all duration-200 hover:border-accent/25">
-                      <RotateCcw className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.5} />
-                    </button>
-                    {AVAILABLE_STYLES.map((styleTag) => (
-                      <Badge
-                        key={styleTag}
-                        variant={selectedStyles.includes(styleTag) ? "default" : "outline"}
-                        className={cn(
-                          "px-2.5 py-1 rounded-full cursor-pointer active:scale-95 transition-all duration-200 text-[11px] font-light",
-                          selectedStyles.includes(styleTag)
-                            ? "bg-gradient-to-r from-primary to-accent text-white border-0 shadow-md shadow-primary/15"
-                            : "bg-slate-800/25 backdrop-blur-sm border-slate-700/25 text-slate-300 hover:bg-slate-800/40 hover:border-primary/15",
-                        )}
-                        onClick={() => toggleStyle(styleTag)}
-                      >
-                        {styleTag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-slate-900/70 to-slate-800/70 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-xl shadow-black/15 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/8" />
+              <div className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="relative w-full flex items-center justify-between p-3.5 active:bg-slate-800/25 transition-colors"
+                  className="w-full flex items-center justify-between p-3.5 active:bg-white/[0.04] transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-200 font-light">Opções avançadas</span>
-                    <Badge className="bg-gradient-to-r from-primary/15 to-accent/15 text-primary border-0 text-[9px] font-light px-1.5 py-0.5">
+                    <span className="text-xs text-white/80 font-light">Opções avançadas</span>
+                    <Badge className="bg-white/[0.12] text-white/90 border-0 text-[9px] font-light px-1.5 py-0.5">
                       NOVO
                     </Badge>
                   </div>
                   {showAdvanced ? (
-                    <ChevronUp className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.5} />
+                    <ChevronUp className="h-3.5 w-3.5 text-white/60" strokeWidth={2} />
                   ) : (
-                    <ChevronDown className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.5} />
+                    <ChevronDown className="h-3.5 w-3.5 text-white/60" strokeWidth={2} />
                   )}
                 </button>
 
                 {showAdvanced && (
-                  <div className="relative px-3.5 pb-3.5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-3.5 pb-3.5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="space-y-1.5">
-                      <Label className="text-[11px] text-slate-400 font-light flex items-center gap-1">
-                        <Music className="h-3 w-3" strokeWidth={1.5} />
+                      <Label className="text-[11px] text-white/60 font-light flex items-center gap-1">
+                        <Music className="h-3 w-3" strokeWidth={2} />
                         Género Vocal
                       </Label>
                       <Select value={vocalGender} onValueChange={setVocalGender}>
-                        <SelectTrigger className="bg-slate-800/15 backdrop-blur-sm border border-slate-700/25 text-slate-200 rounded-lg h-9 font-light text-xs hover:border-primary/25 transition-colors">
+                        <SelectTrigger className="bg-white/[0.04] border border-white/[0.08] text-white/90 rounded-lg h-9 font-light text-xs hover:border-white/[0.15] transition-colors">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-900/98 backdrop-blur-xl border-slate-700/40">
@@ -927,66 +888,63 @@ export default function MelodyPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-[11px] text-slate-400 font-light flex items-center gap-1">
-                        <Music className="h-3 w-3" strokeWidth={1.5} />
+                      <Label className="text-[11px] text-white/60 font-light flex items-center gap-1">
+                        <Music className="h-3 w-3" strokeWidth={2} />
                         Insira estilos a serem excluídos...
                       </Label>
                       <Input
                         placeholder="Metal Pesado, Baterias Animadas"
                         value={negativeTags}
                         onChange={(e) => setNegativeTags(e.target.value)}
-                        className="bg-slate-800/15 backdrop-blur-sm border border-slate-700/25 text-slate-200 text-xs rounded-lg h-9 font-light placeholder:text-slate-500 focus:border-primary/25 focus:bg-slate-800/25 transition-all"
+                        className="bg-white/[0.04] border border-white/[0.08] text-white/90 text-xs rounded-lg h-9 font-light placeholder:text-white/40 focus:border-white/[0.15] focus:bg-white/[0.06] transition-all"
                       />
                     </div>
 
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label className="text-[11px] text-slate-400 font-light flex items-center gap-1">
-                          <Info className="h-3 w-3" strokeWidth={1.5} />
+                        <Label className="text-[11px] text-white/60 font-light flex items-center gap-1">
+                          <Info className="h-3 w-3" strokeWidth={2} />
                           Estranheza
                         </Label>
-                        <span className="text-[11px] text-slate-400 tabular-nums">{weirdness[0]}%</span>
+                        <span className="text-[11px] text-white/60 tabular-nums">{weirdness[0]}%</span>
                       </div>
                       <Slider value={weirdness} onValueChange={setWeirdness} min={0} max={100} step={1} />
                     </div>
 
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label className="text-[11px] text-slate-400 font-light flex items-center gap-1">
-                          <Info className="h-3 w-3" strokeWidth={1.5} />
+                        <Label className="text-[11px] text-white/60 font-light flex items-center gap-1">
+                          <Info className="h-3 w-3" strokeWidth={2} />
                           Influência de Estilo
                         </Label>
-                        <span className="text-[11px] text-slate-400 tabular-nums">{styleInfluence[0]}%</span>
+                        <span className="text-[11px] text-white/60 tabular-nums">{styleInfluence[0]}%</span>
                       </div>
                       <Slider value={styleInfluence} onValueChange={setStyleInfluence} min={0} max={100} step={1} />
                     </div>
 
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label className="text-[11px] text-slate-400 font-light flex items-center gap-1">
-                          <Info className="h-3 w-3" strokeWidth={1.5} />
+                        <Label className="text-[11px] text-white/60 font-light flex items-center gap-1">
+                          <Info className="h-3 w-3" strokeWidth={2} />
                           Influência de Áudio
                         </Label>
-                        <span className="text-[11px] text-slate-400 tabular-nums">{audioInfluence[0]}%</span>
+                        <span className="text-[11px] text-white/60 tabular-nums">{audioInfluence[0]}%</span>
                       </div>
                       <Slider value={audioInfluence} onValueChange={setAudioInfluence} min={0} max={100} step={1} />
                     </div>
                   </div>
                 )}
-              </Card>
+              </div>
 
-              <Card className="bg-gradient-to-br from-slate-900/70 to-slate-800/70 backdrop-blur-2xl border border-white/10 p-[2px] rounded-2xl shadow-xl shadow-black/15 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-2xl" />
-                <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-2xl p-3.5 space-y-2">
-                  <Label className="text-xs text-slate-200 font-light">Título (Opcional)</Label>
-                  <Input
-                    placeholder="Adicionar um título"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="bg-slate-800/15 backdrop-blur-sm border border-slate-700/25 text-slate-200 text-xs rounded-lg h-9 font-light placeholder:text-slate-500 focus:border-primary/25 focus:bg-slate-800/25 transition-all"
-                  />
-                </div>
-              </Card>
+              <div className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-3.5 space-y-2">
+                <Label className="text-xs text-white/80 font-light">Título (Opcional)</Label>
+                <Input
+                  placeholder="Adicionar um título"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="bg-white/[0.04] border border-white/[0.08] text-white/90 text-xs rounded-lg h-9 font-light placeholder:text-white/40 focus:border-white/[0.15] focus:bg-white/[0.06] transition-all"
+                />
+              </div>
 
               <ButtonColorful
                 label={isGenerating ? "A Gerar..." : "Criar"}
@@ -1002,19 +960,22 @@ export default function MelodyPage() {
 
       {/* Desktop View */}
       <div className="hidden lg:flex items-center justify-center min-h-screen p-8">
-        <Card className="w-full max-w-2xl bg-slate-800/50 backdrop-blur-sm border-slate-700/50 p-12 rounded-3xl">
-          <h1 className="text-4xl font-light text-slate-200 mb-8 text-center">Melodia</h1>
-          <p className="text-slate-400 text-center mb-8">
+        <Card className="w-full max-w-2xl bg-white/[0.06] backdrop-blur-xl border-white/[0.08] p-12 rounded-3xl">
+          <h1 className="text-4xl font-light text-white/95 mb-8 text-center">Melodia</h1>
+          <p className="text-white/60 text-center mb-8">
             Esta funcionalidade está otimizada para dispositivos móveis. Por favor, aceda através de um smartphone ou
             tablet.
           </p>
           <div className="flex justify-center">
-            <Button onClick={() => router.push("/")} variant="outline" className="rounded-xl">
+            <Button onClick={() => router.push("/musicstudio")} variant="outline" className="rounded-xl">
               Voltar ao Início
             </Button>
           </div>
         </Card>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileNav />
     </div>
   )
 }

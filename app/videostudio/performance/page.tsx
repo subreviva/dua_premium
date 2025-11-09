@@ -14,7 +14,7 @@ export default function CharacterPerformancePage() {
   const [performanceFile, setPerformanceFile] = useState<File | null>(null)
   const [performancePreview, setPerformancePreview] = useState<string | null>(null)
   const [gesturesEnabled, setGesturesEnabled] = useState(true)
-  const [facialExpressiveness, setFacialExpressiveness] = useState(3)
+  const [expressionIntensity, setExpressionIntensity] = useState(3)
   const [isUploading, setIsUploading] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
@@ -157,7 +157,7 @@ export default function CharacterPerformancePage() {
           characterUri,
           performanceUri,
           bodyControl: gesturesEnabled,
-          facialExpressiveness,
+          expressionIntensity,
           seed: Math.floor(Math.random() * 4294967295),
         }),
       })
@@ -237,7 +237,7 @@ export default function CharacterPerformancePage() {
     setTaskId(null)
     setResultUrl(null)
     setGesturesEnabled(true)
-    setFacialExpressiveness(3)
+    setExpressionIntensity(3)
     setDuration(0)
     setCreditCost(15)
     if (characterInputRef.current) characterInputRef.current.value = ''
@@ -508,20 +508,20 @@ export default function CharacterPerformancePage() {
                     </div>
                   </div>
 
-                  {/* Facial Expressiveness */}
+                  {/* Expression Intensity */}
                   <div className="rounded-2xl bg-zinc-900 border border-white/10 p-6">
                     <div className="mb-4">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-semibold text-white">Expressividade Facial</h3>
-                        <span className="text-sm text-blue-400 font-medium">{facialExpressiveness}</span>
+                        <h3 className="text-sm font-semibold text-white">Intensidade de Expressão</h3>
+                        <span className="text-sm text-blue-400 font-medium">{expressionIntensity}</span>
                       </div>
                       <p className="text-xs text-zinc-400 mb-4">
                         Controle a intensidade das expressões faciais (1-5)
                       </p>
                     </div>
                     <Slider
-                      value={[facialExpressiveness]}
-                      onValueChange={(value) => setFacialExpressiveness(value[0])}
+                      value={[expressionIntensity]}
+                      onValueChange={(value) => setExpressionIntensity(value[0])}
                       min={1}
                       max={5}
                       step={1}
@@ -647,7 +647,7 @@ export default function CharacterPerformancePage() {
                     <div>
                       <h3 className="font-semibold text-white">Performance Animada</h3>
                       <p className="text-xs text-blue-400">
-                        Expressividade {facialExpressiveness} • {gesturesEnabled ? 'Com gestos' : 'Sem gestos'}
+                        Intensidade {expressionIntensity} • {gesturesEnabled ? 'Com gestos' : 'Sem gestos'}
                       </p>
                     </div>
                     <div className="px-3 py-1 rounded-full bg-blue-500/20 text-xs text-blue-400 font-medium">

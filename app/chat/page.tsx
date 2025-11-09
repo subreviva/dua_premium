@@ -22,6 +22,10 @@ import { useChatPersistence } from "@/hooks/useChatPersistence";
 import { useConversations } from "@/hooks/useConversations";
 import { useHotkeys, commonHotkeys } from "@/hooks/useHotkeys";
 import ConversationHistory from "@/components/ConversationHistory";
+import { supabaseClient } from "@/lib/supabase";
+import Image from "next/image";
+
+const supabase = supabaseClient;
 
 interface Message {
   id: string
@@ -89,7 +93,126 @@ export default function ChatPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [showRealTimeChat, setShowRealTimeChat] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showSendEffect, setShowSendEffect] = useState(false);
   const isMobile = useIsMobile()
+
+  // Sistema de sons premium melhorado
+  const playSound = useCallback((type: 'send' | 'receive' | 'error' | 'success' | 'typing') => {
+    if (!soundEnabled) return;
+    
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      const sounds = {
+        send: () => {
+          // Som mais agradável com duas frequências
+          const osc1 = audioContext.createOscillator();
+          const osc2 = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          osc1.connect(gainNode);
+          osc2.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          osc1.frequency.value = 880; // A5
+          osc2.frequency.value = 1100; // Harmônico
+          osc1.type = 'sine';
+          osc2.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+          
+          osc1.start(audioContext.currentTime);
+          osc2.start(audioContext.currentTime);
+          osc1.stop(audioContext.currentTime + 0.15);
+          osc2.stop(audioContext.currentTime + 0.15);
+        },
+        receive: () => {
+          // Som suave em cascata
+          const frequencies = [660, 880, 1100];
+          frequencies.forEach((freq, i) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc.frequency.value = freq;
+            osc.type = 'sine';
+            
+            const startTime = audioContext.currentTime + (i * 0.05);
+            gain.gain.setValueAtTime(0.08, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
+            
+            osc.start(startTime);
+            osc.stop(startTime + 0.2);
+          });
+        },
+        typing: () => {
+          // Som sutil de digitação
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          
+          osc.frequency.value = 1200;
+          osc.type = 'sine';
+          
+          gain.gain.setValueAtTime(0.03, audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+          
+          osc.start(audioContext.currentTime);
+          osc.stop(audioContext.currentTime + 0.05);
+        },
+        error: () => {
+          // Som mais distintivo para erro
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          
+          osc.frequency.value = 250;
+          osc.type = 'sawtooth';
+          
+          gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+          
+          osc.start(audioContext.currentTime);
+          osc.stop(audioContext.currentTime + 0.25);
+        },
+        success: () => {
+          // Acorde de sucesso (C-E-G)
+          const chord = [523.25, 659.25, 783.99]; // C5, E5, G5
+          chord.forEach((freq, i) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc.frequency.value = freq;
+            osc.type = 'sine';
+            
+            const startTime = audioContext.currentTime + (i * 0.03);
+            gain.gain.setValueAtTime(0.06, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+            
+            osc.start(startTime);
+            osc.stop(startTime + 0.4);
+          });
+        },
+      };
+      
+      sounds[type]();
+    } catch (error) {
+      console.log('Sound playback not available');
+    }
+  }, [soundEnabled]);
 
   // Sistema de múltiplas conversas (Sprint 2)
   const {
@@ -123,6 +246,35 @@ export default function ChatPage() {
     },
   };
 
+  // Load user data
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserName(user.user_metadata?.name || user.email?.split('@')[0] || 'Você');
+          
+          // Buscar avatar do perfil
+          const { data: profile } = await supabase
+            .from('users')
+            .select('avatar_url')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile?.avatar_url) {
+            setUserAvatar(profile.avatar_url);
+          } else if (user.user_metadata?.avatar_url) {
+            setUserAvatar(user.user_metadata.avatar_url);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
   useEffect(() => {
     const savedSidebarOpen = localStorage.getItem("sidebarOpen")
     const savedSidebarCollapsed = localStorage.getItem("sidebarCollapsed")
@@ -154,6 +306,24 @@ export default function ChatPage() {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
+
+  // Solicitar permissão para notificações no mobile
+  useEffect(() => {
+    if (isMobile && 'Notification' in window && Notification.permission === 'default') {
+      const timer = setTimeout(() => {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            toast.success('Notificações ativadas', {
+              description: 'Receberá alertas de novas mensagens',
+            });
+            playSound('success');
+          }
+        });
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, playSound]);
 
   const handleNewChat = () => {
     clearHistory();
@@ -242,18 +412,71 @@ export default function ChatPage() {
     scrollToBottom()
   }, [messages, isLoading])
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (navigator.vibrate) navigator.vibrate(10);
+  // Detectar novas mensagens e tocar sons + notificações melhoradas
+  useEffect(() => {
+    if (messages.length === 0) return;
     
-    // Se houver imagem, enviar como body extra
+    const lastMessage = messages[messages.length - 1];
+    const isNewMessage = messages.length > 1;
+    
+    if (isNewMessage && lastMessage.role === 'assistant') {
+      // Som de recebimento
+      playSound('receive');
+      
+      // Vibração tripla elegante
+      if (navigator.vibrate) {
+        navigator.vibrate([40, 60, 40]);
+      }
+      
+      // Notificação Push melhorada
+      if (isMobile && document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        const preview = lastMessage.content.length > 120 
+          ? lastMessage.content.substring(0, 120) + '...' 
+          : lastMessage.content;
+        
+        const notification = new Notification('DUA IA respondeu', {
+          body: preview,
+          icon: '/icon-192x192.png',
+          badge: '/icon-192x192.png',
+          tag: 'dua-message',
+          requireInteraction: false,
+          silent: false,
+        });
+        
+        // Focar app ao clicar na notificação
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+        
+        // Auto-fechar após 5 segundos
+        setTimeout(() => notification.close(), 5000);
+      }
+    }
+  }, [messages, playSound, isMobile]);
+
+    const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!input.trim()) return;
+    
+    // Feedback háptico melhorado
+    if (navigator.vibrate) {
+      navigator.vibrate([10, 30, 10]); // Padrão mais satisfatório
+    }
+    
+    // Reset scroll para fazer auto-scroll quando enviar mensagem
+    setUserScrolled(false);
+    
+    // Som de envio melhorado
+    playSound('send');
+    
+    // Efeito visual de envio
+    setShowSendEffect(true);
+    setTimeout(() => setShowSendEffect(false), 300);
+    
     if (selectedImage) {
-      handleSubmit(e, {
-        body: {
-          image: selectedImage,
-        },
-      });
-      // Limpar imagem após enviar
+      handleSubmit(e, { body: { image: selectedImage } });
       setSelectedImage(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -276,21 +499,27 @@ export default function ChatPage() {
 
   if (isMobile) {
     return (
-      <div className="relative w-full h-[100dvh] flex flex-col overflow-hidden bg-black">
-        {/* Image Background - More Subtle */}
-        <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 flex flex-col bg-black overflow-hidden">
+        {/* Premium Background - Ultra Elegant */}
+        <div className="absolute inset-0 z-0">
           <div 
-            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-50"
+            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-60"
             style={{
               backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
             }}
           />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[50px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-[60px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
         </div>
 
-        {/* Navbar with iOS safe area */}
-        <div className="relative z-50 pt-safe">
+        {/* Navbar - Premium ChatGPT/Gemini Style */}
+        <div 
+          className="relative z-50 flex-shrink-0 bg-black/90 backdrop-blur-xl border-b border-white/[0.06]"
+          style={{ 
+            paddingTop: 'max(env(safe-area-inset-top), 12px)',
+            paddingBottom: '12px'
+          }}
+        >
           <PremiumNavbar
             className="relative"
             credits={250}
@@ -302,15 +531,19 @@ export default function ChatPage() {
           />
         </div>
 
-        {/* Gradient Fade Overlay - Efeito de conversa subindo */}
-        <div className="fixed top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/60 to-transparent z-40 pointer-events-none pt-safe" />
-
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 transition-all duration-300 animate-in fade-in"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
+        {/* Sidebar Overlay */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 bg-black/70 backdrop-blur-xl z-50"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+        </AnimatePresence>
 
         <ChatSidebar
           isOpen={isSidebarOpen}
@@ -325,165 +558,264 @@ export default function ChatPage() {
           groupConversationsByDate={groupConversationsByDate}
         />
 
-        {/* Main Content Area - iOS App Style */}
-        <div className="relative z-10 flex-1 flex flex-col overflow-hidden">
-          {/* Messages Area com scroll otimizado */}
+        {/* Main Chat Container - Premium */}
+        <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Top Fade Gradient - ChatGPT Style */}
+          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black via-black/60 to-transparent pointer-events-none z-10" />
+
+          {/* Messages Container */}
           <div 
             ref={scrollContainerRef}
-            className="flex-1 overflow-y-auto px-4 pt-6 pb-2 premium-scrollbar-chat"
+            className="flex-1 overflow-y-auto overscroll-none px-4 pt-4 min-h-0"
             style={{
               WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
+              overscrollBehavior: 'contain',
+              paddingBottom: 'max(160px, calc(env(safe-area-inset-bottom) + 160px))',
             }}
           >
-            <AnimatePresence mode="wait">
-              {messages.length === 0 ? (
+            <style jsx>{`
+              div::-webkit-scrollbar { display: none; }
+            `}</style>
+
+            {messages.length === 0 ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center justify-center h-full px-6"
+              >
                 <motion.div
-                  key="empty"
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex flex-col items-center justify-center h-full px-4"
+                  transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/[0.12] to-white/[0.06] backdrop-blur-xl border border-white/[0.12] flex items-center justify-center shadow-2xl"
                 >
-                  <div className="text-center space-y-3">
-                    <motion.h1 
-                      className="text-5xl font-bold text-white drop-shadow-lg"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1, duration: 0.5 }}
-                    >
-                      DUA
-                    </motion.h1>
-                    <motion.p 
-                      className="text-neutral-300 text-base max-w-md mx-auto leading-relaxed"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2, duration: 0.5 }}
-                    >
-                      Comece uma conversa ou toque no microfone para falar.
-                    </motion.p>
-                  </div>
+                  <Bot className="w-8 h-8 text-white/90" />
                 </motion.div>
-              ) : (
-                <motion.div
-                  key="messages"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-4 pb-4"
-                >
-                  {messages.map((msg: any, index: number) => (
+              </motion.div>
+            ) : (
+                <div className="space-y-4 pb-2">
+                  {messages.map((msg: any, index: number) => {
+                    const isLastMessage = index === messages.length - 1;
+                    return (
                     <motion.div 
-                      key={msg.id} 
-                      variants={messageVariants}
-                      custom={index}
-                      className="group relative"
+                      key={msg.id}
+                      initial={isLastMessage ? { opacity: 0, y: 20, scale: 0.95 } : false}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ 
+                        duration: 0.4, 
+                        ease: [0.16, 1, 0.3, 1],
+                        delay: isLastMessage ? 0.1 : 0 
+                      }}
+                      className="group"
                     >
                       <div
                         className={cn(
-                          "flex items-start gap-2.5 w-full",
+                          "flex items-start gap-3 w-full",
                           msg.role === "user" && "justify-end"
                         )}
                       >
                         {msg.role === "assistant" && (
                           <motion.div 
-                            className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0 shadow-lg mt-0.5"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+                            className="w-8 h-8 rounded-xl bg-gradient-to-br from-white/[0.12] to-white/[0.06] border border-white/[0.12] flex items-center justify-center flex-shrink-0 mt-0.5 backdrop-blur-xl shadow-lg"
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.08, type: "spring", stiffness: 500, damping: 25 }}
                           >
-                            <Bot className="w-4 h-4 text-neutral-400" />
+                            <Bot className="w-4 h-4 text-white/80" />
                           </motion.div>
                         )}
-                        <div className="relative flex-1 max-w-[75%]">
+                        
+                        <div className="relative flex-1 max-w-[82%]">
                           <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
+                            initial={{ scale: 0.97, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ delay: 0.1, duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                             className={cn(
-                              "px-4 py-2.5 rounded-3xl text-white leading-relaxed shadow-lg text-[15px] relative",
+                              "px-4 py-3 text-[15px] leading-[1.5] relative overflow-hidden",
                               msg.role === "user"
-                                ? "bg-blue-600 rounded-br-md"
-                                : "bg-neutral-800/90 backdrop-blur-sm rounded-bl-md pr-12"
+                                ? "bg-white/[0.12] text-white rounded-[20px] rounded-br-md shadow-lg shadow-black/10 backdrop-blur-xl border border-white/[0.15]"
+                                : "bg-white/[0.06] text-white/95 backdrop-blur-2xl border border-white/[0.08] rounded-[20px] rounded-bl-md shadow-xl"
                             )}
+                            style={{
+                              WebkitFontSmoothing: 'antialiased',
+                              MozOsxFontSmoothing: 'grayscale',
+                            }}
                           >
+                            {/* Efeito de brilho premium para mensagens do assistente */}
+                            {msg.role === "assistant" && isLastMessage && (
+                              <motion.div
+                                initial={{ x: '-100%', opacity: 0 }}
+                                animate={{ x: '200%', opacity: [0, 0.3, 0] }}
+                                transition={{ duration: 1.5, delay: 0.3, ease: 'easeInOut' }}
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
+                                style={{ width: '50%' }}
+                              />
+                            )}
+                            
                             {msg.role === "assistant" ? (
                               <MessageContent content={msg.content} />
                             ) : (
                               msg.content
                             )}
-                          </motion.div>
-                          
-                          {/* Copy button apenas para mensagens da DUA - posicionado dentro do bubble */}
-                          {msg.role === "assistant" && (
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                              <MessageActions 
-                                content={msg.content} 
-                                messageId={msg.id}
-                                onRegenerate={reload}
-                                isRegenerating={isLoading}
-                              />
+                            
+                            {/* Timestamp - ChatGPT/Gemini Style */}
+                            <div className={cn(
+                              "text-[11px] mt-1.5 font-light",
+                              msg.role === "user" ? "text-white/50" : "text-white/30"
+                            )}>
+                              {new Date(msg.createdAt || Date.now()).toLocaleTimeString('pt-PT', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
                             </div>
-                          )}
+                            
+                            {/* Copy/Actions Button - Gemini Style */}
+                            {msg.role === "assistant" && (
+                              <div className="absolute -bottom-9 right-0 opacity-0 group-active:opacity-100 transition-opacity duration-200">
+                                <MessageActions 
+                                  content={msg.content} 
+                                  messageId={msg.id}
+                                  onRegenerate={reload}
+                                  isRegenerating={isLoading}
+                                />
+                              </div>
+                            )}
+                          </motion.div>
                         </div>
+                        
                         {msg.role === "user" && (
                           <motion.div 
-                            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+                            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 shadow-lg overflow-hidden border border-white/20"
+                            style={{
+                              background: userAvatar ? 'transparent' : 'linear-gradient(135deg, #ffffff15 0%, #ffffff25 100%)'
+                            }}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.08, type: "spring", stiffness: 500, damping: 25 }}
                           >
-                            <User className="w-4 h-4 text-white" />
+                            {userAvatar ? (
+                              <Image
+                                src={userAvatar}
+                                alt={userName || 'User'}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : userName ? (
+                              <span className="text-white text-xs font-semibold uppercase">
+                                {userName.substring(0, 2)}
+                              </span>
+                            ) : (
+                              <User className="w-4 h-4 text-white" />
+                            )}
                           </motion.div>
                         )}
                       </div>
                     </motion.div>
-                  ))}
+                  )})}
                   
-                  {/* Typing Indicator quando está carregando */}
-                  {isLoading && <TypingIndicator />}
+                  {isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-3 px-4"
+                    >
+                      <motion.div 
+                        className="w-8 h-8 rounded-xl bg-gradient-to-br from-white/[0.12] to-white/[0.06] border border-white/[0.12] flex items-center justify-center flex-shrink-0 backdrop-blur-xl shadow-lg"
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        <Bot className="w-4 h-4 text-white/80" />
+                      </motion.div>
+                      <div className="flex items-center gap-1.5 bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[20px] px-4 py-3">
+                        <motion.div
+                          className="w-2 h-2 bg-white/60 rounded-full"
+                          animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                        />
+                        <motion.div
+                          className="w-2 h-2 bg-white/60 rounded-full"
+                          animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                        />
+                        <motion.div
+                          className="w-2 h-2 bg-white/60 rounded-full"
+                          animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                  
+                  {!isLoading && messages.length > 0 && <div className="h-2" />}
+                </div>
+              )}
+            <div ref={messagesEndRef} className="h-20" />
+          </div>
+
+          {/* Bottom Fade Gradient - Premium */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10" />
+
+          {/* Input Bar - ChatGPT/Gemini Premium Style */}
+          <div 
+            className="relative z-20 flex-shrink-0 px-4 py-4 bg-black/95 backdrop-blur-2xl"
+            style={{ 
+              paddingBottom: 'max(env(safe-area-inset-bottom), 16px)',
+            }}
+          >
+            {/* Efeito visual de envio */}
+            <AnimatePresence>
+              {showSendEffect && (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 2.5, opacity: [0, 0.3, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="absolute inset-0 bg-gradient-radial from-white/20 via-white/5 to-transparent pointer-events-none"
+                />
+              )}
+            </AnimatePresence>
+            
+            {/* Image Preview */}
+            <AnimatePresence>
+              {selectedImage && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.94, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: 8 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="mb-3"
+                >
+                  <div className="relative inline-block overflow-hidden rounded-2xl border border-white/10 shadow-2xl bg-white/5 backdrop-blur-xl">
+                    <img 
+                      src={selectedImage} 
+                      alt="Preview" 
+                      className="max-w-[140px] max-h-[140px] object-cover"
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={removeImage}
+                      className="absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-black/90 hover:bg-black border border-white/20 text-white shadow-2xl active:scale-90 transition-transform"
+                    >
+                      <span className="text-[11px] font-bold">✕</span>
+                    </Button>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
-            <div ref={messagesEndRef} />
-          </div>
 
-          {/* Premium Input Bar - iOS Style com safe area bottom */}
-          <motion.div 
-            className="relative z-20 px-4 pt-3 pb-safe bg-black/40 backdrop-blur-2xl border-t border-white/5"
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 260, damping: 25 }}
-          >
-            {/* Image Preview */}
-            {selectedImage && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="mb-3 relative inline-block"
-              >
-                <img 
-                  src={selectedImage} 
-                  alt="Preview" 
-                  className="max-w-[200px] max-h-[200px] rounded-xl border border-white/10 shadow-2xl object-cover"
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={removeImage}
-                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 hover:bg-red-600 text-white"
-                >
-                  <span className="text-xs">✕</span>
-                </Button>
-              </motion.div>
-            )}
-
-            <div className="flex items-end gap-2.5 mb-3">
-              {/* Input Container - iOS iMessage Style */}
-              <div className="flex-1 flex items-center gap-2 bg-neutral-900/80 backdrop-blur-xl rounded-[24px] p-2 shadow-2xl border border-white/5">
+            {/* Form Container */}
+            <form onSubmit={handleFormSubmit} className="flex items-end gap-2.5">
+              <div className={cn(
+                "flex-1 flex items-center gap-2 backdrop-blur-2xl rounded-[24px] px-3 py-2.5 shadow-2xl transition-all duration-300",
+                input.trim() 
+                  ? "bg-white/[0.10] border border-white/[0.20] shadow-white/5" 
+                  : "bg-white/[0.06] border border-white/[0.1] hover:bg-white/[0.08] hover:border-white/[0.15]"
+              )}>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -496,81 +828,106 @@ export default function ChatPage() {
                   size="icon"
                   onClick={() => fileInputRef.current?.click()}
                   className={cn(
-                    "text-neutral-400 hover:text-white h-8 w-8 hover:bg-white/5 rounded-full shrink-0 active:scale-90 transition-transform",
-                    selectedImage && "text-blue-400 bg-blue-400/10"
+                    "text-white/50 hover:text-white/90 h-8 w-8 hover:bg-white/10 rounded-full flex-shrink-0 active:scale-90 transition-all duration-200",
+                    selectedImage && "text-white/90 bg-white/15"
                   )}
                 >
-                  <Paperclip className="w-4 h-4" />
+                  <Paperclip className="w-[18px] h-[18px]" />
                 </Button>
+                
                 <Textarea
                   value={input}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    handleInputChange(e);
+                    // Som sutil de digitação (apenas a cada 3 caracteres para não ser excessivo)
+                    if (e.target.value.length % 3 === 0 && e.target.value.length > input.length) {
+                      playSound('typing');
+                    }
+                  }}
                   onKeyDown={handleKeyDown}
-                  placeholder="Mensagem..."
-                  className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-white placeholder:text-neutral-500 resize-none overflow-y-hidden py-2 text-[16px] leading-tight"
+                  placeholder={isLoading ? "DUA está a responder..." : "Mensagem DUA..."}
+                  disabled={isLoading}
+                  className={cn(
+                    "flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-white placeholder:text-white/30 resize-none overflow-y-hidden py-1 px-1 text-[16px] leading-[1.4] font-normal min-h-0 transition-opacity",
+                    isLoading && "opacity-50 cursor-not-allowed"
+                  )}
                   style={{ 
-                    fontSize: '16px', // Prevents iOS zoom on focus
+                    fontSize: '16px',
                     WebkitAppearance: 'none',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
                   }}
                   rows={1}
                 />
+                
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={cn(
-                    "h-8 w-8 rounded-full shrink-0 transition-all duration-200 active:scale-90",
-                    "hover:bg-blue-500/10 hover:text-blue-400 text-neutral-400"
-                  )}
+                  className="h-8 w-8 rounded-full flex-shrink-0 transition-all duration-200 active:scale-90 hover:bg-white/10 text-white/50 hover:text-white/90"
                   onClick={() => {
                     if (navigator.vibrate) navigator.vibrate(10);
                     setShowRealTimeChat(true);
                   }}
-                  title="Conversar por Voz"
+                  title="Voz"
                 >
-                  <Mic className="w-4 h-4" />
+                  <Mic className="w-[18px] h-[18px]" />
                 </Button>
               </div>
               
-              {/* Send/Stop Button - iOS Style */}
+              {/* Send/Stop Button - Premium */}
               <motion.div
-                whileTap={{ scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                animate={{ 
+                  scale: input.trim() || isLoading ? 1 : 0.95,
+                  opacity: input.trim() || isLoading ? 1 : 0.6,
+                }}
+                whileTap={{ scale: 0.90 }}
+                transition={{ type: "spring", stiffness: 600, damping: 30 }}
+                className="flex-shrink-0"
               >
                 {isLoading ? (
-                  <Button 
-                    size="icon"
-                    onClick={() => {
-                      stop();
-                      toast.info("Geração interrompida");
-                    }}
-                    className="rounded-full w-10 h-10 shadow-xl bg-red-600 hover:bg-red-500 active:scale-90 transition-all duration-200 shrink-0"
+                  <motion.div
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <StopCircle className="w-5 h-5 text-white" />
-                  </Button>
+                    <Button 
+                      size="icon"
+                      onClick={() => {
+                        stop();
+                        if (navigator.vibrate) navigator.vibrate(10);
+                        toast.info("Parado");
+                      }}
+                      className="rounded-full w-10 h-10 shadow-2xl bg-red-500 hover:bg-red-400 border-0 active:scale-90 transition-all relative overflow-hidden"
+                    >
+                      {/* Efeito de pulso */}
+                      <motion.div
+                        animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+                        className="absolute inset-0 bg-red-400 rounded-full"
+                      />
+                      <StopCircle className="w-[19px] h-[19px] text-white relative z-10" />
+                    </Button>
+                  </motion.div>
                 ) : (
                   <Button 
+                    type="submit"
                     size="icon" 
                     className={cn(
-                      "rounded-full w-10 h-10 shadow-xl transition-all duration-200 shrink-0",
+                      "rounded-full w-10 h-10 shadow-2xl border-0 transition-all duration-200",
                       input.trim()
-                        ? "bg-blue-600 hover:bg-blue-500 active:scale-90"
-                        : "bg-neutral-800 opacity-50 cursor-not-allowed"
+                        ? "bg-white/90 text-black hover:bg-white active:scale-90 shadow-white/30"
+                        : "bg-white/10 text-white/40 opacity-60 cursor-not-allowed"
                     )}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (navigator.vibrate) navigator.vibrate(10);
-                      handleFormSubmit(e as any);
-                    }}
                     disabled={!input.trim()}
                   >
-                    <ArrowUpIcon className="w-5 h-5 text-white" />
+                    <ArrowUpIcon className="w-5 h-5 font-bold" strokeWidth={2.5} />
                   </Button>
                 )}
               </motion.div>
-            </div>
-          </motion.div>
+            </form>
+          </div>
         </div>
 
+        {/* Voice Chat */}
         <AnimatePresence>
           {showRealTimeChat && (
             <GeminiLiveVoiceChat onClose={() => setShowRealTimeChat(false)} />
@@ -596,7 +953,7 @@ export default function ChatPage() {
       </div>
 
       <PremiumNavbar 
-        className="relative z-50" 
+        className="relative z-[100]" 
         credits={250} 
         variant="transparent"
         showSidebarToggle={true}
@@ -631,7 +988,7 @@ export default function ChatPage() {
       <Button
         onClick={toggleSidebar}
         className={cn(
-          "fixed top-20 lg:top-24 z-50 transition-all duration-300",
+          "fixed top-20 lg:top-24 z-[90] transition-all duration-300",
           "bg-black/70 backdrop-blur-xl border border-white/20 hover:bg-black/90",
           "text-white shadow-xl hover:shadow-2xl",
           "w-11 h-11 lg:w-10 lg:h-10 p-0 rounded-full",
@@ -645,13 +1002,13 @@ export default function ChatPage() {
 
       <div
         className={cn(
-          "relative z-10 flex-1 flex flex-col transition-all duration-300",
+          "relative z-10 flex-1 flex flex-col transition-all duration-300 min-h-0",
           isSidebarOpen ? (isSidebarCollapsed ? "ml-0 lg:ml-16" : "ml-0 lg:ml-64") : "ml-0",
         )}
       >
         <div 
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 premium-scrollbar-chat"
+          className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 premium-scrollbar-chat min-h-0"
         >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-4">
@@ -682,17 +1039,36 @@ export default function ChatPage() {
                   <div className="relative max-w-[85%] sm:max-w-[80%]">
                     <div
                       className={cn(
-                        "rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 backdrop-blur-xl",
+                        "rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 backdrop-blur-xl relative overflow-hidden",
                         msg.role === "user"
                           ? "bg-white/10 text-white border border-white/20"
                           : "bg-black/40 text-white border border-white/10 pr-12",
                       )}
                     >
+                      {/* Efeito de brilho premium para desktop */}
+                      {msg.role === "assistant" && messages[messages.length - 1]?.id === msg.id && (
+                        <motion.div
+                          initial={{ x: '-100%', opacity: 0 }}
+                          animate={{ x: '200%', opacity: [0, 0.2, 0] }}
+                          transition={{ duration: 2, delay: 0.3, ease: 'easeInOut' }}
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none"
+                          style={{ width: '50%' }}
+                        />
+                      )}
+                      
                       {msg.role === "assistant" ? (
                         <MessageContent content={msg.content} className="text-sm sm:text-base" />
                       ) : (
                         <p className="text-sm sm:text-base leading-relaxed break-words">{msg.content}</p>
                       )}
+                      
+                      {/* Timestamp Desktop */}
+                      <div className="text-[10px] text-white/30 mt-1.5 font-light">
+                        {new Date(msg.createdAt || Date.now()).toLocaleTimeString('pt-PT', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </div>
                     </div>
                     
                     {/* Copy button para desktop */}
@@ -708,17 +1084,68 @@ export default function ChatPage() {
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    <div 
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 overflow-hidden border border-white/20"
+                      style={{
+                        background: userAvatar ? 'transparent' : 'linear-gradient(135deg, #ffffff15 0%, #ffffff25 100%)'
+                      }}
+                    >
+                      {userAvatar ? (
+                        <Image
+                          src={userAvatar}
+                          alt={userName || 'User'}
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : userName ? (
+                        <span className="text-white text-[10px] sm:text-xs font-semibold uppercase">
+                          {userName.substring(0, 2)}
+                        </span>
+                      ) : (
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      )}
                     </div>
                   )}
                 </div>
               ))}
               
-              {/* Typing indicator desktop */}
-              {isLoading && <TypingIndicator />}
+              {/* Typing indicator desktop - Melhorado */}
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3"
+                >
+                  <motion.div 
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </motion.div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-4 py-2.5">
+                    <motion.div
+                      className="w-2 h-2 bg-white/70 rounded-full"
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                    />
+                    <motion.div
+                      className="w-2 h-2 bg-white/70 rounded-full"
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                    />
+                    <motion.div
+                      className="w-2 h-2 bg-white/70 rounded-full"
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                    />
+                    <span className="text-xs text-white/60 ml-1">Digitando</span>
+                  </div>
+                </motion.div>
+              )}
               
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} className="h-4" />
             </div>
           )}
         </div>
@@ -758,7 +1185,7 @@ export default function ChatPage() {
                       "text-white hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-purple-500/20",
                       "hover:text-blue-400 active:scale-95 hover:shadow-lg hover:shadow-blue-500/25"
                     )}
-                    title="🎙️ Modo Voz Premium - Como ChatGPT"
+                    title="Modo Voz Premium - Como ChatGPT"
                   >
                     <Mic className="w-4 h-4 sm:w-4 sm:h-4 group-hover:animate-pulse" />
                   </Button>
@@ -821,7 +1248,7 @@ export default function ChatPage() {
                 <div className="relative p-6 border-b border-zinc-800">
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10" />
                   <div className="relative">
-                    <h2 className="text-xl font-bold text-white mb-1">⌨️ Atalhos de Teclado</h2>
+                    <h2 className="text-xl font-bold text-white mb-1">Atalhos de Teclado</h2>
                     <p className="text-sm text-zinc-400">Navegue mais rápido com esses comandos</p>
                   </div>
                 </div>

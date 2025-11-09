@@ -20,25 +20,64 @@ export const metadata: Metadata = {
   title: "DUA - Plataforma de IA Criativa",
   description: "Plataforma completa com Inteligência Artificial - Crie vídeos, imagens, designs e muito mais",
   generator: "v0.app",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "DUA",
+    title: "DUA AI",
+    startupImage: [
+      {
+        url: "/splash/iphone5_splash.png",
+        media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/splash/iphone6_splash.png",
+        media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/splash/iphoneplus_splash.png",
+        media: "(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)",
+      },
+      {
+        url: "/splash/iphonex_splash.png",
+        media: "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)",
+      },
+      {
+        url: "/splash/iphonexr_splash.png",
+        media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/splash/iphonexsmax_splash.png",
+        media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)",
+      },
+      {
+        url: "/splash/ipad_splash.png",
+        media: "(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/splash/ipadpro1_splash.png",
+        media: "(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/splash/ipadpro3_splash.png",
+        media: "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/splash/ipadpro2_splash.png",
+        media: "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)",
+      },
+    ],
   },
   formatDetection: {
     telephone: false,
   },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#8B5CF6" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
   icons: {
     icon: [
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
       { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
     ],
   },
@@ -48,9 +87,10 @@ export function generateViewport() {
   return {
     width: "device-width",
     initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover", // iOS Safe Area Support
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: "cover",
+    themeColor: "#000000",
   }
 }
 
@@ -60,7 +100,23 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="pt" data-scroll-behavior="smooth">
+      <head>
+        {/* PWA Meta Tags */}
+        <meta name="application-name" content="DUA AI" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        
+        {/* iOS Specific Meta Tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="DUA AI" />
+        
+        {/* iOS Splash Screens - Placeholder */}
+        <link rel="apple-touch-startup-image" href="/splash/default.png" />
+        
+        {/* Manifest Link */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+      </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <UnifiedMusicProvider>
           <VideoGenerationProvider>

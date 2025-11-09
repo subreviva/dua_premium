@@ -177,7 +177,7 @@ export default function LoginPage() {
 
             // Login bem-sucedido!
       const userName = (userData && userData.name) || email.split('@')[0];
-      toast.success(`Bem-vindo, ${userName}! 🎉`, {
+      toast.success(`Bem-vindo, ${userName}`, {
         description: "Redirecionando para o chat...",
         duration: 2000,
       });

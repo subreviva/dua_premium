@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
       }
 
       setResetSuccess(true);
-      toast.success("Password alterada com sucesso! 🎉", {
+      toast.success("Password alterada com sucesso", {
         description: "Redirecionando para o login..."
       });
 

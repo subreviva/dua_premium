@@ -3,8 +3,17 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, Music, Coins } from "lucide-react";
+import {
+  Carousel,
+  CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import { useState } from "react";
 
 function Ecosystem2Lados() {
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  
   const ecosystemParts = [
     {
       icon: Building2,
@@ -67,8 +76,102 @@ function Ecosystem2Lados() {
         </p>
       </motion.div>
 
-      {/* Ecosystem Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+      {/* Ecosystem Cards - MOBILE: Carrossel */}
+      <div className="lg:hidden">
+        <Carousel
+          setApi={setCarouselApi}
+          opts={{
+            align: "start",
+            loop: true,
+            dragFree: true,
+            skipSnaps: false,
+          }}
+          className="w-full touch-pan-x"
+        >
+          <CarouselContent className="ml-4">
+            {ecosystemParts.map((part, index) => (
+              <CarouselItem key={index} className="pl-4 basis-[90%] sm:basis-[85%]">
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 1.3, 
+                    ease: [0.22, 1, 0.36, 1],
+                    delay: index * 0.15 
+                  }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  className="group relative h-full"
+                >
+                  <div className="relative h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 space-y-6 transition-all duration-500 hover:bg-white/10 hover:border-white/20 flex flex-col min-h-[620px]">
+                    {/* Icon */}
+                    <div className="w-16 h-16 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/20 transition-all duration-500 shadow-lg">
+                      <part.icon className="w-8 h-8 text-white" />
+                    </div>
+
+                    {/* Title */}
+                    <div className="space-y-4">
+                      <h3 className="text-3xl font-extralight text-white tracking-tight leading-tight">
+                        {part.title}
+                      </h3>
+                      <p className="text-lg text-white/70 font-light leading-relaxed">
+                        {part.subtitle}
+                      </p>
+                    </div>
+
+                    {/* Description */}
+                    {part.description && (
+                      <p className="text-base text-white/60 font-light leading-relaxed">
+                        {part.description}
+                      </p>
+                    )}
+
+                    {/* Features List */}
+                    {part.features.length > 0 && (
+                      <ul className="space-y-4 pt-2 flex-1">
+                        {part.features.map((feature, idx) => (
+                          <li 
+                            key={idx}
+                            className="text-base text-white/60 font-light leading-relaxed flex items-start gap-3"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-white/40 mt-2 flex-shrink-0" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Footer */}
+                    {part.footer && (
+                      <p className="text-base text-white/60 font-light leading-relaxed italic pt-2">
+                        {part.footer}
+                      </p>
+                    )}
+
+                    {/* CTA Button */}
+                    <div className="pt-6">
+                      <Button
+                        variant="outline"
+                        className="group/btn w-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/30 backdrop-blur-sm font-light text-base px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 shadow-lg min-h-[48px] touch-manipulation"
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          {part.cta}
+                          <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                        </span>
+                      </Button>
+                    </div>
+
+                    {/* Gradient overlay on hover */}
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  </div>
+                </motion.div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+
+      {/* Ecosystem Cards - DESKTOP: Grid */}
+      <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         {ecosystemParts.map((part, index) => (
           <motion.div
             key={index}

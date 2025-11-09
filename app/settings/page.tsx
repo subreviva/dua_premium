@@ -228,10 +228,10 @@ export default function SettingsPage() {
 
       // Reload data
       await loadUserData()
-      toast.success('✅ Perfil atualizado!')
+      toast.success('Perfil atualizado')
     } catch (error) {
       console.error('Error saving profile:', error)
-      toast.error('❌ Erro ao salvar perfil')
+      toast.error('Erro ao salvar perfil')
     } finally {
       setSaving(false)
     }
@@ -255,10 +255,10 @@ export default function SettingsPage() {
       if (error) throw error
 
       await loadUserData()
-      toast.success('✅ Notificações atualizadas!')
+      toast.success('Notificações atualizadas')
     } catch (error) {
       console.error('Error saving notifications:', error)
-      toast.error('❌ Erro ao salvar notificações')
+      toast.error('Erro ao salvar notificações')
     } finally {
       setSaving(false)
     }
@@ -280,10 +280,10 @@ export default function SettingsPage() {
       if (error) throw error
 
       await loadUserData()
-      toast.success('✅ Privacidade atualizada!')
+      toast.success('Privacidade atualizada')
     } catch (error) {
       console.error('Error saving privacy:', error)
-      toast.error('❌ Erro ao salvar privacidade')
+      toast.error('Erro ao salvar privacidade')
     } finally {
       setSaving(false)
     }
@@ -292,17 +292,17 @@ export default function SettingsPage() {
   async function handleChangePassword() {
     // Validações
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error('❌ Preencha todos os campos')
+      toast.error('Preencha todos os campos')
       return
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('❌ As passwords não coincidem')
+      toast.error('As passwords não coincidem')
       return
     }
 
     if (newPassword.length < 8) {
-      toast.error('❌ Password deve ter no mínimo 8 caracteres')
+      toast.error('Password deve ter no mínimo 8 caracteres')
       return
     }
 
@@ -321,12 +321,12 @@ export default function SettingsPage() {
       setNewPassword("")
       setConfirmPassword("")
 
-      toast.success('✅ Password alterada com sucesso!', {
+      toast.success('Password alterada com sucesso', {
         description: 'Use a nova password no próximo login'
       })
     } catch (error: any) {
       console.error('Error changing password:', error)
-      toast.error('❌ Erro ao alterar password', {
+      toast.error('Erro ao alterar password', {
         description: error.message || 'Tente novamente'
       })
     } finally {
@@ -336,7 +336,7 @@ export default function SettingsPage() {
 
   async function handleDeleteAccount() {
     if (deleteConfirmText !== 'ELIMINAR') {
-      toast.error('❌ Digite "ELIMINAR" para confirmar')
+      toast.error('Digite "ELIMINAR" para confirmar')
       return
     }
 
@@ -369,7 +369,7 @@ export default function SettingsPage() {
       // 3. Logout
       await supabaseClient.auth.signOut()
 
-      toast.success('✅ Conta eliminada com sucesso', {
+      toast.success('Conta eliminada com sucesso', {
         description: 'Os seus dados foram removidos permanentemente'
       })
 
@@ -380,7 +380,7 @@ export default function SettingsPage() {
 
     } catch (error: any) {
       console.error('Error deleting account:', error)
-      toast.error('❌ Erro ao eliminar conta', {
+      toast.error('Erro ao eliminar conta', {
         description: error.message || 'Contacte o suporte'
       })
     } finally {

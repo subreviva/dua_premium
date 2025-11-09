@@ -62,7 +62,7 @@ export default function HomePage() {
     // Mostrar instrução apenas se iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
     if (isIOS) {
-      alert('📱 Para instalar:\n1. Toque no botão compartilhar ⬆️\n2. Selecione "Adicionar à Tela de Início"')
+      alert('Para instalar:\n1. Toque no botão compartilhar\n2. Selecione "Adicionar à Tela de Início"')
     }
   }
   const { scrollYProgress } = useScroll({
@@ -355,7 +355,8 @@ export default function HomePage() {
             <SectionTitle 
               eyebrow="Identidade" 
               title="A Identidade Visual da DUA" 
-              kicker="Não é só código. É uma presença. A DUA tem rosto, voz e história."
+              kicker="Não é só código. É uma presença.
+A DUA tem rosto, voz e história."
             />
           </div>
           
@@ -543,7 +544,8 @@ export default function HomePage() {
             </h2>
             
             <p className="text-xl sm:text-2xl lg:text-3xl text-white/70 font-light max-w-3xl mx-auto leading-relaxed px-4">
-              Descobre o que a comunidade está a criar com a DUA
+              Descobre o que a comunidade<br />
+              está a criar com a DUA
             </p>
           </motion.div>
         </div>
@@ -596,7 +598,74 @@ export default function HomePage() {
           }}
         />
         
-        <div className="max-w-6xl mx-auto text-center space-y-12 sm:space-y-16 lg:space-y-20 relative z-10">
+        {/* MOBILE VERSION - Clean Centered Final CTA */}
+        <div className="lg:hidden max-w-xl mx-auto text-center space-y-10 relative z-10">
+          {/* Main Headline */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true }}
+            className="space-y-8"
+          >
+            <h2 className="text-5xl font-extralight text-white tracking-tight leading-[1.1]">
+              A DUA não é só<br />
+              <span className="font-light">uma ferramenta</span>
+            </h2>
+            
+            <p className="text-2xl text-white/90 font-light leading-relaxed">
+              É a resposta de quem decidiu que<br />
+              <span className="text-white font-normal">já chega de esperar</span>
+            </p>
+          </motion.div>
+
+          {/* Separator Line */}
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0 }}
+            whileInView={{ opacity: 1, scaleX: 1 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            viewport={{ once: true }}
+            className="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"
+          />
+
+          {/* Revolution Text */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            viewport={{ once: true }}
+            className="text-xl text-white/80 font-light leading-relaxed"
+          >
+            Junta-te à revolução criativa lusófona
+          </motion.p>
+
+          {/* Action Buttons - Premium Style */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+            viewport={{ once: true }}
+            className="flex flex-col gap-4 pt-4"
+          >
+            <Button
+              size="lg"
+              className="w-full gap-3 bg-white text-black hover:bg-white/90 active:bg-white/80 font-medium text-base px-8 py-7 rounded-2xl transition-all duration-300 shadow-2xl shadow-white/20 touch-manipulation"
+            >
+              Começar Agora <ArrowRight className="w-5 h-5" />
+            </Button>
+            
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full gap-3 border-2 border-white/30 bg-transparent hover:bg-white/10 active:bg-white/15 text-white font-light text-base px-8 py-7 rounded-2xl transition-all duration-300 touch-manipulation"
+            >
+              Explorar Estúdios
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* DESKTOP VERSION - Original */}
+        <div className="hidden lg:block max-w-6xl mx-auto text-center space-y-12 sm:space-y-16 lg:space-y-20 relative z-10">
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -628,7 +697,7 @@ export default function HomePage() {
             viewport={{ once: true, amount: 0.3 }}
             className="text-xl sm:text-2xl lg:text-3xl text-white/70 font-light max-w-3xl mx-auto px-4"
           >
-            Junta-te à revolução criativa lusófona.
+            Junta-te à revolução criativa lusófona
           </motion.p>
           
           <motion.div

@@ -287,7 +287,7 @@ export function useConversations() {
       }
     }
     
-    toast.success('✨ Nova conversa iniciada');
+    toast.success('Nova conversa iniciada');
     return newConv.id;
   }, [userId]);
 
@@ -364,7 +364,7 @@ export function useConversations() {
     }
 
     // Toast com Undo
-    toast.success('🗑️ Conversa deletada', {
+    toast.success('Conversa deletada', {
       action: {
         label: 'Desfazer',
         onClick: () => restoreConversation(id)
@@ -391,7 +391,7 @@ export function useConversations() {
     if (userId) {
       try {
         await supabase.rpc('restore_conversation', { conversation_id: id });
-        toast.success('✅ Conversa restaurada');
+        toast.success('Conversa restaurada');
       } catch (error) {
         console.error('❌ Erro ao restaurar no Supabase:', error);
       }
@@ -420,7 +420,7 @@ export function useConversations() {
 
   // Limpar todas as conversas
   const clearAllConversations = useCallback(async () => {
-    if (!confirm('⚠️ Tem certeza que deseja deletar TODAS as conversas? Esta ação não pode ser desfeita.')) {
+    if (!confirm('Tem certeza que deseja deletar TODAS as conversas? Esta ação não pode ser desfeita.')) {
       return;
     }
 

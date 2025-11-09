@@ -214,7 +214,7 @@ export default function PerfilPage() {
         return;
       }
 
-      toast.success("Perfil atualizado! ✨", {
+      toast.success("Perfil atualizado", {
         description: "Suas alterações foram salvas"
       });
 

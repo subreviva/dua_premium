@@ -152,7 +152,7 @@ export default function ComprarPage() {
           content_generated: `Purchase: ${pkg.name} package`,
         })
         
-        toast.success(`✅ ${pkg.tokens_amount} tokens adicionados!`, { 
+        toast.success(`${pkg.tokens_amount} tokens adicionados`, { 
           id: 'payment',
           description: 'Sua compra foi concluída com sucesso'
         })
@@ -240,7 +240,7 @@ export default function ComprarPage() {
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 px-4 py-1">
-                      ⭐ Mais Popular
+                      Mais Popular
                     </Badge>
                   </div>
                 )}
@@ -325,7 +325,7 @@ export default function ComprarPage() {
           <div className="mt-16 max-w-3xl mx-auto">
             <div className="bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 p-8">
               <h3 className="text-2xl font-bold text-white mb-4">
-                ℹ️ Informações de Pagamento
+                Informações de Pagamento
               </h3>
               <div className="space-y-3 text-white/80">
                 <p>• <strong>Pagamento seguro:</strong> Todas as transações são processadas de forma segura</p>

@@ -50,7 +50,107 @@ function HeroFounder() {
       </div>
 
       <div className="container mx-auto relative z-10 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-12 lg:gap-16 items-center lg:grid-cols-2">
+        {/* MOBILE VERSION - iOS Style Card Design */}
+        <div className="lg:hidden space-y-6">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true }}
+          >
+            <Badge 
+              variant="outline" 
+              className="border-white/20 bg-white/5 text-white/90 backdrop-blur-sm px-4 py-2 text-sm font-light"
+            >
+              <Sparkles className="w-3.5 h-3.5 mr-2 inline-block" />
+              A História por Trás da DUA
+            </Badge>
+          </motion.div>
+
+          {/* Title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            viewport={{ once: true }}
+            className="text-4xl tracking-tight font-extralight text-white leading-[1.1]"
+          >
+            Quem Criou a DUA
+          </motion.h1>
+
+          {/* iOS Style Card with Image */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            viewport={{ once: true }}
+            className="relative rounded-3xl overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl"
+          >
+            {/* Image Section */}
+            <div className="relative h-[400px] overflow-hidden">
+              <img 
+                src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-4122-HOMEM%20DENTRO%20DE%20UM%20QUARTO%2C%20NO%20COMPUTADOR....jpeg"
+                alt="Fundador da DUA em estúdio de música"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              
+              {/* Quote on image */}
+              <div className="absolute bottom-6 left-6 right-6">
+                <p className="text-white text-lg font-light leading-relaxed italic">
+                  "A DUA é prova de que é possível reescrever as regras quando o sistema não te deixa jogar."
+                </p>
+              </div>
+            </div>
+
+            {/* Content Section - iOS Card Style */}
+            <div className="p-6 space-y-4 bg-gradient-to-b from-white/[0.02] to-white/[0.08]">
+              <p className="text-base leading-relaxed text-white/80 font-light">
+                A DUA nasceu das mãos de alguém que conhece tanto palcos de festivais quanto bairros periféricos. 
+                Alguém que viveu a exploração da indústria musical, a falta de acesso a ferramentas profissionais 
+                e a solidão de tentar construir algo do zero.
+              </p>
+              
+              <div className="pt-2 pb-1">
+                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              </div>
+              
+              <p className="text-sm leading-relaxed text-white/60 font-light italic">
+                Sem equipa inicial. Sem investimento externo. Apenas uma visão clara e uma teimosia inabalável.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Action Buttons - iOS Style */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            viewport={{ once: true }}
+            className="flex flex-col gap-3 pt-2"
+          >
+            {/* Primary Button */}
+            <Button 
+              size="lg" 
+              className="w-full gap-3 bg-white/10 hover:bg-white/15 active:bg-white/20 text-white font-light text-base px-8 py-6 rounded-2xl transition-all duration-300 shadow-lg border border-white/20 backdrop-blur-xl touch-manipulation"
+            >
+              Conhecer a Visão <MoveRight className="w-4 h-4" />
+            </Button>
+            
+            {/* Secondary Button */}
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="w-full gap-3 border border-white/20 bg-white/5 hover:bg-white/10 active:bg-white/15 text-white backdrop-blur-xl font-light text-base px-8 py-6 rounded-2xl transition-all duration-300 touch-manipulation"
+            >
+              Junte-se à Comunidade
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* DESKTOP VERSION - Original Grid Layout */}
+        <div className="hidden lg:grid grid-cols-1 gap-12 lg:gap-16 items-center lg:grid-cols-2">
           <motion.div 
             initial={{ opacity: 0, x: -60 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -151,13 +251,13 @@ function HeroFounder() {
           </motion.div>
         </div>
 
-        {/* Additional context section below */}
+        {/* Additional context section below - Desktop only */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
           viewport={{ once: true, amount: 0.3 }}
-          className="mt-20 lg:mt-32 max-w-4xl mx-auto text-center space-y-6"
+          className="hidden lg:block mt-20 lg:mt-32 max-w-4xl mx-auto text-center space-y-6"
         >
           <p className="text-xl md:text-2xl lg:text-3xl text-white/80 font-light leading-relaxed">
             Construída por um criador que viviu todos os lados.

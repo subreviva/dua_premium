@@ -11,7 +11,7 @@ export default function VideoEditorPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [videoPreview, setVideoPreview] = useState<string | null>(null)
   const [promptText, setPromptText] = useState("")
-  const [aspectRatio, setAspectRatio] = useState<"1280:720" | "720:1280" | "1024:1024">("1280:720")
+  const [aspectRatio, setAspectRatio] = useState<"1280:720" | "720:1280" | "1104:832" | "960:960" | "832:1104" | "1584:672" | "848:480" | "640:480">("1280:720")
   const [isUploading, setIsUploading] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
@@ -375,11 +375,16 @@ export default function VideoEditorPage() {
               {/* Aspect Ratio */}
               <div className="rounded-2xl bg-zinc-900 border border-white/10 p-4">
                 <label className="block text-sm font-semibold text-white mb-3">Proporção</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-3">
                   {[
-                    { value: '1280:720', label: '16:9 Horizontal', icon: '📱' },
-                    { value: '720:1280', label: '9:16 Vertical', icon: '📲' },
-                    { value: '1024:1024', label: '1:1 Quadrado', icon: '⬜' },
+                    { value: '1280:720', label: '16:9 HD', icon: '�' },
+                    { value: '720:1280', label: '9:16 Vertical', icon: '�' },
+                    { value: '1104:832', label: '4:3 HD', icon: '🖥️' },
+                    { value: '832:1104', label: '3:4 Vertical', icon: '📲' },
+                    { value: '960:960', label: '1:1 Quadrado', icon: '⬜' },
+                    { value: '1584:672', label: '21:9 Cinema', icon: '🎬' },
+                    { value: '848:480', label: '16:9 SD', icon: '📼' },
+                    { value: '640:480', label: '4:3 SD', icon: '💾' },
                   ].map((ratio) => (
                     <button
                       key={ratio.value}

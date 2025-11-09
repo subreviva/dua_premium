@@ -3,106 +3,78 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Play, Pause } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
-  Stories,
-  StoriesContent,
-  Story,
-  StoryAuthor,
-  StoryAuthorImage,
-  StoryAuthorName,
-  StoryOverlay,
-  StoryImage,
-} from '@/components/ui/stories-carousel';
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel';
 
-// Community stories data with lusophone creators
+// Community stories data with lusophone creators + real music from Music Studio
 const communityStories = [
   {
     id: 1,
-    author: 'Marta Lisboa',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
-    fallback: 'ML',
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=1200&fit=crop&q=80',
-    alt: 'Arte Digital Lisboa',
+    author: 'Riicky',
+    avatar: 'https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg',
+    fallback: 'RI',
+    image: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=800&q=80',
+    alt: 'Artista Português',
+    musicUrl: `/audio/featured/ainda-nao-acabou.mp3`,
+    musicTitle: 'Ainda Não Acabou',
+    genre: 'Portuguese Pop',
   },
   {
     id: 2,
-    author: 'Tiago Porto',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-    fallback: 'TP',
-    image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&h=1200&fit=crop&q=80',
-    alt: 'Design Português',
+    author: 'Joana_Goncalves',
+    avatar: 'https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg',
+    fallback: 'JG',
+    image: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=800&q=80',
+    alt: 'Artista Cabo-verdiana',
+    musicUrl: `/audio/featured/bo-surrize.mp3`,
+    musicTitle: 'Bo Surrize Ta Alegra-m Nha Dia',
+    genre: 'Cabo Verde',
   },
   {
     id: 3,
-    author: 'Bia São Paulo',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-    fallback: 'BS',
-    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&h=1200&fit=crop&q=80',
-    alt: 'Arte Brasileira',
+    author: 'FabyJunior',
+    avatar: 'https://cdn2.suno.ai/image_cb01ecb0-2e67-430c-bdae-d235fa14808a.jpeg',
+    fallback: 'FJ',
+    image: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=800&q=80',
+    alt: 'Músico Brasileiro',
+    musicUrl: `/audio/featured/struggle-symphony.mp3`,
+    musicTitle: 'Struggle Symphony',
+    genre: 'Orchestral Rock',
   },
   {
     id: 4,
-    author: 'Djô Praia',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
-    fallback: 'DP',
-    image: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=800&h=1200&fit=crop&q=80',
-    alt: 'Cabo Verde Digital',
+    author: 'Riicky',
+    avatar: 'https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg',
+    fallback: 'RI',
+    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
+    alt: 'Artista Português',
+    musicUrl: `/audio/featured/amor-e-paz.mp3`,
+    musicTitle: 'Amor e Paz',
+    genre: 'Reggae',
   },
   {
     id: 5,
-    author: 'Luana Luanda',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face',
-    fallback: 'LL',
-    image: 'https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&h=1200&fit=crop&q=80',
-    alt: 'Arte Angolana',
-  },
-  {
-    id: 6,
-    author: 'Rafa Maputo',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-    fallback: 'RM',
-    image: 'https://images.unsplash.com/photo-1620641788813-04466f872be2?w=800&h=1200&fit=crop&q=80',
-    alt: 'Design Moçambicano',
-  },
-  {
-    id: 7,
-    author: 'Kátia Bissau',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face',
-    fallback: 'KB',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=1200&fit=crop&q=80',
-    alt: 'Criatividade Guiné-Bissau',
-  },
-  {
-    id: 8,
-    author: 'Miguel Coimbra',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face',
-    fallback: 'MC',
-    image: 'https://images.unsplash.com/photo-1605292356183-a77d0a9c9d1d?w=800&h=1200&fit=crop&q=80',
-    alt: 'Arte Portuguesa',
-  },
-  {
-    id: 9,
-    author: 'Yara Rio',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face',
-    fallback: 'YR',
-    image: 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=800&h=1200&fit=crop&q=80',
-    alt: 'Criação Brasil',
-  },
-  {
-    id: 10,
-    author: 'Zé Mindelo',
-    avatar: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=100&h=100&fit=crop&crop=face',
-    fallback: 'ZM',
-    image: 'https://images.unsplash.com/photo-1617396900799-f4ec2b43c7ae?w=800&h=1200&fit=crop&q=80',
-    alt: 'Design Cabo-verdiano',
+    author: 'Joana_Goncalves',
+    avatar: 'https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg',
+    fallback: 'JG',
+    image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&q=80',
+    alt: 'Artista Rock',
+    musicUrl: `/audio/featured/revolution-in-the-air.mp3`,
+    musicTitle: 'Revolution in the Air',
+    genre: 'Rock Anthem',
   },
 ];
 
 export const CommunityPreview = () => {
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const [playingId, setPlayingId] = React.useState<number | null>(null);
 
   React.useEffect(() => {
     setMounted(true);
@@ -121,47 +93,74 @@ export const CommunityPreview = () => {
   return (
     <div className="w-full">
       <div className="space-y-12 sm:space-y-16">
-        {/* Stories Carousel - Enhanced */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-          viewport={{ once: true, amount: 0.1 }}
-          className="px-4"
-        >
-          <Stories className="overflow-visible">
-            <StoriesContent className="gap-4 sm:gap-6 md:gap-8 lg:gap-10">
-              {communityStories.map((story, index) => (
-                <Story 
-                  key={story.id}
-                  className="aspect-[3/4] w-[180px] sm:w-[220px] md:w-[240px] lg:w-[260px] hover:shadow-[0_20px_60px_rgba(255,255,255,0.2)] transition-shadow duration-500"
-                >
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                    viewport={{ once: true }}
-                    className="w-full h-full"
-                  >
-                    <StoryImage src={story.image} alt={story.alt} />
-                    <StoryOverlay className="from-black/40" />
-                    <StoryAuthor>
-                      <StoryAuthorImage
-                        fallback={story.fallback}
-                        name={story.author}
-                        src={story.avatar}
-                        className="size-7 border-2 border-white/30 shadow-lg"
-                      />
-                      <StoryAuthorName className="text-white/95 font-medium drop-shadow-lg">
-                        {story.author}
-                      </StoryAuthorName>
-                    </StoryAuthor>
-                  </motion.div>
-                </Story>
+        {/* Music carousel - Músicas reais da comunidade Music Studio */}
+        <div className="px-4">
+          <Carousel
+            opts={{ align: 'start', loop: true, dragFree: true, skipSnaps: false }}
+            className="w-full touch-pan-x"
+          >
+            <CarouselContent className="ml-4">
+              {communityStories.map((story) => (
+                <CarouselItem key={story.id} className="pl-4 basis-[90%] sm:basis-[85%] md:basis-[45%] lg:basis-[30%]">
+                  <div className="group relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl h-[460px]">
+                    <div className="relative h-[240px] overflow-hidden">
+                      <img src={story.image} alt={story.alt} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+                      
+                      {/* Genre Badge */}
+                      {story.genre && (
+                        <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-xl border border-white/20 text-xs font-medium text-white shadow-lg">
+                          {story.genre}
+                        </div>
+                      )}
+                      
+                      {/* Avatar */}
+                      <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md overflow-hidden border-2 border-white/20">
+                        <img src={story.avatar} alt={story.author} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+
+                    <div className="p-6 flex flex-col justify-between h-[220px]">
+                      <div className="space-y-3">
+                        <h4 className="text-xl font-extralight text-white tracking-tight leading-tight">{story.musicTitle}</h4>
+                        <p className="text-sm text-white/70 font-light">{story.author}</p>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <button
+                          aria-label={playingId === story.id ? 'Pausar' : 'Reproduzir'}
+                          className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 border border-white/10 min-h-[44px] touch-manipulation"
+                          onClick={() => {
+                            if (!story.musicUrl) return;
+                            if (playingId === story.id) {
+                              audioRef.current?.pause();
+                              setPlayingId(null);
+                              return;
+                            }
+                            if (!audioRef.current) audioRef.current = new Audio();
+                            if (audioRef.current.src !== story.musicUrl) {
+                              audioRef.current.src = story.musicUrl;
+                              audioRef.current.load();
+                            }
+                            audioRef.current.play();
+                            setPlayingId(story.id);
+                            audioRef.current.onended = () => setPlayingId(null);
+                          }}
+                        >
+                          {playingId === story.id ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-0.5" />}
+                        </button>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-white">{story.musicTitle}</div>
+                          <div className="text-xs text-white/60">{story.author}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
               ))}
-            </StoriesContent>
-          </Stories>
-        </motion.div>
+            </CarouselContent>
+          </Carousel>
+        </div>
 
         {/* Ver Mais Button - Premium */}
         <motion.div
