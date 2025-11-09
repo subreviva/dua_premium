@@ -216,21 +216,22 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.3)_60%,rgba(0,0,0,0.7)_100%)]" />
         </motion.div>
 
-        <div className="relative z-10 container mx-auto px-3 sm:px-6 lg:px-8 py-16 sm:py-32">
-          <div className="flex flex-col gap-6 sm:gap-10 lg:gap-14 items-center justify-center max-w-7xl w-full mx-auto text-center">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-32 lg:py-40">
+          <div className="flex flex-col gap-8 sm:gap-10 lg:gap-14 items-center justify-center max-w-7xl w-full mx-auto text-center">
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[14rem] sm:text-[16rem] md:text-[18rem] lg:text-[20rem] xl:text-[24rem] font-extralight leading-[0.85] tracking-[-0.08em] text-white"
+              className="text-[18rem] sm:text-[20rem] md:text-[22rem] lg:text-[24rem] xl:text-[28rem] font-extralight leading-[0.75] tracking-[-0.12em] text-white"
               style={{ 
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 100,
-                textShadow: '0 12px 80px rgba(0,0,0,0.95), 0 6px 40px rgba(0,0,0,0.8), 0 3px 20px rgba(0,0,0,0.6)',
-                letterSpacing: '-0.08em',
+                textShadow: '0 20px 120px rgba(0,0,0,0.98), 0 10px 60px rgba(0,0,0,0.9), 0 5px 30px rgba(0,0,0,0.7)',
+                letterSpacing: '-0.12em',
                 WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
+                MozOsxFontSmoothing: 'grayscale',
+                textRendering: 'optimizeLegibility'
               }}
             >
               DUA
@@ -240,8 +241,8 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-3xl leading-relaxed px-2"
-              style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8), 0 1px 10px rgba(0,0,0,0.6)' }}
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/95 font-light max-w-4xl leading-relaxed px-4"
+              style={{ textShadow: '0 4px 30px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.7)' }}
             >
               Onde a próxima onda de criatividade
               <br className="hidden sm:block" /> 
@@ -253,24 +254,24 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full sm:w-auto px-2 sm:px-0 mt-4"
+              className="w-full sm:w-auto px-4 sm:px-0 mt-6 sm:mt-8"
             >
               <div className="relative group">
                 {/* Glow effect sutil */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/10 via-white/20 to-white/10 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 via-white/20 to-white/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
                 <Button
                   size="lg"
-                  className="relative w-full sm:w-auto rounded-full px-6 sm:px-8 py-3 sm:py-4 bg-white/5 hover:bg-white/10 text-white font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.1)] border border-white/20 hover:border-white/40"
+                  className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-4 sm:py-5 bg-white/5 hover:bg-white/10 text-white font-light text-base sm:text-lg transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_48px_rgba(255,255,255,0.15)] border border-white/20 hover:border-white/40"
                   onClick={() => router.push("/acesso")}
                   style={{
                     backdropFilter: 'blur(24px)',
                     WebkitBackdropFilter: 'blur(24px)'
                   }}
                 >
-                  <span className="relative z-10 flex items-center gap-2 sm:gap-2.5 justify-center tracking-wide">
+                  <span className="relative z-10 flex items-center gap-2.5 sm:gap-3 justify-center tracking-wide">
                     Obter Acesso
-                    <ArrowRight className="w-4 h-4 transition-transform duration-700 group-hover:translate-x-1" />
+                    <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-700 group-hover:translate-x-1" />
                   </span>
                 </Button>
               </div>
