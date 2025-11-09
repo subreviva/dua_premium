@@ -89,7 +89,7 @@ export function FeatureShowcase({
       {/* MOBILE VERSION - Carrossel horizontal */}
       <div className="md:hidden w-full py-16">
         {/* Header mobile */}
-        <div className="px-4 mb-12 space-y-8">
+        <div className="px-4 mb-8 space-y-8">
           {eyebrow && (
             <Badge variant="outline" className="border-white/20 bg-white/5 text-white backdrop-blur-sm text-sm px-4 py-1.5">
               {eyebrow}
@@ -164,7 +164,7 @@ export function FeatureShowcase({
         </Carousel>
 
         {/* CTAs mobile */}
-        <div className="px-4 mt-12 flex flex-col gap-4">
+        <div className="px-4 mt-10 flex flex-col gap-4">
           <Button asChild size="lg" className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-full text-base h-12 px-8 min-h-[48px] touch-manipulation shadow-lg">
             <Link href="#start">Começar</Link>
           </Button>
