@@ -12,6 +12,12 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import {
+  Carousel,
+  CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 
 export type TabMedia = {
@@ -75,10 +81,110 @@ export function FeatureShowcase({
   className,
 }: FeatureShowcaseProps) {
   const initial = defaultTab ?? (tabs[0]?.value ?? "tab-0");
+  const [carouselApi, setCarouselApi] = React.useState<CarouselApi>();
 
   return (
     <section className={cn("w-full text-white", className)}>
-      <div className="container mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-12 md:gap-14 lg:gap-16 px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 lg:py-28 md:grid-cols-12">
+      {/* MOBILE VERSION - Carrossel horizontal */}
+      <div className="md:hidden w-full px-4 py-16">
+        {/* Header mobile */}
+        <div className="mb-10 space-y-6">
+          {eyebrow && (
+            <Badge variant="outline" className="border-white/20 bg-white/5 text-white backdrop-blur-sm text-sm px-4 py-1.5">
+              {eyebrow}
+            </Badge>
+          )}
+          {title && (
+            <h2 className="text-balance text-4xl sm:text-5xl font-extralight leading-[1.08] tracking-tight">
+              {title}
+            </h2>
+          )}
+          {description && (
+            <p className="text-lg text-white/70 font-light leading-relaxed">{description}</p>
+          )}
+          {stats.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {stats.map((s, i) => (
+                <Badge
+                  key={i}
+                  variant="secondary"
+                  className="bg-white/10 text-white/90 backdrop-blur-sm border border-white/10 text-sm px-4 py-2"
+                >
+                  {s}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Carrossel mobile - cada step com sua imagem */}
+        <Carousel
+          setApi={setCarouselApi}
+          opts={{
+            align: "start",
+            loop: true,
+            dragFree: true,
+            skipSnaps: false,
+          }}
+          className="w-full touch-pan-x"
+        >
+          <CarouselContent className="-ml-4">
+            {steps.map((step, idx) => {
+              const tab = tabs[idx] || tabs[0];
+              return (
+                <CarouselItem key={step.id} className="pl-4 basis-[92%]">
+                  <Card className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl">
+                    {/* Imagem */}
+                    <div className="relative aspect-[3/2] overflow-hidden">
+                      <img
+                        src={tab.src}
+                        alt={tab.alt ?? tab.label}
+                        className="h-full w-full object-cover"
+                        loading={idx === 0 ? "eager" : "lazy"}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    </div>
+
+                    {/* Conteúdo do step */}
+                    <div className="p-6 space-y-4">
+                      <h3 className="text-2xl font-medium text-white">
+                        {step.title}
+                      </h3>
+                      <p className="text-base text-white/70 font-light leading-relaxed">
+                        {step.text}
+                      </p>
+                      {tab.label && (
+                        <Badge className="bg-white/10 text-white/90 backdrop-blur-sm border border-white/10 text-xs px-3 py-1">
+                          {tab.label}
+                        </Badge>
+                      )}
+                    </div>
+                  </Card>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
+
+        {/* CTAs mobile */}
+        <div className="mt-10 flex flex-col gap-4">
+          <Button asChild size="lg" className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-full text-base h-12 px-8 min-h-[48px] touch-manipulation">
+            <Link href="#start">Começar</Link>
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            variant="secondary"
+            className="border border-white/20 bg-transparent hover:bg-white/5 text-white rounded-full text-base h-12 px-8 min-h-[48px] touch-manipulation"
+          >
+            <Link href="#examples">Explorar</Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* DESKTOP VERSION - Grid layout original */}
+      <div className="hidden md:block">
+        <div className="container mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-12 md:gap-14 lg:gap-16 px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 lg:py-28 md:grid-cols-12">
         {/* Left column */}
         <div className="md:col-span-6 space-y-8 sm:space-y-10">
           {eyebrow && (
@@ -147,7 +253,7 @@ export function FeatureShowcase({
         {/* Right column */}
         <div className="md:col-span-6 mt-12 md:mt-0">
           <Card
-            className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl"
+            className="relative overflow-hidden rounded-3xl sm:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl"
             style={{ height: panelMinHeight, minHeight: panelMinHeight }}
           >
             <Tabs defaultValue={initial} className="relative h-full w-full">
@@ -173,13 +279,13 @@ export function FeatureShowcase({
               </div>
 
               {/* Tab controls (pill) */}
-              <div className="pointer-events-auto absolute inset-x-0 bottom-4 sm:bottom-6 z-10 flex w-full justify-center px-4">
-                <TabsList className="flex gap-1 sm:gap-2 rounded-full border border-white/20 bg-black/40 p-1 sm:p-1.5 backdrop-blur-xl">
+              <div className="pointer-events-auto absolute inset-x-0 bottom-6 sm:bottom-8 z-10 flex w-full justify-center px-4 sm:px-6">
+                <TabsList className="flex gap-1.5 sm:gap-2 rounded-full border border-white/20 bg-black/40 p-1.5 sm:p-2 backdrop-blur-xl shadow-xl">
                   {tabs.map((t) => (
                     <TabsTrigger
                       key={t.value}
                       value={t.value}
-                      className="rounded-full px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white font-light transition-all"
+                      className="rounded-full px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white font-light transition-all min-h-[44px] touch-manipulation"
                     >
                       {t.label}
                     </TabsTrigger>
@@ -188,6 +294,7 @@ export function FeatureShowcase({
               </div>
             </Tabs>
           </Card>
+        </div>
         </div>
       </div>
     </section>
