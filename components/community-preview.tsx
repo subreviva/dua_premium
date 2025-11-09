@@ -174,10 +174,10 @@ export const CommunityPreview = () => {
           <Button
             size="lg"
             className="group rounded-full px-10 sm:px-14 py-6 sm:py-8 bg-white hover:bg-white text-black font-semibold text-base sm:text-lg transition-all duration-700 hover:scale-[1.08] hover:shadow-[0_20px_80px_rgba(255,255,255,0.3)] active:scale-95 relative overflow-hidden"
-            onClick={() => router.push('/community')}
+            onClick={() => router.push('/acesso')}
           >
             <span className="relative z-10 flex items-center gap-3">
-              Ver Mais
+              Fazer Login para Aceder
               <ArrowRight className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-1" />
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/90 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-700" />

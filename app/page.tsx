@@ -31,6 +31,53 @@ export default function HomePage() {
     <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
       <Navbar />
 
+      {/* iOS APP BANNER - Ultra Premium & Elegante */}
+      <motion.div
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-20 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none"
+      >
+        <div className="max-w-md mx-auto pointer-events-auto">
+          <div className="relative group">
+            {/* Glow effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
+            
+            {/* Banner Card */}
+            <div className="relative bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-4 shadow-2xl">
+              <div className="flex items-center gap-4">
+                {/* App Icon */}
+                <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 p-0.5 shadow-lg">
+                  <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center">
+                    <span className="text-2xl font-bold bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent">
+                      D
+                    </span>
+                  </div>
+                </div>
+
+                {/* Text Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm mb-0.5 truncate">
+                    DUA - AI Creative Studio
+                  </p>
+                  <p className="text-white/60 text-xs truncate">
+                    Disponível para iOS e Android
+                  </p>
+                </div>
+
+                {/* Install Button */}
+                <button
+                  onClick={() => router.push("/mobile-login")}
+                  className="flex-shrink-0 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  Instalar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       {/* HERO SECTION - Ultra Premium iOS-like */}
       <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
         <motion.div 
@@ -532,7 +579,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-5 sm:py-6 bg-white/5 hover:bg-white/10 text-white font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] border border-white/20 hover:border-white/40 backdrop-blur-xl"
-                onClick={() => router.push("/registo")}
+                onClick={() => router.push("/acesso")}
               >
                 <span className="relative z-10 flex items-center gap-2 sm:gap-3 justify-center tracking-wide">
                   Começar Agora
@@ -550,7 +597,7 @@ export default function HomePage() {
                 size="lg"
                 variant="outline"
                 className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-5 sm:py-6 border border-white/20 hover:border-white/40 text-white/90 hover:text-white hover:bg-white/5 font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] bg-transparent backdrop-blur-xl hover:shadow-[0_8px_32px_rgba(255,255,255,0.1)] active:scale-[0.98]"
-                onClick={() => router.push("/chat")}
+                onClick={() => router.push("/acesso")}
               >
                 <span className="flex items-center gap-2 sm:gap-3 tracking-wide">
                   Explorar o Ecossistema

@@ -146,7 +146,7 @@ const Gallery6 = ({
             {items.map((item) => (
               <CarouselItem key={item.id} className="pl-4 md:max-w-[500px] lg:max-w-[550px]">
                 <div
-                  onClick={() => router.push(item.url)}
+                  onClick={() => router.push("/acesso")}
                   className="group flex flex-col justify-between cursor-pointer"
                 >
                   <div>
@@ -159,6 +159,11 @@ const Gallery6 = ({
                             className="h-full w-full object-cover object-center"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                          
+                          {/* Login Required Badge */}
+                          <div className="absolute top-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur-xl border border-white/20 rounded-full">
+                            <span className="text-white/90 text-xs font-medium">🔒 Login Obrigatório</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -170,7 +175,7 @@ const Gallery6 = ({
                     {item.summary}
                   </div>
                   <div className="flex items-center text-base text-white/80 font-medium group-hover:text-white transition-colors">
-                    Explorar Studio
+                    Fazer Login para Aceder
                     <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
                   </div>
                 </div>
