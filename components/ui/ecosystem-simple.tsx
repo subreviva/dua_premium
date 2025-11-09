@@ -49,22 +49,28 @@ export const EcosystemSimple = ({ pillars }: EcosystemSimpleProps) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="text-center space-y-6 sm:space-y-8 mb-10 sm:mb-12 lg:mb-16">
+      <div className="text-left md:text-center space-y-6 sm:space-y-8 mb-10 sm:mb-12 lg:mb-16 px-4 md:px-0">
         <motion.h2
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true, amount: 0.3 }}
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight text-white tracking-tight leading-[1.08]"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-extralight text-white tracking-tight leading-[0.9]"
         >
-          O Ecossistema 2 LADOS
+          <span className="block bg-gradient-to-br from-white via-white/95 to-white/80 bg-clip-text text-transparent md:bg-none md:text-white">
+            O Ecossistema 2 LADOS
+          </span>
         </motion.h2>
+        
+        {/* Underline - mobile only */}
+        <div className="h-1.5 w-40 bg-gradient-to-r from-white/80 via-white/50 to-transparent rounded-full md:hidden" />
+        
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
           viewport={{ once: true, amount: 0.3 }}
-          className="text-lg sm:text-xl lg:text-2xl text-white/70 font-light max-w-4xl mx-auto leading-relaxed"
+          className="text-base sm:text-lg md:text-xl text-white/70 font-light max-w-3xl md:max-w-4xl md:mx-auto leading-relaxed"
         >
           A DUA não trabalha sozinha. Faz parte de um ecossistema completo que te leva da ideia ao mercado.
         </motion.p>
