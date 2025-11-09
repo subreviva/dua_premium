@@ -1,112 +1,71 @@
-/**
- * API: RUNWAY ML - IMAGE TO VIDEO
- * 
- * Transforma uma imagem em vídeo animado
- * Modelos: gen4_turbo, gen3a_turbo
- */
+import { NextRequest, NextResponse } from 'next/server'
 
-import { NextRequest, NextResponse } from 'next/server';
-import RunwayML from '@runwayml/sdk';
-import { consumirCreditos } from '@/lib/creditos-helper';
-
-const client = new RunwayML({
-  apiKey: process.env.RUNWAY_API_KEY || '',
-});
-
-/**
- * POST /api/runway/image-to-video
- */
 export async function POST(request: NextRequest) {
   try {
-    const {
-      userId,
-      promptImage, // URL da imagem
-      promptText = '', // Opcional: descrição do movimento desejado
+    const body = await request.json()
+    const { 
+      promptImage, 
+      promptText, 
       model = 'gen4_turbo',
       ratio = '1280:720',
       duration = 4,
-      seed,
-    } = await request.json();
-
-    // Validações
-    if (!userId) {
-      return NextResponse.json({ error: 'userId é obrigatório' }, { status: 400 });
-    }
+      seed 
+    } = body
 
     if (!promptImage) {
-      return NextResponse.json({ error: 'promptImage (URL) é obrigatório' }, { status: 400 });
-    }
-
-    // Calcular créditos
-    const creditosNecessarios = duration === 4 ? 30 : 90;
-
-    // Consumir créditos
-    const resultadoCreditos = await consumirCreditos(userId, 'video_generation', {
-      type: 'image-to-video',
-      model,
-      duration,
-    });
-
-    if (!resultadoCreditos.success) {
       return NextResponse.json(
-        {
-          error: 'Créditos insuficientes',
-          redirect: '/loja-creditos',
-        },
-        { status: 402 }
-      );
+        { error: 'promptImage is required' },
+        { status: 400 }
+      )
     }
 
-    // Gerar vídeo
-    console.log(`[Runway] Image-to-Video: model=${model}, duration=${duration}s`);
+    const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY
 
-    const taskResponse = await client.imageToVideo.create({
-      model: model === 'gen4_turbo' ? 'gen4_turbo' : 'gen3a_turbo',
-      promptImage,
-      promptText,
-      ratio: ratio as any,
-      duration,
-      seed: seed || Math.floor(Math.random() * 1000000),
-    } as any);
-
-    // Polling
-    let attempts = 0;
-    let currentTask: any = taskResponse;
-
-    while (!['SUCCEEDED', 'FAILED'].includes(currentTask.status || '') && attempts < 120) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      currentTask = await client.tasks.retrieve(taskResponse.id);
-      attempts++;
-    }
-
-    const finalStatus = currentTask.status || 'UNKNOWN';
-
-    if (finalStatus === 'FAILED') {
+    if (!RUNWAY_API_KEY) {
       return NextResponse.json(
-        { error: 'Falha na geração', taskId: taskResponse.id },
+        { error: 'Runway API key not configured' },
         { status: 500 }
-      );
+      )
     }
 
-    if (attempts >= 120) {
+    // Call Runway ML API for image-to-video
+    const response = await fetch('https://api.runwayml.com/v1/image_to_video', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RUNWAY_API_KEY}`,
+        'Content-Type': 'application/json',
+        'X-Runway-Version': '2024-11-06',
+      },
+      body: JSON.stringify({
+        model,
+        promptImage,
+        promptText: promptText || undefined,
+        ratio,
+        duration,
+        seed: seed || Math.floor(Math.random() * 4294967295),
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('Runway API error:', errorData)
       return NextResponse.json(
-        { error: 'Timeout', taskId: taskResponse.id },
-        { status: 202 }
-      );
+        { error: 'Failed to start image-to-video', details: errorData },
+        { status: response.status }
+      )
     }
 
-    const videoUrl = currentTask.output?.[0] || currentTask.artifacts?.[0]?.url || null;
+    const data = await response.json()
 
     return NextResponse.json({
-      success: true,
-      taskId: taskResponse.id,
-      videoUrl,
-      creditosRestantes: resultadoCreditos.creditos_restantes,
-      creditosGastos: creditosNecessarios,
-    });
-
-  } catch (error: any) {
-    console.error('[Runway] Erro:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+      taskId: data.id,
+      status: data.status,
+    })
+  } catch (error) {
+    console.error('Error creating image-to-video:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

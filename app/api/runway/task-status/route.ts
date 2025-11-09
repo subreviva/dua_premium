@@ -27,14 +27,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Chamar API do Runway ML para verificar status
+    // Call Runway ML API
     const response = await fetch(`https://api.runwayml.com/v1/tasks/${taskId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${runwayApiKey}`,
-        'Content-Type': 'application/json',
+        'X-Runway-Version': '2024-11-06',
       },
-    });
+    })
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

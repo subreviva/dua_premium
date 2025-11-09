@@ -29,11 +29,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Call Runway ML API for character performance (Act-Two)
-    const response = await fetch('https://api.runwayml.com/v1/character-performance', {
+    const response = await fetch('https://api.runwayml.com/v1/character_performance', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RUNWAY_API_KEY}`,
         'Content-Type': 'application/json',
+        'X-Runway-Version': '2024-11-06',
       },
       body: JSON.stringify({
         model: 'act_two',
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
         },
         seed: seed || Math.floor(Math.random() * 4294967295),
         bodyControl: bodyControl,
-        facialExpressiveness: facialExpressiveness,
+        expressionIntensity: facialExpressiveness,
       }),
     })
 

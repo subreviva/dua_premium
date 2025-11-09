@@ -26,18 +26,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Chamar API do Runway ML para upscale
-    const response = await fetch('https://api.runwayml.com/v1/upscale', {
+    // Call Runway ML API
+    const response = await fetch('https://api.runwayml.com/v1/video_upscale', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${runwayApiKey}`,
         'Content-Type': 'application/json',
+        'X-Runway-Version': '2024-11-06',
       },
       body: JSON.stringify({
         model: 'upscale_v1',
-        videoUri: videoUri,
+        videoUri,
       }),
-    });
+    })
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
