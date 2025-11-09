@@ -25,6 +25,7 @@ export type TabMedia = {
   label: string; // button label
   src: string;   // image url
   alt?: string;
+  objectPosition?: string; // CSS object-position (ex: "center 20%", "50% 30%")
 };
 
 export type ShowcaseStep = {
@@ -140,6 +141,7 @@ export function FeatureShowcase({
                         src={tab.src}
                         alt={tab.alt ?? tab.label}
                         className="h-full w-full object-cover"
+                        style={{ objectPosition: tab.objectPosition || "center center" }}
                         loading={idx === 0 ? "eager" : "lazy"}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -272,6 +274,7 @@ export function FeatureShowcase({
                       src={t.src}
                       alt={t.alt ?? t.label}
                       className="h-full w-full object-cover"
+                      style={{ objectPosition: t.objectPosition || "center center" }}
                       loading={idx === 0 ? "eager" : "lazy"}
                     />
                   </TabsContent>

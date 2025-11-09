@@ -387,19 +387,22 @@ export default function HomePage() {
                 value: "rosto",
                 label: "Rosto",
                 src: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/DUA%201.jpeg",
-                alt: "Identidade visual da DUA"
+                alt: "Identidade visual da DUA",
+                objectPosition: "center 30%"
               },
               {
                 value: "voz",
                 label: "Voz",
                 src: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/DDDD.png",
-                alt: "Comunicação da DUA"
+                alt: "Comunicação da DUA",
+                objectPosition: "center 35%"
               },
               {
                 value: "historia",
                 label: "História",
                 src: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/DUA%203.jpeg",
-                alt: "Origem da DUA"
+                alt: "Origem da DUA",
+                objectPosition: "center 30%"
               }
             ]}
             defaultTab="rosto"
