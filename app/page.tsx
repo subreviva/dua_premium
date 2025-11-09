@@ -350,26 +350,21 @@ export default function HomePage() {
         />
         
         <div className="max-w-7xl mx-auto relative z-10">
-          {/* Destaque em Mobile - Linha decorativa */}
-          <div className="mb-8 sm:mb-12 px-4 sm:px-0">
-            <div className="h-1 w-12 sm:w-16 bg-gradient-to-r from-white/80 via-white/40 to-transparent rounded-full mb-6 sm:mb-8" />
-            
-            <div>
-              <p className="text-sm sm:text-base text-white/50 font-light mb-2 uppercase tracking-widest">Identidade</p>
-              <h3 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight text-white tracking-tighter leading-[0.9] bg-gradient-to-br from-white via-white/95 to-white/70 bg-clip-text text-transparent md:bg-none md:text-white mb-4">
-                A Identidade Visual da DUA
-              </h3>
-              <p className="text-lg sm:text-xl text-white/60 font-light">
-                Não é só código. É uma presença. A DUA tem rosto, voz e história.
-              </p>
-            </div>
+          {/* SectionTitle component */}
+          <div className="mb-8 sm:mb-12 lg:mb-16 px-4 sm:px-6 md:px-0">
+            <SectionTitle 
+              eyebrow="Identidade" 
+              title="A Identidade Visual da DUA" 
+              kicker="Não é só código. É uma presença. A DUA tem rosto, voz e história."
+            />
           </div>
           
-          <FeatureShowcase
-            eyebrow="Identidade"
-            title=""
-            description=""
-            stats={["Identidade única", "Comunicação próxima", "Propósito claro"]}
+          <div className="px-4 sm:px-6 md:px-0">
+            <FeatureShowcase
+              eyebrow=""
+              title=""
+              description=""
+              stats={["Identidade única", "Comunicação próxima", "Propósito claro"]}
             steps={[
               {
                 id: "rosto",
@@ -411,6 +406,7 @@ export default function HomePage() {
             panelMinHeight={600}
             className="bg-transparent text-white"
           />
+          </div>
         </div>
 
         {/* Enhanced gradient transition inferior */}

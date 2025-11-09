@@ -78,29 +78,33 @@ export function FeatureShowcase({
 
   return (
     <section className={cn("w-full text-white", className)}>
-      <div className="container mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-16 md:grid-cols-12 md:py-20 lg:gap-14">
+      <div className="container mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-12 md:gap-14 lg:gap-16 px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 lg:py-28 md:grid-cols-12">
         {/* Left column */}
-        <div className="md:col-span-6">
-          <Badge variant="outline" className="mb-6 border-white/20 bg-white/5 text-white backdrop-blur-sm">
-            {eyebrow}
-          </Badge>
+        <div className="md:col-span-6 space-y-8 sm:space-y-10">
+          {eyebrow && (
+            <Badge variant="outline" className="border-white/20 bg-white/5 text-white backdrop-blur-sm text-sm sm:text-base px-4 py-1.5">
+              {eyebrow}
+            </Badge>
+          )}
 
-          <h2 className="text-balance text-4xl font-extralight leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            {title}
-          </h2>
+          {title && (
+            <h2 className="text-balance text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight leading-[1.08] tracking-tight">
+              {title}
+            </h2>
+          )}
 
-          {description ? (
-            <p className="mt-6 max-w-xl text-lg text-white/70 font-light">{description}</p>
-          ) : null}
+          {description && (
+            <p className="max-w-xl text-lg sm:text-xl text-white/70 font-light leading-relaxed">{description}</p>
+          )}
 
           {/* Stats chips */}
           {stats.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {stats.map((s, i) => (
                 <Badge
                   key={i}
                   variant="secondary"
-                  className="bg-white/10 text-white/90 backdrop-blur-sm border border-white/10"
+                  className="bg-white/10 text-white/90 backdrop-blur-sm border border-white/10 text-sm sm:text-base px-4 py-2"
                 >
                   {s}
                 </Badge>
@@ -109,14 +113,14 @@ export function FeatureShowcase({
           )}
 
           {/* Steps (Accordion) */}
-          <div className="mt-10 max-w-xl">
+          <div className="mt-12 sm:mt-14 lg:mt-16 max-w-xl w-full">
             <Accordion type="single" collapsible className="w-full border-white/10">
               {steps.map((step) => (
-                <AccordionItem key={step.id} value={step.id} className="border-white/10">
-                  <AccordionTrigger className="text-left text-base font-medium text-white hover:text-white/90 hover:no-underline">
+                <AccordionItem key={step.id} value={step.id} className="border-white/10 py-3 sm:py-4">
+                  <AccordionTrigger className="text-left text-base sm:text-lg font-medium text-white hover:text-white/90 hover:no-underline py-4 sm:py-5">
                     {step.title}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-white/70 font-light leading-relaxed">
+                  <AccordionContent className="text-sm sm:text-base text-white/70 font-light leading-relaxed pb-5 sm:pb-6 pt-2">
                     {step.text}
                   </AccordionContent>
                 </AccordionItem>
@@ -124,15 +128,15 @@ export function FeatureShowcase({
             </Accordion>
 
             {/* CTAs */}
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-full">
+            <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row flex-wrap gap-4">
+              <Button asChild size="lg" className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-full text-base sm:text-lg h-12 sm:h-14 px-8 min-h-[48px] touch-manipulation">
                 <Link href="#start">Começar</Link>
               </Button>
               <Button
                 asChild
                 size="lg"
                 variant="secondary"
-                className="border border-white/20 bg-transparent hover:bg-white/5 text-white rounded-full"
+                className="border border-white/20 bg-transparent hover:bg-white/5 text-white rounded-full text-base sm:text-lg h-12 sm:h-14 px-8 min-h-[48px] touch-manipulation"
               >
                 <Link href="#examples">Explorar</Link>
               </Button>
@@ -141,9 +145,9 @@ export function FeatureShowcase({
         </div>
 
         {/* Right column */}
-        <div className="md:col-span-6">
+        <div className="md:col-span-6 mt-12 md:mt-0">
           <Card
-            className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl"
+            className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-0 shadow-2xl"
             style={{ height: panelMinHeight, minHeight: panelMinHeight }}
           >
             <Tabs defaultValue={initial} className="relative h-full w-full">
@@ -169,13 +173,13 @@ export function FeatureShowcase({
               </div>
 
               {/* Tab controls (pill) */}
-              <div className="pointer-events-auto absolute inset-x-0 bottom-6 z-10 flex w-full justify-center px-4">
-                <TabsList className="flex gap-2 rounded-full border border-white/20 bg-black/40 p-1.5 backdrop-blur-xl">
+              <div className="pointer-events-auto absolute inset-x-0 bottom-4 sm:bottom-6 z-10 flex w-full justify-center px-4">
+                <TabsList className="flex gap-1 sm:gap-2 rounded-full border border-white/20 bg-black/40 p-1 sm:p-1.5 backdrop-blur-xl">
                   {tabs.map((t) => (
                     <TabsTrigger
                       key={t.value}
                       value={t.value}
-                      className="rounded-full px-6 py-2.5 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white font-light transition-all"
+                      className="rounded-full px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white font-light transition-all"
                     >
                       {t.label}
                     </TabsTrigger>
