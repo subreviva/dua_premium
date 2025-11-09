@@ -210,12 +210,12 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[20rem] sm:text-[22rem] md:text-[24rem] lg:text-[26rem] xl:text-[30rem] font-extralight leading-[0.7] tracking-[-0.14em] text-white"
+              className="text-[24rem] sm:text-[22rem] md:text-[24rem] lg:text-[26rem] xl:text-[30rem] font-extralight leading-[0.65] tracking-[-0.15em] text-white"
               style={{ 
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 100,
-                textShadow: '0 24px 140px rgba(0,0,0,0.99), 0 12px 70px rgba(0,0,0,0.95), 0 6px 35px rgba(0,0,0,0.8)',
-                letterSpacing: '-0.14em',
+                textShadow: '0 28px 160px rgba(0,0,0,0.99), 0 14px 80px rgba(0,0,0,0.96), 0 7px 40px rgba(0,0,0,0.85)',
+                letterSpacing: '-0.15em',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
                 textRendering: 'optimizeLegibility'
