@@ -29,12 +29,12 @@ const Gallery6 = ({
   heading = "Estúdios Criativos",
   items = [
     {
-      id: "chat",
-      title: "Chat Studio",
+      id: "music",
+      title: "Music Studio",
       summary:
-        "Converse com a DUA. Ela responde por texto ou áudio, em português ou crioulo cabo-verdiano. Uma parceira criativa que entende a tua língua e cultura.",
-      url: "/chat",
-      image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=800&q=80",
+        "Produz música original. Desde batidas de afrobeat a melodias de kizomba, a DUA ajuda-te a criar sons autênticos da diáspora lusófona.",
+      url: "/musicstudio",
+      image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
     },
     {
       id: "cinema",
@@ -45,20 +45,20 @@ const Gallery6 = ({
       image: "https://images.unsplash.com/photo-1574267432644-f74f8ec574c8?w=800&q=80",
     },
     {
+      id: "chat",
+      title: "Chat Studio",
+      summary:
+        "Converse com a DUA. Ela responde por texto ou áudio, em português ou crioulo cabo-verdiano. Uma parceira criativa que entende a tua língua e cultura.",
+      url: "/chat",
+      image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=800&q=80",
+    },
+    {
       id: "design",
       title: "Design Studio",
       summary:
         "Cria designs visuais únicos. Logótipos, posters, capas de álbuns, identidades visuais — tudo gerado com IA e adaptado à estética lusófona.",
       url: "/designstudio",
       image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
-    },
-    {
-      id: "music",
-      title: "Music Studio",
-      summary:
-        "Produz música original. Desde batidas de afrobeat a melodias de kizomba, a DUA ajuda-te a criar sons autênticos da diáspora lusófona.",
-      url: "/musicstudio",
-      image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
     },
     {
       id: "image",
