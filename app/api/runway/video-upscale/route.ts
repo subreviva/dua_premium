@@ -26,23 +26,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call Runway ML API
-    const response = await fetch('https://api.runwayml.com/v1/video_upscale', {
+    console.log('🎬 Starting video upscale with Runway ML...');
+    console.log('📹 Video URI length:', videoUri.length);
+
+    // Validações
+    if (typeof videoUri !== 'string' || videoUri.length < 13) {
+      return NextResponse.json(
+        { error: 'Invalid videoUri format. Must be HTTPS URL or data URI (min 13 chars)' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar se é URL HTTPS ou data URI
+    const isDataUri = videoUri.startsWith('data:video/');
+    const isHttpsUrl = videoUri.startsWith('https://');
+    
+    if (!isDataUri && !isHttpsUrl) {
+      return NextResponse.json(
+        { error: 'videoUri must be a HTTPS URL or data URI starting with data:video/' },
+        { status: 400 }
+      );
+    }
+
+    const payload = {
+      model: 'upscale_v1',
+      videoUri,
+    };
+
+    console.log('📦 Payload:', { model: payload.model, videoUriType: isDataUri ? 'data URI' : 'HTTPS URL' });
+
+    // Call Runway ML API (DEV endpoint)
+    const response = await fetch('https://api.dev.runwayml.com/v1/video_upscale', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${runwayApiKey}`,
         'Content-Type': 'application/json',
         'X-Runway-Version': '2024-11-06',
       },
-      body: JSON.stringify({
-        model: 'upscale_v1',
-        videoUri,
-      }),
+      body: JSON.stringify(payload),
     })
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Runway API error:', errorData);
+      console.error('❌ Runway API error:', errorData);
       return NextResponse.json(
         { error: 'Failed to start upscale', details: errorData },
         { status: response.status }
@@ -50,11 +76,11 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
+    console.log('✅ Upscale task created:', data.id);
 
     return NextResponse.json({
       success: true,
       taskId: data.id,
-      status: data.status,
     });
   } catch (error) {
     console.error('Error in video-upscale:', error);
