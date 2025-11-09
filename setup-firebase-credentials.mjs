@@ -32,8 +32,20 @@ if (existsSync('.env.local')) {
   console.log('✅ Variáveis de ambiente carregadas do .env.local\n');
 }
 
-// Ler service account
-const serviceAccount = JSON.parse(readFileSync('dua-ia-firebase-adminsdk-fbsvc-f41a2805ae.json', 'utf8'));
+// Ler service account (usa o mais recente disponível)
+let serviceAccountPath;
+if (existsSync('dua-ia-firebase-adminsdk-fbsvc-b3e375ee5e.json')) {
+  serviceAccountPath = 'dua-ia-firebase-adminsdk-fbsvc-b3e375ee5e.json';
+} else if (existsSync('dua-ia-firebase-adminsdk-fbsvc-f41a2805ae.json')) {
+  serviceAccountPath = 'dua-ia-firebase-adminsdk-fbsvc-f41a2805ae.json';
+} else {
+  console.error('\n❌ ERRO: Nenhum arquivo Firebase Service Account encontrado!');
+  console.error('   Procurado: dua-ia-firebase-adminsdk-fbsvc-*.json\n');
+  process.exit(1);
+}
+
+const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+console.log(`📁 Usando: ${serviceAccountPath}`);
 
 console.log('\n📋 Service Account carregado:');
 console.log(`   Project ID: ${serviceAccount.project_id}`);
