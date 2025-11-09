@@ -1,0 +1,36 @@
+🎫 CÓDIGOS DE ACESSO - SOLUÇÃO URGENTE
+═══════════════════════════════════════════════════════════════
+
+❌ PROBLEMA
+Os 170 códigos DUA-XXXX-XXX não funcionam porque NÃO estão na base de dados.
+
+✅ SOLUÇÃO RÁPIDA (2 MINUTOS)
+
+1. Ir para Supabase Dashboard
+   https://supabase.com/dashboard
+
+2. SQL Editor > New Query
+
+3. Copiar e colar TODO o conteúdo do arquivo:
+   insert-170-codes.sql
+
+4. Clicar RUN
+
+5. Deve aparecer: 170 códigos inseridos ✅
+
+═══════════════════════════════════════════════════════════════
+
+TESTAR:
+• Ir para /acesso
+• Digitar: DUA-03BN-9QT
+• Deve validar com sucesso ✅
+
+═══════════════════════════════════════════════════════════════
+
+ARQUIVOS:
+✓ insert-170-codes.sql     → EXECUTAR ESTE
+✓ CODIGO_ACESSO_GUIDE.md   → Guia completo
+✓ verify-codes.mjs         → Verificação automática
+✓ CODIGOS_FIX_RESUMO.txt   → Resumo detalhado
+
+═══════════════════════════════════════════════════════════════

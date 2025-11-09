@@ -4,11 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabaseClient } from "@/lib/supabase";
 import Link from "next/link";
 import { audit } from "@/lib/audit";
+import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
+import { validatePassword } from "@/lib/password-validation";
+import { Eye, EyeOff } from "lucide-react";
 
 const supabase = supabaseClient;
 
@@ -22,6 +26,9 @@ export default function AcessoPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
@@ -63,46 +70,96 @@ export default function AcessoPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validações básicas
     if (!name || name.length < 2) {
-      toast.error("Nome inválido", { description: "Digite seu nome completo" });
-      return;
-    }
-    if (!email || !email.includes("@")) {
-      toast.error("Email inválido", { description: "Digite um email válido" });
-      return;
-    }
-    if (!password || password.length < 6) {
-      toast.error("Password fraca", { description: "A password deve ter no mínimo 6 caracteres" });
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error("Passwords não coincidem", { description: "Confirme sua password corretamente" });
-      return;
-    }
-    setIsRegistering(true);
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email.toLowerCase(),
-        password: password,
-        options: { data: { name: name, invite_code: validatedCode } },
+      toast.error("Nome inválido", { 
+        description: "O teu nome deve ter pelo menos 2 caracteres" 
       });
-      if (authError) {
-        toast.error("Erro ao criar conta", { description: authError.message });
+      return;
+    }
+    
+    if (!email || !email.includes("@")) {
+      toast.error("Email inválido", { 
+        description: "Por favor, verifica o formato do email" 
+      });
+      return;
+    }
+    
+    // Validação ENTERPRISE de password
+    const passwordValidation = validatePassword(password, { name, email });
+    
+    if (!passwordValidation.isValid) {
+      toast.error("Password não cumpre requisitos", { 
+        description: passwordValidation.feedback[0],
+        duration: 5000,
+      });
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords não coincidem", { 
+        description: "Confirma a password corretamente" 
+      });
+      return;
+    }
+    
+    // GDPR: Verificar consentimento
+    if (!acceptedTerms) {
+      toast.error("Termos não aceites", { 
+        description: "Deves aceitar os Termos de Serviço e Política de Privacidade",
+        duration: 5000,
+      });
+      return;
+    }
+    
+    setIsRegistering(true);
+    
+    try {
+      // Usar API de registo enterprise
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inviteCode: validatedCode,
+          name,
+          email: email.toLowerCase(),
+          password,
+          acceptedTerms,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Mostrar mensagens de erro empáticas
+        toast.error(data.error || "Erro ao criar conta", { 
+          description: data.message || "Por favor, tenta novamente",
+          duration: 5000,
+        });
         audit.registration(false, validatedCode || undefined);
         return;
       }
-      if (!authData.user) {
-        toast.error("Erro ao criar conta", { description: "Não foi possível criar sua conta" });
-        audit.registration(false, validatedCode || undefined);
-        return;
+      
+      if (data.success) {
+        toast.success(data.welcomeMessage || "Conta criada com sucesso", { 
+          description: "📧 Verifica o teu email para ativar a conta",
+          duration: 6000,
+        });
+        
+        audit.registration(true, validatedCode || undefined);
+        
+        // Redirecionar para página de verificação de email
+        setTimeout(() => { 
+          router.push("/auth/verify-email"); 
+        }, 2000);
       }
-      await supabase.from('users').update({ has_access: true, invite_code_used: validatedCode }).eq('id', authData.user.id);
-      await supabase.from('invite_codes').update({ active: false, used_by: authData.user.id }).eq('code', validatedCode);
-      toast.success("Conta criada com sucesso", { description: "Redirecionando para o chat", duration: 3000 });
-      audit.registration(true, validatedCode || undefined);
-      setTimeout(() => { router.push("/chat"); }, 2000);
+      
     } catch (error) {
-      toast.error("Erro de conexão", { description: "Não foi possível completar o registo" });
+      console.error('Registration error:', error);
+      toast.error("Erro de conexão", { 
+        description: "Não foi possível completar o registo. Tenta novamente." 
+      });
       audit.error(error as Error, 'user_registration');
       audit.registration(false, validatedCode || undefined);
     } finally {
@@ -277,32 +334,94 @@ export default function AcessoPage() {
                     <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
                       Password
                     </label>
-                    <Input 
-                      type="password" 
-                      placeholder="Mínimo 6 caracteres" 
-                      value={password} 
-                      onChange={(e) => setPassword(e.target.value)} 
-                      disabled={isRegistering}
-                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
-                      required
-                      minLength={6}
-                    />
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Mínimo 12 caracteres" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
+                        disabled={isRegistering}
+                        className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 pr-10"
+                        required
+                        minLength={12}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    
+                    {/* Password Strength Meter */}
+                    {password && (
+                      <PasswordStrengthMeter 
+                        password={password}
+                        userInfo={{ name, email }}
+                        showRequirements={true}
+                        showEstimate={true}
+                      />
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
                       Confirmar password
                     </label>
-                    <Input 
-                      type="password" 
-                      placeholder="Confirme sua password" 
-                      value={confirmPassword} 
-                      onChange={(e) => setConfirmPassword(e.target.value)} 
-                      disabled={isRegistering}
-                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
-                      required
-                      minLength={6}
+                    <div className="relative">
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirme sua password" 
+                        value={confirmPassword} 
+                        onChange={(e) => setConfirmPassword(e.target.value)} 
+                        disabled={isRegistering}
+                        className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 pr-10"
+                        required
+                        minLength={12}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {confirmPassword && password !== confirmPassword && (
+                      <p className="text-xs text-red-500 mt-1">Passwords não coincidem</p>
+                    )}
+                  </div>
+                  
+                  {/* GDPR Consent Checkbox */}
+                  <div className="flex items-start gap-3 pt-4">
+                    <Checkbox
+                      id="terms"
+                      checked={acceptedTerms}
+                      onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                      className="mt-1 border-neutral-700 data-[state=checked]:bg-white data-[state=checked]:border-white"
                     />
+                    <label 
+                      htmlFor="terms" 
+                      className="text-xs text-neutral-500 leading-relaxed cursor-pointer"
+                    >
+                      Li e aceito os{' '}
+                      <Link 
+                        href="/termos" 
+                        target="_blank"
+                        className="text-neutral-300 hover:text-white underline underline-offset-2"
+                      >
+                        Termos de Serviço
+                      </Link>
+                      {' '}e a{' '}
+                      <Link 
+                        href="/privacidade" 
+                        target="_blank"
+                        className="text-neutral-300 hover:text-white underline underline-offset-2"
+                      >
+                        Política de Privacidade
+                      </Link>
+                    </label>
                   </div>
                 </div>
 
@@ -319,7 +438,7 @@ export default function AcessoPage() {
                   </Button>
                   <Button 
                     type="submit" 
-                    disabled={isRegistering || !name || !email || !password || !confirmPassword}
+                    disabled={isRegistering || !acceptedTerms}
                     className="flex-1 h-14 bg-white hover:bg-neutral-200 text-black font-light text-base rounded-none transition-all duration-300 disabled:opacity-30"
                   >
                     {isRegistering ? "Criando" : "Criar conta"}

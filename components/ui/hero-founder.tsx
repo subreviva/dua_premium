@@ -14,11 +14,35 @@ function HeroFounder() {
           autoPlay 
           loop 
           muted 
-          playsInline 
+          playsInline
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover opacity-100"
+          style={{ 
+            filter: 'brightness(0.95) contrast(1.08) saturate(1.1)',
+            WebkitBackfaceVisibility: 'hidden',
+            WebkitPerspective: 1000,
+            WebkitTransform: 'translate3d(0,0,0)',
+            transform: 'translate3d(0,0,0)'
+          }}
+          onLoadedData={(e) => {
+            const video = e.currentTarget
+            video.play().catch(() => setTimeout(() => video.play(), 100))
+          }}
+          onEnded={(e) => {
+            const video = e.currentTarget
+            video.currentTime = 0
+            video.play()
+          }}
+          onError={(e) => {
+            console.error('Hero Founder video failed to load:', e)
+          }}
         >
           <source
-            src="https://6yep4uifnoow71ty.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+            src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir (53).mp4"
+            type="video/mp4"
+          />
+          <source
+            src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
             type="video/mp4"
           />
         </video>
@@ -63,19 +87,30 @@ function HeroFounder() {
               viewport={{ once: true, amount: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 pt-4"
             >
-              <Button 
-                size="lg" 
-                className="gap-3 bg-white text-black hover:bg-white/90 font-light text-base px-8 py-6 rounded-lg transition-all duration-300 hover:scale-105"
-              >
-                Conhecer a Visão <MoveRight className="w-4 h-4" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="gap-3 border-white/20 bg-white/5 text-white hover:bg-white/10 backdrop-blur-sm font-light text-base px-8 py-6 rounded-lg transition-all duration-300 hover:scale-105"
-              >
-                Junte-se à Comunidade
-              </Button>
+              {/* Botão Premium Transparente - Conhecer Visão */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-white/20 via-white/30 to-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                
+                <Button 
+                  size="lg" 
+                  className="relative gap-3 bg-white/5 hover:bg-white/10 text-white font-light text-base px-8 py-6 rounded-full transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] border border-white/20 hover:border-white/40 backdrop-blur-xl"
+                >
+                  Conhecer a Visão <MoveRight className="w-4 h-4 transition-transform duration-700 group-hover:translate-x-2" />
+                </Button>
+              </div>
+              
+              {/* Botão Premium Transparente - Comunidade */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-white/15 via-white/25 to-white/15 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="relative gap-3 border border-white/20 hover:border-white/40 bg-white/5 text-white hover:bg-white/10 backdrop-blur-xl font-light text-base px-8 py-6 rounded-full transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_8px_32px_rgba(255,255,255,0.1)]"
+                >
+                  Junte-se à Comunidade
+                </Button>
+              </div>
             </motion.div>
           </motion.div>
 

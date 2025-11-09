@@ -1,0 +1,179 @@
+#!/usr/bin/env node
+
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * VERIFICAÇÃO E TESTE DOS CÓDIGOS DE ACESSO DUA
+ * ═══════════════════════════════════════════════════════════════
+ * Testa se os códigos estão na base de dados e funcionais
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+import { createClient } from '@supabase/supabase-js';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('❌ Variáveis de ambiente não encontradas');
+  console.error('   NEXT_PUBLIC_SUPABASE_URL:', SUPABASE_URL ? '✓' : '✗');
+  console.error('   NEXT_PUBLIC_SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY ? '✓' : '✗');
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Lista completa dos 170 códigos
+const CODES = [
+  'DUA-03BN-9QT', 'DUA-044P-OYM', 'DUA-09P2-GDD', 'DUA-11SF-3GX', 'DUA-11UF-1ZR',
+  'DUA-17OL-JNL', 'DUA-17Q2-DCZ', 'DUA-1AG9-T4T', 'DUA-1F71-A68', 'DUA-1KVM-WND',
+  'DUA-1WG9-7U7', 'DUA-2OZG-PSG', 'DUA-2PH0-G3I', 'DUA-2TEJ-SK9', 'DUA-352J-L4R',
+  'DUA-3CTK-MVZ', 'DUA-3E3Z-CR1', 'DUA-3FUG-4QE', 'DUA-3UKV-FA8', 'DUA-44MD-4VD',
+  'DUA-4ASV-JAN', 'DUA-4L9D-PR5', 'DUA-578K-5QX', 'DUA-58FX-ZAP', 'DUA-595N-EWJ',
+  'DUA-5DG2-MHJ', 'DUA-5GDU-GU4', 'DUA-5HX2-OTO', 'DUA-5ME0-1UZ', 'DUA-5MEO-FFQ',
+  'DUA-5T39-ON3', 'DUA-6AAL-KAW', 'DUA-6FQ8-0ZR', 'DUA-6IXL-JID', 'DUA-6SCP-2AR',
+  'DUA-6XTN-9NK', 'DUA-6Z1U-9PT', 'DUA-7EUY-DZR', 'DUA-7F5Q-H6A', 'DUA-7FSW-HQH',
+  'DUA-7N7T-LD7', 'DUA-8HC5-7SM', 'DUA-8NET-YUG', 'DUA-8O80-GKM', 'DUA-8T1M-4J5',
+  'DUA-9P5N-QG0', 'DUA-9S9L-D3W', 'DUA-A77V-408', 'DUA-A7IE-4G4', 'DUA-B5KG-MDT',
+  'DUA-B6OT-18R', 'DUA-B7TZ-SRS', 'DUA-BISN-J7T', 'DUA-CJBX-MVP', 'DUA-COPC-B57',
+  'DUA-D164-YBU', 'DUA-D5PU-4O2', 'DUA-D7ST-NZR', 'DUA-DC94-L6M', 'DUA-DPOE-8GD',
+  'DUA-DS9H-THR', 'DUA-DW7K-F3R', 'DUA-DWE8-MUM', 'DUA-EZS1-2WZ', 'DUA-F1WZ-QN2',
+  'DUA-FS8I-EZT', 'DUA-FUG1-XRG', 'DUA-G7WJ-FGS', 'DUA-GFYE-A04', 'DUA-GHVM-R78',
+  'DUA-GKD7-2BR', 'DUA-GUFZ-0TT', 'DUA-I3BP-FJC', 'DUA-ICJH-5CO', 'DUA-IFAL-T5L',
+  'DUA-IVZX-8A8', 'DUA-J4G2-VLJ', 'DUA-JCZK-A5A', 'DUA-JDVL-FTY', 'DUA-JL3M-FY3',
+  'DUA-JNK9-22G', 'DUA-JXC1-Z12', 'DUA-JY3R-IOE', 'DUA-K5JE-H8K', 'DUA-K89W-NE7',
+  'DUA-KAWU-ZWV', 'DUA-KJ6G-UCM', 'DUA-KON4-TGW', 'DUA-KRTT-BMU', 'DUA-L8JQ-UX5',
+  'DUA-LA1J-SEW', 'DUA-LG12-ZO3', 'DUA-LKDW-PIT', 'DUA-LO44-C89', 'DUA-LOXY-Q41',
+  'DUA-LWOW-T1Y', 'DUA-LZMS-6FO', 'DUA-MAA6-QIO', 'DUA-MDDY-PIW', 'DUA-MGP7-MA5',
+  'DUA-MJ45-2XO', 'DUA-MLD2-2UM', 'DUA-MNVM-LHW', 'DUA-MTVV-V38', 'DUA-MU56-Z05',
+  'DUA-MUTS-JSV', 'DUA-N0AP-HWB', 'DUA-N0WJ-XLG', 'DUA-N9SE-4C1', 'DUA-NJFT-HH8',
+  'DUA-NL2B-7NK', 'DUA-NL8B-MJS', 'DUA-NORV-63I', 'DUA-NVM9-ESS', 'DUA-NVYT-G77',
+  'DUA-NWUS-5SG', 'DUA-NYB3-4PF', 'DUA-O8T0-M9P', 'DUA-OLGI-Q24', 'DUA-OO81-UP4',
+  'DUA-PC2X-2NY', 'DUA-PJ8I-9BN', 'DUA-PKQU-6XP', 'DUA-Q32A-SW3', 'DUA-Q4Q8-18T',
+  'DUA-QF11-UWY', 'DUA-QTQ0-RMJ', 'DUA-QULD-ZO8', 'DUA-R0R9-FTT', 'DUA-R9IP-A9A',
+  'DUA-REKC-XIP', 'DUA-RM5K-KIQ', 'DUA-RO7R-578', 'DUA-RYIN-TAC', 'DUA-S1HE-BM9',
+  'DUA-S8VM-GCH', 'DUA-SS9O-3N5', 'DUA-SZY0-37F', 'DUA-T8H5-240', 'DUA-TH5G-4OB',
+  'DUA-TMGC-L07', 'DUA-TQY2-L5H', 'DUA-TWT8-4U1', 'DUA-TXPY-5KF', 'DUA-TZ3L-03T',
+  'DUA-U450-QT6', 'DUA-U5YA-J46', 'DUA-UI2I-83Y', 'DUA-UNSP-K53', 'DUA-US35-PBZ',
+  'DUA-UWTP-HHP', 'DUA-V3I6-RPH', 'DUA-V58K-LF0', 'DUA-VB8L-2RB', 'DUA-VCJQ-N9F',
+  'DUA-VDY7-A55', 'DUA-VI43-SGG', 'DUA-VV41-4D5', 'DUA-W0E2-3II', 'DUA-WEPL-437',
+  'DUA-WZY0-3MJ', 'DUA-XDZN-I5I', 'DUA-XE2X-W1E', 'DUA-XH7J-B6X', 'DUA-XYTJ-M6R',
+  'DUA-YC38-04D', 'DUA-ZDSQ-45B', 'DUA-ZL1Z-CAF', 'DUA-ZLJZ-3TH', 'DUA-ZPZW-3QS'
+];
+
+async function main() {
+  console.log('\n═══════════════════════════════════════════════════════════════');
+  console.log('  VERIFICAÇÃO DOS CÓDIGOS DE ACESSO DUA');
+  console.log('═══════════════════════════════════════════════════════════════\n');
+
+  // 1. Verificar total de códigos na base de dados
+  console.log('📊 Verificando base de dados...\n');
+  
+  const { data: allCodes, error: allError } = await supabase
+    .from('invite_codes')
+    .select('code, active, used_by, created_at');
+
+  if (allError) {
+    console.error('❌ Erro ao consultar base de dados:', allError.message);
+    console.log('\n🔧 SOLUÇÃO:');
+    console.log('   1. Vá ao Supabase Dashboard');
+    console.log('   2. SQL Editor > New Query');
+    console.log('   3. Cole e execute: insert-170-codes.sql');
+    return;
+  }
+
+  console.log(`   Total na DB: ${allCodes?.length || 0} códigos`);
+  console.log(`   Esperado:    ${CODES.length} códigos`);
+  console.log(`   Status:      ${allCodes?.length === CODES.length ? '✅' : '⚠️'}\n`);
+
+  if (!allCodes || allCodes.length === 0) {
+    console.log('❌ NENHUM CÓDIGO ENCONTRADO NA BASE DE DADOS!\n');
+    console.log('🔧 EXECUTE O SCRIPT SQL:');
+    console.log('   cat insert-170-codes.sql\n');
+    return;
+  }
+
+  // 2. Verificar códigos ativos
+  const activeCodes = allCodes.filter(c => c.active);
+  const usedCodes = allCodes.filter(c => !c.active);
+
+  console.log('📈 Estatísticas:\n');
+  console.log(`   Ativos:      ${activeCodes.length} códigos`);
+  console.log(`   Usados:      ${usedCodes.length} códigos`);
+  console.log(`   Percentual:  ${((activeCodes.length / CODES.length) * 100).toFixed(1)}% disponíveis\n`);
+
+  // 3. Testar 5 códigos aleatórios
+  console.log('🧪 Testando códigos aleatórios...\n');
+  
+  const testCodes = [];
+  for (let i = 0; i < 5; i++) {
+    const randomCode = CODES[Math.floor(Math.random() * CODES.length)];
+    testCodes.push(randomCode);
+  }
+
+  for (const code of testCodes) {
+    const { data, error } = await supabase
+      .from('invite_codes')
+      .select('code, active, used_by')
+      .eq('code', code)
+      .single();
+
+    if (error) {
+      console.log(`   ❌ ${code}: NÃO ENCONTRADO`);
+      console.log(`      Erro: ${error.message}\n`);
+    } else if (!data.active) {
+      console.log(`   ⚠️  ${code}: JÁ USADO`);
+      console.log(`      User ID: ${data.used_by}\n`);
+    } else {
+      console.log(`   ✅ ${code}: VÁLIDO E DISPONÍVEL\n`);
+    }
+  }
+
+  // 4. Verificar códigos faltantes
+  const dbCodes = new Set(allCodes.map(c => c.code));
+  const missingCodes = CODES.filter(c => !dbCodes.has(c));
+
+  if (missingCodes.length > 0) {
+    console.log(`⚠️  CÓDIGOS FALTANTES: ${missingCodes.length}\n`);
+    console.log('   Exemplos:');
+    missingCodes.slice(0, 5).forEach(code => console.log(`   • ${code}`));
+    if (missingCodes.length > 5) {
+      console.log(`   ... e mais ${missingCodes.length - 5} códigos\n`);
+    }
+  } else {
+    console.log('✅ TODOS OS 170 CÓDIGOS ESTÃO NA BASE DE DADOS!\n');
+  }
+
+  // 5. Verificar RLS (Row Level Security)
+  console.log('🔒 Verificando RLS Policies...\n');
+  
+  const { data: policies, error: policiesError } = await supabase
+    .rpc('get_table_policies', { table_name: 'invite_codes' })
+    .single();
+
+  if (policiesError) {
+    console.log('   ⚠️  Não foi possível verificar RLS automaticamente');
+    console.log('   Execute manualmente no Supabase SQL Editor:\n');
+    console.log('   SELECT * FROM pg_policies WHERE tablename = \'invite_codes\';\n');
+  }
+
+  // 6. Resumo final
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log('  RESUMO FINAL');
+  console.log('═══════════════════════════════════════════════════════════════\n');
+
+  if (allCodes.length === CODES.length && missingCodes.length === 0) {
+    console.log('✅ Sistema de códigos 100% funcional');
+    console.log('✅ Todos os 170 códigos disponíveis');
+    console.log('✅ Prontos para uso em /acesso\n');
+  } else {
+    console.log('⚠️  Sistema precisa de ajustes');
+    console.log(`   Códigos faltantes: ${missingCodes.length}`);
+    console.log(`   Execute: insert-170-codes.sql\n`);
+  }
+
+  console.log('═══════════════════════════════════════════════════════════════\n');
+}
+
+main().catch(console.error);

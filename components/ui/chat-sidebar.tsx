@@ -381,7 +381,7 @@ export function ChatSidebar({
 
       {/* User Profile */}
       <div className="border-t border-white/5 p-2">
-        <Link href="/profile/maria_silva">
+        <Link href="/perfil">
           <Button
             variant="ghost"
             className={cn(

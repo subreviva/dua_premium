@@ -28,10 +28,10 @@ export default function HomePage() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0.8])
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden">
+    <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
       <Navbar />
 
-      {/* HERO SECTION - Ultra Premium */}
+      {/* HERO SECTION - Ultra Premium iOS-like */}
       <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
         <motion.div 
           style={{ 
@@ -41,7 +41,7 @@ export default function HomePage() {
           }}
           className="absolute inset-0 z-0"
         >
-          {/* Video Background - FORCED AUTOPLAY */}
+          {/* Video Background - ULTRA OPTIMIZADO Desktop + Mobile Loop Perfeito */}
           <video 
             autoPlay 
             loop 
@@ -52,17 +52,45 @@ export default function HomePage() {
             disablePictureInPicture
             disableRemotePlayback
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ filter: 'brightness(1.1) contrast(1.05) saturate(1.1)' }}
+            style={{ 
+              filter: 'brightness(0.95) contrast(1.08) saturate(1.1)',
+              WebkitBackfaceVisibility: 'hidden',
+              WebkitPerspective: 1000,
+              WebkitTransform: 'translate3d(0,0,0)',
+              transform: 'translate3d(0,0,0)'
+            }}
             onLoadedData={(e) => {
               const video = e.currentTarget
-              video.play().catch(() => {
-                console.log('Video autoplay blocked, trying again...')
+              console.log('✅ Video loaded successfully')
+              video.play().catch((err) => {
+                console.log('Video autoplay blocked, trying again...', err)
                 setTimeout(() => video.play(), 100)
               })
             }}
+            onEnded={(e) => {
+              // Garante loop contínuo sem frames
+              const video = e.currentTarget
+              video.currentTime = 0
+              video.play()
+            }}
+            onPause={(e) => {
+              // Previne pausas não intencionais
+              const video = e.currentTarget
+              if (!video.ended) {
+                setTimeout(() => video.play(), 50)
+              }
+            }}
+            onError={(e) => {
+              console.error('❌ Video failed to load:', e)
+            }}
           >
             <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-2225-ultra%20premium%20loop%20para%20hero%20-%20sem%20objet....mp4"
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir (53).mp4"
+              type="video/mp4"
+            />
+            {/* Fallback com URL encoded */}
+            <source
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
               type="video/mp4"
             />
           </video>
@@ -70,35 +98,30 @@ export default function HomePage() {
           {/* Fallback gradient se vídeo não carregar */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-black to-pink-900/30" style={{ zIndex: -1 }} />
           
-          {/* Gradient overlays para depth e elegância */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          {/* Gradient overlays ULTRA PREMIUM - Estilo FLOW */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           
-          {/* Vignette effect premium */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0.6)_100%)]" />
+          {/* Vignette lateral para depth */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
+          
+          {/* Vignette radial premium */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.3)_60%,rgba(0,0,0,0.7)_100%)]" />
         </motion.div>
 
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
-          <div className="flex flex-col gap-6 sm:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center">
-            {/* Animated accent com glassmorphism premium */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="inline-flex items-center gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full bg-white/10 backdrop-blur-xl border border-white/20"
-            >
-              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse" />
-              <span className="text-xs md:text-sm font-medium text-white/95 tracking-wide">Plataforma de Criação com IA</span>
-            </motion.div>
+        <div className="relative z-10 container mx-auto px-3 sm:px-6 lg:px-8 py-16 sm:py-32">
+          <div className="flex flex-col gap-6 sm:gap-10 lg:gap-14 items-center justify-center max-w-7xl w-full mx-auto text-center">
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-              className="text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] font-extralight leading-[0.85] tracking-[-0.08em] text-white"
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              className="text-[10rem] sm:text-[12rem] md:text-[14rem] lg:text-[18rem] xl:text-[22rem] font-extralight leading-[0.85] tracking-[-0.08em] text-white"
               style={{ 
                 fontFamily: "var(--font-sans)", 
-                fontWeight: 100
+                fontWeight: 100,
+                textShadow: '0 8px 60px rgba(0,0,0,0.9), 0 4px 30px rgba(0,0,0,0.7), 0 2px 15px rgba(0,0,0,0.5)',
+                letterSpacing: '-0.08em'
               }}
             >
               DUA
@@ -107,45 +130,56 @@ export default function HomePage() {
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 font-light max-w-3xl leading-relaxed"
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-3xl leading-relaxed px-2"
+              style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8), 0 1px 10px rgba(0,0,0,0.6)' }}
             >
               Onde a próxima onda de criatividade
               <br className="hidden sm:block" /> 
               lusófona acontece
             </motion.p>
 
+            {/* Botão Elegante Transparente - Ultra Premium */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-              className="w-full sm:w-auto"
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full sm:w-auto px-2 sm:px-0 mt-4"
             >
-              <Button
-                size="lg"
-                className="group w-full sm:w-auto rounded-full px-8 sm:px-14 py-5 sm:py-8 bg-white hover:bg-white text-black font-semibold text-sm sm:text-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
-                onClick={() => router.push("/acesso")}
-              >
-                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
-                  Obter Acesso Antecipado
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-              </Button>
+              <div className="relative group">
+                {/* Glow effect sutil */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/10 via-white/20 to-white/10 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                
+                <Button
+                  size="lg"
+                  className="relative w-full sm:w-auto rounded-full px-6 sm:px-8 py-3 sm:py-4 bg-white/5 hover:bg-white/10 text-white font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.1)] border border-white/20 hover:border-white/40"
+                  onClick={() => router.push("/acesso")}
+                  style={{
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)'
+                  }}
+                >
+                  <span className="relative z-10 flex items-center gap-2 sm:gap-2.5 justify-center tracking-wide">
+                    Obter Acesso
+                    <ArrowRight className="w-4 h-4 transition-transform duration-700 group-hover:translate-x-1" />
+                  </span>
+                </Button>
+              </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Enhanced gradient transition com blend perfeito */}
+        {/* Enhanced gradient transition - NÃO afeta o botão */}
         <div 
-          className="absolute bottom-0 left-0 right-0 h-96 pointer-events-none z-20"
+          className="absolute bottom-0 left-0 right-0 h-80 pointer-events-none z-[5]"
           style={{
-            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.2) 20%, rgba(10,10,10,0.5) 40%, rgba(10,10,10,0.8) 70%, rgba(10,10,10,1) 100%)'
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.3) 30%, rgba(10,10,10,0.7) 60%, rgba(10,10,10,0.95) 90%, rgba(10,10,10,1) 100%)'
           }}
         />
       </section>
 
       {/* SEÇÃO 2: STUDIOS CAROUSEL - Premium Edition */}
-      <section className="relative py-20 sm:py-32 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-32 lg:py-48 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
@@ -153,6 +187,8 @@ export default function HomePage() {
             muted 
             playsInline
             preload="auto"
+            controls={false}
+            disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
@@ -165,7 +201,7 @@ export default function HomePage() {
         
         {/* Enhanced gradient transition superior */}
         <div 
-          className="absolute top-0 left-0 right-0 h-72 pointer-events-none z-20"
+          className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
             background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
           }}
@@ -177,7 +213,7 @@ export default function HomePage() {
 
         {/* Enhanced gradient transition inferior */}
         <div 
-          className="absolute bottom-0 left-0 right-0 h-72 pointer-events-none z-20"
+          className="absolute bottom-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
             background: 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0.7) 70%, rgba(26,26,26,1) 100%)'
           }}
@@ -185,7 +221,7 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 3: FEATURE SHOWCASE - Elegant Tabs */}
-      <section className="relative py-20 sm:py-32 lg:py-48 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-32 lg:py-48 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
@@ -193,6 +229,8 @@ export default function HomePage() {
             muted 
             playsInline
             preload="auto"
+            controls={false}
+            disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
@@ -205,7 +243,7 @@ export default function HomePage() {
         
         {/* Enhanced gradient transition superior */}
         <div 
-          className="absolute top-0 left-0 right-0 h-72 pointer-events-none z-20"
+          className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
             background: 'linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
           }}
@@ -270,7 +308,7 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 4: O ECOSSISTEMA 2 LADOS - Simple & Elegant */}
-      <section className="relative py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-28 lg:py-36 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
@@ -278,6 +316,8 @@ export default function HomePage() {
             muted 
             playsInline
             preload="auto"
+            controls={false}
+            disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
@@ -290,7 +330,7 @@ export default function HomePage() {
         
         {/* Enhanced gradient transition superior */}
         <div 
-          className="absolute top-0 left-0 right-0 h-72 pointer-events-none z-20"
+          className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
             background: 'linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
           }}
@@ -335,7 +375,7 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 4: MONOCHROME BENTO - Premium Grid */}
-      <section className="relative py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-28 lg:py-36 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
@@ -343,6 +383,8 @@ export default function HomePage() {
             muted 
             playsInline
             preload="auto"
+            controls={false}
+            disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
@@ -355,7 +397,7 @@ export default function HomePage() {
         
         {/* Enhanced gradient transition superior */}
         <div 
-          className="absolute top-0 left-0 right-0 h-72 pointer-events-none z-20"
+          className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
             background: 'linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
           }}
@@ -412,7 +454,7 @@ export default function HomePage() {
       </section>
 
       {/* SEÇÃO 6: CALL TO ACTION - Ultimate Premium */}
-      <section className="relative py-24 sm:py-36 lg:py-56 px-4 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-20 sm:py-36 lg:py-56 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
             autoPlay 
@@ -420,6 +462,8 @@ export default function HomePage() {
             muted 
             playsInline
             preload="auto"
+            controls={false}
+            disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
           >
             <source
@@ -480,28 +524,40 @@ export default function HomePage() {
             viewport={{ once: true, amount: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-6 sm:pt-8 px-4"
           >
-            <Button
-              size="lg"
-              className="group w-full sm:w-auto rounded-full px-12 sm:px-16 py-7 sm:py-9 bg-white hover:bg-white text-black font-semibold text-base sm:text-lg transition-all duration-700 hover:scale-[1.08] hover:shadow-[0_20px_80px_rgba(255,255,255,0.3)] active:scale-95 relative overflow-hidden"
-              onClick={() => router.push("/registo")}
-            >
-              <span className="relative z-10 flex items-center gap-3">
-                Começar Agora
-                <ArrowRight className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-1" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/90 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="group w-full sm:w-auto rounded-full px-12 sm:px-16 py-7 sm:py-9 border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 font-semibold text-base sm:text-lg transition-all duration-700 hover:scale-[1.05] bg-transparent backdrop-blur-xl hover:shadow-[0_10px_40px_rgba(255,255,255,0.1)] active:scale-95"
-              onClick={() => router.push("/chat")}
-            >
-              <span className="flex items-center gap-3">
-                Explorar o Ecossistema
-                <ArrowRight className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-1" />
-              </span>
-            </Button>
+            {/* Botão Premium Transparente - Começar Agora */}
+            <div className="relative group">
+              {/* Glow effect premium */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-white/20 via-white/30 to-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              
+              <Button
+                size="lg"
+                className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-5 sm:py-6 bg-white/5 hover:bg-white/10 text-white font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] border border-white/20 hover:border-white/40 backdrop-blur-xl"
+                onClick={() => router.push("/registo")}
+              >
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3 justify-center tracking-wide">
+                  Começar Agora
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-700 group-hover:translate-x-2" />
+                </span>
+              </Button>
+            </div>
+            
+            {/* Botão Premium Transparente - Explorar */}
+            <div className="relative group">
+              {/* Glow effect premium */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-white/15 via-white/25 to-white/15 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              
+              <Button
+                size="lg"
+                variant="outline"
+                className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-5 sm:py-6 border border-white/20 hover:border-white/40 text-white/90 hover:text-white hover:bg-white/5 font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] bg-transparent backdrop-blur-xl hover:shadow-[0_8px_32px_rgba(255,255,255,0.1)] active:scale-[0.98]"
+                onClick={() => router.push("/chat")}
+              >
+                <span className="flex items-center gap-2 sm:gap-3 tracking-wide">
+                  Explorar o Ecossistema
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-700 group-hover:translate-x-2" />
+                </span>
+              </Button>
+            </div>
           </motion.div>
         </div>
       </section>

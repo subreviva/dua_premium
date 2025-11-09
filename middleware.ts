@@ -104,11 +104,19 @@ export async function middleware(req: NextRequest) {
     '/',                      // Home page pública
     '/acesso',               // Página de código de acesso
     '/login',                // Login para users registados
+    '/registo',              // Página de registo/waitlist
     '/sobre',                // Sobre
+    '/termos',               // Termos de serviço
+    '/privacidade',          // Política de privacidade
+    '/esqueci-password',     // Reset de password
+    '/reset-password',       // Reset de password
+    '/auth/callback',        // OAuth callback
     '/api/validate-code',    // API de validação
     '/api/auth',             // APIs de autenticação
+    '/api/early-access',     // API de waitlist
     '/_next',                // Next.js internals
     '/favicon.ico',          // Favicon
+    '/images',               // Imagens públicas
   ];
 
   // Verificar se a rota é pública
@@ -167,6 +175,34 @@ export async function middleware(req: NextRequest) {
     }
 
     // 🎯 VERIFICAÇÃO UNIFIED ARCHITECTURE: Acesso por produto
+    // 🔒 ROTAS PROTEGIDAS - Requerem autenticação + has_access = true
+    const PROTECTED_ROUTES = [
+      '/chat',              // Chat IA
+      '/designstudio',      // Design Studio (imagens, designs)
+      '/musicstudio',       // Music Studio (música)
+      '/videostudio',       // Video Studio (cinema/vídeo)
+      '/imagestudio',       // Image Studio (geração de imagens)
+      '/community',         // Community (criações compartilhadas)
+      '/dashboard',         // Dashboard
+      '/perfil',            // Perfil do usuário
+      '/admin',             // Painel admin
+      '/mercado',           // Mercado
+      '/api/chat',          // API de chat
+      '/api/conversations', // API de conversas
+      '/api/comprar-item',  // API de compra
+      '/api/community',     // API de community
+    ];
+    
+    // Verificar se rota é protegida
+    const isProtectedRoute = PROTECTED_ROUTES.some(route => path.startsWith(route));
+    
+    // Se é rota protegida e não tem has_access, bloquear
+    if (isProtectedRoute && !userData.has_access) {
+      console.log(`🚫 ACESSO NEGADO: ${user.email} tentou acessar ${path} sem has_access`);
+      const redirectUrl = new URL('/acesso?reason=no_access', req.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
     // DUA IA routes: /chat, /dashboard, /api/chat, /api/conversations
     const DUAIA_ROUTES = ['/chat', '/dashboard', '/api/chat', '/api/conversations'];
     const isDuaIARoute = DUAIA_ROUTES.some(route => path.startsWith(route));
@@ -189,7 +225,8 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    // User autenticado e com acesso ao produto correto, permitir
+    // ✅ User autenticado e com acesso, permitir
+    console.log(`✅ ACESSO PERMITIDO: ${user.email} → ${path}`);
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);

@@ -1,617 +1,375 @@
+// ===================================================
+// COMMUNITY PAGE - PREMIUM EDITION
+// ===================================================
+// Ultra-premium community experience
+// Sophisticated design with luxury aesthetics
+// No emojis, no amateur icons - pure elegance
+// ===================================================
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Music, ImageIcon, Video, Heart, MessageCircle, Share2, User, Lock, Sparkles } from "lucide-react"
-import { BeamsBackground } from "@/components/ui/beams-background"
-import { OrbitingAvatarsCTA } from "@/components/ui/orbiting-avatars"
-import { MasonryGrid } from "@/components/ui/image-testimonial-grid"
-import { MusicPlayerCard } from "@/components/ui/music-player-card"
-import { GlassmorphismProfileCard } from "@/components/ui/glassmorphism-profile-card"
-import { PremiumNavbar } from "@/components/ui/premium-navbar"
-import { Button } from "@/components/ui/button"
+import { Grid3x3, Image as ImageIcon, Music as MusicIcon, Sparkles, ArrowLeft, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { supabaseClient } from '@/lib/supabase'
+import Link from "next/link"
+import { useCommunityPosts, type PostType } from "@/hooks/useCommunityPosts"
+import { CommunityPostCard } from "@/components/community/CommunityPostCard"
 
-const supabase = supabaseClient;
-
-const mockImages = [
-  {
-    id: "1",
-    url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80",
-    title: "Cidade Cyberpunk",
-    artist: "Maria Silva",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
-    likes: 234,
-    comments: 45,
-  },
-  {
-    id: "2",
-    url: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80",
-    title: "Retrato Artístico",
-    artist: "Ana Santos",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana",
-    likes: 892,
-    comments: 123,
-  },
-  {
-    id: "3",
-    url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&q=80",
-    title: "Paisagem Futurista",
-    artist: "Pedro Costa",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Pedro",
-    likes: 456,
-    comments: 67,
-  },
-  {
-    id: "4",
-    url: "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=800&q=80",
-    title: "Arte Abstrata",
-    artist: "Sofia Oliveira",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sofia",
-    likes: 678,
-    comments: 89,
-  },
-  {
-    id: "5",
-    url: "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80",
-    title: "Natureza Digital",
-    artist: "Lucas Ferreira",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas",
-    likes: 345,
-    comments: 56,
-  },
-  {
-    id: "6",
-    url: "https://images.unsplash.com/photo-1620641788813-04466f872be2?w=800&q=80",
-    title: "Espaço Sideral",
-    artist: "Beatriz Lima",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Beatriz",
-    likes: 567,
-    comments: 78,
-  },
-]
-
-const mockMusic = [
-  {
-    id: "1",
-    albumArt: "https://images.unsplash.com/photo-1470225628813-04466f872be2?w=800&q=80",
-    songTitle: "Melodia Ambiente",
-    artistName: "João Costa",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Joao",
-    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    likes: 567,
-    comments: 89,
-  },
-  {
-    id: "2",
-    albumArt: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80",
-    songTitle: "Ritmo Eletrônico",
-    artistName: "Carla Mendes",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carla",
-    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    likes: 789,
-    comments: 123,
-  },
-  {
-    id: "3",
-    albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
-    songTitle: "Jazz Suave",
-    artistName: "Ricardo Alves",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ricardo",
-    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    likes: 432,
-    comments: 67,
-  },
-]
-
-const mockVideos = [
-  {
-    id: "1",
-    thumbnail: "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800&q=80",
-    title: "Animação 3D Futurista",
-    artist: "Miguel Santos",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Miguel",
-    duration: "2:34",
-    likes: 1234,
-    comments: 234,
-  },
-  {
-    id: "2",
-    thumbnail: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80",
-    title: "Motion Graphics",
-    artist: "Inês Rodrigues",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ines",
-    duration: "1:45",
-    likes: 987,
-    comments: 156,
-  },
-  {
-    id: "3",
-    thumbnail: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80",
-    title: "Visualização de Dados",
-    artist: "Tiago Pereira",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tiago",
-    duration: "3:12",
-    likes: 765,
-    comments: 98,
-  },
-  {
-    id: "4",
-    thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80",
-    title: "Arte Generativa",
-    artist: "Catarina Lopes",
-    artistAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Catarina",
-    duration: "2:56",
-    likes: 543,
-    comments: 87,
-  },
-]
-
-const ImageCard = ({ image }: { image: (typeof mockImages)[0] }) => {
-  const [isLiked, setIsLiked] = useState(false)
-  const [localLikes, setLocalLikes] = useState(image.likes)
-  const [showProfile, setShowProfile] = useState(false)
-
-  const handleLike = () => {
-    setIsLiked(!isLiked)
-    setLocalLikes(isLiked ? localLikes - 1 : localLikes + 1)
-  }
-
+// ===================================================
+// LOADING SKELETON COMPONENT
+// ===================================================
+function LoadingSkeleton() {
   return (
-    <>
-      <motion.div
-        className="relative rounded-2xl overflow-hidden group bg-card/40 backdrop-blur-xl border border-white/10"
-        whileHover={{ scale: 1.02 }}
-        transition={{ duration: 0.2 }}
-      >
-        <img src={image.url || "/placeholder.svg"} alt={image.title} className="w-full h-auto object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        <div className="absolute top-0 left-0 p-4 text-white">
-          <button
-            onClick={() => setShowProfile(true)}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          >
-            <img
-              src={image.artistAvatar || "/placeholder.svg"}
-              className="w-8 h-8 rounded-full border-2 border-white/80"
-              alt={image.artist}
-            />
-            <span className="font-semibold text-sm drop-shadow-md">{image.artist}</span>
-          </button>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="flex items-center justify-between text-white">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleLike}
-              className={`flex items-center gap-2 ${isLiked ? "text-red-500" : ""}`}
-            >
-              <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-              <span className="text-sm font-medium">{localLikes}</span>
-            </motion.button>
-
-            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="flex items-center gap-2">
-              <MessageCircle size={20} />
-              <span className="text-sm font-medium">{image.comments}</span>
-            </motion.button>
-
-            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Share2 size={20} />
-            </motion.button>
-          </div>
-        </div>
-      </motion.div>
-
-      {showProfile && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setShowProfile(false)}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: i * 0.05 }}
+          className="relative bg-black/40 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm"
         >
-          <div onClick={(e) => e.stopPropagation()}>
-            <GlassmorphismProfileCard
-              avatarUrl={image.artistAvatar}
-              name={image.artist}
-              title="Artista Digital"
-              bio="Criador de arte digital e fotografia gerada por IA. Apaixonado por explorar novos estilos visuais."
-              socialLinks={[
-                {
-                  id: "profile",
-                  icon: User,
-                  label: "Ver Perfil",
-                  href: `/profile/${image.artist.toLowerCase().replace(" ", "")}`,
-                },
-              ]}
-              actionButton={{
-                text: "Ver Perfil Completo",
-                href: `/profile/${image.artist.toLowerCase().replace(" ", "")}`,
-              }}
-            />
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
-
-const VideoCard = ({ video }: { video: (typeof mockVideos)[0] }) => {
-  const [isLiked, setIsLiked] = useState(false)
-  const [localLikes, setLocalLikes] = useState(video.likes)
-  const [showProfile, setShowProfile] = useState(false)
-
-  const handleLike = () => {
-    setIsLiked(!isLiked)
-    setLocalLikes(isLiked ? localLikes - 1 : localLikes + 1)
-  }
-
-  return (
-    <>
-      <motion.div
-        className="relative rounded-2xl overflow-hidden group bg-card/40 backdrop-blur-xl border border-white/10"
-        whileHover={{ scale: 1.02 }}
-        transition={{ duration: 0.2 }}
-      >
-        <div className="relative aspect-video">
-          <img src={video.thumbnail || "/placeholder.svg"} alt={video.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-              <Video className="w-8 h-8 text-black" />
+          {/* Shimmer Effect */}
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+          
+          <div className="aspect-square bg-gradient-to-br from-white/5 to-white/0" />
+          <div className="p-4 space-y-3">
+            <div className="h-6 bg-white/5 rounded-lg w-3/4" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-white/5" />
+              <div className="h-4 w-28 bg-white/5 rounded-lg" />
+            </div>
+            <div className="flex items-center gap-4 pt-2">
+              <div className="h-4 w-12 bg-white/5 rounded-lg" />
+              <div className="h-4 w-12 bg-white/5 rounded-lg" />
             </div>
           </div>
-          <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs text-white font-medium">
-            {video.duration}
-          </div>
-        </div>
-
-        <div className="p-4">
-          <button
-            onClick={() => setShowProfile(true)}
-            className="flex items-center gap-3 mb-3 hover:opacity-80 transition-opacity w-full"
-          >
-            <img src={video.artistAvatar || "/placeholder.svg"} className="w-10 h-10 rounded-full" alt={video.artist} />
-            <div className="flex-1 text-left">
-              <h3 className="font-semibold text-sm text-foreground">{video.artist}</h3>
-              <p className="text-xs text-muted-foreground">Há 3 horas</p>
-            </div>
-          </button>
-
-          <h2 className="text-base font-bold mb-3">{video.title}</h2>
-
-          <div className="flex items-center justify-between pt-3 border-t border-white/5">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleLike}
-              className={`flex items-center gap-2 transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-              <span className="text-sm font-medium">{localLikes}</span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <MessageCircle size={20} />
-              <span className="text-sm font-medium">{video.comments}</span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Share2 size={20} />
-            </motion.button>
-          </div>
-        </div>
-      </motion.div>
-
-      {showProfile && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setShowProfile(false)}
-        >
-          <div onClick={(e) => e.stopPropagation()}>
-            <GlassmorphismProfileCard
-              avatarUrl={video.artistAvatar}
-              name={video.artist}
-              title="Criador de Vídeo"
-              bio="Especialista em motion graphics e animação 3D. Transformando ideias em experiências visuais."
-              socialLinks={[
-                {
-                  id: "profile",
-                  icon: User,
-                  label: "Ver Perfil",
-                  href: `/profile/${video.artist.toLowerCase().replace(" ", "")}`,
-                },
-              ]}
-              actionButton={{
-                text: "Ver Perfil Completo",
-                href: `/profile/${video.artist.toLowerCase().replace(" ", "")}`,
-              }}
-            />
-          </div>
-        </div>
-      )}
-    </>
-  )
+        </motion.div>
+      ))}
+    </div>
+  );
 }
 
+// ===================================================
+// ERROR MESSAGE COMPONENT
+// ===================================================
+function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex items-center justify-center min-h-[400px]"
+    >
+      <div className="text-center space-y-6 max-w-md">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20 flex items-center justify-center mx-auto backdrop-blur-sm">
+          <div className="text-3xl">⚠</div>
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-lg font-light text-white">Something went wrong</h3>
+          <p className="text-sm font-light text-zinc-400 leading-relaxed">{message}</p>
+        </div>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-light transition-all duration-300"
+          >
+            Try Again
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ===================================================
+// EMPTY STATE COMPONENT
+// ===================================================
+function EmptyState({ type }: { type: PostType }) {
+  const config = {
+    all: {
+      icon: Grid3x3,
+      title: "No posts yet",
+      description: "Be the first to share your AI creation with the community"
+    },
+    image: {
+      icon: ImageIcon,
+      title: "No images yet",
+      description: "Create stunning images in our Image Studio and share them here"
+    },
+    music: {
+      icon: MusicIcon,
+      title: "No music yet",
+      description: "Compose amazing tracks in our Music Studio and share them here"
+    }
+  };
+
+  const { icon: Icon, title, description } = config[type];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex items-center justify-center min-h-[500px]"
+    >
+      <div className="text-center space-y-6 max-w-md">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-white/10 flex items-center justify-center mx-auto backdrop-blur-sm">
+          <Icon className="w-12 h-12 text-white/40" strokeWidth={1.5} />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-light text-white">{title}</h3>
+          <p className="text-sm font-light text-zinc-400 leading-relaxed">{description}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ===================================================
+// MAIN COMPONENT
+// ===================================================
 export default function CommunityPage() {
-  const [hasAccessedCommunity, setHasAccessedCommunity] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const [columns, setColumns] = useState(3)
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<PostType>("all");
+  const { posts, loading, error, hasMore, loadMore, refresh } = useCommunityPosts({ type: activeTab });
 
-  // Verificar autenticação
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setIsAuthenticated(!!session)
-    }
-    checkAuth()
-  }, [])
-
-  useEffect(() => {
-    const getColumns = (width: number) => {
-      if (width < 640) return 1
-      if (width < 1024) return 2
-      return 3
-    }
-
-    const handleResize = () => {
-      setColumns(getColumns(window.innerWidth))
-    }
-
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  const communityAvatars = [
-    { src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop", alt: "Criador 1" },
-    { src: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop", alt: "Criador 2" },
-    { src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop", alt: "Criador 3" },
-    { src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop", alt: "Criador 4" },
-    { src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop", alt: "Criador 5" },
-    { src: "https://images.unsplash.com/photo-1488161628813-04466f872be2?w=150&h=150&fit=crop", alt: "Criador 6" },
-  ]
-
-  // Loading state
-  if (isAuthenticated === null) {
-    return (
-      <div className="relative w-full min-h-screen flex items-center justify-center">
-        <div className="fixed inset-0 z-0">
-          <BeamsBackground intensity="medium" />
-        </div>
-        <div className="relative z-10 text-white text-lg">Carregando...</div>
-      </div>
-    )
-  }
-
-  // Not authenticated - show login gate
-  if (isAuthenticated === false) {
-    return (
-      <div className="relative w-full min-h-screen">
-        <div className="fixed inset-0 z-0">
-          <BeamsBackground intensity="medium" />
-        </div>
-
-        <PremiumNavbar variant="transparent" credits={undefined} />
-
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl mx-auto text-center space-y-8"
-          >
-            {/* Lock Icon with glow */}
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex justify-center"
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full blur-3xl opacity-40 animate-pulse" />
-                <div className="relative w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-xl">
-                  <Lock className="w-12 h-12 text-cyan-400" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Title */}
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">
-                Comunidade <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Exclusiva</span>
-              </h1>
-              <p className="text-lg sm:text-xl text-white/80 leading-relaxed max-w-xl mx-auto">
-                A Comunidade DUA é um espaço <span className="text-cyan-400 font-semibold">privado</span> onde criadores lusófonos
-                partilham arte gerada por IA, conectam-se e colaboram.
-              </p>
-            </div>
-
-            {/* Benefits */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
-              >
-                <Sparkles className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                <p className="text-sm text-white/90 font-medium">Galerias Exclusivas</p>
-                <p className="text-xs text-white/60 mt-1">Arte, música e vídeos únicos</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
-              >
-                <User className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                <p className="text-sm text-white/90 font-medium">Rede de Criadores</p>
-                <p className="text-xs text-white/60 mt-1">Conecte-se com artistas</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
-              >
-                <Heart className="w-8 h-8 text-pink-400 mx-auto mb-2" />
-                <p className="text-sm text-white/90 font-medium">Colaboração</p>
-                <p className="text-xs text-white/60 mt-1">Projetos em comunidade</p>
-              </motion.div>
-            </div>
-
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
-            >
-              <Button
-                onClick={() => router.push('/acesso')}
-                size="lg"
-                className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 active:scale-95"
-              >
-                Criar Conta Gratuita
-              </Button>
-              <Button
-                onClick={() => router.push('/login')}
-                size="lg"
-                variant="outline"
-                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-xl"
-              >
-                Já tenho conta
-              </Button>
-            </motion.div>
-
-            {/* Info text */}
-            <p className="text-xs text-white/50 pt-4">
-              🔒 Acesso exclusivo para membros registados • Gratuito para sempre
-            </p>
-          </motion.div>
-        </div>
-      </div>
-    )
-  }
-
-  // Authenticated - show welcome screen first
-  if (!hasAccessedCommunity) {
-    return (
-      <div className="relative w-full min-h-screen">
-        <div className="fixed inset-0 z-0">
-          <BeamsBackground intensity="medium" />
-        </div>
-
-        <PremiumNavbar variant="transparent" credits={undefined} />
-
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
-          <OrbitingAvatarsCTA
-            title="Bem-vindo à Comunidade DUA"
-            description="Explore milhares de criações de arte gerada por IA. Descubra galerias de imagens, vídeos e músicas criadas pela nossa vibrante comunidade de criadores lusófonos. Partilhe as suas criações, conecte-se com outros artistas e inspire-se."
-            buttonText="Entrar na Comunidade"
-            buttonProps={{
-              onClick: () => setHasAccessedCommunity(true),
-              className:
-                "bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/60 active:scale-95 h-12 text-base transition-all duration-300",
-            }}
-            avatars={communityAvatars}
-            orbitRadius={22}
-            orbitDuration={50}
-            className="bg-transparent"
-          />
-        </div>
-      </div>
-    )
-  }
-
-  // Authenticated and accessed - show full community
   return (
-    <div className="relative w-full min-h-screen">
-      <div className="fixed inset-0 z-0">
-        <BeamsBackground intensity="subtle" />
+    <div className="min-h-screen bg-black">
+      {/* Simple Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+          <Link 
+            href="/chat" 
+            className="text-white/60 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-xl font-light text-white">DUA Community</h1>
+        </div>
       </div>
 
-      <PremiumNavbar showBackButton={true} backLink="/" variant="solid" credits={undefined} />
-
-      <div className="relative z-10 min-h-screen pt-4 sm:pt-6 lg:pt-8">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
-          <div className="space-y-1.5 sm:space-y-2 px-1">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white flex items-center gap-3">
-              Comunidade DUA
-              <span className="text-xs sm:text-sm px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 text-cyan-400">
-                Membros
-              </span>
-            </h1>
-            <p className="text-sm sm:text-base text-white/70">
-              Explore criações exclusivas de imagens, músicas e vídeos da nossa comunidade de criadores
-            </p>
+      <div className="relative z-10 container mx-auto px-4 py-16 pt-32">
+        {/* ===================================================
+            HEADER - PREMIUM
+            =================================================== */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16 space-y-6"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+            <Sparkles className="w-4 h-4 text-purple-400" strokeWidth={1.5} />
+            <span className="text-sm font-light text-zinc-400 tracking-wide">
+              Creator Community
+            </span>
           </div>
 
-          <Tabs defaultValue="imagem" className="w-full">
-            <TabsList className="bg-black/40 backdrop-blur-xl border border-white/10 w-full sm:w-auto h-auto p-1">
+          <h1 className="text-5xl md:text-7xl font-light tracking-tight text-white">
+            Discover
+            <span className="block mt-2 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              AI Creations
+            </span>
+          </h1>
+
+          <p className="text-lg font-light text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+            Explore extraordinary content created by our community of AI artists and creators
+          </p>
+        </motion.div>
+
+        {/* ===================================================
+            TABS - PREMIUM
+            =================================================== */}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PostType)} className="w-full">
+          <div className="flex justify-center mb-12">
+            <TabsList className="bg-white/5 border border-white/10 backdrop-blur-md p-1 rounded-full">
               <TabsTrigger
-                value="imagem"
-                className="gap-1.5 sm:gap-2 flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm"
+                value="all"
+                className="data-[state=active]:bg-white data-[state=active]:text-black rounded-full px-6 py-2 font-light transition-all"
               >
-                <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span>Imagem</span>
+                <Grid3x3 className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                All
               </TabsTrigger>
               <TabsTrigger
-                value="musica"
-                className="gap-1.5 sm:gap-2 flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm"
+                value="image"
+                className="data-[state=active]:bg-white data-[state=active]:text-black rounded-full px-6 py-2 font-light transition-all"
               >
-                <Music className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span>Música</span>
+                <ImageIcon className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                Images
               </TabsTrigger>
               <TabsTrigger
-                value="video"
-                className="gap-1.5 sm:gap-2 flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm"
+                value="music"
+                className="data-[state=active]:bg-white data-[state=active]:text-black rounded-full px-6 py-2 font-light transition-all"
               >
-                <Video className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span>Vídeo</span>
+                <MusicIcon className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                Music
               </TabsTrigger>
             </TabsList>
+          </div>
 
-            <TabsContent value="imagem" className="mt-4 sm:mt-6">
-              <MasonryGrid columns={columns} gap={3}>
-                {mockImages.map((image) => (
-                  <ImageCard key={image.id} image={image} />
-                ))}
-              </MasonryGrid>
-            </TabsContent>
+          {/* ===================================================
+              ALL CONTENT TAB
+              =================================================== */}
+          <TabsContent value="all">
+            {loading && <LoadingSkeleton />}
+            {error && <ErrorMessage message={error} onRetry={refresh} />}
+            {!loading && !error && posts.length === 0 && <EmptyState type="all" />}
+            {!loading && !error && posts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-8"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {posts.map((post, index) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                    >
+                      <CommunityPostCard post={post} />
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {hasMore && (
+                  <div className="flex justify-center pt-8">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={loadMore}
+                      disabled={loading}
+                      className="group px-8 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all font-light text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 inline-block animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <span>Load More</span>
+                          <Grid3x3 className="w-4 h-4 ml-2 inline-block group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </TabsContent>
 
-            <TabsContent value="musica" className="mt-4 sm:mt-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-                {mockMusic.map((music) => (
-                  <MusicPlayerCard key={music.id} {...music} />
-                ))}
-              </div>
-            </TabsContent>
+          {/* ===================================================
+              IMAGES TAB
+              =================================================== */}
+          <TabsContent value="image">
+            {loading && <LoadingSkeleton />}
+            {error && <ErrorMessage message={error} onRetry={refresh} />}
+            {!loading && !error && posts.length === 0 && <EmptyState type="image" />}
+            {!loading && !error && posts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-8"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {posts.map((post, index) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                    >
+                      <CommunityPostCard post={post} />
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {hasMore && (
+                  <div className="flex justify-center pt-8">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={loadMore}
+                      disabled={loading}
+                      className="group px-8 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all font-light text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 inline-block animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <span>Load More</span>
+                          <ImageIcon className="w-4 h-4 ml-2 inline-block group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </TabsContent>
 
-            <TabsContent value="video" className="mt-4 sm:mt-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-                {mockVideos.map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+          {/* ===================================================
+              MUSIC TAB
+              =================================================== */}
+          <TabsContent value="music">
+            {loading && <LoadingSkeleton />}
+            {error && <ErrorMessage message={error} onRetry={refresh} />}
+            {!loading && !error && posts.length === 0 && <EmptyState type="music" />}
+            {!loading && !error && posts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-8"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {posts.map((post, index) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                    >
+                      <CommunityPostCard post={post} />
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {hasMore && (
+                  <div className="flex justify-center pt-8">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={loadMore}
+                      disabled={loading}
+                      className="group px-8 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all font-light text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 inline-block animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <span>Load More</span>
+                          <MusicIcon className="w-4 h-4 ml-2 inline-block group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
-  )
+  );
 }

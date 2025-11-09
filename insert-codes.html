@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎫 Inserir Códigos DUA - Supabase</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+    }
+    
+    h1 {
+      color: #2d3748;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #718096;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    button {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .log {
+      margin-top: 30px;
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      display: none;
+    }
+    
+    .log.visible {
+      display: block;
+    }
+    
+    .log-line {
+      margin-bottom: 4px;
+    }
+    
+    .log-line.success { color: #38a169; }
+    .log-line.error { color: #e53e3e; }
+    .log-line.warning { color: #d69e2e; }
+    .log-line.info { color: #3182ce; }
+    
+    .progress {
+      margin-top: 20px;
+      background: #e2e8f0;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .progress.visible {
+      display: block;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s;
+      width: 0%;
+    }
+    
+    .help {
+      margin-top: 20px;
+      padding: 16px;
+      background: #edf2f7;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #2d3748;
+    }
+    
+    .help strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #1a202c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎫 Inserir Códigos de Acesso DUA</h1>
+    <p class="subtitle">Insira automaticamente os 170 códigos no Supabase</p>
+    
+    <form id="insertForm">
+      <div class="form-group">
+        <label for="supabaseUrl">Supabase URL</label>
+        <input 
+          type="url" 
+          id="supabaseUrl" 
+          placeholder="https://xxx.supabase.co"
+          value="https://nranmngyocaqjwcokcxm.supabase.co"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="serviceKey">Service Role Key (Secret)</label>
+        <input 
+          type="password" 
+          id="serviceKey" 
+          placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yYW5tbmd5b2NhcWp3Y29rY3htIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODU3NzE1MiwiZXhwIjoyMDc0MTUzMTUyfQ.QigiIbtuBBvzxL3yqLHkl-QYZBSBDBrx1L4B0nf_4lQ"
+          required
+        >
+      </div>
+      
+      <button type="submit" id="submitBtn">
+        🚀 Inserir 170 Códigos
+      </button>
+    </form>
+    
+    <div class="progress" id="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <div class="help">
+      <strong>ℹ️ Como obter as credenciais:</strong>
+      1. Vá para: Supabase Dashboard → Settings → API<br>
+      2. Copie "Project URL" (já preenchido acima)<br>
+      3. Copie "service_role secret" (chave secreta - já preenchida)
+    </div>
+  </div>
+
+  <script>
+    // Lista completa dos 170 códigos
+    const CODES = [
+      'DUA-03BN-9QT', 'DUA-044P-OYM', 'DUA-09P2-GDD', 'DUA-11SF-3GX', 'DUA-11UF-1ZR',
+      'DUA-17OL-JNL', 'DUA-17Q2-DCZ', 'DUA-1AG9-T4T', 'DUA-1F71-A68', 'DUA-1KVM-WND',
+      'DUA-1WG9-7U7', 'DUA-2OZG-PSG', 'DUA-2PH0-G3I', 'DUA-2TEJ-SK9', 'DUA-352J-L4R',
+      'DUA-3CTK-MVZ', 'DUA-3E3Z-CR1', 'DUA-3FUG-4QE', 'DUA-3UKV-FA8', 'DUA-44MD-4VD',
+      'DUA-4ASV-JAN', 'DUA-4L9D-PR5', 'DUA-578K-5QX', 'DUA-58FX-ZAP', 'DUA-595N-EWJ',
+      'DUA-5DG2-MHJ', 'DUA-5GDU-GU4', 'DUA-5HX2-OTO', 'DUA-5ME0-1UZ', 'DUA-5MEO-FFQ',
+      'DUA-5T39-ON3', 'DUA-6AAL-KAW', 'DUA-6FQ8-0ZR', 'DUA-6IXL-JID', 'DUA-6SCP-2AR',
+      'DUA-6XTN-9NK', 'DUA-6Z1U-9PT', 'DUA-7EUY-DZR', 'DUA-7F5Q-H6A', 'DUA-7FSW-HQH',
+      'DUA-7N7T-LD7', 'DUA-8HC5-7SM', 'DUA-8NET-YUG', 'DUA-8O80-GKM', 'DUA-8T1M-4J5',
+      'DUA-9P5N-QG0', 'DUA-9S9L-D3W', 'DUA-A77V-408', 'DUA-A7IE-4G4', 'DUA-B5KG-MDT',
+      'DUA-B6OT-18R', 'DUA-B7TZ-SRS', 'DUA-BISN-J7T', 'DUA-CJBX-MVP', 'DUA-COPC-B57',
+      'DUA-D164-YBU', 'DUA-D5PU-4O2', 'DUA-D7ST-NZR', 'DUA-DC94-L6M', 'DUA-DPOE-8GD',
+      'DUA-DS9H-THR', 'DUA-DW7K-F3R', 'DUA-DWE8-MUM', 'DUA-EZS1-2WZ', 'DUA-F1WZ-QN2',
+      'DUA-FS8I-EZT', 'DUA-FUG1-XRG', 'DUA-G7WJ-FGS', 'DUA-GFYE-A04', 'DUA-GHVM-R78',
+      'DUA-GKD7-2BR', 'DUA-GUFZ-0TT', 'DUA-I3BP-FJC', 'DUA-ICJH-5CO', 'DUA-IFAL-T5L',
+      'DUA-IVZX-8A8', 'DUA-J4G2-VLJ', 'DUA-JCZK-A5A', 'DUA-JDVL-FTY', 'DUA-JL3M-FY3',
+      'DUA-JNK9-22G', 'DUA-JXC1-Z12', 'DUA-JY3R-IOE', 'DUA-K5JE-H8K', 'DUA-K89W-NE7',
+      'DUA-KAWU-ZWV', 'DUA-KJ6G-UCM', 'DUA-KON4-TGW', 'DUA-KRTT-BMU', 'DUA-L8JQ-UX5',
+      'DUA-LA1J-SEW', 'DUA-LG12-ZO3', 'DUA-LKDW-PIT', 'DUA-LO44-C89', 'DUA-LOXY-Q41',
+      'DUA-LWOW-T1Y', 'DUA-LZMS-6FO', 'DUA-MAA6-QIO', 'DUA-MDDY-PIW', 'DUA-MGP7-MA5',
+      'DUA-MJ45-2XO', 'DUA-MLD2-2UM', 'DUA-MNVM-LHW', 'DUA-MTVV-V38', 'DUA-MU56-Z05',
+      'DUA-MUTS-JSV', 'DUA-N0AP-HWB', 'DUA-N0WJ-XLG', 'DUA-N9SE-4C1', 'DUA-NJFT-HH8',
+      'DUA-NL2B-7NK', 'DUA-NL8B-MJS', 'DUA-NORV-63I', 'DUA-NVM9-ESS', 'DUA-NVYT-G77',
+      'DUA-NWUS-5SG', 'DUA-NYB3-4PF', 'DUA-O8T0-M9P', 'DUA-OLGI-Q24', 'DUA-OO81-UP4',
+      'DUA-PC2X-2NY', 'DUA-PJ8I-9BN', 'DUA-PKQU-6XP', 'DUA-Q32A-SW3', 'DUA-Q4Q8-18T',
+      'DUA-QF11-UWY', 'DUA-QTQ0-RMJ', 'DUA-QULD-ZO8', 'DUA-R0R9-FTT', 'DUA-R9IP-A9A',
+      'DUA-REKC-XIP', 'DUA-RM5K-KIQ', 'DUA-RO7R-578', 'DUA-RYIN-TAC', 'DUA-S1HE-BM9',
+      'DUA-S8VM-GCH', 'DUA-SS9O-3N5', 'DUA-SZY0-37F', 'DUA-T8H5-240', 'DUA-TH5G-4OB',
+      'DUA-TMGC-L07', 'DUA-TQY2-L5H', 'DUA-TWT8-4U1', 'DUA-TXPY-5KF', 'DUA-TZ3L-03T',
+      'DUA-U450-QT6', 'DUA-U5YA-J46', 'DUA-UI2I-83Y', 'DUA-UNSP-K53', 'DUA-US35-PBZ',
+      'DUA-UWTP-HHP', 'DUA-V3I6-RPH', 'DUA-V58K-LF0', 'DUA-VB8L-2RB', 'DUA-VCJQ-N9F',
+      'DUA-VDY7-A55', 'DUA-VI43-SGG', 'DUA-VV41-4D5', 'DUA-W0E2-3II', 'DUA-WEPL-437',
+      'DUA-WZY0-3MJ', 'DUA-XDZN-I5I', 'DUA-XE2X-W1E', 'DUA-XH7J-B6X', 'DUA-XYTJ-M6R',
+      'DUA-YC38-04D', 'DUA-ZDSQ-45B', 'DUA-ZL1Z-CAF', 'DUA-ZLJZ-3TH', 'DUA-ZPZW-3QS'
+    ];
+
+    const logElement = document.getElementById('log');
+    const progressElement = document.getElementById('progress');
+    const progressBar = document.getElementById('progressBar');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function log(message, type = 'info') {
+      const line = document.createElement('div');
+      line.className = `log-line ${type}`;
+      line.textContent = message;
+      logElement.appendChild(line);
+      logElement.scrollTop = logElement.scrollHeight;
+      logElement.classList.add('visible');
+    }
+
+    function updateProgress(current, total) {
+      const percent = Math.round((current / total) * 100);
+      progressBar.style.width = `${percent}%`;
+      progressElement.classList.add('visible');
+    }
+
+    document.getElementById('insertForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const url = document.getElementById('supabaseUrl').value;
+      const key = document.getElementById('serviceKey').value;
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Processando...';
+      logElement.innerHTML = '';
+      
+      log('═══════════════════════════════════════════════════════════════', 'info');
+      log('🎫 INSERÇÃO AUTOMÁTICA DOS 170 CÓDIGOS DE ACESSO DUA', 'info');
+      log('═══════════════════════════════════════════════════════════════', 'info');
+      log('');
+      
+      try {
+        // Criar cliente Supabase
+        const supabase = window.supabase.createClient(url, key);
+        log('✅ Conectado ao Supabase: ' + url, 'success');
+        log('');
+        
+        // Verificar se tabela existe
+        log('📊 Verificando estado atual...', 'info');
+        const { data: existing, error: checkError } = await supabase
+          .from('invite_codes')
+          .select('code, active')
+          .limit(1);
+        
+        if (checkError) {
+          log('❌ ERRO: Tabela invite_codes não existe!', 'error');
+          log('Execute primeiro o SQL: insert-170-codes.sql', 'warning');
+          return;
+        }
+        
+        log('✅ Tabela invite_codes encontrada', 'success');
+        log('');
+        
+        // Verificar códigos existentes
+        const { data: allExisting } = await supabase
+          .from('invite_codes')
+          .select('code');
+        
+        const existingCodes = new Set((allExisting || []).map(c => c.code));
+        const missingCodes = CODES.filter(code => !existingCodes.has(code));
+        
+        log(`   Códigos na DB: ${existingCodes.size}`, 'info');
+        log(`   Códigos esperados: ${CODES.length}`, 'info');
+        log(`   Códigos faltantes: ${missingCodes.length}`, 'info');
+        log('');
+        
+        if (missingCodes.length === 0) {
+          log('🎉 TODOS OS 170 CÓDIGOS JÁ ESTÃO NA BASE DE DADOS!', 'success');
+          updateProgress(170, 170);
+          return;
+        }
+        
+        // Inserir códigos em lotes
+        log('📝 Inserindo códigos faltantes...', 'info');
+        log('');
+        
+        const BATCH_SIZE = 50;
+        let inserted = 0;
+        
+        for (let i = 0; i < missingCodes.length; i += BATCH_SIZE) {
+          const batch = missingCodes.slice(i, i + BATCH_SIZE);
+          const records = batch.map(code => ({
+            code,
+            active: true,
+            created_at: new Date().toISOString()
+          }));
+          
+          const { data, error } = await supabase
+            .from('invite_codes')
+            .insert(records)
+            .select();
+          
+          if (error) {
+            log(`❌ Erro no lote ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`, 'error');
+          } else {
+            inserted += data.length;
+            log(`✅ Lote ${Math.floor(i / BATCH_SIZE) + 1}: ${data.length} códigos inseridos`, 'success');
+            updateProgress(inserted, missingCodes.length);
+          }
+        }
+        
+        log('');
+        log('═══════════════════════════════════════════════════════════════', 'info');
+        log(`✅ Códigos inseridos: ${inserted}`, 'success');
+        log('');
+        
+        // Verificação final
+        const { data: finalCheck } = await supabase
+          .from('invite_codes')
+          .select('code, active');
+        
+        const total = finalCheck.length;
+        const active = finalCheck.filter(c => c.active).length;
+        
+        log(`📊 Estado final:`, 'info');
+        log(`   Total: ${total} / ${CODES.length}`, 'info');
+        log(`   Ativos: ${active}`, 'info');
+        log(`   Usados: ${total - active}`, 'info');
+        log('');
+        
+        if (total === CODES.length) {
+          log('🎉 SUCESSO TOTAL! TODOS OS 170 CÓDIGOS INSERIDOS!', 'success');
+          log('');
+          log('🧪 Teste agora:', 'info');
+          log('   1. Vá para /acesso', 'info');
+          log('   2. Digite: DUA-03BN-9QT', 'info');
+          log('   3. Deve validar com sucesso ✅', 'info');
+        }
+        
+        log('═══════════════════════════════════════════════════════════════', 'info');
+        
+      } catch (error) {
+        log('', 'error');
+        log('❌ ERRO FATAL: ' + error.message, 'error');
+        log(error.stack, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🚀 Inserir 170 Códigos';
+      }
+    });
+  </script>
+</body>
+</html>

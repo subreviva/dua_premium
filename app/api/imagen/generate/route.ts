@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * API Route: /api/imagen/generate
@@ -11,11 +12,17 @@ import { GoogleGenAI } from '@google/genai';
  * - imagen-3.0-generate-002 (Imagen 3)
  * 
  * Documentação oficial: https://ai.google.dev/gemini-api/docs/imagen
+ * 
+ * 🔥 NOVO: Sistema de créditos integrado!
+ * Custo: 30 créditos por geração
  */
+
+// Custo em créditos
+const CUSTO_GERACAO_IMAGEM = 30;
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, model, config } = await req.json();
+    const { prompt, model, config, user_id } = await req.json();
 
     // Validação
     if (!prompt || typeof prompt !== 'string') {
@@ -32,6 +39,80 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ========================================
+    // 🔥 VERIFICAR E CONSUMIR CRÉDITOS
+    // ========================================
+    
+    // Configuração padrão (precisa estar antes do consumo de créditos)
+    const finalConfig = {
+      numberOfImages: 4,
+      aspectRatio: '1:1',
+      personGeneration: 'allow_adult',
+      ...config,
+    };
+
+    if (user_id) {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+
+      // Verificar saldo
+      const { data: user } = await supabase
+        .from('users')
+        .select('creditos_servicos')
+        .eq('id', user_id)
+        .single();
+
+      const creditosAtuais = user?.creditos_servicos || 0;
+
+      if (creditosAtuais < CUSTO_GERACAO_IMAGEM) {
+        return NextResponse.json({
+          error: 'Créditos insuficientes',
+          details: {
+            creditos_necessarios: CUSTO_GERACAO_IMAGEM,
+            creditos_atuais: creditosAtuais,
+            faltam: CUSTO_GERACAO_IMAGEM - creditosAtuais,
+          },
+          redirect: '/loja-creditos',
+        }, { status: 402 }); // 402 Payment Required
+      }
+
+      // Consumir créditos
+      const { error: consumoError } = await supabase
+        .from('users')
+        .update({
+          creditos_servicos: creditosAtuais - CUSTO_GERACAO_IMAGEM,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user_id);
+
+      if (consumoError) {
+        console.error('Erro ao consumir créditos:', consumoError);
+        return NextResponse.json({
+          error: 'Erro ao processar créditos',
+        }, { status: 500 });
+      }
+
+      // Registrar transação
+      await supabase
+        .from('transactions')
+        .insert({
+          user_id,
+          source_type: 'service_usage',
+          amount_dua: 0,
+          amount_creditos: -CUSTO_GERACAO_IMAGEM,
+          description: 'Geração de imagem (Google Imagen)',
+          metadata: {
+            prompt: prompt.substring(0, 100),
+            model: model || 'imagen-4.0-generate-001',
+            config: finalConfig,
+            timestamp: new Date().toISOString(),
+          },
+          status: 'completed',
+        });
+    }
+
     // API Key
     const API_KEY = process.env.GOOGLE_API_KEY;
     if (!API_KEY) {
@@ -44,14 +125,6 @@ export async function POST(req: NextRequest) {
 
     // Inicializar cliente
     const ai = new GoogleGenAI({ apiKey: API_KEY });
-
-    // Configuração padrão
-    const finalConfig = {
-      numberOfImages: 4,
-      aspectRatio: '1:1',
-      personGeneration: 'allow_adult',
-      ...config,
-    };
 
     // Validar número de imagens
     if (finalConfig.numberOfImages < 1 || finalConfig.numberOfImages > 4) {

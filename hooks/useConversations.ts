@@ -4,9 +4,20 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 
+// Verificar variáveis de ambiente
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('❌ Variáveis de ambiente Supabase não configuradas!', {
+    hasUrl: !!SUPABASE_URL,
+    hasKey: !!SUPABASE_ANON_KEY
+  });
+}
+
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  SUPABASE_URL || '',
+  SUPABASE_ANON_KEY || ''
 );
 
 export interface ChatMessage {
@@ -44,11 +55,11 @@ interface SupabaseConversation {
   id: string;
   user_id: string;
   title: string;
-  messages: any[];
+  model?: string;
+  system_prompt?: string;
+  message_count?: number;
   created_at: string;
   updated_at: string;
-  sync_version: number;
-  deleted_at: string | null;
 }
 
 export function useConversations() {
@@ -143,11 +154,25 @@ export function useConversations() {
   // Carregar user ID e iniciar sync
   useEffect(() => {
     const loadUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUserId(session.user.id);
-        await loadConversationsFromSupabase(session.user.id);
-      } else {
+      try {
+        const { data: { session }, error: authError } = await supabase.auth.getSession();
+        
+        if (authError) {
+          console.warn('⚠️  Erro ao obter sessão:', authError.message);
+          loadConversationsFromLocalStorage();
+          setIsLoading(false);
+          return;
+        }
+        
+        if (session?.user) {
+          setUserId(session.user.id);
+          await loadConversationsFromSupabase(session.user.id);
+        } else {
+          loadConversationsFromLocalStorage();
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar usuário:', error);
         loadConversationsFromLocalStorage();
         setIsLoading(false);
       }
@@ -160,19 +185,55 @@ export function useConversations() {
     try {
       setIsLoading(true);
       
+      // Validar user ID
+      if (!uid || uid.trim() === '') {
+        console.warn('⚠️  User ID inválido, usando localStorage');
+        loadConversationsFromLocalStorage();
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('🔍 Carregando conversas do Supabase para user:', uid);
+      
       const { data, error } = await supabase
         .from('duaia_conversations')
         .select('*')
         .eq('user_id', uid)
-        .is('deleted_at', null)
         .order('updated_at', { ascending: false });
 
+      console.log('📦 Resposta do Supabase:', { hasData: !!data, hasError: !!error, dataLength: data?.length });
+
       if (error) {
+        // Verificar se o erro é realmente um objeto vazio ou null
+        const errorKeys = error ? Object.keys(error) : [];
+        const isEmptyError = errorKeys.length === 0;
+        
+        if (isEmptyError) {
+          console.warn('⚠️  Erro vazio retornado do Supabase (possível problema de RLS ou autenticação), usando localStorage');
+          loadConversationsFromLocalStorage();
+          return;
+        }
+        
         // PGRST205 = tabela não existe, silenciar erro e usar localStorage
         if (error.code === 'PGRST205') {
           console.warn('⚠️  Tabela duaia_conversations não existe no Supabase, usando localStorage');
+        } else if (error.code === 'PGRST116') {
+          console.warn('⚠️  Erro de permissão RLS no Supabase, usando localStorage');
         } else {
-          console.error('❌ Erro ao carregar do Supabase:', error);
+          // Log detalhado do erro para debug - acessando propriedades diretamente
+          console.error('❌ Erro ao carregar conversas do Supabase:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            status: (error as any).status,
+            statusText: (error as any).statusText
+          });
+          
+          // Se é erro 400, pode ser problema com a query ou RLS
+          if ((error as any).status === 400 || error.code?.startsWith('PGRST')) {
+            console.warn('⚠️  Erro 400 do Supabase - possível problema de RLS ou query inválida');
+          }
         }
         loadConversationsFromLocalStorage();
         return;
@@ -181,15 +242,12 @@ export function useConversations() {
       if (data && data.length > 0) {
         const formattedConversations = data.map((conv: SupabaseConversation) => ({
           id: conv.id,
-          title: conv.title,
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            createdAt: new Date(msg.createdAt || msg.created_at)
-          })),
+          title: conv.title || 'Nova Conversa',
+          messages: [], // Mensagens serão carregadas separadamente
           createdAt: new Date(conv.created_at),
           updatedAt: new Date(conv.updated_at),
           userId: conv.user_id,
-          syncVersion: conv.sync_version
+          syncVersion: 1
         }));
 
         setConversations(formattedConversations);
@@ -211,8 +269,11 @@ export function useConversations() {
           await migrateLocalToSupabase(uid);
         }
       }
-    } catch (error) {
-      console.error('❌ Erro ao carregar conversas:', error);
+    } catch (error: any) {
+      console.error('❌ Erro ao carregar conversas:', {
+        message: error?.message || 'Erro desconhecido',
+        stack: error?.stack || 'N/A'
+      });
       loadConversationsFromLocalStorage();
     } finally {
       setIsLoading(false);

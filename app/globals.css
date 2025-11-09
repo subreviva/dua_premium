@@ -44,6 +44,15 @@ html {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .premium-fade-in {
   animation: premium-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1277,17 +1286,29 @@ select {
 @media (max-width: 768px) {
   /* REMOVIDO: overflow: hidden e position: fixed - BLOQUEAVAM O SCROLL */
   
+  /* iOS-style smooth scrolling */
+  html {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+  
   * {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Premium touch feedback */
+  /* Premium touch feedback iOS-like */
   button:active,
   a:active,
   [role="button"]:active {
-    transform: scale(0.96);
-    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.97);
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Prevent iOS zoom on input focus */
@@ -1297,14 +1318,16 @@ select {
     font-size: 16px !important;
   }
 
-  /* Smooth momentum scrolling */
+  /* Smooth momentum scrolling everywhere */
   * {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Hide scrollbars on mobile for cleaner look */
+  /* Hide scrollbars on mobile for ultra clean iOS look */
   ::-webkit-scrollbar {
     display: none;
+    width: 0;
+    height: 0;
   }
 
   * {
@@ -1312,10 +1335,36 @@ select {
     scrollbar-width: none;
   }
 
-  /* Better spacing for mobile */
+  /* Better spacing for mobile - iOS margins */
   .container {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+  
+  /* Safe area insets for modern iOS devices */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(0px, env(safe-area-inset-left));
+      padding-right: max(0px, env(safe-area-inset-right));
+    }
+  }
+  
+  /* Prevent overscroll bounce ONLY on body (permite scroll normal) */
+  body {
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Enhanced touch targets iOS guidelines (44px minimum) */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+  }
+  
+  /* Video sempre rodando em mobile */
+  video {
+    object-fit: cover;
+    pointer-events: none;
   }
 
   /* Larger touch targets */

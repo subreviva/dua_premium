@@ -11,7 +11,8 @@ import {
   Users, Coins, Activity, Shield, Plus, Loader2, Edit, Trash2, RefreshCw, 
   Lock, Unlock, Search, TrendingUp, Database, Clock, Download, FileText,
   History, Eye, ChevronDown, ChevronUp, Calendar, Filter, CheckSquare,
-  Square, BarChart3, Zap, AlertCircle, CheckCircle, XCircle, Info
+  Square, BarChart3, Zap, AlertCircle, CheckCircle, XCircle, Info,
+  Home, MessageSquare, ArrowLeft
 } from "lucide-react";
 import { clientCheckAdmin } from "@/lib/admin-check-db";
 
@@ -602,6 +603,19 @@ export default function AdminPanelPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 text-white">
       <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8 py-6 space-y-6">
         
+        {/* Back Navigation - Mobile Friendly */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="text-gray-400 hover:text-white"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Voltar
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -612,16 +626,36 @@ export default function AdminPanelPage() {
               {currentUser?.email} · {currentUser?.role?.toUpperCase()}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => checkAdminAndLoadData()}
-            className="border-white/10 hover:bg-white/5"
-            disabled={processing}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${processing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/')}
+              className="border-white/10 hover:bg-white/5"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Home
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/chat')}
+              className="border-white/10 hover:bg-white/5"
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Chat
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => checkAdminAndLoadData()}
+              className="border-white/10 hover:bg-white/5"
+              disabled={processing}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${processing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -1067,9 +1101,9 @@ export default function AdminPanelPage() {
                         </span>
                       </div>
                       <Badge 
-                        className={`${getTierBadge(user.subscription_tier)} text-xs px-2 py-0.5`}
+                        className={`${getTierBadge(user.subscription_tier || 'free')} text-xs px-2 py-0.5`}
                       >
-                        {user.subscription_tier.toUpperCase()}
+                        {(user.subscription_tier || 'free').toUpperCase()}
                       </Badge>
                     </div>
                   </div>

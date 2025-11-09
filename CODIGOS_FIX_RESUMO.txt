@@ -1,0 +1,180 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║         🎫 CÓDIGOS DE ACESSO DUA - PROBLEMA IDENTIFICADO E RESOLVIDO     ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+❌ PROBLEMA:
+───────────────────────────────────────────────────────────────────────────────
+Os 170 códigos de acesso DUA-XXXX-XXX NÃO estão inseridos na base de dados.
+
+Quando o utilizador tenta validar um código na página /acesso, recebe a 
+mensagem "Este código não existe" porque a tabela `invite_codes` está VAZIA.
+
+
+✅ SOLUÇÃO (3 PASSOS RÁPIDOS):
+───────────────────────────────────────────────────────────────────────────────
+
+PASSO 1 - Aceder ao Supabase Dashboard:
+   → https://supabase.com/dashboard/project/YOUR_PROJECT/editor
+   → SQL Editor > New Query
+
+PASSO 2 - Executar o Script SQL:
+   → Abrir: insert-170-codes.sql
+   → Copiar TODO o conteúdo
+   → Colar no SQL Editor
+   → Clicar RUN (Ctrl+Enter)
+   → Aguardar 5-10 segundos
+
+PASSO 3 - Verificar Resultado:
+   Deve aparecer:
+   ┌──────────────┬──────────────┬────────────┐
+   │ total_codes  │ active_codes │ used_codes │
+   ├──────────────┼──────────────┼────────────┤
+   │ 170          │ 170          │ 0          │
+   └──────────────┴──────────────┴────────────┘
+
+   Se ver isto → SUCESSO! ✅
+
+
+🧪 TESTAR IMEDIATAMENTE:
+───────────────────────────────────────────────────────────────────────────────
+
+No Supabase SQL Editor:
+   SELECT * FROM invite_codes WHERE code = 'DUA-03BN-9QT';
+
+Na aplicação:
+   1. Ir para /acesso
+   2. Digitar: DUA-03BN-9QT
+   3. Validar Código
+   4. Deve aparecer: "Código válido ✅"
+
+
+📁 ARQUIVOS CRIADOS:
+───────────────────────────────────────────────────────────────────────────────
+
+insert-170-codes.sql        → ⭐ EXECUTAR ESTE NO SUPABASE
+CODIGO_ACESSO_GUIDE.md      → Guia completo detalhado
+verify-codes.mjs            → Script de verificação automática
+test-codes.sh               → Teste bash simples
+
+
+📊 DETALHES TÉCNICOS:
+───────────────────────────────────────────────────────────────────────────────
+
+Tabela:          public.invite_codes
+Códigos:         170 (DUA-03BN-9QT até DUA-ZPZW-3QS)
+Status inicial:  active = true (todos disponíveis)
+RLS:             Configurado (anyone can read active codes)
+Índices:         code, active (para queries rápidas)
+
+
+🔍 COMO FUNCIONA:
+───────────────────────────────────────────────────────────────────────────────
+
+1. Utilizador acede /acesso
+2. Digite código (ex: DUA-03BN-9QT)
+3. Sistema consulta: SELECT * FROM invite_codes WHERE code = 'DUA-03BN-9QT'
+4. Valida:
+   ✓ Código existe?
+   ✓ active = true?
+   ✓ used_by = null?
+5. Se OK → Permite registo
+6. Após registo → Marca código como usado (active = false)
+
+
+💡 EXEMPLO DE USO:
+───────────────────────────────────────────────────────────────────────────────
+
+ANTES do registo:
+   code: DUA-03BN-9QT
+   active: true
+   used_by: null
+   used_at: null
+
+DEPOIS do registo:
+   code: DUA-03BN-9QT
+   active: false
+   used_by: 123e4567-e89b-12d3-a456-426614174000
+   used_at: 2025-11-08 15:30:00+00
+
+
+📋 PRIMEIROS 10 CÓDIGOS (TESTAR):
+───────────────────────────────────────────────────────────────────────────────
+
+1.  DUA-03BN-9QT  ← Começar por este
+2.  DUA-044P-OYM
+3.  DUA-09P2-GDD
+4.  DUA-11SF-3GX
+5.  DUA-11UF-1ZR
+6.  DUA-17OL-JNL
+7.  DUA-17Q2-DCZ
+8.  DUA-1AG9-T4T
+9.  DUA-1F71-A68
+10. DUA-1KVM-WND
+
+
+🎯 CHECKLIST DE VERIFICAÇÃO:
+───────────────────────────────────────────────────────────────────────────────
+
+□ Executei insert-170-codes.sql no Supabase
+□ Query retornou 170 códigos inseridos
+□ Testei DUA-03BN-9QT no SQL Editor (encontrado)
+□ Testei DUA-03BN-9QT em /acesso (validado)
+□ Consegui criar conta usando o código
+□ Código foi marcado como usado após registo
+
+
+⚠️  TROUBLESHOOTING:
+───────────────────────────────────────────────────────────────────────────────
+
+Problema: "Este código não existe"
+   → Tabela invite_codes está vazia
+   → Solução: Executar insert-170-codes.sql
+
+Problema: "Este código já foi utilizado"
+   → Código com active = false
+   → Solução: Usar outro código da lista
+
+Problema: Erro de permissão RLS
+   → Row Level Security mal configurado
+   → Solução: Script já inclui policies corretas
+
+
+📞 COMANDOS ÚTEIS (Supabase SQL Editor):
+───────────────────────────────────────────────────────────────────────────────
+
+-- Ver todos os códigos
+SELECT * FROM invite_codes ORDER BY code;
+
+-- Ver apenas códigos disponíveis
+SELECT * FROM invite_codes WHERE active = true;
+
+-- Contar por status
+SELECT 
+  COUNT(*) as total,
+  COUNT(*) FILTER (WHERE active = true) as disponiveis,
+  COUNT(*) FILTER (WHERE active = false) as usados
+FROM invite_codes;
+
+-- Resetar um código (tornar disponível novamente)
+UPDATE invite_codes 
+SET active = true, used_by = null, used_at = null 
+WHERE code = 'DUA-03BN-9QT';
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ PRÓXIMOS PASSOS:
+
+1. EXECUTAR insert-170-codes.sql no Supabase (AGORA!)
+2. Testar 1 código em /acesso
+3. Confirmar que validação funciona
+4. Distribuir códigos aos utilizadores
+5. Monitorizar uso via SQL queries
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Criado: 08/11/2025
+Status: ✅ Pronto para deploy
+Urgência: 🔴 CRÍTICO - Sistema de acesso bloqueado sem isto

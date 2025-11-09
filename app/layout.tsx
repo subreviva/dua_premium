@@ -10,6 +10,7 @@ import { StagewiseToolbar } from "@/components/stagewise-toolbar"
 import { PremiumToaster } from "@/components/ui/premium-toaster"
 import { PremiumLoading } from "@/components/ui/premium-loading"
 import PWAInstallPrompt, { ConnectionStatus } from "@/components/PWAInstallPrompt"
+import CookieConsent from "@/components/cookie-consent"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -75,6 +76,9 @@ export default function RootLayout({
             {/* PWA Components */}
             <PWAInstallPrompt />
             <ConnectionStatus />
+            
+            {/* Cookie Consent Banner - GDPR Compliance */}
+            <CookieConsent />
             
             {/* Premium Components */}
             <PremiumToaster />
