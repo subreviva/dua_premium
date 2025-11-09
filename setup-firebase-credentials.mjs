@@ -7,7 +7,7 @@
  * e atualizar automaticamente o .env.local
  */
 
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -15,6 +15,22 @@ const execAsync = promisify(exec);
 
 console.log('🔥 FIREBASE - Configuração Automática\n');
 console.log('=' .repeat(70));
+
+// Carregar variáveis de ambiente do .env.local
+if (existsSync('.env.local')) {
+  const envContent = readFileSync('.env.local', 'utf8');
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join('=').trim();
+        process.env[key] = value;
+      }
+    }
+  });
+  console.log('✅ Variáveis de ambiente carregadas do .env.local\n');
+}
 
 // Ler service account
 const serviceAccount = JSON.parse(readFileSync('dua-ia-firebase-adminsdk-fbsvc-f41a2805ae.json', 'utf8'));
