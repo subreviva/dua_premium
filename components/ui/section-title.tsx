@@ -23,17 +23,17 @@ export default function SectionTitle({ eyebrow, title, kicker }: Props) {
         </div>
       )}
 
-      <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extralight text-white tracking-tight leading-[0.9] relative">
+      <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-extralight text-white tracking-tight leading-[0.9] relative">
         <span className="block bg-gradient-to-br from-white via-white/95 to-white/80 bg-clip-text text-transparent md:bg-none md:text-white">
           {title}
         </span>
       </h2>
 
-      {/* Gradiente underline - MOBILE com mais destaque */}
-      <div className="mt-6 sm:mt-8 h-1.5 sm:h-2 w-40 sm:w-48 bg-gradient-to-r from-white/80 via-white/50 to-transparent rounded-full" />
+      {/* Gradiente underline */}
+      <div className="mt-6 sm:mt-8 h-1 sm:h-1.5 w-32 sm:w-40 bg-gradient-to-r from-white/70 via-white/40 to-transparent rounded-full" />
 
       {kicker && (
-        <p className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-white/70 max-w-3xl font-light leading-relaxed">{kicker}</p>
+        <p className="mt-6 sm:mt-8 text-lg sm:text-xl md:text-2xl text-white/75 max-w-3xl font-light leading-relaxed">{kicker}</p>
       )}
     </div>
   )
