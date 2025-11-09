@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CinemaSidebar } from "@/components/cinema-sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 import { Upload, Sparkles, Check, ArrowUpCircle, FileVideo, Loader2 } from "lucide-react"
 
 export default function QualidadePage() {
@@ -104,7 +104,9 @@ export default function QualidadePage() {
 
   return (
     <div className="flex h-screen bg-black overflow-hidden">
-      <CinemaSidebar />
+      <div className="hidden md:block">
+        <AppSidebar />
+      </div>
       
       <main className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-12 max-w-7xl">
