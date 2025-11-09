@@ -38,14 +38,31 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Função para instalar PWA
-  const handleInstallPWA = () => {
+  // Função para instalar PWA automaticamente
+  const handleInstallPWA = async () => {
     // Marcar como instalado
     localStorage.setItem('dua-app-installed', 'true')
     setShowIOSBanner(false)
     
-    // Redirecionar para mobile-login (ponto de entrada da PWA)
-    router.push('/mobile-login')
+    // Tentar instalar PWA automaticamente
+    if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
+      // PWA já deve estar registrado pelo Next.js
+      // Mostrar prompt de instalação nativo se disponível
+      const deferredPrompt = (window as any).deferredPrompt
+      if (deferredPrompt) {
+        deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        console.log(`User response to install prompt: ${outcome}`)
+        ;(window as any).deferredPrompt = null
+      }
+    }
+    
+    // iOS: usuário precisa adicionar manualmente via Safari
+    // Mostrar instrução apenas se iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+    if (isIOS) {
+      alert('📱 Para instalar:\n1. Toque no botão compartilhar ⬆️\n2. Selecione "Adicionar à Tela de Início"')
+    }
   }
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -206,12 +223,14 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[10rem] sm:text-[12rem] md:text-[14rem] lg:text-[18rem] xl:text-[22rem] font-extralight leading-[0.85] tracking-[-0.08em] text-white"
+              className="text-[14rem] sm:text-[16rem] md:text-[18rem] lg:text-[20rem] xl:text-[24rem] font-extralight leading-[0.85] tracking-[-0.08em] text-white"
               style={{ 
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 100,
-                textShadow: '0 8px 60px rgba(0,0,0,0.9), 0 4px 30px rgba(0,0,0,0.7), 0 2px 15px rgba(0,0,0,0.5)',
-                letterSpacing: '-0.08em'
+                textShadow: '0 12px 80px rgba(0,0,0,0.95), 0 6px 40px rgba(0,0,0,0.8), 0 3px 20px rgba(0,0,0,0.6)',
+                letterSpacing: '-0.08em',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
               }}
             >
               DUA
