@@ -6,11 +6,14 @@ import { Menu, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { UserAvatar } from "@/components/user-avatar"
+import { supabaseClient } from "@/lib/supabase"
+import { getLoginRedirect } from "@/lib/route-protection"
 
 export default function Navbar() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const { scrollY } = useScroll()
 
   const navBackground = useTransform(scrollY, [0, 100], ["rgba(26, 26, 26, 0)", "rgba(26, 26, 26, 0.7)"])
@@ -25,13 +28,39 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  useEffect(() => {
+    // Verificar autenticação
+    const checkAuth = async () => {
+      const { data: { user } } = await supabaseClient.auth.getUser()
+      setIsAuthenticated(!!user)
+    }
+    checkAuth()
+
+    // Listener para mudanças de autenticação
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleProtectedNavigation = (href: string, label: string) => {
+    if (!isAuthenticated && href !== '/community') {
+      // Redirecionar para página de acesso com código
+      router.push(getLoginRedirect(href))
+    } else {
+      router.push(href)
+    }
+    setIsOpen(false)
+  }
+
   const navLinks = [
-    { label: "Chat", href: "/chat" },
-    { label: "Cinema", href: "/videostudio" },
-    { label: "Design", href: "/designstudio" },
-    { label: "Music", href: "/musicstudio" },
-    { label: "Imagem", href: "/imagestudio" },
-    { label: "Comunidade", href: "/community" },
+    { label: "Chat", href: "/chat", protected: true },
+    { label: "Cinema", href: "/videostudio", protected: true },
+    { label: "Design", href: "/designstudio", protected: true },
+    { label: "Music", href: "/musicstudio", protected: true },
+    { label: "Imagem", href: "/imagestudio", protected: true },
+    { label: "Comunidade", href: "/community", protected: false },
   ]
 
   return (
@@ -66,7 +95,7 @@ export default function Navbar() {
               {navLinks.map((link, index) => (
                 <button
                   key={link.href}
-                  onClick={() => router.push(link.href)}
+                  onClick={() => handleProtectedNavigation(link.href, link.label)}
                   className="text-white/70 hover:text-white font-light transition-colors duration-300 text-sm"
                 >
                   {link.label}
@@ -116,10 +145,7 @@ export default function Navbar() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: isOpen ? 1 : 0, x: isOpen ? 0 : -20 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              onClick={() => {
-                router.push(link.href)
-                setIsOpen(false)
-              }}
+              onClick={() => handleProtectedNavigation(link.href, link.label)}
               className="block w-full text-left text-[#f5d4c8] hover:text-[#f5f0eb] font-medium text-lg py-2 transition-colors"
             >
               {link.label}

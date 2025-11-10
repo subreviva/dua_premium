@@ -1,11 +1,43 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Instagram, Twitter, Linkedin, Youtube, Mail } from "lucide-react"
+import { useState, useEffect } from "react"
+import { supabaseClient } from "@/lib/supabase"
+import { getLoginRedirect } from "@/lib/route-protection"
 
 export default function Footer() {
+  const router = useRouter()
   const currentYear = new Date().getFullYear()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Verificar autenticação
+    const checkAuth = async () => {
+      const { data: { user } } = await supabaseClient.auth.getUser()
+      setIsAuthenticated(!!user)
+    }
+    checkAuth()
+
+    // Listener para mudanças de autenticação
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleProtectedLink = (e: React.MouseEvent, href: string) => {
+    // Rotas protegidas que requerem autenticação
+    const protectedPaths = ['/chat', '/videostudio', '/designstudio', '/musicstudio', '/imagestudio']
+    
+    if (protectedPaths.some(path => href.startsWith(path)) && !isAuthenticated) {
+      e.preventDefault()
+      router.push(getLoginRedirect(href))
+    }
+  }
 
   const footerLinks = {
     product: [
@@ -81,6 +113,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
+                    onClick={(e) => handleProtectedLink(e, link.href)}
                     className="text-white/60 hover:text-white font-light text-sm transition-colors duration-300"
                   >
                     {link.label}

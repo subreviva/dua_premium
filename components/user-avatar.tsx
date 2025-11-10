@@ -187,16 +187,16 @@ export function UserAvatar() {
     );
   }
 
-  // Não logado - mostra botão de login
+  // Não logado - mostra botão de acesso exclusivo
   if (!user) {
     return (
       <div className="flex items-center gap-3">
         <Button
-          variant="ghost"
-          className="text-white/70 hover:text-white hover:bg-white/10"
-          onClick={() => router.push("/login")}
+          variant="outline"
+          className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all"
+          onClick={() => router.push("/acesso")}
         >
-          Entrar
+          Obter Acesso
         </Button>
         <Button
           className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold px-6"
