@@ -210,8 +210,8 @@ export async function POST(request: NextRequest) {
         avatar_set: false,
         welcome_seen: false,
         session_active: true,
-        dua_ia_balance: 100,
-        dua_coin_balance: 50,
+        creditos_servicos: 150, // ✅ 150 créditos de serviços iniciais
+        saldo_dua: 50,          // ✅ 50 DUA coins iniciais
         account_type: 'normal',
         registration_ip: request.headers.get('x-forwarded-for') || 'unknown',
         registration_user_agent: request.headers.get('user-agent') || 'unknown',
@@ -275,8 +275,8 @@ export async function POST(request: NextRequest) {
           invite_code: inviteCode,
           name,
           email,
-          dua_ia_balance: 100,
-          dua_coin_balance: 50,
+          creditos_servicos: 150, // ✅ ATUALIZADO
+          saldo_dua: 50,          // ✅ ATUALIZADO
           account_type: 'normal',
         },
         ip_address: request.headers.get('x-forwarded-for') || 'unknown',
@@ -295,8 +295,8 @@ export async function POST(request: NextRequest) {
           id: userId,
           email,
           name,
-          duaIaBalance: 100,
-          duaCoinBalance: 50,
+          creditosServicos: 150, // ✅ ATUALIZADO: 150 créditos iniciais
+          saldoDua: 50,          // ✅ ATUALIZADO: 50 DUA coins iniciais
           accountType: 'normal',
           emailVerified: false, // ✅ ENTERPRISE: Requer verificação
         },

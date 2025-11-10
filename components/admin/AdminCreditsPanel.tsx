@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import ServiceCostsConfig from '@/components/admin/ServiceCostsConfig';
 import {
   Coins,
   TrendingUp,
@@ -25,6 +26,7 @@ import {
   AlertCircle,
   Search,
   Filter,
+  Settings,
 } from 'lucide-react';
 
 interface GlobalStats {
@@ -85,7 +87,7 @@ export default function AdminCreditsPanel() {
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [showBulkPanel, setShowBulkPanel] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'activity' | 'distribute'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'activity' | 'distribute' | 'costs'>('overview');
 
   useEffect(() => {
     loadData();
@@ -346,6 +348,7 @@ export default function AdminCreditsPanel() {
           { id: 'users', label: 'Usuários', icon: Users },
           { id: 'activity', label: 'Atividade', icon: Activity },
           { id: 'distribute', label: 'Distribuir', icon: Zap },
+          { id: 'costs', label: 'Custos de Serviços', icon: Settings },
         ].map(tab => (
           <button
             key={tab.id}
@@ -890,6 +893,11 @@ export default function AdminCreditsPanel() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Costs Tab */}
+      {activeTab === 'costs' && (
+        <ServiceCostsConfig />
       )}
     </div>
   );

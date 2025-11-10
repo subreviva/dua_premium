@@ -14,7 +14,9 @@ import {
   Copy, 
   ScanEye, 
   TrendingUp, 
-  Bot
+  Bot,
+  Layers,
+  Maximize2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -36,7 +38,9 @@ const TOOL_ICONS: Record<ToolId, React.ReactNode> = {
   'analyze-image': <ScanEye className="w-5 h-5" />,
   'design-trends': <TrendingUp className="w-5 h-5" />,
   'design-assistant': <Bot className="w-5 h-5" />,
-  'export-project': <Package className="w-5 h-5" />,
+  'export-project': <ImagePlus className="w-5 h-5" />,
+  'remove-background': <Layers className="w-5 h-5" />,
+  'upscale-image': <Maximize2 className="w-5 h-5" />,
 };
 
 const TOOL_NAMES: Record<ToolId, string> = {
@@ -53,6 +57,8 @@ const TOOL_NAMES: Record<ToolId, string> = {
   'design-trends': 'Trends',
   'design-assistant': 'IA',
   'export-project': 'Export',
+  'remove-background': 'Remover BG',
+  'upscale-image': 'Upscale',
 };
 
 const ALL_TOOLS: ToolId[] = [
@@ -62,6 +68,8 @@ const ALL_TOOLS: ToolId[] = [
   'generate-svg',
   'generate-pattern',
   'edit-image',
+  'remove-background',
+  'upscale-image',
   'generate-variations',
   'color-palette',
   'product-mockup',

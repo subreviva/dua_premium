@@ -24,6 +24,8 @@ import { useHotkeys, commonHotkeys } from "@/hooks/useHotkeys";
 import ConversationHistory from "@/components/ConversationHistory";
 import { supabaseClient } from "@/lib/supabase";
 import Image from "next/image";
+import { useImageGeneration } from "@/hooks/useImageGeneration";
+import { ChatImage } from "@/components/chat/ChatImage";
 
 const supabase = supabaseClient;
 
@@ -32,6 +34,11 @@ interface Message {
   role: "user" | "assistant"
   content: string
   timestamp: Date
+  type?: "text" | "image"
+  imageUrl?: string
+  imagePrompt?: string
+  isFreeImage?: boolean
+  creditsCharged?: number
 }
 
 interface AutoResizeProps {
@@ -104,6 +111,9 @@ export default function ChatPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showSendEffect, setShowSendEffect] = useState(false);
   const isMobile = useIsMobile()
+
+  // Hook de geração de imagens
+  const { isGenerating, detectImageRequest, generateImage } = useImageGeneration();
 
   // Sistema de sons premium melhorado
   const playSound = useCallback((type: 'send' | 'receive' | 'error' | 'success' | 'typing') => {
@@ -461,10 +471,71 @@ export default function ChatPage() {
     }
   }, [messages, playSound, isMobile]);
 
-    const handleFormSubmit = (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!input.trim()) return;
+
+    // MÁXIMO RIGOR: Detectar pedidos de imagem ANTES de enviar ao chat
+    const imagePrompt = detectImageRequest(input);
+    
+    if (imagePrompt) {
+      // É um pedido de imagem - processar separadamente
+      console.log('🎨 Imagem detectada:', imagePrompt);
+      
+      // Som de envio melhorado
+      playSound('send');
+      
+      // Feedback háptico
+      if (navigator.vibrate) {
+        navigator.vibrate([10, 30, 10]);
+      }
+      
+      try {
+        // Gerar imagem via API
+        const result = await generateImage(imagePrompt);
+        
+        if (result) {
+          // Adicionar mensagem do usuário
+          const userMessage = {
+            id: `user-${Date.now()}`,
+            role: 'user' as const,
+            content: input,
+            timestamp: new Date(),
+            type: 'text' as const,
+          };
+          
+          // Adicionar mensagem da imagem
+          const imageMessage = {
+            id: `image-${Date.now()}`,
+            role: 'assistant' as const,
+            content: `Imagem gerada: "${imagePrompt}"`,
+            timestamp: new Date(),
+            type: 'image' as const,
+            imageUrl: result.imageUrl,
+            imagePrompt: imagePrompt,
+            isFreeImage: result.isFree,
+            creditsCharged: result.creditsCharged,
+          };
+          
+          setMessages([...messages, userMessage, imageMessage]);
+          
+          // Som de recebimento
+          playSound('receive');
+          
+          // Limpar input
+          handleInputChange({ target: { value: '' } } as any);
+        }
+      } catch (error) {
+        console.error('Erro ao gerar imagem:', error);
+        playSound('error');
+      }
+      
+      // ⚠️ NÃO ENVIAR PARA CHAT NORMAL - imagem já processada
+      return;
+    }
+    
+    // Fluxo normal do chat (texto)
     
     // Feedback háptico melhorado
     if (navigator.vibrate) {
@@ -661,8 +732,22 @@ export default function ChatPage() {
                               />
                             )}
                             
-                            {/* Usar MessageContent para ambos os papéis para habilitar previews de links do usuário também */}
-                            <MessageContent content={msg.content} />
+                            {/* MÁXIMO RIGOR: Renderizar imagens geradas */}
+                            {(msg as any).type === 'image' && (msg as any).imageUrl && (
+                              <div className="mt-3">
+                                <ChatImage
+                                  imageUrl={(msg as any).imageUrl}
+                                  prompt={(msg as any).imagePrompt || ''}
+                                  isFree={(msg as any).isFreeImage}
+                                  creditsCharged={(msg as any).creditsCharged || 0}
+                                />
+                              </div>
+                            )}
+                            
+                            {/* Usar MessageContent para mensagens de texto */}
+                            {(!(msg as any).type || (msg as any).type === 'text') && (
+                              <MessageContent content={msg.content} />
+                            )}
                             
                             {/* Timestamp - ChatGPT/Gemini Style */}
                             <div className={cn(
@@ -807,6 +892,39 @@ export default function ChatPage() {
                       <span className="text-[11px] font-bold">✕</span>
                     </Button>
                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* MÁXIMO RIGOR: Indicador de geração de imagem (Mobile) */}
+            <AnimatePresence>
+              {isGenerating && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="mb-3 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 backdrop-blur-xl"
+                >
+                  <div className="flex gap-1">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                      className="w-2 h-2 rounded-full bg-purple-400"
+                    />
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }}
+                      className="w-2 h-2 rounded-full bg-pink-400"
+                    />
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }}
+                      className="w-2 h-2 rounded-full bg-purple-400"
+                    />
+                  </div>
+                  <span className="text-sm text-white/90 font-medium">
+                    Gerando imagem...
+                  </span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1059,8 +1177,22 @@ export default function ChatPage() {
                         />
                       )}
                       
+                      {/* MÁXIMO RIGOR: Renderizar imagens geradas (Desktop) */}
+                      {(msg as any).type === 'image' && (msg as any).imageUrl && (
+                        <div className="mb-3">
+                          <ChatImage
+                            imageUrl={(msg as any).imageUrl}
+                            prompt={(msg as any).imagePrompt || ''}
+                            isFree={(msg as any).isFreeImage}
+                            creditsCharged={(msg as any).creditsCharged || 0}
+                          />
+                        </div>
+                      )}
+                      
                       {/* Renderizar conteúdo com previews de links para user e assistant */}
-                      <MessageContent content={msg.content} className="text-sm sm:text-base" />
+                      {(!(msg as any).type || (msg as any).type === 'text') && (
+                        <MessageContent content={msg.content} className="text-sm sm:text-base" />
+                      )}
                       
                       {/* Timestamp Desktop */}
                       <div className="text-[10px] text-white/30 mt-1.5 font-light">
@@ -1141,6 +1273,41 @@ export default function ChatPage() {
                       transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
                     />
                     <span className="text-xs text-white/60 ml-1">Digitando</span>
+                  </div>
+                </motion.div>
+              )}
+              
+              {/* MÁXIMO RIGOR: Indicador de geração de imagem (Desktop) */}
+              {isGenerating && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3"
+                >
+                  <motion.div 
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </motion.div>
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl border border-purple-500/30 rounded-2xl px-4 py-2.5">
+                    <motion.div
+                      className="w-2 h-2 bg-purple-400 rounded-full"
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                    />
+                    <motion.div
+                      className="w-2 h-2 bg-pink-400 rounded-full"
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                    />
+                    <motion.div
+                      className="w-2 h-2 bg-purple-400 rounded-full"
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                    />
+                    <span className="text-xs text-white/90 ml-1 font-medium">Gerando imagem</span>
                   </div>
                 </motion.div>
               )}

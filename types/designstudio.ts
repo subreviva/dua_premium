@@ -1,7 +1,7 @@
 
 import { Chat } from '@google/genai';
 
-export type ToolId = 'generate-image' | 'edit-image' | 'generate-logo' | 'generate-icon' | 'color-palette' | 'product-mockup' | 'generate-pattern' | 'generate-variations' | 'generate-svg' | 'analyze-image' | 'design-trends' | 'design-assistant' | 'export-project';
+export type ToolId = 'generate-image' | 'edit-image' | 'generate-logo' | 'generate-icon' | 'color-palette' | 'product-mockup' | 'generate-pattern' | 'generate-variations' | 'generate-svg' | 'analyze-image' | 'design-trends' | 'design-assistant' | 'export-project' | 'remove-background' | 'upscale-image';
 
 export interface Tool {
   id: ToolId;
@@ -61,6 +61,8 @@ export type ApiFunctions = {
   generateSvgCode: (prompt: string) => Promise<string | null>;
   analyzeImage: (base64ImageData: string, mimeType: string) => Promise<string | null>;
   researchTrends: (query: string) => Promise<TrendResult | null>;
+  removeBackground: (base64ImageData: string, mimeType: string) => Promise<ImageObject | null>;
+  upscaleImage: (base64ImageData: string, mimeType: string, factor: number) => Promise<ImageObject | null>;
   startChat: () => Chat;
   sendMessageStream: (chat: Chat, message: string, onChunk: (chunk: string) => void) => Promise<void>;
 };

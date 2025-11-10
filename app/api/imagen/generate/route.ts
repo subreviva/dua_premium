@@ -13,12 +13,16 @@ import { createClient } from '@supabase/supabase-js';
  * 
  * Documentação oficial: https://ai.google.dev/gemini-api/docs/imagen
  * 
- * 🔥 NOVO: Sistema de créditos integrado!
- * Custo: 30 créditos por geração
+ * 🔥 NOVO: Sistema de créditos integrado com custos dinâmicos!
  */
 
-// Custo em créditos
-const CUSTO_GERACAO_IMAGEM = 30;
+// Mapeamento de modelos para service_name
+const SERVICE_NAME_MAP: Record<string, string> = {
+  'imagen-4.0-ultra-generate-001': 'image_ultra',
+  'imagen-4.0-generate-001': 'image_standard',
+  'imagen-4.0-fast-generate-001': 'image_fast',
+  'imagen-3.0-generate-002': 'image_3',
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,6 +60,26 @@ export async function POST(req: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
+
+      // Determinar service_name baseado no modelo
+      const modelId = model || 'imagen-4.0-generate-001';
+      const serviceName = SERVICE_NAME_MAP[modelId] || 'image_standard';
+
+      // Consultar custo do serviço via RPC
+      const { data: costData, error: costError } = await supabase.rpc('get_service_cost', {
+        p_service_name: serviceName
+      });
+
+      if (costError) {
+        console.error('Erro ao obter custo do serviço:', costError);
+        return NextResponse.json({
+          error: 'Erro ao consultar custo do serviço',
+        }, { status: 500 });
+      }
+
+      const CUSTO_GERACAO_IMAGEM = costData || 25; // fallback para standard
+
+      console.log(`💰 Serviço: ${serviceName} → ${CUSTO_GERACAO_IMAGEM} créditos`);
 
       // Verificar saldo
       const { data: user } = await supabase
@@ -102,10 +126,11 @@ export async function POST(req: NextRequest) {
           source_type: 'service_usage',
           amount_dua: 0,
           amount_creditos: -CUSTO_GERACAO_IMAGEM,
-          description: 'Geração de imagem (Google Imagen)',
+          description: `Geração de imagem (${serviceName})`,
           metadata: {
             prompt: prompt.substring(0, 100),
-            model: model || 'imagen-4.0-generate-001',
+            model: modelId,
+            service_name: serviceName,
             config: finalConfig,
             timestamp: new Date().toISOString(),
           },

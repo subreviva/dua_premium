@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Sparkles, Zap, Crown, TrendingUp, Award, Star } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, TrendingUp, Award, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { supabaseClient } from "@/lib/supabase";
 
 interface PackageFeatures {
   credits: number;
@@ -18,6 +21,7 @@ interface PricingTier {
   name: string;
   description: string;
   price: number;
+  stripePriceId: string; // Stripe Price ID
   icon: any;
   features: PackageFeatures;
   gradient: string;
@@ -30,16 +34,17 @@ const pricingTiers: PricingTier[] = [
   {
     id: "starter",
     name: "Starter",
-    description: "Ideal para começar sua jornada criativa",
+    description: "Ideal para experimentar a plataforma",
     price: 5,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER || "price_starter",
     icon: Sparkles,
     features: {
       credits: 170,
-      music: 28,
-      designs: 42,
-      logos: 28,
-      videos: 8,
-      savings: 2,
+      music: 8,
+      designs: 6,
+      logos: 1,
+      videos: 1,
+      savings: 0,
     },
     gradient: "from-slate-500/20 via-gray-500/10 to-slate-600/20",
     iconColor: "text-slate-400",
@@ -48,16 +53,17 @@ const pricingTiers: PricingTier[] = [
   {
     id: "basic",
     name: "Basic",
-    description: "Perfeito para criadores individuais",
+    description: "Ideal para criadores iniciantes",
     price: 10,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC || "price_basic",
     icon: Zap,
     features: {
-      credits: 340,
-      music: 56,
-      designs: 85,
-      logos: 56,
+      credits: 350,
+      music: 58,
+      designs: 23,
+      logos: 17,
       videos: 17,
-      savings: 2,
+      savings: 0,
     },
     gradient: "from-blue-500/20 via-cyan-500/10 to-blue-600/20",
     iconColor: "text-blue-400",
@@ -66,16 +72,17 @@ const pricingTiers: PricingTier[] = [
   {
     id: "standard",
     name: "Standard",
-    description: "Excelente equilíbrio entre valor e recursos",
+    description: "Ideal para uso regular",
     price: 15,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STANDARD || "price_standard",
     icon: TrendingUp,
     features: {
       credits: 550,
       music: 91,
-      designs: 137,
-      logos: 91,
+      designs: 36,
+      logos: 27,
       videos: 27,
-      savings: 9,
+      savings: 10,
     },
     gradient: "from-purple-500/20 via-violet-500/10 to-purple-600/20",
     iconColor: "text-purple-400",
@@ -84,16 +91,17 @@ const pricingTiers: PricingTier[] = [
   {
     id: "plus",
     name: "Plus",
-    description: "Poder extra para projetos ambiciosos",
+    description: "Ideal para profissionais e equipas",
     price: 30,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PLUS || "price_plus",
     icon: Award,
     features: {
       credits: 1150,
-      music: 191,
-      designs: 287,
-      logos: 191,
-      videos: 57,
-      savings: 13,
+      music: 50,
+      designs: 30,
+      logos: 3,
+      videos: 3,
+      savings: 15,
     },
     gradient: "from-orange-500/20 via-amber-500/10 to-orange-600/20",
     iconColor: "text-orange-400",
@@ -103,14 +111,15 @@ const pricingTiers: PricingTier[] = [
   {
     id: "pro",
     name: "Pro",
-    description: "Para profissionais que exigem o máximo",
+    description: "Ideal para agências e produtores",
     price: 60,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || "price_pro",
     icon: Star,
     features: {
       credits: 2400,
       music: 400,
-      designs: 600,
-      logos: 400,
+      designs: 96,
+      logos: 120,
       videos: 120,
       savings: 17,
     },
@@ -121,15 +130,16 @@ const pricingTiers: PricingTier[] = [
   {
     id: "premium",
     name: "Premium",
-    description: "Experiência definitiva sem limites",
+    description: "Ideal para empresas e uso intensivo",
     price: 150,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM || "price_premium",
     icon: Crown,
     features: {
       credits: 6250,
-      music: 1041,
-      designs: 1562,
-      logos: 1041,
-      videos: 312,
+      music: 200,
+      designs: 150,
+      logos: 50,
+      videos: 50,
       savings: 20,
     },
     gradient: "from-yellow-500/20 via-amber-500/10 to-yellow-600/20",
@@ -139,10 +149,59 @@ const pricingTiers: PricingTier[] = [
 ];
 
 export default function PricingPackages() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [hoveredTier, setHoveredTier] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const router = useRouter();
 
-  const formatNumber = (num: number) => {
+  const handlePurchase = async (tier: PricingTier) => {
+    try {
+      setLoadingTier(tier.id);
+
+      // Verificar autenticação
+      const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+      
+      if (authError || !user) {
+        toast.error('Faça login para comprar créditos');
+        router.push('/login?redirect=/pricing');
+        return;
+      }
+
+      // Criar checkout session
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: tier.stripePriceId,
+          credits: tier.features.credits,
+          tierName: tier.name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao criar sessão de checkout');
+      }
+
+      const { url } = await response.json();
+
+      if (url) {
+        // Redirecionar para Stripe Checkout
+        window.location.href = url;
+      } else {
+        throw new Error('URL de checkout não encontrada');
+      }
+
+    } catch (error: any) {
+      console.error('Erro ao processar compra:', error);
+      toast.error(error.message || 'Erro ao processar compra');
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
+  const formatNumber = (num: number): string => {
     return new Intl.NumberFormat("pt-PT").format(num);
   };
 
@@ -298,13 +357,22 @@ export default function PricingPackages() {
 
                   {/* CTA Button */}
                   <Button
+                    onClick={() => handlePurchase(tier)}
+                    disabled={loadingTier === tier.id}
                     className={`w-full py-6 text-base font-semibold rounded-xl transition-all duration-300 ${
                       tier.popular
                         ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg hover:shadow-xl"
                         : "bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:border-white/20"
                     }`}
                   >
-                    {tier.popular ? "Começar Agora" : "Selecionar Plano"}
+                    {loadingTier === tier.id ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        Processando...
+                      </>
+                    ) : (
+                      tier.popular ? "Começar Agora" : "Selecionar Plano"
+                    )}
                   </Button>
                 </div>
               </div>

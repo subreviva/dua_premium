@@ -272,12 +272,19 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Adicionar créditos usando RPC
-        const { data: newBalance, error } = await supabase.rpc(
+        // ✅ Adicionar créditos usando RPC COM AUDITORIA INTEGRADA
+        const { data, error } = await supabase.rpc(
           'add_servicos_credits',
           {
             p_user_id: userId,
             p_amount: amount,
+            p_transaction_type: 'admin_add',
+            p_description: `Admin: Créditos adicionados por ${adminEmail}`,
+            p_admin_email: adminEmail,
+            p_metadata: JSON.stringify({
+              reason: reason || 'Admin distribution',
+              timestamp: new Date().toISOString(),
+            }),
           }
         );
 
@@ -285,26 +292,25 @@ export async function POST(req: NextRequest) {
           throw error;
         }
 
-        // Registrar no audit trail
-        await supabase.from('duaia_transactions').insert({
-          user_id: userId,
-          type: 'credit',
-          amount,
-          currency: 'credits',
-          description: `Admin: Créditos adicionados por ${adminEmail}`,
-          metadata: {
-            admin_email: adminEmail,
-            reason: reason || 'Admin distribution',
-            timestamp: new Date().toISOString(),
-          },
-          status: 'completed',
-        });
+        // RPC retorna JSONB com resultado completo
+        const result = data as {
+          success: boolean;
+          balance_before: number;
+          balance_after: number;
+          amount_added: number;
+          transaction_id: string;
+          admin_email: string;
+        };
 
         console.log(`✅ Admin ${adminEmail} added ${amount} credits to user ${userId}`);
+        console.log(`   Balance: ${result.balance_before} → ${result.balance_after}`);
+        console.log(`   Transaction ID: ${result.transaction_id}`);
 
         return NextResponse.json({
           success: true,
-          newBalance,
+          newBalance: result.balance_after,
+          balanceBefore: result.balance_before,
+          transactionId: result.transaction_id,
           message: `${amount} créditos adicionados com sucesso`,
         });
       }
@@ -317,12 +323,19 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Deduzir créditos usando RPC
-        const { data: newBalance, error } = await supabase.rpc(
+        // ✅ Deduzir créditos usando RPC COM AUDITORIA INTEGRADA
+        const { data, error } = await supabase.rpc(
           'deduct_servicos_credits',
           {
             p_user_id: userId,
             p_amount: amount,
+            p_operation: 'admin_deduct',
+            p_description: `Admin: Créditos deduzidos por ${adminEmail}`,
+            p_metadata: JSON.stringify({
+              admin_email: adminEmail,
+              reason: reason || 'Admin adjustment',
+              timestamp: new Date().toISOString(),
+            }),
           }
         );
 
@@ -330,26 +343,23 @@ export async function POST(req: NextRequest) {
           throw error;
         }
 
-        // Registrar no audit trail
-        await supabase.from('duaia_transactions').insert({
-          user_id: userId,
-          type: 'debit',
-          amount,
-          currency: 'credits',
-          description: `Admin: Créditos deduzidos por ${adminEmail}`,
-          metadata: {
-            admin_email: adminEmail,
-            reason: reason || 'Admin adjustment',
-            timestamp: new Date().toISOString(),
-          },
-          status: 'completed',
-        });
+        const result = data as {
+          success: boolean;
+          balance_before: number;
+          balance_after: number;
+          amount_deducted: number;
+          transaction_id: string;
+          operation: string;
+        };
 
         console.log(`✅ Admin ${adminEmail} deducted ${amount} credits from user ${userId}`);
+        console.log(`   Balance: ${result.balance_before} → ${result.balance_after}`);
 
         return NextResponse.json({
           success: true,
-          newBalance,
+          newBalance: result.balance_after,
+          balanceBefore: result.balance_before,
+          transactionId: result.transaction_id,
           message: `${amount} créditos deduzidos com sucesso`,
         });
       }

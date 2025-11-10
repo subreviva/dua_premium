@@ -217,12 +217,15 @@ export async function deductCredits(
 
     console.log(`💳 Deducting ${cost} credits for ${operationName} (user: ${userId})`);
 
-    // TRANSAÇÃO ATÔMICA: Deduzir créditos
+    // ✅ TRANSAÇÃO ATÔMICA COM AUDITORIA INTEGRADA
     const { data, error: deductError } = await supabase.rpc(
       'deduct_servicos_credits',
       {
         p_user_id: userId,
         p_amount: cost,
+        p_operation: operation,
+        p_description: operationName,
+        p_metadata: metadata ? JSON.stringify(metadata) : null,
       }
     );
 
@@ -235,38 +238,25 @@ export async function deductCredits(
       };
     }
 
-    const newBalance = data ?? 0;
-    console.log(`✅ Credits deducted successfully. New balance: ${newBalance}`);
+    // RPC retorna JSONB com todas as informações
+    const result = data as {
+      success: boolean;
+      balance_before: number;
+      balance_after: number;
+      amount_deducted: number;
+      transaction_id: string;
+      operation: string;
+    };
 
-    // AUDIT TRAIL: Registrar transação
-    const { data: transaction, error: auditError } = await supabase
-      .from('duaia_transactions')
-      .insert({
-        user_id: userId,
-        type: 'debit',
-        amount: cost,
-        currency: 'credits',
-        description: operationName,
-        metadata: {
-          operation,
-          cost,
-          ...metadata,
-          timestamp: new Date().toISOString(),
-        },
-        status: 'completed',
-      })
-      .select('id')
-      .single();
-
-    if (auditError) {
-      console.warn('⚠️ Failed to record audit trail:', auditError);
-      // Não falhar a operação, apenas logar
-    }
+    console.log(`✅ Credits deducted successfully!`);
+    console.log(`   Before: ${result.balance_before} credits`);
+    console.log(`   After: ${result.balance_after} credits`);
+    console.log(`   Transaction ID: ${result.transaction_id}`);
 
     return {
       success: true,
-      newBalance,
-      transactionId: transaction?.id,
+      newBalance: result.balance_after,
+      transactionId: result.transaction_id,
     };
   } catch (error) {
     console.error('❌ Fatal error deducting credits:', error);
@@ -309,12 +299,22 @@ export async function refundCredits(
     console.log(`🔄 Refunding ${cost} credits for failed ${operationName} (user: ${userId})`);
     console.log(`   Reason: ${reason}`);
 
-    // TRANSAÇÃO ATÔMICA: Adicionar créditos de volta
+    // ✅ TRANSAÇÃO ATÔMICA COM AUDITORIA INTEGRADA
     const { data, error: refundError } = await supabase.rpc(
       'add_servicos_credits',
       {
         p_user_id: userId,
         p_amount: cost,
+        p_transaction_type: 'refund',
+        p_description: `Reembolso: ${operationName}`,
+        p_admin_email: null,
+        p_metadata: JSON.stringify({
+          operation,
+          cost,
+          reason,
+          refund: true,
+          timestamp: new Date().toISOString(),
+        }),
       }
     );
 
@@ -327,29 +327,24 @@ export async function refundCredits(
       };
     }
 
-    const newBalance = data ?? 0;
-    console.log(`✅ Credits refunded successfully. New balance: ${newBalance}`);
+    // RPC retorna JSONB com todas as informações
+    const result = data as {
+      success: boolean;
+      balance_before: number;
+      balance_after: number;
+      amount_added: number;
+      transaction_id: string;
+    };
 
-    // AUDIT TRAIL: Registrar reembolso
-    await supabase.from('duaia_transactions').insert({
-      user_id: userId,
-      type: 'credit',
-      amount: cost,
-      currency: 'credits',
-      description: `Reembolso: ${operationName}`,
-      metadata: {
-        operation,
-        cost,
-        reason,
-        refund: true,
-        timestamp: new Date().toISOString(),
-      },
-      status: 'completed',
-    });
+    console.log(`✅ Credits refunded successfully!`);
+    console.log(`   Before: ${result.balance_before} credits`);
+    console.log(`   After: ${result.balance_after} credits`);
+    console.log(`   Transaction ID: ${result.transaction_id}`);
 
     return {
       success: true,
-      newBalance,
+      newBalance: result.balance_after,
+      transactionId: result.transaction_id,
     };
   } catch (error) {
     console.error('❌ Fatal error refunding credits:', error);

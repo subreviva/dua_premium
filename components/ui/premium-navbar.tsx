@@ -69,18 +69,29 @@ export function PremiumNavbar({
       const { data: { user } } = await supabase.auth.getUser()
       
       if (user) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('total_tokens, tokens_used')
-          .eq('id', user.id)
+        // ✅ CORRIGIDO: Buscar de duaia_user_balances (dados reais)
+        const { data: balanceData } = await supabase
+          .from('duaia_user_balances')
+          .select('servicos_creditos')
+          .eq('user_id', user.id)
           .single()
         
-        if (userData) {
-          setUserCredits(userData.total_tokens - userData.tokens_used)
+        if (balanceData) {
+          setUserCredits(balanceData.servicos_creditos || 0)
+        } else {
+          // Auto-criar registro se não existe
+          const { data: newBalance } = await supabase
+            .from('duaia_user_balances')
+            .insert({ user_id: user.id, servicos_creditos: 0, duacoin_balance: 0 })
+            .select('servicos_creditos')
+            .single()
+          
+          setUserCredits(newBalance?.servicos_creditos || 0)
         }
       }
     } catch (error) {
       console.error('Error loading credits:', error)
+      setUserCredits(0)
     }
   }
 

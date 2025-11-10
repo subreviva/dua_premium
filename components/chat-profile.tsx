@@ -46,13 +46,11 @@ interface UserData {
   display_name?: string;
   avatar_url?: string;
   bio?: string;
-  total_tokens: number;
-  tokens_used: number;
-  // subscription_tier não existe no schema - usando default 'free'
+  servicos_creditos: number; // Créditos do sistema premium (de duaia_user_balances)
+  duacoin_balance: number; // DuaCoin balance (de duaia_user_balances)
   total_projects: number;
   total_generated_content: number;
   created_at: string;
-  servicos_creditos?: number; // Créditos do sistema premium
 }
 
 interface AdminData extends UserData {
@@ -96,25 +94,91 @@ export function ChatProfile() {
       const adminStatus = ADMIN_EMAILS.includes(user.email || '');
       setIsAdmin(adminStatus);
 
-      // Carregar dados do usuário atual
-      const { data: userData, error: userError } = await supabaseClient
-        .from('users')
-      .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
-        .eq('id', user.id)
+      // Carregar dados do usuário atual com créditos
+      const { data: balanceData, error: balanceError } = await supabaseClient
+        .from('duaia_user_balances')
+        .select(`
+          user_id,
+          servicos_creditos,
+          duacoin_balance,
+          users!duaia_user_balances_user_id_fkey(
+            id,
+            email,
+            full_name,
+            avatar_url,
+            bio,
+            created_at
+          )
+        `)
+        .eq('user_id', user.id)
         .single();
 
-      if (!userError && userData) {
+      if (!balanceError && balanceData && balanceData.users) {
+        const userInfo = Array.isArray(balanceData.users) ? balanceData.users[0] : balanceData.users;
+        const userData: UserData = {
+          id: userInfo.id,
+          email: userInfo.email,
+          full_name: userInfo.full_name || undefined,
+          avatar_url: userInfo.avatar_url || undefined,
+          bio: userInfo.bio || undefined,
+          servicos_creditos: balanceData.servicos_creditos,
+          duacoin_balance: balanceData.duacoin_balance,
+          total_projects: 0, // TODO: calcular de projects table
+          total_generated_content: 0, // TODO: calcular de generations
+          created_at: userInfo.created_at
+        };
         setCurrentUser(userData);
+      } else if (balanceError?.code === 'PGRST116') {
+        // Usuário não tem registro de balance ainda - criar
+        const { error: insertError } = await supabaseClient
+          .from('duaia_user_balances')
+          .insert({ user_id: user.id, servicos_creditos: 0, duacoin_balance: 0 });
+        
+        if (!insertError) {
+          // Recarregar após criar
+          await loadUserData();
+        }
       }
 
-      // Se for admin, carregar todos os usuários
+      // Se for admin, carregar todos os usuários com créditos
       if (adminStatus) {
-        const { data: usersData, error: usersError } = await supabaseClient
-          .from('users')
-      .select('id, email, name, username, bio, avatar_url, has_access, invite_code_used, created_at, updated_at, email_verified, email_verified_at, last_login_at, last_login_ip, failed_login_attempts, account_locked_until, password_changed_at, two_factor_enabled, two_factor_secret')
+        const { data: allBalances, error: allBalancesError } = await supabaseClient
+          .from('duaia_user_balances')
+          .select(`
+            user_id,
+            servicos_creditos,
+            duacoin_balance,
+            users!duaia_user_balances_user_id_fkey(
+              id,
+              email,
+              full_name,
+              avatar_url,
+              bio,
+              has_access,
+              invite_code_used,
+              created_at
+            )
+          `)
           .order('created_at', { ascending: false });
 
-        if (!usersError && usersData) {
+        if (!allBalancesError && allBalances) {
+          const usersData: AdminData[] = allBalances.map(balance => {
+            const userInfo = Array.isArray(balance.users) ? balance.users[0] : balance.users;
+            return {
+              id: userInfo.id,
+              email: userInfo.email,
+              full_name: userInfo.full_name || undefined,
+              avatar_url: userInfo.avatar_url || undefined,
+              bio: userInfo.bio || undefined,
+              servicos_creditos: balance.servicos_creditos,
+              duacoin_balance: balance.duacoin_balance,
+              total_projects: 0,
+              total_generated_content: 0,
+              created_at: userInfo.created_at,
+              has_access: userInfo.has_access,
+              invite_code_used: userInfo.invite_code_used || undefined
+            };
+          });
           setAllUsers(usersData);
         }
       }
@@ -184,8 +248,6 @@ export function ChatProfile() {
         .from('users')
         .update({
           full_name: editForm.full_name,
-          display_name: editForm.display_name,
-          subscription_tier: editForm.subscription_tier,
           bio: editForm.bio
         })
         .eq('id', editingUser);
@@ -244,24 +306,9 @@ export function ChatProfile() {
   };
 
   const handleResetTokens = async (userId: string) => {
-    if (!confirm('Resetar contador de tokens usados para 0?')) return;
-
-    setProcessing(true);
-    try {
-      const { error } = await supabaseClient
-        .from('users')
-        .update({ tokens_used: 0 })
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      toast.success('Tokens usados resetados para 0!');
-      await loadUserData();
-    } catch (error) {
-      toast.error('Erro ao resetar tokens');
-    } finally {
-      setProcessing(false);
-    }
+    if (!confirm('Esta funcionalidade foi substituída pelo sistema de créditos premium. Use o AdminCreditsPanel para gerenciar créditos.')) return;
+    
+    toast.info('Use o AdminCreditsPanel para gerenciar créditos dos usuários');
   };
 
   const getTierBadge = (tier: string) => {
@@ -276,7 +323,7 @@ export function ChatProfile() {
 
   const getAvatarUrl = (user: UserData) => {
     if (user.avatar_url) return user.avatar_url;
-    const name = (user.display_name || user.name || user.full_name) || user.full_name || user.email;
+    const name = user.full_name || user.email;
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
   };
 
@@ -284,21 +331,18 @@ export function ChatProfile() {
     .filter(user => {
       const matchesSearch = 
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.display_name || user.name || user.full_name)?.toLowerCase().includes(searchTerm.toLowerCase());
+        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesTier = filterTier === 'all' || (user.subscription_tier || 'free') === filterTier;
-      
-      return matchesSearch && matchesTier;
+      return matchesSearch;
     })
     .sort((a, b) => {
       switch (sortBy) {
         case 'email':
           return (a.email || '').localeCompare(b.email || '');
         case 'tokens':
-          return (b.total_tokens || 0) - (a.total_tokens || 0);
+          return (b.servicos_creditos || 0) - (a.servicos_creditos || 0); // Ordenar por créditos
         case 'usage':
-          return (b.tokens_used || 0) - (a.tokens_used || 0);
+          return (b.duacoin_balance || 0) - (a.duacoin_balance || 0); // Ordenar por DuaCoin
         case 'created':
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -352,9 +396,9 @@ export function ChatProfile() {
                   <Coins className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/60">Tokens Distribuídos</p>
+                  <p className="text-sm text-white/60">Créditos Totais</p>
                   <p className="text-2xl font-bold">
-                    {allUsers.reduce((sum, u) => sum + (u.total_tokens || 0), 0).toLocaleString()}
+                    {allUsers.reduce((sum, u) => sum + (u.servicos_creditos || 0), 0).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -380,9 +424,9 @@ export function ChatProfile() {
                   <Trophy className="w-5 h-5 text-pink-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/60">Premium Users</p>
+                  <p className="text-sm text-white/60">DuaCoin Total</p>
                   <p className="text-2xl font-bold">
-                    {allUsers.filter(u => u.subscription_tier !== 'free').length}
+                    {allUsers.reduce((sum, u) => sum + (u.duacoin_balance || 0), 0).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -425,7 +469,7 @@ export function ChatProfile() {
                         <div>
                           <p className="font-medium">{user.email}</p>
                           <p className="text-sm text-white/60">
-                            {user.total_tokens || 0} tokens • {(user.subscription_tier || 'free')}
+                            {user.servicos_creditos || 0} créditos • {user.duacoin_balance || 0} DuaCoin
                           </p>
                         </div>
                         {selectedUserId === user.id && (
@@ -523,8 +567,8 @@ export function ChatProfile() {
                 >
                   <option value="created">Mais Recentes</option>
                   <option value="email">Email (A-Z)</option>
-                  <option value="tokens">Mais Tokens</option>
-                  <option value="usage">Mais Usados</option>
+                  <option value="tokens">Mais Créditos</option>
+                  <option value="usage">Mais DuaCoin</option>
                 </select>
 
                 {/* Busca */}
@@ -556,31 +600,23 @@ export function ChatProfile() {
                         <p className="text-sm text-white/60">
                           {user.full_name || 'Nome não definido'}
                         </p>
-                        {(user.display_name || user.name || user.full_name) && (
-                          <p className="text-xs text-purple-400">@{(user.display_name || user.name || user.full_name)}</p>
-                        )}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-xs text-white/60">Tokens</p>
-                        <p className="font-bold text-lg">{user.total_tokens || 0}</p>
+                        <p className="text-xs text-white/60">Créditos</p>
+                        <p className="font-bold text-lg">{user.servicos_creditos || 0}</p>
                       </div>
-
                       <div className="text-right">
-                        <p className="text-xs text-white/60">Usados</p>
-                        <p className="font-bold text-lg">{user.tokens_used || 0}</p>
+                        <p className="text-xs text-white/60">DuaCoin</p>
+                        <p className="font-bold text-lg">{user.duacoin_balance || 0}</p>
                       </div>
 
                       <div className="text-right">
                         <p className="text-xs text-white/60">Gerado</p>
                         <p className="font-bold text-sm">{user.total_generated_content || 0}</p>
                       </div>
-
-                      <Badge className={cn("bg-gradient-to-r", getTierBadge((user.subscription_tier || 'free')))}>
-                        {(user.subscription_tier || 'free')}
-                      </Badge>
 
                       {/* Actions Menu */}
                       <div className="flex gap-1">
@@ -592,8 +628,6 @@ export function ChatProfile() {
                             setEditingUser(user.id);
                             setEditForm({
                               full_name: user.full_name || '',
-                              display_name: (user.display_name || user.name || user.full_name) || '',
-                              subscription_tier: (user.subscription_tier || 'free'),
                               bio: user.bio || ''
                             });
                           }}
@@ -604,13 +638,13 @@ export function ChatProfile() {
                           <Edit className="w-3.5 h-3.5" />
                         </Button>
 
-                        {/* Reset Tokens */}
+                        {/* Reset Tokens - DEPRECATED */}
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleResetTokens(user.id)}
                           className="h-8 w-8 p-0 hover:bg-yellow-500/20"
-                          title="Resetar tokens usados"
+                          title="Use AdminCreditsPanel para gerenciar créditos"
                           disabled={processing}
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
@@ -664,29 +698,6 @@ export function ChatProfile() {
                             className="bg-black/50 border-white/20 h-9"
                             disabled={processing}
                           />
-                        </div>
-                        <div>
-                          <label className="text-xs text-white/60 mb-1 block">Display Name</label>
-                          <Input
-                            value={editForm.display_name || ''}
-                            onChange={(e) => setEditForm({...editForm, display_name: e.target.value})}
-                            className="bg-black/50 border-white/20 h-9"
-                            disabled={processing}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs text-white/60 mb-1 block">Tier</label>
-                          <select
-                            value={editForm.subscription_tier || 'free'}
-                            onChange={(e) => setEditForm({...editForm, subscription_tier: e.target.value})}
-                            className="w-full bg-black/50 border border-white/20 rounded-lg px-3 h-9 text-sm focus:outline-none focus:border-purple-500"
-                            disabled={processing}
-                          >
-                            <option value="free">Free</option>
-                            <option value="basic">Basic</option>
-                            <option value="premium">Premium</option>
-                            <option value="ultimate">Ultimate</option>
-                          </select>
                         </div>
                         <div>
                           <label className="text-xs text-white/60 mb-1 block">Bio</label>
@@ -787,16 +798,16 @@ export function ChatProfile() {
                   <p className="text-sm text-white/60">Projetos</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{currentUser.total_tokens || 0}</p>
-                  <p className="text-sm text-white/60">Tokens</p>
+                  <p className="text-2xl font-bold">{currentUser.servicos_creditos || 0}</p>
+                  <p className="text-sm text-white/60">Créditos</p>
                 </div>
               </div>
 
               {/* Badges */}
               <div className="flex flex-wrap gap-2">
-                <Badge className={cn("bg-gradient-to-r", getTierBadge(currentUser.subscription_tier))}>
+                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500">
                   <Award className="w-3 h-3 mr-1" />
-                  {currentUser.subscription_tier}
+                  Premium
                 </Badge>
                 {currentUser.total_generated_content > 100 && (
                   <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500">
@@ -815,35 +826,7 @@ export function ChatProfile() {
           </div>
         </motion.div>
 
-        {/* Tokens Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white/80 mb-1">Tokens Disponíveis</p>
-              <p className="text-4xl font-bold">{currentUser.total_tokens - currentUser.tokens_used}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-white/80 mb-1">Tokens Usados</p>
-              <p className="text-2xl font-bold">{currentUser.tokens_used}</p>
-            </div>
-          </div>
-          
-          <div className="mt-4 bg-white/10 rounded-full h-2 overflow-hidden">
-            <div 
-              className="bg-white h-full transition-all"
-              style={{ 
-                width: `${Math.min(100, (currentUser.tokens_used / currentUser.total_tokens) * 100)}%` 
-              }}
-            />
-          </div>
-        </motion.div>
-
-        {/* Credits Card Premium */}
+        {/* Credits Card Premium - ÚNICO CARD DE CRÉDITOS NECESSÁRIO */}
         <UserCreditsCard />
 
         {/* Tabs */}

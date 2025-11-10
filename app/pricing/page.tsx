@@ -1,4 +1,4 @@
-import PricingPackages from "@/components/pricing/PricingPackages";
+import PricingPackagesUltra from "@/components/pricing/PricingPackagesUltra";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function PricingPage() {
-  return <PricingPackages />;
+  return <PricingPackagesUltra />;
 }
