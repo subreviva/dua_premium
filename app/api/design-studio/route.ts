@@ -1,19 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { createClient } from '@supabase/supabase-js';
+import { withCredits } from '@/lib/credits/credits-middleware';
+import { DesignStudioOperation } from '@/lib/credits/credits-config';
 
 /**
- * 🔒 API ROUTE SEGURA - Design Studio
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🎨 DESIGN STUDIO API - ULTRA PROFISSIONAL V2.0
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Esta rota mantém a API key NO SERVIDOR (nunca exposta no browser)
- * Todas as chamadas para Google Gemini devem passar por aqui
+ * FEATURES:
+ * - Sistema de créditos integrado (validação + dedução automática)
+ * - Suporte a TODAS ferramentas Design Studio
+ * - Gemini 2.5 Flash Image (geração + edição)
+ * - Audit trail completo
+ * - Error handling profissional
+ * - Rollback automático em caso de falha
  * 
- * ✅ CORRIGIDO: Usa gemini-2.5-flash-image para gerar E editar imagens
- * ✅ Sistema de créditos integrado
+ * OPERAÇÕES SUPORTADAS:
+ * - generate-image, generate-logo, generate-icon
+ * - generate-pattern, generate-svg
+ * - edit-image, remove-background, upscale-image
+ * - generate-variations (3x)
+ * - analyze-image, color-palette
+ * - design-trends, design-assistant
+ * - export-png, export-svg (grátis)
  */
 
 const API_KEY = process.env.GOOGLE_API_KEY;
-const CUSTO_GERACAO_IMAGEM = 30; // Créditos por geração
 
 if (!API_KEY) {
   console.error('❌ GOOGLE_API_KEY não configurada no servidor!');
