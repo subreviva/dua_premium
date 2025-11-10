@@ -37,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { motion, AnimatePresence } from "framer-motion";
+import { UserCreditsCard } from "@/components/profile/UserCreditsCard";
 
 interface UserData {
   id: string;
@@ -51,6 +52,7 @@ interface UserData {
   total_projects: number;
   total_generated_content: number;
   created_at: string;
+  servicos_creditos?: number; // Créditos do sistema premium
 }
 
 interface AdminData extends UserData {
@@ -840,6 +842,9 @@ export function ChatProfile() {
             />
           </div>
         </motion.div>
+
+        {/* Credits Card Premium */}
+        <UserCreditsCard />
 
         {/* Tabs */}
         <Tabs defaultValue="all" className="w-full">
