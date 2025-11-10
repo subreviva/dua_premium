@@ -83,9 +83,15 @@ export default function ChatPage() {
   });
 
   // Auto-save mensagens
+  // Persistir somente mensagens com papel suportado pelo sistema de histórico (user/assistant)
   useEffect(() => {
     if (isLoaded && messages.length > 0) {
-      saveMessages(messages);
+      const filtered = messages.filter((m: any) => m.role === 'user' || m.role === 'assistant');
+      // Evitar salvar se não houver mensagens elegíveis
+      if (filtered.length > 0) {
+        // mapear para shape esperado se necessário (remove campos extras)
+        saveMessages(filtered as any);
+      }
     }
   }, [messages, isLoaded, saveMessages]);
 
@@ -655,11 +661,8 @@ export default function ChatPage() {
                               />
                             )}
                             
-                            {msg.role === "assistant" ? (
-                              <MessageContent content={msg.content} />
-                            ) : (
-                              msg.content
-                            )}
+                            {/* Usar MessageContent para ambos os papéis para habilitar previews de links do usuário também */}
+                            <MessageContent content={msg.content} />
                             
                             {/* Timestamp - ChatGPT/Gemini Style */}
                             <div className={cn(
@@ -1056,11 +1059,8 @@ export default function ChatPage() {
                         />
                       )}
                       
-                      {msg.role === "assistant" ? (
-                        <MessageContent content={msg.content} className="text-sm sm:text-base" />
-                      ) : (
-                        <p className="text-sm sm:text-base leading-relaxed break-words">{msg.content}</p>
-                      )}
+                      {/* Renderizar conteúdo com previews de links para user e assistant */}
+                      <MessageContent content={msg.content} className="text-sm sm:text-base" />
                       
                       {/* Timestamp Desktop */}
                       <div className="text-[10px] text-white/30 mt-1.5 font-light">

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 // Imagen 4 Models
 export const IMAGEN_MODELS = {
@@ -36,6 +37,20 @@ export function useImagenApi(): UseImagenApiReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Obter user_id do Supabase
+  useEffect(() => {
+    const getUserId = async () => {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUserId();
+  }, []);
 
   const generateImages = useCallback(
     async (prompt: string, model: ImagenModel, config: ImagenConfig = {}): Promise<GeneratedImage[]> => {
@@ -66,11 +81,35 @@ export function useImagenApi(): UseImagenApiReturn {
             prompt,
             model: modelId,
             config: finalConfig,
+            user_id: userId, // ✅ Passa user_id para validar créditos
           }),
         });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          
+          // Se erro de API não configurada
+          if (response.status === 503) {
+            throw new Error(
+              errorData.message || 
+              '🔧 API de geração de imagens não configurada. Configure GOOGLE_API_KEY na Vercel.'
+            );
+          }
+          
+          // Se erro de créditos, redirecionar
+          if (response.status === 402 && errorData.redirect) {
+            const details = errorData.details;
+            alert(
+              `❌ Créditos Insuficientes\n\n` +
+              `Necessário: ${details?.creditos_necessarios || 30} créditos\n` +
+              `Você tem: ${details?.creditos_atuais || 0} créditos\n` +
+              `Faltam: ${details?.faltam || 30} créditos\n\n` +
+              `Redirecionando para comprar créditos...`
+            );
+            window.location.href = errorData.redirect;
+            throw new Error('Redirecionando para compra de créditos...');
+          }
+          
           throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
         }
 
@@ -92,7 +131,7 @@ export function useImagenApi(): UseImagenApiReturn {
         setIsLoading(false);
       }
     },
-    []
+    [userId]
   );
 
   return {

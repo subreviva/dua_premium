@@ -116,10 +116,14 @@ export async function POST(req: NextRequest) {
     // API Key
     const API_KEY = process.env.GOOGLE_API_KEY;
     if (!API_KEY) {
-      // console.error('❌ GOOGLE_API_KEY não configurada');
+      console.error('❌ GOOGLE_API_KEY não configurada');
       return NextResponse.json(
-        { error: 'API Key não configurada. Configure GOOGLE_API_KEY no .env.local' },
-        { status: 500 }
+        { 
+          error: 'Serviço de geração de imagens não configurado',
+          message: 'A variável GOOGLE_API_KEY não está configurada no servidor. Configure-a na Vercel em: Settings > Environment Variables',
+          docs: 'https://ai.google.dev/gemini-api/docs/api-key'
+        },
+        { status: 503 }
       );
     }
 

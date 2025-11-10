@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DUA_SYSTEM_INSTRUCTION } from '@/lib/dua-prompt';
+import { buildCommentary } from '@/lib/linkCommentary';
 
 // Configuração do modelo Gemini
 const genAI = new GoogleGenerativeAI(
@@ -20,10 +21,50 @@ export async function POST(req: Request) {
         parts: [{ text: m.content }],
       }));
 
+    // Se a última mensagem tiver links, buscar metadados e inserir um contexto auxiliar
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user');
+    const linkRegex = /(https?:\/\/[^\s<>()]+(?:\([^\s()]*\)[^\s<>()]*)*)/gi;
+    let extraContext = '';
+    if (lastUserMsg && typeof lastUserMsg.content === 'string') {
+      const urls = Array.from(new Set((lastUserMsg.content.match(linkRegex) || [])));
+      if (urls.length) {
+        try {
+          const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+          const res = await fetch(`${base}/api/link-intel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls }),
+            next: { revalidate: 60 }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const simple = (data.links || []).map((l: any) => ({
+              url: l.url,
+              provider: l.provider,
+              siteName: l.siteName,
+              title: l.title,
+              description: l.description,
+              author: l.author,
+              channelTitle: l.channelTitle,
+              tags: l.tags,
+              type: l.type,
+            }));
+            if (simple.length > 0) {
+              extraContext = buildCommentary(simple);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch link intelligence:', err);
+        }
+      }
+    }
+
     // Criar model com system instruction
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash-exp',
-      systemInstruction: DUA_SYSTEM_INSTRUCTION,
+      systemInstruction: extraContext
+        ? `${DUA_SYSTEM_INSTRUCTION}\n\nContexto sobre os links detectados pelo usuário:\n${extraContext}\n\nResponda levando isso em conta.`
+        : DUA_SYSTEM_INSTRUCTION,
     });
 
     // Iniciar chat com histórico

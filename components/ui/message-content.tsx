@@ -4,6 +4,9 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { cn } from '@/lib/utils';
+import { useRichLinkDetection } from '@/hooks/useLinkDetection';
+import { LinkPreview } from './link-preview';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface MessageContentProps {
   content: string;
@@ -11,8 +14,25 @@ interface MessageContentProps {
 }
 
 export function MessageContent({ content, className }: MessageContentProps) {
+  const { links, hasLinks, textParts } = useRichLinkDetection(content);
+
+  // Debug: Log links detectados e conteúdo
+  console.log('📝 Content:', content);
+  console.log('🔗 hasLinks:', hasLinks);
+  console.log('🔗 Links detectados:', links);
+  console.log('📄 textParts:', textParts);
+
+  // Remover URLs do conteúdo para evitar duplicação
+  // ReactMarkdown vai renderizar o texto sem os links
+  const contentWithoutLinks = hasLinks 
+    ? links.reduce((text, link) => {
+        return text.replace(link.text, ''); // Remove o link do texto
+      }, content)
+    : content;
+
   return (
-    <div className={cn("prose prose-invert max-w-none", className)}>
+    <div className={cn("prose prose-invert max-w-none space-y-3", className)}>
+      {/* Renderizar texto com Markdown (sem os links que serão previews) */}
       <ReactMarkdown
         components={{
           // Code blocks com syntax highlighting
@@ -47,8 +67,14 @@ export function MessageContent({ content, className }: MessageContentProps) {
             return <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>;
           },
           
-          // Links
+          // Links - Remover renderização padrão, vamos usar LinkPreview
           a({ href, children }) {
+            // Se o link está na lista de links detectados, não renderizar aqui
+            // Será renderizado como preview abaixo
+            if (hasLinks && links.some(link => link.url === href)) {
+              return null;
+            }
+            
             return (
               <a 
                 href={href} 
@@ -100,8 +126,42 @@ export function MessageContent({ content, className }: MessageContentProps) {
           },
         }}
       >
-        {content}
+        {contentWithoutLinks.trim() || ' '}
       </ReactMarkdown>
+
+      {/* Renderizar previews de links detectados */}
+      <AnimatePresence mode="popLayout">
+        {hasLinks && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="space-y-3 mt-4"
+          >
+            {/* Debug: Mostrar quantidade de links */}
+            <div className="text-xs text-white/40 mb-2">
+              {links.length} link{links.length !== 1 ? 's' : ''} detectado{links.length !== 1 ? 's' : ''}
+            </div>
+            
+            {links.map((link, index) => (
+              <motion.div
+                key={`${link.url}-${index}`}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ 
+                  delay: index * 0.1,
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 25 
+                }}
+              >
+                <LinkPreview url={link.url} />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
