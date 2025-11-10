@@ -59,10 +59,26 @@ export function useImagenApi(): UseImagenApiReturn {
       setLoadingMessage('🎨 Gerando imagens com Imagen...');
 
       try {
+        // ✅ GARANTIR user_id antes de continuar
+        let currentUserId = userId;
+        if (!currentUserId) {
+          console.warn('⚠️ User ID não disponível, tentando obter...');
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            throw new Error('Você precisa estar logado para gerar imagens');
+          }
+          currentUserId = user.id;
+          setUserId(user.id);
+        }
+
         const modelId = IMAGEN_MODELS[model];
         
         console.log('🎨 useImagenApi - Iniciando geração');
-        console.log('User ID:', userId);
+        console.log('User ID:', currentUserId);
         console.log('Modelo:', modelId);
         console.log('Prompt:', prompt);
         
@@ -88,7 +104,7 @@ export function useImagenApi(): UseImagenApiReturn {
             prompt,
             model: modelId,
             config: finalConfig,
-            user_id: userId, // ✅ Passa user_id para validar créditos
+            user_id: currentUserId, // ✅ Usa user_id garantido
           }),
         });
 

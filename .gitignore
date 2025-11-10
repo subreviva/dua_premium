@@ -28,4 +28,4 @@ firebase-config.js
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+next-env.d.ts.env.local
