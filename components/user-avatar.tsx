@@ -15,6 +15,7 @@ import {
 import { User, Shield, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { ShoppingCart } from "lucide-react";
 
 export function UserAvatar() {
   const router = useRouter();
@@ -277,6 +278,14 @@ export function UserAvatar() {
         >
           <Settings className="w-4 h-4" />
           Configurações
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          onClick={() => router.push('/comprar')}
+          className="text-purple-400 hover:bg-purple-500/10 cursor-pointer flex items-center gap-2 font-semibold"
+        >
+          <ShoppingCart className="w-4 h-4" />
+          Comprar Créditos
         </DropdownMenuItem>
         
         <DropdownMenuSeparator className="bg-white/10" />

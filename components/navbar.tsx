@@ -2,12 +2,13 @@
 
 import { Button } from "@/components/ui/button"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Menu, X } from "lucide-react"
+import { Menu, X, ShoppingCart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { UserAvatar } from "@/components/user-avatar"
 import { supabaseClient } from "@/lib/supabase"
 import { getLoginRedirect } from "@/lib/route-protection"
+import { CreditsDisplay } from "@/components/ui/credits-display"
 
 export default function Navbar() {
   const router = useRouter()
@@ -108,8 +109,20 @@ export default function Navbar() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="hidden lg:flex items-center gap-4"
+              className="hidden lg:flex items-center gap-3"
             >
+              {isAuthenticated && (
+                <>
+                  <CreditsDisplay variant="compact" />
+                  <Button
+                    onClick={() => router.push('/comprar')}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0 transition-all duration-300 rounded-full px-4 h-9 text-sm font-semibold"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Comprar
+                  </Button>
+                </>
+              )}
               <UserAvatar />
             </motion.div>
 
@@ -153,6 +166,21 @@ export default function Navbar() {
           ))}
 
           <div className="pt-6 border-t border-[#f5d4c8]/10">
+            {isAuthenticated && (
+              <div className="space-y-4 mb-6">
+                <CreditsDisplay variant="default" className="w-full justify-center" />
+                <Button
+                  onClick={() => {
+                    router.push('/comprar')
+                    setIsOpen(false)
+                  }}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0 transition-all duration-300 rounded-full h-10 text-sm font-semibold"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Comprar Créditos
+                </Button>
+              </div>
+            )}
             <UserAvatar />
           </div>
         </div>
