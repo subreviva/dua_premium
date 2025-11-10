@@ -24,10 +24,11 @@ interface ControlPanelProps {
   isLoading: boolean;
   sessionGallery: any[]; // Pass sessionGallery for export
   history: CanvasContent[]; // Pass history for export
+  styleSuffixes?: string; // Estilos selecionados para adicionar aos prompts
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = (props) => {
-  const { activeTool } = props;
+  const { activeTool, styleSuffixes = '' } = props;
 
   switch (activeTool) {
     case 'generate-image':

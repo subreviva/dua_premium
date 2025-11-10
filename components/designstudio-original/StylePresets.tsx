@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Palette, Sparkles, Zap } from 'lucide-react';
+import { 
+  Palette, Sparkles, Zap, Paintbrush, Frame, Pen, Droplet, Flower,
+  Zap as Lightning, Box, Grid3x3, Gamepad2, Diamond, Camera, Film,
+  Focus, User, Mountain, Rainbow, Circle, Moon, Star, Radio, Crown
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface StylePreset {
   id: string;
   name: string;
-  icon: string;
+  icon: React.ReactNode;
   suffix: string;
   preview?: string;
   category: 'artistic' | 'digital' | 'mood' | 'photography';
@@ -15,34 +19,34 @@ export interface StylePreset {
 
 export const STYLE_PRESETS: StylePreset[] = [
   // ARTÍSTICO
-  { id: 'watercolor', name: 'Aquarela', icon: '🎨', suffix: 'watercolor painting style, soft blended colors', category: 'artistic' },
-  { id: 'oil', name: 'Óleo', icon: '🖼️', suffix: 'oil painting on canvas, textured brushstrokes, classical art', category: 'artistic' },
-  { id: 'sketch', name: 'Sketch', icon: '✏️', suffix: 'pencil sketch, detailed linework, artistic drawing', category: 'artistic' },
-  { id: 'ink', name: 'Tinta', icon: '🖋️', suffix: 'ink illustration, bold black lines, traditional art', category: 'artistic' },
-  { id: 'pastel', name: 'Pastel', icon: '🌸', suffix: 'soft pastel colors, delicate blending, gentle aesthetic', category: 'artistic' },
+  { id: 'watercolor', name: 'Aquarela', icon: <Paintbrush className="w-5 h-5" />, suffix: 'watercolor painting style, soft blended colors', category: 'artistic' },
+  { id: 'oil', name: 'Óleo', icon: <Frame className="w-5 h-5" />, suffix: 'oil painting on canvas, textured brushstrokes, classical art', category: 'artistic' },
+  { id: 'sketch', name: 'Sketch', icon: <Pen className="w-5 h-5" />, suffix: 'pencil sketch, detailed linework, artistic drawing', category: 'artistic' },
+  { id: 'ink', name: 'Tinta', icon: <Droplet className="w-5 h-5" />, suffix: 'ink illustration, bold black lines, traditional art', category: 'artistic' },
+  { id: 'pastel', name: 'Pastel', icon: <Flower className="w-5 h-5" />, suffix: 'soft pastel colors, delicate blending, gentle aesthetic', category: 'artistic' },
 
   // DIGITAL
-  { id: 'cyberpunk', name: 'Cyberpunk', icon: '🌃', suffix: 'neon cyberpunk aesthetic, futuristic city, purple and cyan lights', category: 'digital' },
-  { id: '3d-render', name: '3D Render', icon: '🎮', suffix: 'photorealistic 3D render, high quality CGI, perfect lighting', category: 'digital' },
-  { id: 'flat', name: 'Flat Design', icon: '📐', suffix: 'modern flat design, clean vectors, minimalist style', category: 'digital' },
-  { id: 'pixel', name: 'Pixel Art', icon: '👾', suffix: 'pixel art style, retro gaming aesthetic, 16-bit graphics', category: 'digital' },
-  { id: 'isometric', name: 'Isométrico', icon: '🏗️', suffix: 'isometric perspective, clean geometric design', category: 'digital' },
-  { id: 'glassmorphism', name: 'Glass', icon: '💎', suffix: 'glassmorphism design, frosted glass effect, translucent', category: 'digital' },
+  { id: 'cyberpunk', name: 'Cyberpunk', icon: <Lightning className="w-5 h-5" />, suffix: 'neon cyberpunk aesthetic, futuristic city, purple and cyan lights', category: 'digital' },
+  { id: '3d-render', name: '3D Render', icon: <Box className="w-5 h-5" />, suffix: 'photorealistic 3D render, high quality CGI, perfect lighting', category: 'digital' },
+  { id: 'flat', name: 'Flat Design', icon: <Grid3x3 className="w-5 h-5" />, suffix: 'modern flat design, clean vectors, minimalist style', category: 'digital' },
+  { id: 'pixel', name: 'Pixel Art', icon: <Gamepad2 className="w-5 h-5" />, suffix: 'pixel art style, retro gaming aesthetic, 16-bit graphics', category: 'digital' },
+  { id: 'isometric', name: 'Isométrico', icon: <Box className="w-5 h-5" />, suffix: 'isometric perspective, clean geometric design', category: 'digital' },
+  { id: 'glassmorphism', name: 'Glass', icon: <Diamond className="w-5 h-5" />, suffix: 'glassmorphism design, frosted glass effect, translucent', category: 'digital' },
 
   // FOTOGRAFIA
-  { id: 'photo-realistic', name: 'Fotorrealista', icon: '📸', suffix: 'photorealistic, high resolution photography, professional quality', category: 'photography' },
-  { id: 'cinematic', name: 'Cinematográfico', icon: '🎬', suffix: 'cinematic lighting, movie scene aesthetic, dramatic composition', category: 'photography' },
-  { id: 'macro', name: 'Macro', icon: '🔍', suffix: 'macro photography, extreme close-up, detailed textures', category: 'photography' },
-  { id: 'portrait', name: 'Retrato', icon: '👤', suffix: 'professional portrait photography, studio lighting, shallow depth of field', category: 'photography' },
-  { id: 'landscape', name: 'Paisagem', icon: '🏔️', suffix: 'stunning landscape photography, golden hour, expansive view', category: 'photography' },
+  { id: 'photo-realistic', name: 'Fotorrealista', icon: <Camera className="w-5 h-5" />, suffix: 'photorealistic, high resolution photography, professional quality', category: 'photography' },
+  { id: 'cinematic', name: 'Cinematográfico', icon: <Film className="w-5 h-5" />, suffix: 'cinematic lighting, movie scene aesthetic, dramatic composition', category: 'photography' },
+  { id: 'macro', name: 'Macro', icon: <Focus className="w-5 h-5" />, suffix: 'macro photography, extreme close-up, detailed textures', category: 'photography' },
+  { id: 'portrait', name: 'Retrato', icon: <User className="w-5 h-5" />, suffix: 'professional portrait photography, studio lighting, shallow depth of field', category: 'photography' },
+  { id: 'landscape', name: 'Paisagem', icon: <Mountain className="w-5 h-5" />, suffix: 'stunning landscape photography, golden hour, expansive view', category: 'photography' },
 
   // MOOD/ATMOSFERA
-  { id: 'vibrant', name: 'Vibrante', icon: '🌈', suffix: 'vibrant and colorful, high saturation, energetic mood', category: 'mood' },
-  { id: 'minimal', name: 'Minimalista', icon: '⚪', suffix: 'minimal clean design, lots of white space, simple elegant', category: 'mood' },
-  { id: 'dark', name: 'Dark Mode', icon: '🌙', suffix: 'dark moody atmosphere, dramatic shadows, noir aesthetic', category: 'mood' },
-  { id: 'pastel-mood', name: 'Pastel Suave', icon: '🦄', suffix: 'soft pastel colors, dreamy aesthetic, kawaii vibes', category: 'mood' },
-  { id: 'vintage', name: 'Vintage', icon: '📻', suffix: 'vintage retro style, aged aesthetic, nostalgic feel', category: 'mood' },
-  { id: 'luxury', name: 'Luxo', icon: '👑', suffix: 'luxury premium aesthetic, gold accents, elegant sophistication', category: 'mood' },
+  { id: 'vibrant', name: 'Vibrante', icon: <Rainbow className="w-5 h-5" />, suffix: 'vibrant and colorful, high saturation, energetic mood', category: 'mood' },
+  { id: 'minimal', name: 'Minimalista', icon: <Circle className="w-5 h-5" />, suffix: 'minimal clean design, lots of white space, simple elegant', category: 'mood' },
+  { id: 'dark', name: 'Dark Mode', icon: <Moon className="w-5 h-5" />, suffix: 'dark moody atmosphere, dramatic shadows, noir aesthetic', category: 'mood' },
+  { id: 'pastel-mood', name: 'Pastel Suave', icon: <Star className="w-5 h-5" />, suffix: 'soft pastel colors, dreamy aesthetic, kawaii vibes', category: 'mood' },
+  { id: 'vintage', name: 'Vintage', icon: <Radio className="w-5 h-5" />, suffix: 'vintage retro style, aged aesthetic, nostalgic feel', category: 'mood' },
+  { id: 'luxury', name: 'Luxo', icon: <Crown className="w-5 h-5" />, suffix: 'luxury premium aesthetic, gold accents, elegant sophistication', category: 'mood' },
 ];
 
 const CATEGORY_LABELS = {
@@ -135,7 +139,9 @@ export default function StylePresets({
                 )}
 
                 {/* Icon */}
-                <div className="text-3xl mb-2">{preset.icon}</div>
+                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                  {preset.icon}
+                </div>
                 
                 {/* Name */}
                 <div className="text-white text-sm font-medium mb-1">
@@ -172,10 +178,9 @@ export default function StylePresets({
               return (
                 <span
                   key={styleId}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-white/90 text-xs"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-white/90 text-xs"
                 >
-                  <span>{style.icon}</span>
-                  <span>{style.name}</span>
+                  <span className="text-white/60">{style.name}</span>
                 </span>
               );
             })}

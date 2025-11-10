@@ -126,7 +126,9 @@ export default function DesignStudioPage() {
             <Canvas 
               content={canvasContent} 
               isLoading={api.isLoading} 
-              loadingMessage={api.loadingMessage} 
+              loadingMessage={api.loadingMessage}
+              api={api}
+              onContentUpdate={handleContentUpdate}
             />
           </div>
         </main>

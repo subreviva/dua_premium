@@ -1,26 +1,29 @@
 'use client';
 
 import React from 'react';
-import { CanvasContent } from '@/types/designstudio';
+import { CanvasContent, ApiFunctions } from '@/types/designstudio';
 import Spinner from './ui/Spinner';
 import { useToast } from '@/hooks/useToast';
 import { Download, Sparkles, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import QuickActionsBar from './QuickActionsBar';
 
 interface CanvasProps {
   content: CanvasContent;
   isLoading: boolean;
   loadingMessage: string;
+  api?: ApiFunctions;
+  onContentUpdate?: (content: CanvasContent) => void;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) => {
+const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage, api, onContentUpdate }) => {
   const { addToast } = useToast();
 
   const handleDownload = () => {
     if (content.type === 'image') {
       const a = document.createElement('a');
       a.href = content.src;
-      a.download = 'dua-design-imagem.png';
+      a.download = `dua-design-${Date.now()}.png`;
       a.click();
       addToast('Imagem descarregada.');
     } else if (content.type === 'svg') {
@@ -28,10 +31,58 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) =
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'dua-design-vetor.svg';
+      a.download = `dua-design-${Date.now()}.svg`;
       a.click();
       URL.revokeObjectURL(url);
       addToast('Vetor SVG descarregado.');
+    }
+  };
+
+  const handleShare = async () => {
+    if (content.type === 'image' && navigator.share) {
+      try {
+        // Converter base64 para blob
+        const response = await fetch(content.src);
+        const blob = await response.blob();
+        const file = new File([blob], `design-${Date.now()}.png`, { type: 'image/png' });
+        
+        await navigator.share({
+          title: 'Minha criação DUA',
+          text: 'Feito com DUA Design Studio',
+          files: [file]
+        });
+        addToast('Compartilhado com sucesso!');
+      } catch (error) {
+        // Fallback: copiar link
+        addToast('Compartilhamento não disponível');
+      }
+    }
+  };
+
+  const handleRemoveBackground = async () => {
+    if (content.type === 'image' && api && onContentUpdate) {
+      const result = await api.editImage(content.src, content.mimeType, 'remove background completely, transparent PNG, isolated subject');
+      if (result) {
+        onContentUpdate({ type: 'image', src: result.src, mimeType: result.mimeType, prompt: 'Background removed' });
+        addToast('Fundo removido com sucesso!');
+      }
+    }
+  };
+
+  const handleUpscale = async () => {
+    if (content.type === 'image' && api && onContentUpdate) {
+      const result = await api.editImage(content.src, content.mimeType, 'upscale to 4K resolution, enhance quality, sharpen details, professional photography');
+      if (result) {
+        onContentUpdate({ type: 'image', src: result.src, mimeType: result.mimeType, prompt: 'Upscaled to 4K' });
+        addToast('Imagem melhorada!');
+      }
+    }
+  };
+
+  const handleGenerateVariations = async () => {
+    if (content.type === 'image' && api) {
+      addToast('Gerando 3 variações...');
+      await api.generateVariations(content.src, content.mimeType);
     }
   };
 
@@ -121,7 +172,24 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage }) =
         </div>
       )}
       {renderContent()}
-      {(content.type === 'image' || content.type === 'svg') && !isLoading && (
+      
+      {/* Quick Actions Bar - Desktop e Mobile */}
+      {content.type === 'image' && !isLoading && api && onContentUpdate && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 hidden md:block">
+          <QuickActionsBar
+            imageUrl={content.src}
+            onRemoveBackground={handleRemoveBackground}
+            onUpscale={handleUpscale}
+            onGenerateVariations={handleGenerateVariations}
+            onDownload={handleDownload}
+            onShare={handleShare}
+            isLoading={isLoading}
+          />
+        </div>
+      )}
+      
+      {/* Download button (legacy - só quando não tem Quick Actions) */}
+      {(content.type === 'image' || content.type === 'svg') && !isLoading && (!api || content.type === 'svg') && (
         <button 
           onClick={handleDownload} 
           title="Descarregar" 
