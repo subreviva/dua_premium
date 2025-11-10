@@ -9,27 +9,35 @@ const MODELS = {
   search: 'gemini-2.5-flash',              // Para ferramentas de pesquisa
 } as const;
 
-// Aceitar ambas as variáveis para compatibilidade (Vercel pode usar qualquer uma)
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || process.env.GOOGLE_API_KEY;
+// ⚠️ SEGURANÇA: NUNCA usar NEXT_PUBLIC_ para API keys sensíveis!
+// NEXT_PUBLIC_ expõe a variável no browser (cliente)
+// API keys devem ficar APENAS no servidor
 
-// 4. Tipagem - usando 'any' estrategicamente devido ao require dinâmico
+// Para desenvolvimento local com mock, detectar se estamos no browser
+const isBrowser = typeof window !== 'undefined';
+
+// Modo mock para desenvolvimento
 let ai: any = null;
 let GoogleGenAIModule: any, Modality: any, Type: any;
 
-if (API_KEY) {
-  try {
-    const genai = require('@google/genai');
-    GoogleGenAIModule = genai.GoogleGenAI;
-    Modality = genai.Modality;
-    Type = genai.Type;
-    // IMPORTANTE: vertexai: false para usar API Key diretamente (não OAuth2)
-    ai = new GoogleGenAIModule({ apiKey: API_KEY, vertexai: false });
-    // PRODUCTION: Removed console.log("✅ Google Gemini API configurada (API Key mode)!");
-  } catch (e) {
-    // PRODUCTION: Removed console.warn("⚠️ @google/genai não instalado. Instale com: npm install @google/genai");
+// ⚠️ REMOVIDO: Não carregar API key no cliente
+// const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || process.env.GOOGLE_API_KEY;
+
+// Se não está no browser E tem a API key no servidor, inicializar
+if (!isBrowser) {
+  const API_KEY = process.env.GOOGLE_API_KEY;
+  if (API_KEY) {
+    try {
+      const genai = require('@google/genai');
+      GoogleGenAIModule = genai.GoogleGenAI;
+      Modality = genai.Modality;
+      Type = genai.Type;
+      ai = new GoogleGenAIModule({ apiKey: API_KEY, vertexai: false });
+      // PRODUCTION: Removed console.log("✅ Google Gemini API configurada no servidor!");
+    } catch (e) {
+      // PRODUCTION: Removed console.warn("⚠️ @google/genai não instalado.");
+    }
   }
-} else {
-  // PRODUCTION: Removed console.warn("⚠️ NEXT_PUBLIC_GOOGLE_API_KEY não configurada. Usando modo MOCK.");
 }
 
 export const useDuaApi = () => {
@@ -84,35 +92,31 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A gerar a sua obra-prima...',
       async () => {
-        let finalPrompt = prompt;
-        const wantsText = /\b(text|texto|palavra|letter|escrito|escrita|escrever|com as palavras|com o texto|sign|placa|lettering|typography|font)\b/i.test(prompt);
-        
-        if (wantsText) {
-          finalPrompt = `${prompt}, high quality, professional`;
-        } else {
-          finalPrompt = `${prompt}, photorealistic, high quality, professional photography, no text, no words, no letters, no watermarks`;
-        }
-        
-        if (config?.negativePrompt) {
-          finalPrompt = `${finalPrompt}. Avoid the following: ${config.negativePrompt}${wantsText ? '' : ', text, words, letters, typography, captions, watermarks'}.`;
-        }
-        
-        // PRODUCTION: Removed console.log('📝 Prompt final:', finalPrompt);
-
-        const response = await ai!.models.generateContent({
-          model: MODELS.image,
-          contents: [{ parts: [{ text: finalPrompt }] }],
+        // 🔒 MODO SEGURO: Chamada via API Route (API key fica no servidor)
+        const response = await fetch('/api/design-studio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generateImage',
+            prompt: prompt,
+            model: MODELS.image,
+            config: {
+              aspectRatio,
+              ...config
+            }
+          })
         });
 
-        const imagePart = response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
-        if (imagePart?.inlineData) {
-          const { data, mimeType } = imagePart.inlineData;
-          return { src: `data:${mimeType};base64,${data}`, mimeType };
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao gerar imagem');
         }
-        setError('O modelo não retornou uma imagem. Tente novamente.');
-        return null;
+
+        const data = await response.json();
+        return data.image;
       },
       async () => {
+        // Mock para desenvolvimento
         await new Promise(resolve => setTimeout(resolve, 2000));
         return { src: `https://picsum.photos/seed/${Date.now()}/1024/1024`, mimeType: 'image/jpeg' };
       }
@@ -123,16 +127,30 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A aplicar as suas edições criativas...',
       async () => {
-        const contents = [{ role: 'user', parts: [{ text: prompt }, { inlineData: { data: base64ImageData, mimeType } }] }];
-        const response = await ai!.models.generateContent({ model: MODELS.image, contents });
-        
-        const imagePart = response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
-        if (imagePart?.inlineData) {
-          const { data, mimeType } = imagePart.inlineData;
-          return { src: `data:${mimeType};base64,${data}`, mimeType };
+        // 🔒 MODO SEGURO: Chamada via API Route
+        const response = await fetch('/api/design-studio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'editImage',
+            prompt,
+            model: MODELS.image,
+            config: {
+              image: {
+                data: base64ImageData,
+                mimeType
+              }
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao editar imagem');
         }
-        setError('O modelo não retornou uma imagem editada.');
-        return null;
+
+        const data = await response.json();
+        return data.image;
       },
       async () => {
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -145,11 +163,29 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A analisar as cores...',
       async () => {
-        const contents = [{ role: 'user', parts: [{ inlineData: { data: base64ImageData, mimeType } }, { text: "Analise esta imagem e extraia as 5 cores mais proeminentes. Forneça um nome comum para cada cor." }] }];
-        const config = { responseMimeType: 'application/json', responseSchema: { type: Type.OBJECT, properties: { palette: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { hex: { type: Type.STRING, description: "O código hexadecimal da cor, ex: '#RRGGBB'" }, name: { type: Type.STRING, description: "Um nome comum para a cor, ex: 'Azul Meia-Noite'" } } } } } } };
-        const response = await ai!.models.generateContent({ model: MODELS.vision, contents, config });
-        const result = JSON.parse(response.text.trim());
-        return result.palette || [];
+        // 🔒 MODO SEGURO: Chamada via API Route
+        const response = await fetch('/api/design-studio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'extractColorPalette',
+            model: MODELS.vision,
+            config: {
+              image: {
+                data: base64ImageData,
+                mimeType
+              }
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao extrair paleta de cores');
+        }
+
+        const data = await response.json();
+        return data.palette || [];
       },
       async () => {
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -167,23 +203,29 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A gerar variações criativas...',
       async () => {
-        const contents = [{ role: 'user', parts: [{ text: "Gere 3 variações artísticas e distintas desta imagem. Cada uma deve ter um estilo único (ex: aguarela, cyberpunk, fotorealista)." }, { inlineData: { data: base64ImageData, mimeType } }] }];
-        const response = await ai!.models.generateContent({ 
-          model: MODELS.image, 
-          contents,
-          config: { candidateCount: 3 } // Pedido explícito de 3 variações
+        // 🔒 MODO SEGURO: Chamada via API Route
+        const response = await fetch('/api/design-studio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generateVariations',
+            model: MODELS.image,
+            config: {
+              image: {
+                data: base64ImageData,
+                mimeType
+              }
+            }
+          })
         });
-        
-        const variations: ImageObject[] = response.candidates
-          ?.flatMap((candidate: any) => candidate.content.parts)
-          .filter((part: any) => !!part.inlineData)
-          .map((part: any) => ({ src: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, mimeType: part.inlineData.mimeType })) || [];
 
-        if (variations.length === 0) {
-          setError('O modelo não retornou nenhuma variação de imagem.');
-          return null;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao gerar variações');
         }
-        return variations;
+
+        const data = await response.json();
+        return data.variations || [];
       },
       async () => {
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -200,9 +242,24 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A melhorar a sua ideia...',
       async () => {
-        const contents = [{ role: 'user', parts: [{ text: `You are a creative assistant for an image generator. Take the user's simple idea and expand it into a rich, detailed, and artistic prompt in English. User idea: "${idea}"` }] }];
-        const response = await ai!.models.generateContent({ model: MODELS.text, contents });
-        return response.text;
+        // 🔒 MODO SEGURO: Chamada via API Route
+        const response = await fetch('/api/design-studio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'chat',
+            prompt: `You are a creative assistant for an image generator. Take the user's simple idea and expand it into a rich, detailed, and artistic prompt in English. User idea: "${idea}"`,
+            model: MODELS.text
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao melhorar prompt');
+        }
+
+        const data = await response.json();
+        return data.result;
       },
       async () => {
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -215,10 +272,28 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A gerar o seu vetor SVG...',
       async () => {
-        const contents = [{ role: 'user', parts: [{ text: `You are an expert SVG generator. Based on the following description, create a clean, valid SVG code. Do not include any text, explanation, or markdown code fences. Return ONLY the raw SVG code starting with '<svg' and ending with '</svg>'. Description: ${prompt}` }] }];
-        const response = await ai!.models.generateContent({ model: MODELS.text, contents });
-        const svgCode = response.text.trim();
-        if (svgCode.startsWith('<svg') && svgCode.endsWith('</svg>')) { return svgCode; }
+        // 🔒 MODO SEGURO: Chamada via API Route
+        const response = await fetch('/api/design-studio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'chat',
+            prompt: `You are an expert SVG generator. Based on the following description, create a clean, valid SVG code. Do not include any text, explanation, or markdown code fences. Return ONLY the raw SVG code starting with '<svg' and ending with '</svg>'. Description: ${prompt}`,
+            model: MODELS.text
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao gerar SVG');
+        }
+
+        const data = await response.json();
+        const svgCode = data.result.trim();
+        
+        if (svgCode.startsWith('<svg') && svgCode.endsWith('</svg>')) { 
+          return svgCode; 
+        }
         setError('O modelo não retornou um código SVG válido.');
         return null;
       },
@@ -233,9 +308,30 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A analisar a imagem...',
       async () => {
-        const contents = [{ role: 'user', parts: [{ inlineData: { data: base64ImageData, mimeType } }, { text: "Descreva esta imagem em detalhe para um 'alt' text. Seja conciso mas descritivo." }] }];
-        const response = await ai!.models.generateContent({ model: MODELS.vision, contents });
-        return response.text;
+        // 🔒 MODO SEGURO: Chamada via API Route
+        const response = await fetch('/api/design-studio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'analyzeImage',
+            prompt: "Descreva esta imagem em detalhe para um 'alt' text. Seja conciso mas descritivo.",
+            model: MODELS.vision,
+            config: {
+              image: {
+                data: base64ImageData,
+                mimeType
+              }
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao analisar imagem');
+        }
+
+        const data = await response.json();
+        return data.result;
       },
       async () => {
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -248,10 +344,24 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A pesquisar tendências...',
       async () => {
-        const response = await ai!.models.generateContent({ model: MODELS.search, contents: { role: 'user', parts: [{ text: query }] }, config: { tools: [{ googleSearch: {} }] } });
-        const groundingMetadata = response.candidates?.[0]?.groundingMetadata;
-        const sources = groundingMetadata?.groundingAttributions as GroundingChunk[] || [];
-        return { text: response.text, sources };
+        // ⚠️ Google Search requer configuração adicional
+        // TODO: Implementar via API Route quando Google Search estiver configurado
+        // const response = await fetch('/api/design-studio', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({
+        //     action: 'researchTrends',
+        //     query,
+        //     model: MODELS.search
+        //   })
+        // });
+        
+        // Por enquanto, usar mock
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        return {
+          text: `Tendências de design 2024 relacionadas com "${query}": Minimalismo, cores vibrantes, gradientes suaves, tipografia bold, elementos 3D e glassmorphism são populares. Modo MOCK ativo.`,
+          sources: []
+        };
       },
       async () => {
         await new Promise(resolve => setTimeout(resolve, 2000));

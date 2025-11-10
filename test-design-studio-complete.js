@@ -12,7 +12,7 @@ const envPath = path.join(__dirname, '.env.local');
 const envContent = fs.readFileSync(envPath, 'utf8');
 const API_KEY = envContent
   .split('\n')
-  .find(line => line.startsWith('NEXT_PUBLIC_GOOGLE_API_KEY='))
+  .find(line => line.startsWith('GOOGLE_API_KEY='))
   ?.split('=')[1]
   ?.trim();
 

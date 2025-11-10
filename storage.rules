@@ -1,0 +1,63 @@
+rules_version = '2';
+
+// 🔥 FIREBASE STORAGE SECURITY RULES
+// Proteção de upload/download de arquivos
+// Última atualização: 10 de Novembro de 2025
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ========================================
+    // PASTA PÚBLICA DA COMUNIDADE
+    // ========================================
+    match /community/{fileName} {
+      // ✅ Leitura: Qualquer pessoa pode visualizar
+      allow read: if true;
+      
+      // ✅ Escrita: Apenas usuários autenticados
+      // Restrições:
+      // - Máximo 10MB por arquivo
+      // - Apenas imagens (jpg, png, gif, webp)
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    
+    // ========================================
+    // PASTA PRIVADA DE USUÁRIOS
+    // ========================================
+    match /users/{userId}/{allPaths=**} {
+      // ✅ Leitura/Escrita: Apenas o próprio usuário
+      // Restrições:
+      // - Máximo 10MB por arquivo
+      allow read, write: if request.auth != null 
+                         && request.auth.uid == userId
+                         && request.resource.size < 10 * 1024 * 1024;
+    }
+    
+    // ========================================
+    // PASTA DE AVATARES
+    // ========================================
+    match /avatars/{userId} {
+      // ✅ Leitura: Qualquer pessoa pode ver avatares
+      allow read: if true;
+      
+      // ✅ Escrita: Apenas o próprio usuário
+      // Restrições:
+      // - Máximo 2MB (avatares menores)
+      // - Apenas imagens
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.size < 2 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    
+    // ========================================
+    // BLOQUEIO PADRÃO
+    // ========================================
+    // Qualquer caminho não especificamente permitido acima é BLOQUEADO
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

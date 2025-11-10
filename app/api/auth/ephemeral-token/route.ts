@@ -33,8 +33,7 @@ export async function POST(request: Request) {
     
     // Usar a API key real do Gemini
     const apiKey = process.env.GOOGLE_GEMINI_API_KEY || 
-                   process.env.GOOGLE_API_KEY || 
-                   process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+                   process.env.GOOGLE_API_KEY;
     
     if (!apiKey) {
       // console.error("GOOGLE_GEMINI_API_KEY não configurada");

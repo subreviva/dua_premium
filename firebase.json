@@ -1,0 +1,8 @@
+{
+  "storage": [
+    {
+      "bucket": "dua-ia.firebasestorage.app",
+      "rules": "storage.rules"
+    }
+  ]
+}

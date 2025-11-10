@@ -1,6 +1,6 @@
 // Debug endpoint para verificar se API key está carregada
 export async function GET() {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+  const apiKey = process.env.GOOGLE_API_KEY;
   
   return Response.json({
     hasKey: !!apiKey,

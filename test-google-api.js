@@ -12,7 +12,7 @@ const envPath = path.join(__dirname, '.env.local');
 const envContent = fs.readFileSync(envPath, 'utf8');
 const API_KEY = envContent
   .split('\n')
-  .find(line => line.startsWith('NEXT_PUBLIC_GOOGLE_API_KEY='))
+  .find(line => line.startsWith('GOOGLE_API_KEY='))
   ?.split('=')[1]
   ?.trim();
 
@@ -22,7 +22,7 @@ console.log('═'.repeat(50));
 // Teste 1: Verificar se API key está configurada
 console.log('\n✓ Teste 1: API Key configurada?');
 if (!API_KEY) {
-  console.log('❌ FALHOU: NEXT_PUBLIC_GOOGLE_API_KEY não encontrada');
+  console.log('❌ FALHOU: GOOGLE_API_KEY não encontrada');
   process.exit(1);
 }
 console.log('✅ PASSOU: API Key encontrada');

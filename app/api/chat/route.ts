@@ -3,7 +3,7 @@ import { DUA_SYSTEM_INSTRUCTION } from '@/lib/dua-prompt';
 
 // Configuração do modelo Gemini
 const genAI = new GoogleGenerativeAI(
-  process.env.GOOGLE_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_API_KEY || ''
+  process.env.GOOGLE_API_KEY || ''
 );
 
 export const maxDuration = 30;

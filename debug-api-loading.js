@@ -1,8 +1,9 @@
-// Debug: Verificar se API key está sendo carregada no browser
+// Debug: Verificar se API key está sendo carregada
 console.log('🔍 DEBUG: Verificando carregamento da API');
 
-// Simular o que acontece no useDuaApi.ts
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+// Esta variável NÃO deve mais existir no código de produção
+// API keys NUNCA devem usar NEXT_PUBLIC_ (são expostas no browser)
+const API_KEY = process.env.GOOGLE_API_KEY;
 
 console.log('📊 Resultados:');
 console.log('1. API_KEY existe?', !!API_KEY);
