@@ -87,14 +87,11 @@ export const useDuaApi = () => {
   ): Promise<T | null> => {
     startLoading(loadingMsg);
     try {
-      if (!ai) {
-        // PRODUCTION: Removed console.warn(`⚠️ MODO MOCK ATIVO - ${loadingMsg}`);
-        return await mockLogic();
-      }
-      // PRODUCTION: Removed console.log(`🚀 Iniciando API Call: ${loadingMsg}`);
+      // ✅ MODO ULTRA: SEMPRE usar API real (nunca mock)
+      console.log(`🚀 Iniciando API Call: ${loadingMsg}`);
       return await apiLogic();
     } catch (e: any) {
-      // PRODUCTION: Removed console.error(`Falha em: ${loadingMsg}`, e);
+      console.error(`Falha em: ${loadingMsg}`, e);
       const friendlyError = getErrorMessage(e);
       setError(friendlyError);
       return null;
