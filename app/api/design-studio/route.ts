@@ -3,28 +3,18 @@ import { GoogleGenAI } from '@google/genai';
 import { withCredits } from '@/lib/credits/credits-middleware';
 import { DesignStudioOperation } from '@/lib/credits/credits-config';
 import { getAdminClient } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * 🎨 DESIGN STUDIO API - ULTRA PROFISSIONAL V2.0
+ * 🎨 DESIGN STUDIO API - ULTRA PROFISSIONAL V3.0
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * FEATURES:
- * - Sistema de créditos integrado (validação + dedução automática)
- * - Suporte a TODAS ferramentas Design Studio
+ * - Admin tem geração ilimitada sem cobrar créditos
+ * - Autenticação via cookies
  * - Gemini 2.5 Flash Image (geração + edição)
- * - Audit trail completo
  * - Error handling profissional
- * - Rollback automático em caso de falha
- * 
- * OPERAÇÕES SUPORTADAS:
- * - generate-image, generate-logo, generate-icon
- * - generate-pattern, generate-svg
- * - edit-image, remove-background, upscale-image
- * - generate-variations (3x)
- * - analyze-image, color-palette
- * - design-trends, design-assistant
- * - export-png, export-svg (grátis)
  */
 
 const API_KEY = process.env.GOOGLE_API_KEY;
@@ -40,6 +30,40 @@ export async function POST(req: NextRequest) {
         { error: 'API Key não configurada no servidor' },
         { status: 500 }
       );
+    }
+
+    // Verificar autenticação
+    const supabase = getAdminClient();
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('sb-access-token')?.value;
+    
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Não autenticado - faça login' },
+        { status: 401 }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Token inválido ou expirado' },
+        { status: 401 }
+      );
+    }
+
+    // Buscar role do usuário
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const isAdmin = userData?.role === 'admin';
+
+    if (isAdmin) {
+      console.log('👑 Admin detectado - geração ilimitada no Design Studio');
     }
 
     const body = await req.json();
