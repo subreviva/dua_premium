@@ -127,6 +127,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log('🎨 Iniciando geração de imagem...');
+    console.log('📝 Prompt:', prompt);
+    console.log('🤖 Modelo:', model || 'imagen-4.0-generate-001');
+    console.log('⚙️ Config:', finalConfig);
+
     // Inicializar cliente
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
@@ -138,7 +143,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Image generation log removed for production
+    console.log('🚀 Chamando Google Imagen API...');
 
     // Gerar imagens
     const response = await ai.models.generateImages({
@@ -146,6 +151,8 @@ export async function POST(req: NextRequest) {
       prompt,
       config: finalConfig,
     });
+    
+    console.log('✅ Resposta recebida da API');
 
     if (!response.generatedImages || response.generatedImages.length === 0) {
       return NextResponse.json(
@@ -167,7 +174,7 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // console.log(`✅ ${images.length} imagens geradas com sucesso`);
+    console.log(`✅ ${images.length} imagens geradas com sucesso`);
 
     return NextResponse.json({
       success: true,
@@ -177,7 +184,8 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    // console.error('❌ Erro na API Imagen:', error);
+    console.error('❌ Erro na API Imagen:', error);
+    console.error('Stack:', error.stack);
 
     // Erros específicos da API
     if (error.message?.includes('API key')) {

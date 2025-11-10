@@ -61,6 +61,11 @@ export function useImagenApi(): UseImagenApiReturn {
       try {
         const modelId = IMAGEN_MODELS[model];
         
+        console.log('🎨 useImagenApi - Iniciando geração');
+        console.log('User ID:', userId);
+        console.log('Modelo:', modelId);
+        console.log('Prompt:', prompt);
+        
         // Default config
         const finalConfig: ImagenConfig = {
           numberOfImages: 4,
@@ -74,6 +79,8 @@ export function useImagenApi(): UseImagenApiReturn {
           finalConfig.imageSize = '2K';
         }
 
+        console.log('Config final:', finalConfig);
+
         const response = await fetch('/api/imagen/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -85,8 +92,11 @@ export function useImagenApi(): UseImagenApiReturn {
           }),
         });
 
+        console.log('Response status:', response.status);
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          console.error('Erro da API:', errorData);
           
           // Se erro de API não configurada
           if (response.status === 503) {
@@ -114,11 +124,13 @@ export function useImagenApi(): UseImagenApiReturn {
         }
 
         const data = await response.json();
+        console.log('Dados recebidos:', data);
         
         if (!data.images || data.images.length === 0) {
           throw new Error('Nenhuma imagem foi gerada');
         }
 
+        console.log(`✅ ${data.images.length} imagens geradas com sucesso`);
         setLoadingMessage('');
         return data.images;
         
