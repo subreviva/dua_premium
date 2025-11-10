@@ -29,23 +29,42 @@ export const MUSIC_CREDITS = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🎨 IMAGEM - Geração e edição via Gemini
+// 🎨 IMAGEM - Geração com Imagen (Google)
 // ═══════════════════════════════════════════════════════════════════════════
 export const IMAGE_CREDITS = {
-  image_fast: 2,                   // Gemini Flash - rápido e barato
-  image_standard: 4,               // Gemini Standard - qualidade média
-  image_ultra: 6,                  // Gemini Ultra - máxima qualidade
-  image_gemini: 4,                 // Gemini genérico (compatibilidade)
+  image_fast: 15,                  // Imagen-4 Fast - 1K Fast (~2-3s)
+  image_standard: 25,              // Imagen-4 Standard - 2K (~5-8s) ⭐ RECOMENDADO
+  image_ultra: 35,                 // Imagen-4 Ultra - 4K Ultra HD (~10-15s)
+  image_3: 10,                     // Imagen-3 - Econômico (~5s)
+  image_gemini: 4,                 // Gemini genérico (compatibilidade legacy)
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎬 VÍDEO - Geração e processamento
 // ═══════════════════════════════════════════════════════════════════════════
 export const VIDEO_CREDITS = {
+  // Gen-4 (Runway)
   video_gen4_5s: 20,               // Gen-4 Turbo 5 segundos
   video_gen4_10s: 40,              // Gen-4 Turbo 10 segundos
-  video_upscale_5s: 10,            // Upscale 5 segundos
   video_gen4_aleph_5s: 60,         // Gen-4 Aleph 5s (premium)
+  
+  // Image to Video
+  image_to_video_5s: 18,           // Transformar imagem em vídeo 5s
+  image_to_video_10s: 35,          // Transformar imagem em vídeo 10s
+  
+  // Video Editing
+  video_to_video: 50,              // Editar vídeos com IA (Gen-4 Aleph)
+  
+  // Character Animation
+  act_two: 35,                     // Animar personagens com áudio
+  
+  // Gen-3 Alpha (opção econômica)
+  gen3_alpha_5s: 18,               // Geração econômica 5s
+  gen3_alpha_10s: 35,              // Geração econômica 10s
+  
+  // Video Enhancement
+  video_upscale_5s: 10,            // Upscale 5 segundos
+  video_upscale_10s: 20,           // Upscale para HD/4K (10s)
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -157,16 +176,24 @@ export const OPERATION_NAMES: Record<CreditOperation, string> = {
   music_convert_wav: 'Converter para WAV',
   
   // Imagem
-  image_fast: 'Imagem Rápida (Gemini Flash)',
-  image_standard: 'Imagem Standard (Gemini)',
-  image_ultra: 'Imagem Ultra (Gemini Pro)',
-  image_gemini: 'Imagem Gemini',
+  image_fast: 'Imagen-4 Fast (1K, ~2-3s)',
+  image_standard: 'Imagen-4 Standard (2K, ~5-8s)',
+  image_ultra: 'Imagen-4 Ultra (4K, ~10-15s)',
+  image_3: 'Imagen-3 (Econômico)',
+  image_gemini: 'Imagem Gemini (Legacy)',
   
   // Vídeo
   video_gen4_5s: 'Vídeo Gen-4 (5s)',
   video_gen4_10s: 'Vídeo Gen-4 (10s)',
-  video_upscale_5s: 'Upscale Vídeo (5s)',
   video_gen4_aleph_5s: 'Vídeo Gen-4 Aleph (5s)',
+  image_to_video_5s: 'Imagem para Vídeo (5s)',
+  image_to_video_10s: 'Imagem para Vídeo (10s)',
+  video_to_video: 'Editar Vídeo com IA',
+  act_two: 'Animar Personagem com Áudio',
+  gen3_alpha_5s: 'Gen-3 Alpha Econômico (5s)',
+  gen3_alpha_10s: 'Gen-3 Alpha Econômico (10s)',
+  video_upscale_5s: 'Upscale Vídeo (5s)',
+  video_upscale_10s: 'Upscale Vídeo HD/4K (10s)',
   
   // Chat
   chat_basic: 'Chat Básico (Grátis)',
