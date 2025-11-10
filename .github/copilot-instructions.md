@@ -206,21 +206,165 @@ components/
 - Execute complete verification before declaring completion
 - Run tests, check database, verify functionality
 
-### 2. Mandatory Supabase Verification
-```typescript
-// BEFORE any schema change:
-// 1. Check current structure
-const { data } = await supabase.from('table_name').select('*').limit(1);
-console.log('Current columns:', Object.keys(data[0]));
+### 2. Rollback & Reversibility (CRITICAL)
+**All critical changes MUST have documented rollback path BEFORE implementation**
 
-// 2. Verify foreign keys
-// 3. Check RLS policies
-// 4. Test with actual data
+```sql
+-- Example: Adding a column
+-- FORWARD MIGRATION (do-migration.sql)
+ALTER TABLE users ADD COLUMN new_field TEXT;
+
+-- ROLLBACK SCRIPT (undo-migration.sql) - CREATE THIS FIRST!
+ALTER TABLE users DROP COLUMN IF EXISTS new_field;
+
+-- Test rollback BEFORE applying forward migration
 ```
 
-**Scripts**: `verificar-estrutura-supabase.mjs`, `check-table-structure.mjs`
+**Rollback Documentation Template:**
+```markdown
+## Rollback Plan for [Change Description]
 
-### 3. DUA Coin & DUA IA Coherence
+### What Changed
+- Table: `table_name`
+- Columns: `col1`, `col2`
+- RLS Policies: `policy_name`
+
+### Rollback SQL
+```sql
+-- Script to undo changes
+-- Test this FIRST before applying changes
+```
+
+### Verification After Rollback
+1. Check data integrity: `SELECT COUNT(*) FROM table_name`
+2. Verify foreign keys: `\d+ table_name` (Postgres)
+3. Test authentication flow
+```
+
+**Files**: Store rollback scripts in `/sql/rollback/[feature].sql`
+
+### 3. Automated Testing (MANDATORY)
+**No code changes without tests**
+
+```typescript
+// Example: Testing image generation
+// File: tests/api/imagen.test.ts
+
+import { describe, it, expect, beforeAll } from '@jest/globals';
+
+describe('Image Generation API', () => {
+  let userId: string;
+  
+  beforeAll(async () => {
+    // Setup test user with credits
+    userId = await createTestUser({ creditos_servicos: 100 });
+  });
+  
+  it('should deduct credits on successful generation', async () => {
+    const response = await fetch('/api/imagen/generate', {
+      method: 'POST',
+      body: JSON.stringify({
+        prompt: 'test',
+        user_id: userId,
+        config: { numberOfImages: 1 }
+      })
+    });
+    
+    expect(response.status).toBe(200);
+    
+    // Verify credits deducted
+    const user = await getUserBalance(userId);
+    expect(user.creditos_servicos).toBe(70); // 100 - 30
+  });
+  
+  it('should reject when insufficient credits', async () => {
+    const poorUser = await createTestUser({ creditos_servicos: 10 });
+    
+    const response = await fetch('/api/imagen/generate', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: 'test', user_id: poorUser })
+    });
+    
+    expect(response.status).toBe(402);
+    expect(await response.json()).toHaveProperty('redirect', '/loja-creditos');
+  });
+});
+```
+
+**Test Commands:**
+```bash
+# Run all tests
+pnpm test
+
+# Run specific test file
+pnpm test tests/api/imagen.test.ts
+
+# Run with coverage
+pnpm test:coverage
+```
+
+**Directories:**
+- Unit tests: `/tests/unit/`
+- Integration tests: `/tests/integration/`
+- E2E tests: `/tests/e2e/`
+
+### 4. Complete Supabase Verification (EXPANDED)
+**Verification MUST include RLS Policies + Foreign Keys + Data Integrity**
+
+```typescript
+// COMPLETE Supabase verification script
+// File: verify-supabase-complete.mjs
+
+async function verifySupabaseComplete(tableName: string) {
+  // 1. Structure validation
+  const { data } = await supabase.from(tableName).select('*').limit(1);
+  console.log('✓ Columns:', Object.keys(data[0]));
+  
+  // 2. RLS Policies validation
+  const { data: policies } = await supabase.rpc('get_policies', { 
+    schema_name: 'public',
+    table_name: tableName 
+  });
+  console.log('✓ RLS Policies:', policies.length);
+  
+  // 3. Foreign Keys validation
+  const { data: fks } = await supabase.rpc('get_foreign_keys', {
+    table_name: tableName
+  });
+  console.log('✓ Foreign Keys:', fks);
+  
+  // 4. Test RLS enforcement
+  const { data: testRead, error: rlsError } = await supabaseAnon
+    .from(tableName)
+    .select('*')
+    .limit(1);
+  
+  if (rlsError && rlsError.code === 'PGRST301') {
+    console.log('✓ RLS enforced correctly (anonymous denied)');
+  }
+  
+  // 5. Referential Integrity test
+  try {
+    await supabase.from(tableName).insert({ 
+      user_id: '00000000-0000-0000-0000-000000000000' // Invalid UUID
+    });
+    console.error('✗ Foreign key NOT enforced!');
+  } catch (e) {
+    console.log('✓ Foreign key enforced');
+  }
+}
+```
+
+**RLS Policy Checklist:**
+- [ ] `SELECT` policy: Users can only read their own data
+- [ ] `INSERT` policy: Users can only insert for themselves
+- [ ] `UPDATE` policy: Users can only update their own data
+- [ ] `DELETE` policy: Users can only delete their own data
+- [ ] Admin override: Service role bypasses RLS
+
+**Scripts**: `check-rls-policies.mjs`, `verify-foreign-keys.mjs`
+
+### 5. DUA Coin & DUA IA Coherence
 - **NEVER forget**: DUA Coin and DUA IA are intrinsically linked
 - All changes must respect the unified authentication system
 - User balances sync between systems via `public.users`
@@ -232,7 +376,191 @@ console.log('Current columns:', Object.keys(data[0]));
 - `users` table is the single source of truth
 - Authentication flows MUST use Supabase Auth exclusively
 
-### 5. Project Memory & Context
+### 5. DUA Coin & DUA IA Coherence
+- **NEVER forget**: DUA Coin and DUA IA are intrinsically linked
+- All changes must respect the unified authentication system
+- User balances sync between systems via `public.users`
+- Verify sync with: `ANALYZE_DUAIA_DUACOIN_SYNC.mjs`
+
+### 6. Code Standards & Consistency (STRICT)
+**Follow project patterns rigorously**
+
+```typescript
+// ✅ CORRECT: Consistent error handling
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    
+    // Validate input
+    if (!body.prompt) {
+      return NextResponse.json(
+        { error: 'Prompt é obrigatório' },
+        { status: 400 }
+      );
+    }
+    
+    // Process request
+    const result = await processRequest(body);
+    
+    return NextResponse.json({ success: true, data: result });
+  } catch (error: any) {
+    console.error('Erro na API:', error);
+    return NextResponse.json(
+      { error: error.message || 'Erro interno' },
+      { status: 500 }
+    );
+  }
+}
+
+// ❌ WRONG: Inconsistent patterns
+export async function POST(req) {  // Missing types
+  const body = req.json();  // Missing await
+  if (!body.prompt) throw new Error('Missing prompt');  // Don't throw in API routes
+  return { data: result };  // Missing NextResponse.json
+}
+```
+
+**Linting:**
+```bash
+# Before commit
+pnpm lint          # Check for errors
+pnpm lint:fix      # Auto-fix issues
+pnpm format        # Prettier formatting
+```
+
+**Naming Conventions:**
+- API Routes: `kebab-case` (`imagen-generate`, not `imagenGenerate`)
+- Components: `PascalCase` (`UserProfile`, not `userProfile`)
+- Hooks: `camelCase` with `use` prefix (`useImagenApi`)
+- Files: Match export (`UserProfile.tsx` for `UserProfile` component)
+- Database: `snake_case` (`user_id`, `created_at`)
+
+### 7. Authentication Security (DETAILED)
+**JWT validation, session management, token encryption**
+
+```typescript
+// Server-side JWT validation
+import { createServerClient } from '@supabase/ssr';
+
+export async function validateSession(request: NextRequest) {
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+      },
+    }
+  );
+  
+  // Get session from JWT
+  const { data: { session }, error } = await supabase.auth.getSession();
+  
+  if (error || !session) {
+    return null;
+  }
+  
+  // Verify token hasn't expired
+  const expiresAt = session.expires_at;
+  if (expiresAt && Date.now() / 1000 > expiresAt) {
+    console.warn('Session expired');
+    await supabase.auth.signOut();
+    return null;
+  }
+  
+  // Verify user exists in database
+  const { data: user } = await supabase
+    .from('users')
+    .select('id, email, has_access')
+    .eq('id', session.user.id)
+    .single();
+  
+  if (!user || !user.has_access) {
+    return null;
+  }
+  
+  return { session, user };
+}
+```
+
+**Session Policies:**
+- JWT expiration: 1 hour (configurable via Supabase)
+- Refresh token: 30 days
+- Auto-refresh: 5 minutes before expiration
+- Secure cookies: `httpOnly`, `secure`, `sameSite: 'lax'`
+
+**Credential Storage:**
+```typescript
+// ✅ CORRECT: Server-only sensitive keys
+// .env.local (NEVER commit)
+GOOGLE_API_KEY=AIza...              # Server-only
+SUPABASE_SERVICE_ROLE_KEY=eyJ...   # Server-only
+
+// ✅ CORRECT: Client-safe keys
+NEXT_PUBLIC_SUPABASE_URL=https://...     # Safe (designed for client)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...     # Safe (RLS protected)
+NEXT_PUBLIC_FIREBASE_API_KEY=AIza...     # Safe (Firebase Rules)
+
+// ❌ WRONG: Exposing sensitive keys
+NEXT_PUBLIC_GOOGLE_API_KEY=AIza...       # NEVER!
+NEXT_PUBLIC_SERVICE_ROLE_KEY=eyJ...      # NEVER!
+```
+
+### 8. Schema as Source of Truth
+**Always reference schema files, never rely on memory**
+
+```typescript
+// BEFORE any database operation
+// 1. Check current schema
+import { readFileSync } from 'fs';
+
+const schemaSQL = readFileSync('sql/UNIFIED_SCHEMA_COMPLETE.sql', 'utf-8');
+console.log('📋 Current schema:', schemaSQL.includes('table_name'));
+
+// 2. Verify against actual database
+const { data: tableInfo } = await supabase.rpc('get_table_info', {
+  schema: 'public',
+  table: 'users'
+});
+
+console.log('✓ Columns match schema:', validateAgainstSchema(tableInfo));
+```
+
+**Schema Files (Source of Truth):**
+```
+sql/
+├── UNIFIED_SCHEMA_COMPLETE.sql    # Complete schema (primary source)
+├── schema-creditos-dua.sql        # Credits system
+├── schema-creditos-sync-duacoin.sql  # DUA Coin sync
+├── 01_users_columns.sql           # User table structure
+└── rollback/                      # Rollback scripts
+    ├── remove-column.sql
+    └── revert-rls.sql
+```
+
+**Schema Validation Script:**
+```typescript
+// verify-schema-matches.mjs
+import { readFileSync } from 'fs';
+import { createClient } from '@supabase/supabase-js';
+
+const expectedSchema = parseSQL('sql/UNIFIED_SCHEMA_COMPLETE.sql');
+const actualSchema = await getSupabaseSchema();
+
+const diff = compareSchemas(expectedSchema, actualSchema);
+
+if (diff.length > 0) {
+  console.error('❌ Schema mismatch detected:');
+  diff.forEach(d => console.log(`  - ${d}`));
+  process.exit(1);
+}
+
+console.log('✅ Schema matches source of truth');
+```
+
+### 9. Project Memory & Context
 ```typescript
 // Store and actively use:
 {
@@ -241,11 +569,14 @@ console.log('Current columns:', Object.keys(data[0]));
   auth: "Supabase Auth (Phone/Google OAuth)",
   apis: ["Google Gemini", "Google Imagen", "Suno Music API"],
   credits: { dua: "saldo_dua", services: "creditos_servicos" },
-  unifiedSystem: true
+  unifiedSystem: true,
+  schemaSource: "sql/UNIFIED_SCHEMA_COMPLETE.sql",
+  rlsEnabled: true,
+  sessionExpiry: 3600 // 1 hour
 }
 ```
 
-### 6. Verification Checklist (Before ANY commit)
+### 10. Verification Checklist (Before ANY commit)
 ```bash
 # 1. Database structure matches expectations
 node verificar-estrutura-supabase.mjs
@@ -337,26 +668,98 @@ git push                                  # Auto-deploy to Vercel
 I understand and accept these ultra-rigor rules as my primary operational standard:
 
 1. ✅ **Never declare work complete** without full verification cycle
-2. ✅ **Always verify Supabase** structure before/after changes
-3. ✅ **Maintain DUA Coin ↔ DUA IA coherence** in all modifications
-4. ✅ **Respect unified credentials system** - single SSO for all
-5. ✅ **Store and use project context** - never forget architecture
-6. ✅ **Execute verification checklist** before every completion
+2. ✅ **Create rollback scripts BEFORE implementing** critical changes
+3. ✅ **Write automated tests** for all new/modified code
+4. ✅ **Verify RLS + Foreign Keys + Data Integrity** in Supabase
+5. ✅ **Follow code standards strictly** - lint, format, naming conventions
+6. ✅ **Validate JWT/session security** for all auth changes
+7. ✅ **Use schema files as source of truth** - never rely on memory
+8. ✅ **Maintain DUA Coin ↔ DUA IA coherence** in all modifications
+9. ✅ **Respect unified credentials system** - single SSO for all
+10. ✅ **Execute complete verification checklist** before every commit
 
 ### Verification Steps I Will Execute
 ```typescript
-const verificationSteps = [
-  "Run verificar-estrutura-supabase.mjs",
-  "Confirm table structures match schema",
-  "Verify RLS policies active and correct",
-  "Check DUA IA ↔ DUA COIN sync intact",
-  "Test authentication flow end-to-end",
-  "Verify credits system functioning",
-  "Confirm no sensitive keys exposed (NEXT_PUBLIC_ check)",
-  "Test feature functionality in browser",
-  "Check Vercel deployment logs",
-  "Validate TypeScript types match DB schema"
+const criticalVerificationSteps = [
+  // Pre-implementation
+  "1. Create rollback script in sql/rollback/",
+  "2. Test rollback script works",
+  "3. Document rollback plan",
+  "4. Check schema source of truth (UNIFIED_SCHEMA_COMPLETE.sql)",
+  
+  // Implementation
+  "5. Write code following project standards",
+  "6. Create/update automated tests",
+  "7. Run pnpm lint && pnpm format",
+  
+  // Database changes
+  "8. Verify schema matches source: verify-schema-matches.mjs",
+  "9. Check RLS policies: check-rls-policies.mjs",
+  "10. Verify foreign keys: verify-foreign-keys.mjs",
+  "11. Test referential integrity",
+  
+  // System integrity
+  "12. DUA IA ↔ DUA COIN sync: ANALYZE_DUAIA_DUACOIN_SYNC.mjs",
+  "13. Test auth flow: test-auth-flow.mjs",
+  "14. Verify credits: test-credits-system.mjs",
+  "15. Check session security: test-session-security.mjs",
+  
+  // Security
+  "16. No sensitive keys exposed: grep NEXT_PUBLIC_GOOGLE_API_KEY",
+  "17. JWT validation working",
+  "18. Session expiration enforced",
+  
+  // Testing
+  "19. All tests pass: pnpm test",
+  "20. Coverage maintained: pnpm test:coverage (>80%)",
+  "21. TypeScript clean: pnpm type-check",
+  
+  // Final verification
+  "22. Feature works in browser",
+  "23. Vercel deployment successful",
+  "24. Runtime logs clean",
+  "25. Rollback tested and confirmed working"
+];
+
+const documentationSteps = [
+  "Document rollback plan before implementation",
+  "Update schema documentation if DB changed",
+  "Update API docs if endpoints changed",
+  "Add migration notes to changelog"
 ];
 ```
 
-**I will not mark any task as complete until all verification steps pass.**
+### Example Pre-Implementation Checklist
+```markdown
+## Feature: [Feature Name]
+
+### 1. Rollback Plan
+- [ ] Created sql/rollback/[feature]-rollback.sql
+- [ ] Tested rollback script
+- [ ] Documented in docs/rollback/[feature].md
+
+### 2. Tests
+- [ ] Unit tests written (tests/unit/[feature].test.ts)
+- [ ] Integration tests written (tests/integration/[feature].test.ts)
+- [ ] Coverage >80%
+
+### 3. Schema Validation
+- [ ] Checked UNIFIED_SCHEMA_COMPLETE.sql
+- [ ] RLS policies defined
+- [ ] Foreign keys validated
+- [ ] Migration SQL ready
+
+### 4. Security
+- [ ] No NEXT_PUBLIC_ for sensitive keys
+- [ ] JWT validation in place
+- [ ] Session policies enforced
+- [ ] Credentials encrypted
+
+### 5. Standards
+- [ ] ESLint passing
+- [ ] Prettier formatted
+- [ ] TypeScript clean
+- [ ] Naming conventions followed
+```
+
+**I will not mark any task as complete until ALL 25 verification steps pass and documentation is complete.**
