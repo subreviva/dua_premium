@@ -116,15 +116,17 @@ export default function DesignStudioPage() {
             }
             @media (max-width: 768px) {
               main {
-                padding-top: calc(env(safe-area-inset-top) + 3.5rem);
-                padding-bottom: calc(env(safe-area-inset-bottom) + ${showToolPanel ? (panelHeight === 'full' ? '85vh' : '50vh') : '5rem'});
-                padding-left: max(0.75rem, env(safe-area-inset-left));
-                padding-right: max(0.75rem, env(safe-area-inset-right));
+                /* Safe area top + navbar (56px) + espaço superior */
+                padding-top: calc(env(safe-area-inset-top) + 4rem);
+                /* Safe area bottom + tools bar (64px) + painel + espaço para download button */
+                padding-bottom: calc(env(safe-area-inset-bottom) + 4rem + ${showToolPanel ? (panelHeight === 'full' ? '85vh' : '50vh') : '0px'});
+                padding-left: max(1rem, env(safe-area-inset-left));
+                padding-right: max(1rem, env(safe-area-inset-right));
                 transition: padding-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
               }
             }
           `}</style>
-          <div className="w-full max-w-7xl">
+          <div className="w-full max-w-7xl px-3 md:px-0">
             <Canvas 
               content={canvasContent} 
               isLoading={api.isLoading} 

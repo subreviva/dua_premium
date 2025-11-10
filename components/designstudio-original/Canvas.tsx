@@ -117,11 +117,16 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage, api
         );
       case 'image':
         return (
-          <img 
-            src={content.src} 
-            alt={content.prompt || 'Imagem gerada'} 
-            className="object-contain w-full h-full max-h-full rounded-lg shadow-2xl shadow-blue-500/20" 
-          />
+          <div className="relative w-full h-full flex items-center justify-center p-2 md:p-4">
+            <img 
+              src={content.src} 
+              alt={content.prompt || 'Imagem gerada'} 
+              className="object-contain w-full h-full max-w-full max-h-full rounded-lg shadow-2xl shadow-blue-500/20" 
+              style={{
+                maxHeight: 'calc(100% - 4rem)', // Espaço para botão download
+              }}
+            />
+          </div>
         );
       case 'svg':
         return (
@@ -147,10 +152,12 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage, api
 
   return (
     <div className={cn(
-      "w-full rounded-2xl flex items-center justify-center relative transition-all duration-300",
-      // Mobile: aspect-square menor, desktop: max-h-full
-      "h-auto min-h-[300px] md:h-full md:max-h-[calc(100vh-4rem)]",
-      "aspect-square md:aspect-auto",
+      "w-full rounded-2xl flex items-center justify-center relative transition-all duration-300 overflow-hidden",
+      // Mobile: altura otimizada para não cortar imagem
+      "h-auto md:h-full",
+      // Mobile: aspect variável baseado no conteúdo
+      content.type === 'image' ? "min-h-[60vh] max-h-[75vh]" : "min-h-[300px]",
+      "md:max-h-[calc(100vh-4rem)]",
       content.type === 'empty' 
         ? "bg-black/20 backdrop-blur-sm border-2 border-dashed border-white/10" 
         : "bg-black/30 backdrop-blur-lg border border-white/10 shadow-2xl"
@@ -173,7 +180,7 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage, api
       )}
       {renderContent()}
       
-      {/* Quick Actions Bar - Desktop e Mobile */}
+      {/* Quick Actions Bar - Desktop */}
       {content.type === 'image' && !isLoading && api && onContentUpdate && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 hidden md:block">
           <QuickActionsBar
@@ -188,14 +195,32 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage, api
         </div>
       )}
       
-      {/* Download button (legacy - só quando não tem Quick Actions) */}
-      {(content.type === 'image' || content.type === 'svg') && !isLoading && (!api || content.type === 'svg') && (
+      {/* iOS Premium Download Button - Mobile e Desktop fallback */}
+      {(content.type === 'image' || content.type === 'svg') && !isLoading && (
         <button 
           onClick={handleDownload} 
           title="Descarregar" 
-          className="absolute top-3 right-3 md:top-4 md:right-4 z-10 p-2.5 md:p-3 bg-black/70 backdrop-blur-xl rounded-2xl text-white/80 hover:text-white hover:bg-gradient-to-br hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-300 border border-white/20 hover:border-blue-400/40 hover:scale-110 active:scale-90 group shadow-lg shadow-black/40"
+          className={cn(
+            "absolute z-10 transition-all duration-300 group",
+            // Mobile: bottom center, grande e visível
+            "bottom-3 left-1/2 -translate-x-1/2 md:top-4 md:right-4 md:left-auto md:translate-x-0",
+            // iOS Premium Design
+            "flex items-center gap-2 px-6 py-3.5 md:p-3",
+            "bg-gradient-to-br from-blue-500/90 to-purple-500/90 md:from-black/70 md:to-black/70",
+            "backdrop-blur-3xl rounded-full md:rounded-2xl",
+            "text-white font-semibold text-sm md:text-white/80 md:font-normal",
+            "border-2 border-white/30 md:border md:border-white/20",
+            "hover:from-blue-500 hover:to-purple-500 md:hover:bg-gradient-to-br md:hover:from-blue-500/30 md:hover:to-purple-500/30",
+            "hover:border-white/50 md:hover:border-blue-400/40",
+            "hover:scale-105 md:hover:scale-110",
+            "active:scale-95 md:active:scale-90",
+            "shadow-[0_8px_32px_rgba(59,130,246,0.5)] md:shadow-lg md:shadow-black/40",
+            // Evitar sobreposição com QuickActionsBar no desktop quando presente
+            api && onContentUpdate && content.type === 'image' ? 'md:block' : ''
+          )}
         >
-          <Download className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-y-0.5" />
+          <Download className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
+          <span className="md:hidden">Download</span>
         </button>
       )}
     </div>
