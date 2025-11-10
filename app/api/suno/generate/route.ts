@@ -1,5 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { SunoAPI } from "@/lib/suno-api"
+import { checkCredits, deductCredits, refundCredits } from "@/lib/credits/credits-service"
+import { createClient } from "@supabase/supabase-js"
+
+// Cliente Supabase seguro (server-only)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,11 +36,40 @@ export async function POST(request: NextRequest) {
       styleWeight,
       weirdnessConstraint,
       audioWeight,
+      userId, // 🔥 NOVO: userId obrigatório
     } = body
+
+    // 🔥 VALIDAÇÃO: userId é obrigatório
+    if (!userId) {
+      return NextResponse.json(
+        { error: "userId é obrigatório para gerar música" },
+        { status: 400 }
+      )
+    }
 
     if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 })
     }
+
+    // 🔥 PASSO 1: VERIFICAR CRÉDITOS ANTES DE GERAR
+    console.log(`🎵 [Suno] Verificando créditos para usuário ${userId}...`)
+    const creditCheck = await checkCredits(userId, 'music_generate_v5')
+
+    if (!creditCheck.hasCredits) {
+      console.log(`❌ [Suno] Créditos insuficientes: ${creditCheck.message}`)
+      return NextResponse.json(
+        {
+          error: 'Créditos insuficientes',
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+          message: creditCheck.message,
+        },
+        { status: 402 } // 402 Payment Required
+      )
+    }
+
+    console.log(`✅ [Suno] Créditos OK (saldo: ${creditCheck.currentBalance}, necessário: ${creditCheck.required})`)
 
     if (customMode) {
       if (!style || typeof style !== "string" || !style.trim()) {
@@ -98,22 +141,69 @@ export async function POST(request: NextRequest) {
       titleLength: title?.length,
     })
 
-    const taskId = await client.generateMusic({
-      prompt,
-      customMode: customMode || false,
-      instrumental: instrumental !== false,
+    // 🔥 PASSO 2: GERAR MÚSICA (pode falhar)
+    let taskId: string
+    try {
+      taskId = await client.generateMusic({
+        prompt,
+        customMode: customMode || false,
+        instrumental: instrumental !== false,
+        model: model || "V3_5",
+        style,
+        title,
+        callBackUrl,
+        negativeTags: negativeTags || undefined,
+        vocalGender: vocalGender || undefined,
+        styleWeight: styleWeight !== undefined ? Math.round(styleWeight * 100) / 100 : undefined,
+        weirdnessConstraint: weirdnessConstraint !== undefined ? Math.round(weirdnessConstraint * 100) / 100 : undefined,
+        audioWeight: audioWeight !== undefined ? Math.round(audioWeight * 100) / 100 : undefined,
+      })
+
+      console.log(`✅ [Suno] Música gerada com sucesso! Task ID: ${taskId}`)
+    } catch (generationError: any) {
+      console.error('❌ [Suno] Erro ao gerar música:', generationError)
+      
+      // Não deduzir créditos se geração falhou
+      if (generationError.message?.includes("402")) {
+        return NextResponse.json({ error: "Insufficient credits" }, { status: 402 })
+      } else if (generationError.message?.includes("429")) {
+        return NextResponse.json({ error: "Rate limit exceeded. Please wait before retrying." }, { status: 429 })
+      } else if (generationError.message?.includes("400")) {
+        return NextResponse.json({ error: "Validation error. Check for copyrighted content." }, { status: 400 })
+      }
+
+      throw generationError
+    }
+
+    // 🔥 PASSO 3: DEDUZIR CRÉDITOS APÓS SUCESSO
+    console.log(`💳 [Suno] Deduzindo ${creditCheck.required} créditos...`)
+    const deduction = await deductCredits(userId, 'music_generate_v5', {
+      prompt: prompt.substring(0, 200),
       model: model || "V3_5",
-      style,
-      title,
-      callBackUrl,
-      negativeTags: negativeTags || undefined,
-      vocalGender: vocalGender || undefined,
-      styleWeight: styleWeight !== undefined ? Math.round(styleWeight * 100) / 100 : undefined,
-      weirdnessConstraint: weirdnessConstraint !== undefined ? Math.round(weirdnessConstraint * 100) / 100 : undefined,
-      audioWeight: audioWeight !== undefined ? Math.round(audioWeight * 100) / 100 : undefined,
+      customMode,
+      instrumental,
+      taskId,
     })
 
-    return NextResponse.json({ taskId })
+    if (!deduction.success) {
+      console.error('❌ [Suno] Erro ao deduzir créditos:', deduction.error)
+      // Música foi gerada mas créditos não foram deduzidos
+      // Log crítico para análise posterior
+      console.error('⚠️ [CRITICAL] Música gerada sem cobrança de créditos!', {
+        userId,
+        taskId,
+        error: deduction.error,
+      })
+    } else {
+      console.log(`✅ [Suno] Créditos deduzidos! Novo saldo: ${deduction.newBalance}`)
+    }
+
+    return NextResponse.json({
+      taskId,
+      creditsUsed: creditCheck.required,
+      newBalance: deduction.newBalance,
+      transactionId: deduction.transactionId,
+    })
   } catch (error) {
     console.error("[v0] Suno generation error:", error)
 

@@ -3,146 +3,187 @@
  * Use este arquivo para integrar o consumo de créditos em todos os serviços de IA
  */
 
-interface ConsumoCreditos {
+/**
+ * Adapter legacy -> Centralized credits service
+ *
+ * Este arquivo mantém a API antiga (`consumirCreditos`, `verificarCreditos`,
+ * etc.) para não quebrar os muitos pontos do código que ainda importam
+ * `@/lib/creditos-helper`. Internamente, quando executado no servidor,
+ * ele delega para o `lib/credits/credits-service.ts` (que usa SERVICE_ROLE_KEY
+ * e RPCs atômicos). No cliente, mantém a chamada ao endpoint `/api/consumir-creditos`
+ * para compatibilidade.
+ */
+
+import { createClient } from '@supabase/supabase-js';
+import {
+  getCreditCost,
+  isFreeOperation,
+  getOperationName,
+} from '@/lib/credits/credits-config';
+
+// Import server-only service but keep dynamic to avoid bundling in client
+let serverCreditsService: any = null;
+if (typeof window === 'undefined') {
+  serverCreditsService = require('./credits/credits-service');
+}
+
+type ConsumoCreditos = {
   success: boolean;
   creditos_restantes?: number;
+  transactionId?: string;
   error?: string;
   details?: any;
-}
-
-interface CustoServico {
-  music_generation: number;
-  image_generation: number;
-  chat_message: number;
-  video_generation: number;
-  voice_generation: number;
-}
-
-// Custos de cada serviço em créditos
-export const CUSTOS_SERVICOS: CustoServico = {
-  music_generation: 50,      // Gerar 1 música = 50 créditos
-  image_generation: 30,      // Gerar 1 imagem = 30 créditos
-  chat_message: 1,           // 1 mensagem de chat = 1 crédito
-  video_generation: 100,     // Gerar 1 vídeo = 100 créditos
-  voice_generation: 20,      // Gerar voz = 20 créditos
 };
 
 /**
- * Consome créditos antes de executar um serviço
- * @param userId - ID do usuário
- * @param serviceType - Tipo de serviço (music_generation, image_generation, etc)
- * @param metadata - Metadados opcionais (prompt, model, etc)
- * @returns Resultado do consumo
+ * Consumir créditos (compatível com chamadas antigas)
+ * - Se importado no servidor: usa RPC `deduct_servicos_credits` via credits-service
+ * - Se no cliente: faz POST para /api/consumir-creditos (mantém compatibilidade)
+ *
+ * Suporta duas formas de chamada:
+ * 1) serviceType é uma operação conhecida em credits-config (ex: 'image_standard')
+ *    então o custo é obtido automaticamente.
+ * 2) metadata.creditos contém um número -> usa esse valor como custo (legacy)
  */
 export async function consumirCreditos(
   userId: string,
-  serviceType: keyof CustoServico,
+  serviceType: string,
   metadata: Record<string, any> = {}
 ): Promise<ConsumoCreditos> {
-  try {
-    const creditos = CUSTOS_SERVICOS[serviceType];
+  // SERVER-SIDE: usar credits-service diretamente (mais seguro e atômico)
+  if (typeof window === 'undefined' && serverCreditsService) {
+    try {
+      // Se metadata.creditos foi passado (legacy), use esse valor diretamente
+      if (typeof metadata.creditos === 'number') {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
 
-    if (!creditos) {
+        // Chamar RPC direto com valor customizado
+        const { data, error } = await supabase.rpc('deduct_servicos_credits', {
+          p_user_id: userId,
+          p_amount: metadata.creditos,
+          p_operation: serviceType,
+          p_description: getOperationName(serviceType as any) || serviceType,
+          p_metadata: JSON.stringify({ ...metadata, legacy: true }),
+        });
+
+        if (error) {
+          return { success: false, error: error.message, details: error };
+        }
+
+        return {
+          success: true,
+          creditos_restantes: data?.balance_after ?? 0,
+          transactionId: data?.transaction_id,
+        };
+      }
+
+      // Se serviceType existe nas operações conhecidas, usar deductCredits
+      const knownOps = Object.keys(require('./credits/credits-config').ALL_CREDITS || {});
+      if (knownOps.includes(serviceType)) {
+        // Primeiro checar se há saldo suficiente
+        const check = await serverCreditsService.checkCredits(userId, serviceType);
+        if (!check.hasCredits) {
+          return {
+            success: false,
+            error: 'Créditos insuficientes',
+            details: { required: check.required, current: check.currentBalance },
+          };
+        }
+
+        // Deduzir créditos (RPC atômico)
+        const deduct = await serverCreditsService.deductCredits(userId, serviceType, metadata);
+        if (!deduct.success) {
+          return { success: false, error: deduct.error || 'Erro ao deduzir créditos' };
+        }
+
+        return {
+          success: true,
+          creditos_restantes: deduct.newBalance,
+          transactionId: deduct.transactionId,
+        };
+      }
+
+      // Caso não seja operação conhecida e não tenha metadata.creditos,
+      // tentaremos usar credits-service as operação by-name (it may accept it)
+      const fallback = await serverCreditsService.deductCredits(userId, serviceType, metadata);
+      if (!fallback.success) {
+        return { success: false, error: fallback.error || 'Créditos insuficientes' };
+      }
+
       return {
-        success: false,
-        error: `Tipo de serviço desconhecido: ${serviceType}`,
+        success: true,
+        creditos_restantes: fallback.newBalance,
+        transactionId: fallback.transactionId,
       };
+    } catch (err: any) {
+      console.error('Erro consumirCreditos (server):', err);
+      return { success: false, error: err?.message || String(err) };
     }
+  }
 
-    const response = await fetch('/api/consumir-creditos', {
+  // CLIENT-SIDE: manter POST para /api/consumir-creditos
+  try {
+    const creditos = metadata.creditos;
+    const res = await fetch('/api/consumir-creditos', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         user_id: userId,
-        creditos,
+        creditos: creditos,
         service_type: serviceType,
-        metadata: {
-          ...metadata,
-          timestamp: new Date().toISOString(),
-        },
+        metadata: { ...metadata, timestamp: new Date().toISOString() },
       }),
     });
 
-    const result = await response.json();
-
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || 'Erro ao consumir créditos',
-        details: result.details,
-      };
+    const json = await res.json();
+    if (!json.success) {
+      return { success: false, error: json.error || 'Erro ao consumir créditos', details: json.details };
     }
 
     return {
       success: true,
-      creditos_restantes: result.data?.creditos_restantes,
+      creditos_restantes: json.data?.creditos_restantes,
+      transactionId: json.data?.transaction_id,
     };
-
-  } catch (error: any) {
-    console.error('Erro ao consumir créditos:', error);
-    return {
-      success: false,
-      error: 'Erro ao processar consumo de créditos',
-    };
+  } catch (err: any) {
+    console.error('Erro consumirCreditos (client):', err);
+    return { success: false, error: err?.message || 'Erro ao consumir créditos' };
   }
 }
 
 /**
- * Verifica se o usuário tem créditos suficientes
- * @param userId - ID do usuário
- * @param serviceType - Tipo de serviço
- * @returns Se tem créditos suficientes e quantos créditos tem
+ * Verificar créditos (compatível com uso antigo)
  */
 export async function verificarCreditos(
   userId: string,
-  serviceType: keyof CustoServico
+  requiredCredits: number | string
 ): Promise<{ suficiente: boolean; creditos_atuais: number; creditos_necessarios: number }> {
+  // Server: use duaia_user_balances
+  if (typeof window === 'undefined') {
+    try {
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+      const { data, error } = await supabase.from('duaia_user_balances').select('servicos_creditos').eq('user_id', userId).single();
+      const atual = data?.servicos_creditos ?? 0;
+      const necessario = typeof requiredCredits === 'number' ? requiredCredits : (getCreditCost(requiredCredits as any) || 0);
+      return { suficiente: atual >= necessario, creditos_atuais: atual, creditos_necessarios: necessario };
+    } catch (err) {
+      return { suficiente: false, creditos_atuais: 0, creditos_necessarios: typeof requiredCredits === 'number' ? requiredCredits : (getCreditCost(requiredCredits as any) || 0) };
+    }
+  }
+
+  // Client: call balance endpoint
   try {
-    const response = await fetch(`/api/users/${userId}/balance`);
-    const result = await response.json();
-
-    const creditosAtuais = result.data?.creditos_servicos || 0;
-    const creditosNecessarios = CUSTOS_SERVICOS[serviceType];
-
-    return {
-      suficiente: creditosAtuais >= creditosNecessarios,
-      creditos_atuais: creditosAtuais,
-      creditos_necessarios: creditosNecessarios,
-    };
-
-  } catch (error) {
-    return {
-      suficiente: false,
-      creditos_atuais: 0,
-      creditos_necessarios: CUSTOS_SERVICOS[serviceType],
-    };
+    const res = await fetch(`/api/users/${userId}/balance`);
+    const json = await res.json();
+    const atual = json.data?.creditos_servicos ?? 0;
+    const necessario = typeof requiredCredits === 'number' ? requiredCredits : (getCreditCost(requiredCredits as any) || 0);
+    return { suficiente: atual >= necessario, creditos_atuais: atual, creditos_necessarios: necessario };
+  } catch (err) {
+    return { suficiente: false, creditos_atuais: 0, creditos_necessarios: typeof requiredCredits === 'number' ? requiredCredits : (getCreditCost(requiredCredits as any) || 0) };
   }
 }
 
-/**
- * Calcula o custo total de múltiplas operações
- * @param operacoes - Array de operações a serem executadas
- * @returns Custo total em créditos
- */
-export function calcularCustoTotal(
-  operacoes: Array<keyof CustoServico>
-): number {
-  return operacoes.reduce((total, op) => total + CUSTOS_SERVICOS[op], 0);
-}
-
-/**
- * Formata mensagem de erro de créditos insuficientes
- * @param creditosAtuais - Créditos atuais do usuário
- * @param creditosNecessarios - Créditos necessários
- * @returns Mensagem formatada
- */
-export function formatarErroCreditos(
-  creditosAtuais: number,
-  creditosNecessarios: number
-): string {
-  const faltam = creditosNecessarios - creditosAtuais;
-  
-  return `Créditos insuficientes! Você tem ${creditosAtuais} créditos, mas precisa de ${creditosNecessarios}. Faltam ${faltam} créditos. Compre mais créditos em /loja-creditos`;
-}
+export { getCreditCost };

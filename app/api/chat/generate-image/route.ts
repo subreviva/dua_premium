@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase';
+import { consumirCreditos } from '@/lib/creditos-helper';
 import Replicate from 'replicate';
 import { cookies } from 'next/headers';
 
@@ -44,22 +45,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Buscar informações do usuário
+    // Buscar informações do usuário (migrar para duaia_user_balances)
+    const { data: balanceData, error: balanceError } = await supabase
+      .from('duaia_user_balances')
+      .select('servicos_creditos')
+      .eq('user_id', user.id)
+      .single();
+
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('creditos_servicos, chat_images_generated, role')
+      .select('chat_images_generated, role')
       .eq('id', user.id)
       .single();
 
-    if (userError) {
-      console.error('Erro ao buscar usuário:', userError);
+    if (userError && balanceError) {
+      console.error('Erro ao buscar usuário/balances:', userError, balanceError);
       return NextResponse.json(
         { error: 'Erro ao buscar dados do usuário' },
         { status: 500 }
       );
     }
 
-    const creditosAtuais = userData?.creditos_servicos || 0;
+    const creditosAtuais = balanceData?.servicos_creditos || 0;
     const imagensGeradas = userData?.chat_images_generated || 0;
     const isAdmin = userData?.role === 'admin';
 
@@ -108,46 +115,29 @@ export async function POST(request: NextRequest) {
 
     // Atualizar contador de imagens e cobrar créditos (apenas para não-admins)
     const novoContador = imagensGeradas + 1;
-    const novosCreditos = precisaCobrar 
-      ? creditosAtuais - CREDITO_IMAGEM_CHAT 
-      : creditosAtuais;
+    let novosCreditos = creditosAtuais;
 
     // Admin não atualiza contador nem cobra créditos
     if (!isAdmin) {
-      const { error: updateError } = await supabase
+      // Atualizar contador de imagens
+      await supabase
         .from('users')
-        .update({
-          chat_images_generated: novoContador,
-          creditos_servicos: novosCreditos,
-        })
+        .update({ chat_images_generated: novoContador })
         .eq('id', user.id);
 
-      if (updateError) {
-        console.error('Erro ao atualizar créditos:', updateError);
-        // Não retornar erro, a imagem foi gerada
-      }
-
-      // Registrar transação se cobrou créditos
+      // Cobrar créditos atomicamente via central service
       if (precisaCobrar) {
-        const { error: transactionError } = await supabase
-          .from('duaia_transactions')
-          .insert({
-            user_id: user.id,
-            transaction_type: 'debit',
-            amount: -CREDITO_IMAGEM_CHAT,
-            balance_before: creditosAtuais,
-            balance_after: novosCreditos,
-            operation: 'chat_image_generation',
-            description: 'Geração de imagem no chat',
-            metadata: {
-              prompt: prompt.substring(0, 100),
-              model: 'prunaai/flux-fast',
-              image_number: novoContador,
-            }
-          });
+        const resultado = await consumirCreditos(user.id, 'chat_basic', {
+          creditos: CREDITO_IMAGEM_CHAT,
+          prompt: prompt.substring(0, 100),
+          model: 'prunaai/flux-fast',
+          image_number: novoContador,
+        });
 
-        if (transactionError) {
-          console.error('Erro ao registrar transação:', transactionError);
+        if (resultado.success) {
+          novosCreditos = resultado.creditos_restantes || creditosAtuais;
+        } else {
+          console.error('Erro ao cobrar créditos:', resultado.error);
         }
       }
     } else {

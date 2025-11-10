@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
+import { consumirCreditos } from '@/lib/creditos-helper';
 
 /**
  * API Route: /api/imagen/generate
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
       const modelId = model || 'imagen-4.0-generate-001';
       const serviceName = SERVICE_NAME_MAP[modelId] || 'image_standard';
 
-      // Consultar custo do serviço via RPC
+      // Consultar custo do serviço via RPC (mantém custo dinâmico)
       const { data: costData, error: costError } = await supabase.rpc('get_service_cost', {
         p_service_name: serviceName
       });
@@ -81,61 +82,22 @@ export async function POST(req: NextRequest) {
 
       console.log(`💰 Serviço: ${serviceName} → ${CUSTO_GERACAO_IMAGEM} créditos`);
 
-      // Verificar saldo
-      const { data: user } = await supabase
-        .from('users')
-        .select('creditos_servicos')
-        .eq('id', user_id)
-        .single();
+      // Delegar consumo para o adapter unificado (server side)
+      const resultado = await consumirCreditos(user_id, serviceName, {
+        creditos: CUSTO_GERACAO_IMAGEM,
+        prompt: prompt.substring(0, 100),
+        model: modelId,
+        service_name: serviceName,
+        config: finalConfig,
+      });
 
-      const creditosAtuais = user?.creditos_servicos || 0;
-
-      if (creditosAtuais < CUSTO_GERACAO_IMAGEM) {
+      if (!resultado.success) {
         return NextResponse.json({
-          error: 'Créditos insuficientes',
-          details: {
-            creditos_necessarios: CUSTO_GERACAO_IMAGEM,
-            creditos_atuais: creditosAtuais,
-            faltam: CUSTO_GERACAO_IMAGEM - creditosAtuais,
-          },
+          error: 'Créditos insuficientes ou erro ao consumir créditos',
+          details: resultado.error || resultado.details,
           redirect: '/loja-creditos',
-        }, { status: 402 }); // 402 Payment Required
+        }, { status: 402 });
       }
-
-      // Consumir créditos
-      const { error: consumoError } = await supabase
-        .from('users')
-        .update({
-          creditos_servicos: creditosAtuais - CUSTO_GERACAO_IMAGEM,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user_id);
-
-      if (consumoError) {
-        console.error('Erro ao consumir créditos:', consumoError);
-        return NextResponse.json({
-          error: 'Erro ao processar créditos',
-        }, { status: 500 });
-      }
-
-      // Registrar transação
-      await supabase
-        .from('transactions')
-        .insert({
-          user_id,
-          source_type: 'service_usage',
-          amount_dua: 0,
-          amount_creditos: -CUSTO_GERACAO_IMAGEM,
-          description: `Geração de imagem (${serviceName})`,
-          metadata: {
-            prompt: prompt.substring(0, 100),
-            model: modelId,
-            service_name: serviceName,
-            config: finalConfig,
-            timestamp: new Date().toISOString(),
-          },
-          status: 'completed',
-        });
     }
 
     // API Key

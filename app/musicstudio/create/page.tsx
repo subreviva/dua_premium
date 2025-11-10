@@ -153,12 +153,19 @@ export default function CreatePage() {
         }
       }
 
+      // 🔥 OBTER USER ID
+      const { data: { user } } = await supabaseClient.auth.getUser()
+      if (!user) {
+        throw new Error("Você precisa estar autenticado para gerar música")
+      }
+
       const response = await fetch("/api/suno/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          userId: user.id, // 🔥 ENVIAR USER ID
           prompt,
           customMode,
           instrumental,

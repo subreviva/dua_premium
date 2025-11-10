@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import RunwayML from '@runwayml/sdk';
 import { consumirCreditos } from '@/lib/creditos-helper';
+import { refundCredits } from '@/lib/credits/credits-service';
 
 // Inicializar cliente Runway
 const client = new RunwayML({
@@ -31,6 +32,15 @@ const RUNWAY_CONFIG = {
     gen4_aleph: 10, // 10 segundos
   },
 } as const;
+
+// Mapear modelos Runway para operações do sistema de créditos
+const MODEL_TO_OPERATION_MAP: Record<string, string> = {
+  'gen4_turbo_5s': 'video_gen4_5s',
+  'gen4_turbo_10s': 'video_gen4_10s',
+  'gen4_aleph_5s': 'video_gen4_aleph_5s',
+  'gen3a_turbo_5s': 'gen3_alpha_5s',
+  'gen3a_turbo_10s': 'gen3_alpha_10s',
+};
 
 type RunwayModel = typeof RUNWAY_CONFIG.SUPPORTED_MODELS[number];
 type RunwayRatio = typeof RUNWAY_CONFIG.SUPPORTED_RATIOS[number];
@@ -81,25 +91,29 @@ export async function POST(request: NextRequest) {
     // Calcular custo em créditos baseado no modelo e duração
     const duration = RUNWAY_CONFIG.DURATIONS[model as RunwayModel];
     let creditosNecessarios = 0;
+    let operationKey = '';
 
     if (model === 'gen4_turbo') {
-      creditosNecessarios = duration === 4 ? 30 : 90; // 4s ou ~15s
+      operationKey = duration === 5 ? 'video_gen4_5s' : 'video_gen4_10s';
+      creditosNecessarios = duration === 5 ? 20 : 40;
     } else if (model === 'gen3a_turbo') {
-      creditosNecessarios = 35; // 5s
+      operationKey = duration === 5 ? 'gen3_alpha_5s' : 'gen3_alpha_10s';
+      creditosNecessarios = duration === 5 ? 18 : 35;
     } else if (model === 'gen4_aleph') {
-      creditosNecessarios = 100; // 10s qualidade máxima
+      operationKey = 'video_gen4_aleph_5s';
+      creditosNecessarios = 60;
     }
 
-    // Consumir créditos ANTES de gerar
+    // Consumir créditos ANTES de gerar (usando adapter que chama RPC)
     const resultadoCreditos = await consumirCreditos(
       userId,
-      'video_generation',
+      operationKey,
       {
+        creditos: creditosNecessarios,
         model,
         promptText: promptText.substring(0, 100),
         ratio,
         duration,
-        creditos: creditosNecessarios,
       }
     );
 
@@ -107,11 +121,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Créditos insuficientes',
-          details: {
-            necessarios: creditosNecessarios,
-            atuais: 0, // TODO: obter saldo atual
-          },
-          redirect: '/loja-creditos',
+          details: resultadoCreditos.error || resultadoCreditos.details,
+          redirect: '/comprar',
         },
         { status: 402 } // Payment Required
       );
@@ -144,12 +155,15 @@ export async function POST(request: NextRequest) {
 
     if (finalStatus === 'FAILED') {
       // Reembolsar créditos em caso de falha
-      // TODO: Implementar reembolso
+      console.log('🔄 Falha na geração - reembolsando créditos');
+      await refundCredits(userId, operationKey as any, 'Runway task failed');
+      
       return NextResponse.json(
         {
           error: 'Falha na geração do vídeo',
           taskId: taskResponse.id,
           details: currentTask,
+          refunded: true,
         },
         { status: 500 }
       );
