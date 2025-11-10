@@ -12,9 +12,10 @@ import {
   Lock, Unlock, Search, TrendingUp, Database, Clock, Download, FileText,
   History, Eye, ChevronDown, ChevronUp, Calendar, Filter, CheckSquare,
   Square, BarChart3, Zap, AlertCircle, CheckCircle, XCircle, Info,
-  Home, MessageSquare, ArrowLeft
+  Home, MessageSquare, ArrowLeft, Wallet
 } from "lucide-react";
 import { clientCheckAdmin } from "@/lib/admin-check-db";
+import AdminCreditsPanel from "@/components/admin/AdminCreditsPanel";
 
 interface UserData {
   id: string;
@@ -100,6 +101,9 @@ export default function AdminPanelPage() {
   const [tokensToAdd, setTokensToAdd] = useState(100);
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  
+  // Gestão de Créditos
+  const [showCreditsPanel, setShowCreditsPanel] = useState(false);
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -760,6 +764,16 @@ export default function AdminPanelPage() {
               Advanced Filters
             </Button>
 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCreditsPanel(!showCreditsPanel)}
+              className="border-white/10 hover:bg-white/5"
+            >
+              <Wallet className="w-4 h-4 mr-2" />
+              Credits Management
+            </Button>
+
             <div className="ml-auto flex items-center gap-2">
               <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
                 <input
@@ -838,6 +852,13 @@ export default function AdminPanelPage() {
             </div>
           )}
         </div>
+
+        {/* Credits Management Panel */}
+        {showCreditsPanel && (
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+            <AdminCreditsPanel />
+          </div>
+        )}
 
         {/* Token Injection */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
