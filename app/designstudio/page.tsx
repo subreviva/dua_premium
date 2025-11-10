@@ -194,6 +194,7 @@ export default function DesignStudioPage() {
               onRedo={handleRedo}
               onSelectHistory={setCanvasFromHistoryOrGallery}
               onClearSession={handleClearSession}
+              onToolSelect={handleToolSelect}
             />
           </aside>
         </div>
@@ -214,6 +215,7 @@ export default function DesignStudioPage() {
             onRedo={handleRedo}
             onSelectHistory={setCanvasFromHistoryOrGallery}
             onClearSession={handleClearSession}
+            onToolSelect={handleToolSelect}
           />
         </aside>
         

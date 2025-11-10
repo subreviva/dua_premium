@@ -25,10 +25,11 @@ interface ControlPanelProps {
   sessionGallery: any[]; // Pass sessionGallery for export
   history: CanvasContent[]; // Pass history for export
   styleSuffixes?: string; // Estilos selecionados para adicionar aos prompts
+  templatePrompt?: string; // Prompt do template selecionado
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = (props) => {
-  const { activeTool, styleSuffixes = '' } = props;
+  const { activeTool, styleSuffixes = '', templatePrompt = '' } = props;
 
   switch (activeTool) {
     case 'generate-image':

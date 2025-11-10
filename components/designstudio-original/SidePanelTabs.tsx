@@ -24,22 +24,37 @@ interface SidePanelTabsProps {
   onRedo: () => void;
   onSelectHistory: (content: CanvasContent) => void;
   onClearSession: () => void;
+  onToolSelect?: (toolId: ToolId) => void;
 }
 
 type Tab = 'tools' | 'templates' | 'styles' | 'history';
 
 const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
   const [activeTab, setActiveTab] = useState<Tab>('tools');
+  const [templatePrompt, setTemplatePrompt] = useState<string>('');
   const { selectedStyles, toggleStyle, getStyleSuffixes } = useStylePresets();
 
   const handleTemplateSelect = (template: Template) => {
-    // Aplicar template e voltar para a aba de ferramentas
+    // Construir prompt completo com estilos
     const enhancedPrompt = getStyleSuffixes() 
       ? `${template.prompt}, ${getStyleSuffixes()}`
       : template.prompt;
     
-    // Aqui você pode adicionar lógica para aplicar o template
-    // Por exemplo, atualizar o prompt input no ControlPanel
+    // Salvar o prompt para ser usado pelo ControlPanel
+    setTemplatePrompt(enhancedPrompt);
+    
+    // Se tem aspect ratio, ajustar ferramenta apropriada
+    if (template.category === 'logo' && props.onToolSelect) {
+      props.onToolSelect('generate-logo');
+    } else if (template.category === 'icon' && props.onToolSelect) {
+      props.onToolSelect('generate-icon');
+    } else if (template.category === 'pattern' && props.onToolSelect) {
+      props.onToolSelect('generate-pattern');
+    } else if (props.onToolSelect) {
+      props.onToolSelect('generate-image');
+    }
+    
+    // Voltar para a aba de ferramentas
     setActiveTab('tools');
   };
 
@@ -131,7 +146,7 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
         {activeTab === 'tools' && (
           <div className="p-4 md:p-6">
-            <ControlPanel {...props} styleSuffixes={getStyleSuffixes()} />
+            <ControlPanel {...props} styleSuffixes={getStyleSuffixes()} templatePrompt={templatePrompt} />
           </div>
         )}
         
