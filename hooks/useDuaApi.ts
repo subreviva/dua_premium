@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AspectRatio, Color, ImageObject, TrendResult, GroundingChunk, GenerationConfig } from '@/types/designstudio';
+import { createClient } from '@supabase/supabase-js';
 
 // 1. Centralizar a Configuração dos Modelos
 const MODELS = {
-  image: 'gemini-2.5-flash-image-preview', // Para geração e edição de imagem
+  image: 'gemini-2.5-flash-image',         // ✅ CORRIGIDO: Modelo que GERA e EDITA imagens
   vision: 'gemini-2.5-flash',             // Para análise de imagem e texto
   text: 'gemini-2.5-flash',                // Para chat, prompts, etc.
   search: 'gemini-2.5-flash',              // Para ferramentas de pesquisa
@@ -44,6 +45,20 @@ export const useDuaApi = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Obter user_id do Supabase (igual ao useImagenApi)
+  useEffect(() => {
+    const getUserId = async () => {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUserId();
+  }, []);
 
   const startLoading = (initialMessage: string) => { setIsLoading(true); setError(null); setLoadingMessage(initialMessage); };
   const stopLoading = () => { setIsLoading(false); setLoadingMessage(''); };
@@ -92,6 +107,21 @@ export const useDuaApi = () => {
     return handleApiCall(
       'A gerar a sua obra-prima...',
       async () => {
+        // Garantir user_id
+        let currentUserId = userId;
+        if (!currentUserId) {
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            throw new Error('Você precisa estar logado para gerar imagens');
+          }
+          currentUserId = user.id;
+          setUserId(user.id);
+        }
+
         // 🔒 MODO SEGURO: Chamada via API Route (API key fica no servidor)
         const response = await fetch('/api/design-studio', {
           method: 'POST',
@@ -100,6 +130,7 @@ export const useDuaApi = () => {
             action: 'generateImage',
             prompt: prompt,
             model: MODELS.image,
+            user_id: currentUserId, // ✅ Envia user_id para validar créditos
             config: {
               aspectRatio,
               ...config
@@ -109,6 +140,21 @@ export const useDuaApi = () => {
 
         if (!response.ok) {
           const error = await response.json();
+          
+          // Se erro de créditos insuficientes
+          if (response.status === 402 && error.redirect) {
+            const details = error.details;
+            alert(
+              `❌ Créditos Insuficientes\n\n` +
+              `Necessário: ${details?.creditos_necessarios || 30} créditos\n` +
+              `Você tem: ${details?.creditos_atuais || 0} créditos\n` +
+              `Faltam: ${details?.faltam || 30} créditos\n\n` +
+              `Redirecionando para comprar créditos...`
+            );
+            window.location.href = error.redirect;
+            throw new Error('Redirecionando para compra de créditos...');
+          }
+          
           throw new Error(error.error || 'Erro ao gerar imagem');
         }
 
@@ -121,12 +167,27 @@ export const useDuaApi = () => {
         return { src: `https://picsum.photos/seed/${Date.now()}/1024/1024`, mimeType: 'image/jpeg' };
       }
     );
-  }, [handleApiCall]);
+  }, [handleApiCall, userId]);
 
   const editImage = useCallback(async (base64ImageData: string, mimeType: string, prompt: string): Promise<ImageObject | null> => {
     return handleApiCall(
       'A aplicar as suas edições criativas...',
       async () => {
+        // Garantir user_id
+        let currentUserId = userId;
+        if (!currentUserId) {
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            throw new Error('Você precisa estar logado para editar imagens');
+          }
+          currentUserId = user.id;
+          setUserId(user.id);
+        }
+
         // 🔒 MODO SEGURO: Chamada via API Route
         const response = await fetch('/api/design-studio', {
           method: 'POST',
@@ -135,6 +196,7 @@ export const useDuaApi = () => {
             action: 'editImage',
             prompt,
             model: MODELS.image,
+            user_id: currentUserId, // ✅ Envia user_id
             config: {
               image: {
                 data: base64ImageData,
@@ -146,6 +208,21 @@ export const useDuaApi = () => {
 
         if (!response.ok) {
           const error = await response.json();
+          
+          // Se erro de créditos insuficientes
+          if (response.status === 402 && error.redirect) {
+            const details = error.details;
+            alert(
+              `❌ Créditos Insuficientes\n\n` +
+              `Necessário: ${details?.creditos_necessarios || 30} créditos\n` +
+              `Você tem: ${details?.creditos_atuais || 0} créditos\n` +
+              `Faltam: ${details?.faltam || 30} créditos\n\n` +
+              `Redirecionando para comprar créditos...`
+            );
+            window.location.href = error.redirect;
+            throw new Error('Redirecionando para compra de créditos...');
+          }
+          
           throw new Error(error.error || 'Erro ao editar imagem');
         }
 
@@ -157,7 +234,7 @@ export const useDuaApi = () => {
         return { src: `https://picsum.photos/seed/${Date.now()}/1024/1024`, mimeType: 'image/jpeg' };
       }
     );
-  }, [handleApiCall]);
+  }, [handleApiCall, userId]);
 
   const extractColorPalette = useCallback(async (base64ImageData: string, mimeType: string): Promise<Color[] | null> => {
     return handleApiCall(
