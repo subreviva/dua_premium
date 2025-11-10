@@ -72,10 +72,23 @@ const ALL_TOOLS: ToolId[] = [
 ];
 
 const ToolsBar: React.FC<ToolsBarProps> = ({ activeTool, onToolSelect }) => {
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll para ferramenta ativa quando muda
+  React.useEffect(() => {
+    if (activeTool && scrollContainerRef.current) {
+      const activeButton = scrollContainerRef.current.querySelector(`[data-tool="${activeTool}"]`);
+      if (activeButton) {
+        activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [activeTool]);
+  
   return (
-    <div className="w-full bg-black/98 backdrop-blur-3xl border-t border-white/10 shadow-[0_-2px_15px_rgba(0,0,0,0.6)]">
+    <div className="w-full bg-black/98 backdrop-blur-3xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.6)]">
       <div 
-        className="flex gap-2 px-2.5 py-2 overflow-x-auto scrollbar-hide scroll-smooth"
+        ref={scrollContainerRef}
+        className="flex gap-2 px-3 py-2.5 overflow-x-auto scrollbar-hide scroll-smooth"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {ALL_TOOLS.map((toolId) => {
@@ -84,26 +97,27 @@ const ToolsBar: React.FC<ToolsBarProps> = ({ activeTool, onToolSelect }) => {
           return (
             <button
               key={toolId}
+              data-tool={toolId}
               onClick={() => onToolSelect(toolId)}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 min-w-[64px] p-2 rounded-xl transition-all flex-shrink-0",
-                "active:scale-95",
+                "flex flex-col items-center justify-center gap-1.5 min-w-[72px] px-3 py-2.5 rounded-2xl transition-all flex-shrink-0",
+                "active:scale-95 touch-manipulation",
                 isActive
-                  ? "bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 border border-blue-400/50 shadow-lg shadow-blue-500/25"
-                  : "bg-white/5 hover:bg-white/8 border border-white/10"
+                  ? "bg-gradient-to-br from-blue-500/35 via-blue-600/25 to-purple-500/35 border-2 border-blue-400/60 shadow-lg shadow-blue-500/30"
+                  : "bg-white/8 hover:bg-white/12 border-2 border-white/10 hover:border-white/20"
               )}
             >
               <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
+                "w-9 h-9 rounded-xl flex items-center justify-center transition-all",
                 isActive 
-                  ? "bg-gradient-to-br from-blue-500/40 to-purple-500/40 text-white scale-105" 
+                  ? "bg-gradient-to-br from-blue-500/50 to-purple-500/50 text-white scale-110 shadow-lg" 
                   : "bg-white/10 text-white/70"
               )}>
                 {TOOL_ICONS[toolId]}
               </div>
               <span className={cn(
-                "text-[9px] font-semibold leading-tight text-center tracking-tight",
-                isActive ? "text-white" : "text-white/60"
+                "text-[10px] font-bold leading-tight text-center tracking-tight whitespace-nowrap",
+                isActive ? "text-white" : "text-white/70"
               )}>
                 {TOOL_NAMES[toolId]}
               </span>

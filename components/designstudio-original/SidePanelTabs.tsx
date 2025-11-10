@@ -63,15 +63,19 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
   };
 
   return (
-    <div className="flex flex-col h-full max-h-full">
-      {/* Tabs - iOS Premium Style */}
+    <div className="flex flex-col h-full max-h-full overflow-hidden">
+      {/* Tabs - iOS Premium Style com scroll otimizado */}
       <div className="border-b border-white/5 bg-black/20 backdrop-blur-xl flex-shrink-0">
-        <nav className="-mb-px flex gap-2 px-4 md:px-4 pt-4 md:pt-4 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+        <nav 
+          className="-mb-px flex gap-2 px-4 md:px-4 pt-3 md:pt-4 pb-2 md:pb-0 overflow-x-auto scrollbar-hide scroll-smooth" 
+          aria-label="Tabs"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           <button
             onClick={() => setActiveTab('tools')}
             className={cn(
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
-              'active:scale-95 active:transition-transform active:duration-100',
+              'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'tools'
                 ? 'bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 text-white border-blue-400/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
                 : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
@@ -88,7 +92,7 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
             onClick={() => setActiveTab('templates')}
             className={cn(
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
-              'active:scale-95 active:transition-transform active:duration-100',
+              'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'templates'
                 ? 'bg-gradient-to-br from-purple-500/30 via-purple-600/20 to-pink-500/30 text-white border-purple-400/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
                 : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
@@ -105,7 +109,7 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
             onClick={() => setActiveTab('styles')}
             className={cn(
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
-              'active:scale-95 active:transition-transform active:duration-100',
+              'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'styles'
                 ? 'bg-gradient-to-br from-pink-500/30 via-pink-600/20 to-purple-500/30 text-white border-pink-400/30 shadow-[0_0_15px_rgba(236,72,153,0.3)]'
                 : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
@@ -127,7 +131,7 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
             onClick={() => setActiveTab('history')}
             className={cn(
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
-              'active:scale-95 active:transition-transform active:duration-100',
+              'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'history'
                 ? 'bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 text-white border-blue-400/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
                 : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
@@ -142,37 +146,44 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
         </nav>
       </div>
       
-      {/* Content with iOS smooth scroll */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* Content with iOS smooth scroll - melhor padding mobile */}
+      <div 
+        className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overscroll-contain" 
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         {activeTab === 'tools' && (
-          <div className="p-4 md:p-6">
+          <div className="p-4 md:p-6 pb-6 md:pb-6">
             <ControlPanel {...props} styleSuffixes={getStyleSuffixes()} templatePrompt={templatePrompt} />
           </div>
         )}
         
         {activeTab === 'templates' && (
-          <TemplateGallery
-            onSelectTemplate={handleTemplateSelect}
-            currentCategory={
-              props.activeTool === 'generate-logo' ? 'logo' :
-              props.activeTool === 'generate-icon' ? 'icon' :
-              props.activeTool === 'generate-pattern' ? 'pattern' :
-              undefined
-            }
-          />
+          <div className="pb-6 md:pb-6">
+            <TemplateGallery
+              onSelectTemplate={handleTemplateSelect}
+              currentCategory={
+                props.activeTool === 'generate-logo' ? 'logo' :
+                props.activeTool === 'generate-icon' ? 'icon' :
+                props.activeTool === 'generate-pattern' ? 'pattern' :
+                undefined
+              }
+            />
+          </div>
         )}
         
         {activeTab === 'styles' && (
-          <StylePresets
-            onSelectStyle={handleStyleSelect}
-            selectedStyles={selectedStyles}
-            allowMultiple={true}
-            compact={false}
-          />
+          <div className="pb-6 md:pb-6">
+            <StylePresets
+              onSelectStyle={handleStyleSelect}
+              selectedStyles={selectedStyles}
+              allowMultiple={true}
+              compact={false}
+            />
+          </div>
         )}
         
         {activeTab === 'history' && (
-          <div className="p-4 md:p-6">
+          <div className="p-4 md:p-6 pb-6 md:pb-6">
             <div className="space-y-6 md:space-y-8">
               <HistoryPanel 
                 history={props.history} 

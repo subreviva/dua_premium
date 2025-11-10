@@ -19,12 +19,14 @@ export default function DesignStudioPage() {
   const [sessionGallery, setSessionGallery] = useState<ImageObject[]>([]);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showToolPanel, setShowToolPanel] = useState(false);
+  const [panelHeight, setPanelHeight] = useState<'half' | 'full'>('half'); // Novo: controle de altura
   
   const api = useDuaApi();
 
   const handleToolSelect = useCallback((toolId: ToolId) => {
     setActiveTool(toolId);
-    setShowToolPanel(true); // Abre o painel quando seleciona ferramenta
+    setShowToolPanel(true);
+    setPanelHeight('half'); // Sempre começa em half quando seleciona tool
     const textTools: ToolId[] = ['design-trends', 'analyze-image', 'design-assistant', 'export-project'];
     if (textTools.includes(toolId) && canvasContent.type !== 'text-result') {
         if (canvasContent.type === 'empty') {
@@ -115,10 +117,10 @@ export default function DesignStudioPage() {
             @media (max-width: 768px) {
               main {
                 padding-top: calc(env(safe-area-inset-top) + 3.5rem);
-                padding-bottom: calc(env(safe-area-inset-bottom) + ${showToolPanel ? '48vh' : '4rem'});
-                padding-left: 0.75rem;
-                padding-right: 0.75rem;
-                transition: padding-bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                padding-bottom: calc(env(safe-area-inset-bottom) + ${showToolPanel ? (panelHeight === 'full' ? '85vh' : '50vh') : '5rem'});
+                padding-left: max(0.75rem, env(safe-area-inset-left));
+                padding-right: max(0.75rem, env(safe-area-inset-right));
+                transition: padding-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
               }
             }
           `}</style>
@@ -133,11 +135,13 @@ export default function DesignStudioPage() {
           </div>
         </main>
 
-        {/* Mobile: iOS Tools Bar - Fixed Bottom with Scroll */}
+        {/* Mobile: iOS Tools Bar - Fixed Bottom com Safe Area */}
         <div 
-          className="md:hidden fixed left-0 right-0 z-20 transition-all duration-300 ease-out"
+          className="md:hidden fixed left-0 right-0 z-20 transition-all duration-400 ease-out"
           style={{ 
-            bottom: showToolPanel ? 'calc(48vh)' : '0'
+            bottom: showToolPanel ? (panelHeight === 'full' ? 'calc(85vh)' : 'calc(50vh)') : '0',
+            paddingLeft: 'env(safe-area-inset-left)',
+            paddingRight: 'env(safe-area-inset-right)',
           }}
         >
           <div style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
@@ -148,36 +152,63 @@ export default function DesignStudioPage() {
           </div>
         </div>
 
-        {/* Mobile: iOS Bottom Sheet Premium - Slide Up quando tool ativa */}
+        {/* Mobile: iOS Bottom Sheet Premium - Altura Adaptativa */}
         <div 
-          className={`md:hidden fixed left-0 right-0 z-10 transition-all duration-300 ease-out ${
+          className={`md:hidden fixed left-0 right-0 z-10 transition-all duration-400 ease-out ${
             showToolPanel ? 'translate-y-0' : 'translate-y-full'
           }`}
           style={{ 
             bottom: '0',
-            height: '48vh',
-            paddingBottom: 'env(safe-area-inset-bottom)'
+            height: panelHeight === 'full' ? '85vh' : '50vh',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+            paddingLeft: 'env(safe-area-inset-left)',
+            paddingRight: 'env(safe-area-inset-right)',
           }}
         >
-          <aside className="h-full w-full bg-gradient-to-b from-black/98 via-black to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-20px_60px_rgba(0,0,0,0.9)] rounded-t-[24px]">
-            {/* Drag Handle - iOS Style */}
-            <div className="flex items-center justify-center py-2 flex-shrink-0">
-              <div className="w-10 h-1 bg-white/20 rounded-full"></div>
-            </div>
-            
-            {/* Close Button Header */}
-            <div className="flex items-center justify-between px-4 pb-2 flex-shrink-0">
-              <h3 className="text-white/90 font-semibold text-sm tracking-wide">
-                {activeTool ? 'Ferramenta & Histórico' : 'Painel'}
-              </h3>
-              <button
-                onClick={() => setShowToolPanel(false)}
-                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center border border-white/5"
-              >
-                <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+          <aside className="h-full w-full bg-gradient-to-b from-black/98 via-black to-black backdrop-blur-3xl border-t border-white/10 flex flex-col overflow-hidden shadow-[0_-20px_60px_rgba(0,0,0,0.9)] rounded-t-[28px]">
+            {/* Drag Handle + Controls - iOS Style */}
+            <div className="flex flex-col items-center flex-shrink-0">
+              {/* Drag Handle */}
+              <div className="flex items-center justify-center py-3 w-full">
+                <div className="w-12 h-1.5 bg-white/20 rounded-full"></div>
+              </div>
+              
+              {/* Header com controles */}
+              <div className="flex items-center justify-between w-full px-5 pb-3">
+                <h3 className="text-white/90 font-semibold text-base tracking-tight">
+                  {activeTool ? 'Ferramenta & Histórico' : 'Painel'}
+                </h3>
+                <div className="flex items-center gap-2">
+                  {/* Botão Expandir/Recolher */}
+                  <button
+                    onClick={() => setPanelHeight(panelHeight === 'half' ? 'full' : 'half')}
+                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center border border-white/10"
+                    aria-label={panelHeight === 'half' ? 'Expandir' : 'Recolher'}
+                  >
+                    <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {panelHeight === 'half' ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                      )}
+                    </svg>
+                  </button>
+                  
+                  {/* Botão Fechar */}
+                  <button
+                    onClick={() => {
+                      setShowToolPanel(false);
+                      setPanelHeight('half');
+                    }}
+                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center border border-white/10"
+                    aria-label="Fechar"
+                  >
+                    <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
             
             <SidePanelTabs
