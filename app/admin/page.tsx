@@ -12,10 +12,11 @@ import {
   Lock, Unlock, Search, TrendingUp, Database, Clock, Download, FileText,
   History, Eye, ChevronDown, ChevronUp, Calendar, Filter, CheckSquare,
   Square, BarChart3, Zap, AlertCircle, CheckCircle, XCircle, Info,
-  Home, MessageSquare, ArrowLeft, Wallet
+  Home, MessageSquare, ArrowLeft, Wallet, Ticket
 } from "lucide-react";
 import { clientCheckAdmin } from "@/lib/admin-check-db";
 import AdminCreditsPanel from "@/components/admin/AdminCreditsPanel";
+import AdminInviteCodesPanel from "@/components/admin/AdminInviteCodesPanel";
 
 interface UserData {
   id: string;
@@ -104,6 +105,9 @@ export default function AdminPanelPage() {
   
   // Gestão de Créditos
   const [showCreditsPanel, setShowCreditsPanel] = useState(false);
+  
+  // Gestão de Códigos de Acesso
+  const [showCodesPanel, setShowCodesPanel] = useState(false);
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -772,6 +776,16 @@ export default function AdminPanelPage() {
             >
               <Wallet className="w-4 h-4 mr-2" />
               Credits Management
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCodesPanel(!showCodesPanel)}
+              className="border-white/10 hover:bg-white/5"
+            >
+              <Ticket className="w-4 h-4 mr-2" />
+              Invite Codes
             </Button>
 
             <div className="ml-auto flex items-center gap-2">
@@ -1489,6 +1503,26 @@ export default function AdminPanelPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Painel de Códigos de Acesso */}
+      {showCodesPanel && (
+        <div className="bg-gradient-to-br from-purple-500/5 to-purple-600/5 border border-purple-500/20 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Ticket className="w-6 h-6 text-purple-400" />
+              Gestão de Códigos de Acesso
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowCodesPanel(false)}
+            >
+              <XCircle className="w-4 h-4" />
+            </Button>
+          </div>
+          <AdminInviteCodesPanel />
         </div>
       )}
 
