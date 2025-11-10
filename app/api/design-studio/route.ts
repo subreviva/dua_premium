@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { withCredits } from '@/lib/credits/credits-middleware';
 import { DesignStudioOperation } from '@/lib/credits/credits-config';
+import { getAdminClient } from '@/lib/supabase';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -42,69 +43,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { action, prompt, model, config, user_id } = body;
+    const { action, prompt, model, config } = body;
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
     switch (action) {
       case 'generateImage': {
-        // ✅ CORRIGIDO: Usar gemini-2.5-flash-image (modelo que GERA imagens)
         console.log('🎨 Design Studio - Gerando imagem com Gemini 2.5 Flash Image');
         
-        // Verificar e consumir créditos
-        if (user_id) {
-          const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-          );
-
-          const { data: user } = await supabase
-            .from('users')
-            .select('creditos_servicos')
-            .eq('id', user_id)
-            .single();
-
-          const creditosAtuais = user?.creditos_servicos || 0;
-
-          if (creditosAtuais < CUSTO_GERACAO_IMAGEM) {
-            return NextResponse.json({
-              error: 'Créditos insuficientes',
-              details: {
-                creditos_necessarios: CUSTO_GERACAO_IMAGEM,
-                creditos_atuais: creditosAtuais,
-                faltam: CUSTO_GERACAO_IMAGEM - creditosAtuais,
-              },
-              redirect: '/loja-creditos',
-            }, { status: 402 });
-          }
-
-          // Consumir créditos
-          await supabase
-            .from('users')
-            .update({
-              creditos_servicos: creditosAtuais - CUSTO_GERACAO_IMAGEM,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', user_id);
-
-          // Registrar transação
-          await supabase
-            .from('transactions')
-            .insert({
-              user_id,
-              source_type: 'service_usage',
-              amount_dua: 0,
-              amount_creditos: -CUSTO_GERACAO_IMAGEM,
-              description: 'Geração de imagem (Design Studio)',
-              metadata: {
-                prompt: prompt.substring(0, 100),
-                tool: 'design-studio',
-                timestamp: new Date().toISOString(),
-              },
-              status: 'completed',
-            });
-        }
-
         // Gerar imagem com gemini-2.5-flash-image
         const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash-image',
@@ -171,62 +117,9 @@ export async function POST(req: NextRequest) {
       }
 
       case 'editImage': {
-        // ✅ CORRIGIDO: Editar imagem com gemini-2.5-flash-image
         console.log('✏️ Design Studio - Editando imagem com Gemini 2.5 Flash Image');
         
         const { image } = config;
-        
-        // Verificar e consumir créditos
-        if (user_id) {
-          const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-          );
-
-          const { data: user } = await supabase
-            .from('users')
-            .select('creditos_servicos')
-            .eq('id', user_id)
-            .single();
-
-          const creditosAtuais = user?.creditos_servicos || 0;
-
-          if (creditosAtuais < CUSTO_GERACAO_IMAGEM) {
-            return NextResponse.json({
-              error: 'Créditos insuficientes',
-              details: {
-                creditos_necessarios: CUSTO_GERACAO_IMAGEM,
-                creditos_atuais: creditosAtuais,
-                faltam: CUSTO_GERACAO_IMAGEM - creditosAtuais,
-              },
-              redirect: '/loja-creditos',
-            }, { status: 402 });
-          }
-
-          await supabase
-            .from('users')
-            .update({
-              creditos_servicos: creditosAtuais - CUSTO_GERACAO_IMAGEM,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', user_id);
-
-          await supabase
-            .from('transactions')
-            .insert({
-              user_id,
-              source_type: 'service_usage',
-              amount_dua: 0,
-              amount_creditos: -CUSTO_GERACAO_IMAGEM,
-              description: 'Edição de imagem (Design Studio)',
-              metadata: {
-                prompt: prompt.substring(0, 100),
-                tool: 'edit-image',
-                timestamp: new Date().toISOString(),
-              },
-              status: 'completed',
-            });
-        }
 
         // Editar imagem com gemini-2.5-flash-image
         const response = await ai.models.generateContent({
