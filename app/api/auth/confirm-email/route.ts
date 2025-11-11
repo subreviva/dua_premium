@@ -25,8 +25,11 @@ export async function POST(request: NextRequest) {
     const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       userId,
       { 
-        email_confirm: true,
-        user_metadata: { name }
+        email_confirm: true, // Marca email como confirmado
+        user_metadata: { 
+          name,
+          email_verified: true,
+        }
       }
     );
 
