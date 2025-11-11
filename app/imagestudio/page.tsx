@@ -307,7 +307,7 @@ export default function ImageStudioPage() {
         const firstImage = images[0]
         setGeneratedImage({
           url: firstImage.url,
-          prompt: firstImage.prompt,
+          prompt: prompt, // ✅ Usar o prompt do estado, não da API
           width: 1024,
           height: 1024,
           settings: {

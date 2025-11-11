@@ -153,10 +153,12 @@ export async function POST(req: NextRequest) {
       const imageBytes = generatedImage.image.imageBytes;
       const base64Image = `data:image/png;base64,${imageBytes}`;
       
+      // ✅ FIX: Não incluir 'prompt' no objeto retornado
+      // Isso causava o texto sobreposto na imagem
       return {
         url: base64Image,
         mimeType: 'image/png',
-        prompt: prompt,
+        // prompt: prompt, ❌ REMOVIDO - causava texto na imagem
         index: index + 1,
       };
     });
