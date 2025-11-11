@@ -48,27 +48,33 @@ export type CreditsHandler = (
 /**
  * Wrapper que gerencia todo o fluxo de créditos automaticamente
  * 
- * @param req - Next Request
+ * @param req - Next Request (ou null se userId for passado diretamente)
  * @param operation - Operação a ser executada
  * @param handler - Handler que executa a lógica (recebe userId)
  * @param metadata - Metadados opcionais para transação
+ * @param directUserId - userId já extraído (opcional, evita re-parse do body)
  * @returns NextResponse
  */
 export async function withCredits(
-  req: NextRequest,
+  req: NextRequest | null,
   operation: CreditOperation,
   handler: CreditsHandler,
-  metadata?: Partial<CreditTransactionMetadata>
+  metadata?: Partial<CreditTransactionMetadata>,
+  directUserId?: string
 ): Promise<NextResponse> {
   let creditDeducted = false;
   let userId: string | null = null;
 
   try {
     // ─────────────────────────────────────────────────────────────────────
-    // STEP 1: Extrair userId do body
+    // STEP 1: Extrair userId do body OU usar directUserId
     // ─────────────────────────────────────────────────────────────────────
-    const body = await req.json();
-    userId = body.userId || body.user_id;
+    if (directUserId) {
+      userId = directUserId;
+    } else if (req) {
+      const body = await req.json();
+      userId = body.userId || body.user_id;
+    }
 
     if (!userId) {
       return NextResponse.json(

@@ -23,15 +23,16 @@ if (!API_KEY) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { action, prompt, model, config, user_id } = body;
-
   if (!API_KEY) {
     return NextResponse.json(
       { error: 'API Key não configurada no servidor' },
       { status: 500 }
     );
   }
+
+  // ⚠️ IMPORTANTE: Ler body UMA VEZ e passar para withCredits
+  const body = await req.json();
+  const { action, prompt, model, config, user_id } = body;
 
   // Determinar a operação de créditos baseada na action
   let operation: DesignStudioOperation;
@@ -59,17 +60,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ação inválida' }, { status: 400 });
   }
 
+  // Criar um request modificado com body já parseado
+  const userId = user_id || body.userId;
+  
+  if (!userId) {
+    return NextResponse.json({ error: 'user_id é obrigatório' }, { status: 401 });
+  }
+
   // Usar withCredits para validar e debitar créditos automaticamente
-  return withCredits(req, operation, async (userId, context) => {
-    // withCredits já valida o userId, então podemos usá-lo diretamente
-    console.log(`🎨 Design Studio - ${action} - User: ${userId}`);
+  // Passando userId diretamente para evitar re-parse do body
+  return withCredits(
+    null, 
+    operation, 
+    async (validatedUserId, context) => {
+      // withCredits já valida o userId, então podemos usá-lo diretamente
+      console.log(`🎨 Design Studio - ${action} - User: ${validatedUserId}`);
 
     // Verificar se é admin (sem debitar créditos)
     const supabase = getAdminClient();
     const { data: userData } = await supabase
       .from('users')
       .select('role')
-      .eq('id', userId)
+      .eq('id', validatedUserId)
       .single();
 
     const isAdmin = userData?.role === 'admin';
@@ -268,5 +280,8 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
     }
-  });
+  },
+  undefined, // metadata (opcional)
+  userId     // directUserId - passa userId já extraído
+  );
 }
