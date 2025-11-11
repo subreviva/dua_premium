@@ -16,6 +16,46 @@ import { Eye, EyeOff } from "lucide-react";
 
 const supabase = supabaseClient;
 
+// ⚡ HELPER: Retry com exponential backoff para rate limiting
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<T> {
+  let lastError: any;
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      
+      // Se não é erro de rate limit, falhar imediatamente
+      if (error?.status !== 429 && !error?.message?.includes('rate limit')) {
+        throw error;
+      }
+      
+      // Se é último retry, falhar
+      if (i === maxRetries - 1) {
+        throw error;
+      }
+      
+      // Aguardar com exponential backoff
+      const delay = initialDelay * Math.pow(2, i);
+      console.log(`[RETRY] Aguardando ${delay}ms antes de retry ${i + 1}/${maxRetries}...`);
+      
+      toast.info(`Rate limit detectado`, {
+        description: `Aguardando ${delay/1000}s antes de tentar novamente...`,
+        duration: delay,
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw lastError;
+}
+
 export default function AcessoPage() {
   const router = useRouter();
   const [step, setStep] = useState("code");
@@ -43,12 +83,16 @@ export default function AcessoPage() {
     }
     setIsValidatingCode(true);
     try {
-      const { data, error } = await supabase
-        .from('invite_codes')
-        .select('code, active, used_by')
-        .ilike('code', code)
-        .limit(1)
-        .single();
+      // ⚡ RETRY AUTOMÁTICO em caso de rate limit
+      const { data, error } = await retryWithBackoff(async () => {
+        return await supabase
+          .from('invite_codes')
+          .select('code, active, used_by')
+          .ilike('code', code)
+          .limit(1)
+          .single();
+      });
+      
       if (error || !data) {
         toast.error("Código inválido", { description: "Este código não existe" });
         return;
@@ -60,8 +104,16 @@ export default function AcessoPage() {
       setValidatedCode(data.code);
       setStep("register");
       toast.success("Código válido", { description: "Complete seu registo para continuar" });
-    } catch (error) {
-      toast.error("Erro de conexão", { description: "Não foi possível validar o código" });
+    } catch (error: any) {
+      console.error('[VALIDATE] Erro:', error);
+      if (error?.status === 429) {
+        toast.error("Muitas tentativas", { 
+          description: "Por favor aguarda 1 minuto e tenta novamente",
+          duration: 5000 
+        });
+      } else {
+        toast.error("Erro de conexão", { description: "Não foi possível validar o código" });
+      }
     } finally {
       setIsValidatingCode(false);
     }
@@ -115,16 +167,19 @@ export default function AcessoPage() {
     setIsRegistering(true);
     
     try {
-      console.log('[REGISTER] Registo 100% FRONTEND - SEM APIs');
+      console.log('[REGISTER] Registo 100% FRONTEND - COM PROTEÇÃO RATE LIMIT');
       
       // PASSO 1: Criar conta Supabase Auth (usa anon key - público)
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: email.toLowerCase(),
-        password,
-        options: {
-          data: { name },
-          emailRedirectTo: undefined, // Sem email de confirmação
-        },
+      // ⚡ RETRY AUTOMÁTICO em caso de rate limit
+      const { data: signUpData, error: signUpError } = await retryWithBackoff(async () => {
+        return await supabase.auth.signUp({
+          email: email.toLowerCase(),
+          password,
+          options: {
+            data: { name },
+            emailRedirectTo: undefined, // Sem email de confirmação
+          },
+        });
       });
 
       if (signUpError) {
@@ -132,9 +187,12 @@ export default function AcessoPage() {
         
         // Se o erro é "User already registered", tentar login direto
         if (signUpError.message.includes('already registered')) {
-          const { error: loginError } = await supabase.auth.signInWithPassword({
-            email: email.toLowerCase(),
-            password,
+          // ⚡ RETRY AUTOMÁTICO em caso de rate limit
+          const { error: loginError } = await retryWithBackoff(async () => {
+            return await supabase.auth.signInWithPassword({
+              email: email.toLowerCase(),
+              password,
+            });
           });
           
           if (!loginError) {
@@ -144,6 +202,15 @@ export default function AcessoPage() {
             setTimeout(() => router.push("/"), 1500);
             return;
           }
+        }
+        
+        // Verificar se é erro de rate limit
+        if (signUpError.status === 429 || signUpError.message?.includes('rate limit')) {
+          toast.error("Muitas tentativas", {
+            description: "Por favor aguarda 1 minuto e tenta novamente",
+            duration: 5000,
+          });
+          return;
         }
         
         toast.error("Erro ao criar conta", {
@@ -167,9 +234,12 @@ export default function AcessoPage() {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // PASSO 2: Fazer login IMEDIATAMENTE para ter sessão ativa
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email: email.toLowerCase(),
-        password,
+      // ⚡ RETRY AUTOMÁTICO em caso de rate limit
+      const { error: loginError } = await retryWithBackoff(async () => {
+        return await supabase.auth.signInWithPassword({
+          email: email.toLowerCase(),
+          password,
+        });
       });
 
       if (loginError) {
@@ -296,11 +366,20 @@ export default function AcessoPage() {
         router.push("/");
       }, 1500);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('[REGISTER] Erro geral:', error);
-      toast.error("Erro de conexão", {
-        description: "Não foi possível completar o registo. Tenta novamente."
-      });
+      
+      // Verificar se é erro de rate limit
+      if (error?.status === 429 || error?.message?.includes('rate limit')) {
+        toast.error("Muitas tentativas", {
+          description: "Por favor aguarda 1 minuto e tenta novamente",
+          duration: 5000,
+        });
+      } else {
+        toast.error("Erro de conexão", {
+          description: "Não foi possível completar o registo. Tenta novamente."
+        });
+      }
     } finally {
       setIsRegistering(false);
     }

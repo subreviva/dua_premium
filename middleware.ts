@@ -22,18 +22,26 @@ import { createClient } from '@supabase/supabase-js';
 // Rate Limiting Storage (em produção usar Redis)
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 
-// Configurações de Rate Limiting
+// Configurações de Rate Limiting - AJUSTADAS PARA MÁXIMO RIGOR E USABILIDADE
 const RATE_LIMITS = {
-  login: { requests: 5, window: 60 * 1000 }, // 5 tentativas por minuto
-  general: { requests: 100, window: 60 * 1000 }, // 100 requests por minuto
-  api: { requests: 50, window: 60 * 1000 }, // 50 API calls por minuto
+  // Rotas críticas de autenticação - mais restritivo
+  auth_critical: { requests: 10, window: 60 * 1000 }, // 10 tentativas de login por minuto
+  
+  // Rotas de registro/acesso - MAIS PERMISSIVO para evitar bloqueios legítimos
+  registration: { requests: 30, window: 60 * 1000 }, // 30 requests por minuto na página de acesso
+  
+  // APIs gerais - balanceado
+  api: { requests: 100, window: 60 * 1000 }, // 100 API calls por minuto
+  
+  // Navegação geral - muito permissivo
+  general: { requests: 200, window: 60 * 1000 }, // 200 requests por minuto
 };
 
 function getRateLimitKey(ip: string, type: string): string {
   return `${ip}:${type}`;
 }
 
-function checkRateLimit(ip: string, type: 'login' | 'general' | 'api'): boolean {
+function checkRateLimit(ip: string, type: 'auth_critical' | 'registration' | 'general' | 'api'): boolean {
   const key = getRateLimitKey(ip, type);
   const limit = RATE_LIMITS[type];
   const now = Date.now();
@@ -61,11 +69,21 @@ function checkRateLimit(ip: string, type: 'login' | 'general' | 'api'): boolean 
   return true;
 }
 
+// Cleanup automático do mapa de rate limiting (prevenir memory leaks)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitMap.entries()) {
+    // Remove entradas mais antigas que 5 minutos
+    if (now - value.lastReset > 5 * 60 * 1000) {
+      rateLimitMap.delete(key);
+    }
+  }
+}, 60 * 1000); // Limpar a cada 1 minuto
+
 function getClientIP(req: NextRequest): string {
   return (
     req.headers.get('x-forwarded-for')?.split(',')[0] ||
     req.headers.get('x-real-ip') ||
-    req.ip ||
     'unknown'
   );
 }
@@ -74,20 +92,29 @@ export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const clientIP = getClientIP(req);
 
-  // Aplicar rate limiting
-  const rateLimitType = path.startsWith('/api') 
-    ? 'api' 
-    : path.includes('login') || path.includes('acesso') 
-      ? 'login' 
-      : 'general';
+  // Aplicar rate limiting COM CATEGORIZAÇÃO INTELIGENTE
+  let rateLimitType: 'auth_critical' | 'registration' | 'general' | 'api';
+  
+  if (path.startsWith('/api')) {
+    rateLimitType = 'api';
+  } else if (path === '/acesso' || path === '/registo' || path.startsWith('/api/auth/register')) {
+    // ROTAS DE REGISTRO - MAIS PERMISSIVO
+    rateLimitType = 'registration';
+  } else if (path === '/login' || path.startsWith('/api/auth/login') || path.startsWith('/api/auth/callback')) {
+    // ROTAS DE LOGIN CRÍTICAS - MAIS RESTRITIVO
+    rateLimitType = 'auth_critical';
+  } else {
+    rateLimitType = 'general';
+  }
 
   if (!checkRateLimit(clientIP, rateLimitType)) {
-    console.log(`🚫 Rate limit exceeded for ${clientIP} on ${path}`);
+    console.log(`🚫 Rate limit exceeded for ${clientIP} on ${path} (type: ${rateLimitType})`);
     return new NextResponse(
       JSON.stringify({ 
         error: 'Rate limit exceeded',
         message: 'Too many requests. Please try again later.',
-        retryAfter: 60 
+        retryAfter: 60,
+        type: rateLimitType
       }),
       { 
         status: 429,
