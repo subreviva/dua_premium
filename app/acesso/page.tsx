@@ -32,14 +32,13 @@ export default function AcessoPage() {
   const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
-    audit.pageAccess('/acesso');
+    // Silent page access tracking (no DB calls)
   }, []);
 
   const handleValidateCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code || code.length < 6) {
       toast.error("Código inválido", { description: "O código deve ter no mínimo 6 caracteres" });
-      audit.codeValidation(code, false, 1);
       return;
     }
     setIsValidatingCode(true);
@@ -52,22 +51,17 @@ export default function AcessoPage() {
         .single();
       if (error || !data) {
         toast.error("Código inválido", { description: "Este código não existe" });
-        audit.codeValidation(code, false, 1);
         return;
       }
       if (!data.active) {
         toast.error("Código inativo", { description: "Este código já foi utilizado" });
-        audit.codeValidation(code, false, 1);
         return;
       }
       setValidatedCode(data.code);
       setStep("register");
       toast.success("Código válido", { description: "Complete seu registo para continuar" });
-      audit.codeValidation(code, true, 1);
     } catch (error) {
       toast.error("Erro de conexão", { description: "Não foi possível validar o código" });
-      audit.error(error as Error, 'code_validation');
-      audit.codeValidation(code, false, 1);
     } finally {
       setIsValidatingCode(false);
     }
@@ -134,24 +128,22 @@ export default function AcessoPage() {
         }),
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
+        const data = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
         toast.error(data.error || "Erro ao criar conta", { 
           description: data.message || "Por favor, tenta novamente",
           duration: 5000,
         });
-        audit.registration(false, validatedCode || undefined);
         return;
       }
+      
+      const data = await response.json();
       
       if (data.success) {
         toast.success("Bem-vindo à DUA! 🎉", { 
           description: "150 créditos adicionados à sua conta",
           duration: 3000,
         });
-        
-        audit.registration(true, validatedCode || undefined);
         
         // Fazer login automático
         const { error: loginError } = await supabase.auth.signInWithPassword({
@@ -178,8 +170,6 @@ export default function AcessoPage() {
       toast.error("Erro de conexão", { 
         description: "Não foi possível completar o registo. Tenta novamente." 
       });
-      audit.error(error as Error, 'user_registration');
-      audit.registration(false, validatedCode || undefined);
     } finally {
       setIsRegistering(false);
     }

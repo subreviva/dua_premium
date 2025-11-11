@@ -3,31 +3,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validatePassword, ENTERPRISE_POLICY } from '@/lib/password-validation';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs'; // Force Node.js runtime (not Edge)
 
 /**
- * API de Registo Ultra Rigoroso - DUA IA
+ * API de Registo Direto - DUA IA
  * 
- * ENTERPRISE-GRADE SECURITY:
- * - Password policy: 12+ chars, complexidade alta
- * - Email verification obrigatória
- * - Prevenção de passwords comuns
- * - Validações rigorosas
- * 
- * Fluxo:
- * 1. Valida código de convite (existe, ativo, não usado)
- * 2. Valida dados do usuário (nome, email, password ENTERPRISE)
- * 3. Verifica se email já existe
- * 4. Cria conta Supabase Auth (email verification automática)
- * 5. Cria perfil em public.users
- * 6. Inicializa saldos: DUA IA (100) + DUA COIN (50)
- * 7. Marca código como usado
- * 8. Cria sessão ativa (24h)
- * 9. Registra atividade
- * 10. Retorna dados + mensagem de boas-vindas
+ * Fluxo simplificado:
+ * 1. Valida código de convite
+ * 2. Valida dados do usuário
+ * 3. Cria conta Supabase Auth (auto-confirmada)
+ * 4. Cria perfil em public.users
+ * 5. Adiciona 150 créditos via RPC
+ * 6. Marca código como usado
+ * 7. Retorna sucesso para login automático
  */
 export async function POST(request: NextRequest) {
+  console.log('[REGISTER] Iniciando registo...');
   try {
     const body = await request.json();
+    console.log('[REGISTER] Body recebido:', { 
+      hasInviteCode: !!body.inviteCode, 
+      hasEmail: !!body.email,
+      hasPassword: !!body.password,
+      hasName: !!body.name
+    });
     const { inviteCode, name, email, password, acceptedTerms } = body;
 
     // ════════════════════════════════════════════════════════════════
