@@ -34,7 +34,8 @@ export default function HomePage() {
         
         {/* 🎵 MOBILE: Conteúdo ultra premium estilo Suno */}
         <div className="md:hidden flex-1 overflow-y-auto pt-[calc(56px+env(safe-area-inset-top))] pb-safe-nav">
-          <div className="relative min-h-[calc(100vh-56px-env(safe-area-inset-top)-env(safe-area-inset-bottom)-80px)] flex flex-col">
+          {/* Hero Section */}
+          <div className="relative min-h-[60vh] flex flex-col">
             {/* Gradiente de fundo elegante */}
             <div className="absolute inset-0 z-0 bg-gradient-to-b from-zinc-950 via-black to-black">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.08),transparent_50%)]" />
@@ -42,13 +43,13 @@ export default function HomePage() {
             </div>
 
             {/* Conteúdo centralizado */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-12">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12">
               {/* Hero Text */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                className="text-center mb-12"
+                className="text-center mb-10"
               >
                 <h1 className="text-[42px] leading-[1.1] font-bold tracking-tight text-white mb-4 bg-gradient-to-b from-white via-white to-white/80 bg-clip-text text-transparent">
                   Crie Música
@@ -85,17 +86,30 @@ export default function HomePage() {
                   </div>
                 </button>
               </motion.div>
-
-              {/* Info text sutil */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="text-center text-[11px] text-white/30 font-light mt-8 max-w-[240px]"
-              >
-                Explore todas as ferramentas pelo menu inferior
-              </motion.p>
             </div>
+          </div>
+
+          {/* 🎵 Featured Tracks Carousel - Ultra Elegante */}
+          <div className="relative bg-black py-10">
+            <div className="px-6 mb-6">
+              <h2 className="text-[24px] font-semibold text-white tracking-tight mb-2">
+                Músicas em Destaque
+              </h2>
+              <p className="text-[13px] text-white/40 font-light">
+                Criações recentes da comunidade
+              </p>
+            </div>
+            
+            <div className="relative">
+              <FeaturedTracksCarousel />
+            </div>
+          </div>
+
+          {/* Info text sutil */}
+          <div className="relative bg-gradient-to-b from-black to-zinc-950 py-8 px-6">
+            <p className="text-center text-[11px] text-white/30 font-light max-w-[240px] mx-auto">
+              Explore todas as ferramentas pelo menu inferior
+            </p>
           </div>
         </div>
 

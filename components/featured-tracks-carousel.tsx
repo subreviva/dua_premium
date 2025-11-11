@@ -92,7 +92,8 @@ export function FeaturedTracksCarousel() {
 
   return (
     <div className="w-full">
-      <div className="mb-5 md:mb-6">
+      {/* Header - apenas desktop */}
+      <div className="hidden md:block mb-5 md:mb-6">
         <h2 className="text-[22px] md:text-2xl font-semibold text-white mb-1 md:mb-2">
           Criado com DUA
         </h2>
@@ -109,9 +110,9 @@ export function FeaturedTracksCarousel() {
         className="w-full"
       >
         <CarouselContent className="-ml-3 md:-ml-4">
-          {FEATURED_TRACKS.map((track) => (
-            <CarouselItem key={track.id} className="pl-3 md:pl-4 basis-[260px] md:basis-[320px]">
-              <Card className="bg-white/[0.06] border-white/[0.08] overflow-hidden group active:bg-white/[0.1] transition-all">
+          {FEATURED_TRACKS.map((track, index) => (
+            <CarouselItem key={track.id} className="pl-3 md:pl-4 basis-[75%] md:basis-[320px]">
+              <Card className="bg-white/[0.04] border-white/[0.06] overflow-hidden group active:bg-white/[0.08] transition-all backdrop-blur-xl shadow-xl shadow-black/20">
                 <CardContent className="p-0">
                   {/* Cover Image */}
                   <div className="relative aspect-square overflow-hidden">
@@ -119,42 +120,51 @@ export function FeaturedTracksCarousel() {
                       src={track.cover}
                       alt={`Capa de ${track.title}`}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover transition-transform duration-700 group-active:scale-105"
+                      priority={index < 2}
                     />
                     
-                    {/* Play/Pause Overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    {/* Gradient Overlay Sutil */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    
+                    {/* Play/Pause Button - Sempre visível no mobile */}
+                    <div className="absolute inset-0 flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] md:bg-black/40" />
                       <Button
                         size="icon"
-                        className="w-14 h-14 rounded-full bg-white/95 hover:bg-white text-black active:scale-95 transition-transform shadow-xl"
+                        className="relative w-16 h-16 rounded-full bg-white/95 hover:bg-white text-black active:scale-90 transition-all shadow-2xl border-2 border-white/20"
                         onClick={() => togglePlay(track)}
                         disabled={loadingTrackId === track.id}
                       >
                         {loadingTrackId === track.id ? (
-                          <Loader2 className="w-6 h-6 animate-spin" />
+                          <Loader2 className="w-7 h-7 animate-spin" />
                         ) : currentTrack?.id === track.id && isPlaying ? (
-                          <Pause className="w-6 h-6" fill="currentColor" />
+                          <Pause className="w-7 h-7" fill="currentColor" />
                         ) : (
-                          <Play className="w-6 h-6 ml-1" fill="currentColor" />
+                          <Play className="w-7 h-7 ml-1" fill="currentColor" />
                         )}
                       </Button>
                     </div>
 
-                    {/* Genre Badge */}
-                    <div className="absolute top-2.5 right-2.5">
-                      <div className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10">
-                        <span className="text-[11px] font-medium text-white">
+                    {/* Genre Badge - Mais elegante */}
+                    <div className="absolute top-3 right-3">
+                      <div className="px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-lg">
+                        <span className="text-[10px] font-semibold text-white/90 tracking-wide uppercase">
                           {track.genre}
                         </span>
                       </div>
                     </div>
 
-                    {/* Playing Indicator */}
+                    {/* Playing Indicator - Mais premium */}
                     {currentTrack?.id === track.id && isPlaying && (
-                      <div className="absolute bottom-2.5 left-2.5">
-                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-green-500/95 backdrop-blur-md shadow-lg">
-                          <Headphones className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-                          <span className="text-[11px] font-semibold text-white">
+                      <div className="absolute bottom-3 left-3 animate-in fade-in duration-300">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 backdrop-blur-xl shadow-lg shadow-green-500/25">
+                          <div className="flex gap-0.5">
+                            <div className="w-0.5 h-3 bg-white rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+                            <div className="w-0.5 h-3 bg-white rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                            <div className="w-0.5 h-3 bg-white rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                          </div>
+                          <span className="text-[11px] font-bold text-white tracking-tight">
                             Tocando
                           </span>
                         </div>
@@ -162,12 +172,12 @@ export function FeaturedTracksCarousel() {
                     )}
                   </div>
 
-                  {/* Track Info */}
-                  <div className="p-3.5 md:p-4">
-                    <h3 className="font-semibold text-[15px] text-white mb-0.5 truncate">
+                  {/* Track Info - Design mais limpo */}
+                  <div className="p-4 bg-gradient-to-b from-white/[0.02] to-transparent">
+                    <h3 className="font-semibold text-[16px] text-white mb-1 truncate tracking-tight">
                       {track.title}
                     </h3>
-                    <p className="text-[13px] text-zinc-400 font-normal truncate">
+                    <p className="text-[13px] text-white/50 font-light truncate">
                       {track.artist}
                     </p>
                   </div>
