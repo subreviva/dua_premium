@@ -6,11 +6,10 @@ import { consumirCreditos } from '@/lib/creditos-helper';
 /**
  * API Route: /api/imagen/generate
  * 
- * Gera imagens usando os modelos Google Imagen:
- * - imagen-4.0-ultra-generate-001 (Ultra qualidade, mais lento)
- * - imagen-4.0-generate-001 (Standard, balanço perfeito)
- * - imagen-4.0-fast-generate-001 (Fast, geração rápida)
- * - imagen-3.0-generate-002 (Imagen 3)
+ * Gera imagens usando os modelos Google Imagen (2025):
+ * - imagen-4-ultra (Ultra qualidade, máximo realismo e detalhes)
+ * - imagen-4 (Standard, balanço perfeito qualidade/velocidade)
+ * - imagen-3 (Geração anterior, ainda suportada)
  * 
  * Documentação oficial: https://ai.google.dev/gemini-api/docs/imagen
  * 
@@ -19,10 +18,9 @@ import { consumirCreditos } from '@/lib/creditos-helper';
 
 // Mapeamento de modelos para service_name
 const SERVICE_NAME_MAP: Record<string, string> = {
-  'imagen-4.0-ultra-generate-001': 'image_ultra',
-  'imagen-4.0-generate-001': 'image_standard',
-  'imagen-4.0-fast-generate-001': 'image_fast',
-  'imagen-3.0-generate-002': 'image_3',
+  'imagen-4-ultra': 'image_ultra',
+  'imagen-4': 'image_standard',
+  'imagen-3': 'image_fast',
 };
 
 export async function POST(req: NextRequest) {
@@ -63,7 +61,7 @@ export async function POST(req: NextRequest) {
       );
 
       // Determinar service_name baseado no modelo
-      const modelId = model || 'imagen-4.0-generate-001';
+      const modelId = model || 'imagen-4';
       const serviceName = SERVICE_NAME_MAP[modelId] || 'image_standard';
 
       // Consultar custo do serviço via RPC (mantém custo dinâmico)
@@ -116,7 +114,7 @@ export async function POST(req: NextRequest) {
 
     console.log('🎨 Iniciando geração de imagem...');
     console.log('📝 Prompt:', prompt);
-    console.log('🤖 Modelo:', model || 'imagen-4.0-generate-001');
+    console.log('🤖 Modelo:', model || 'imagen-4');
     console.log('⚙️ Config:', finalConfig);
 
     // Inicializar cliente
@@ -134,7 +132,7 @@ export async function POST(req: NextRequest) {
 
     // Gerar imagens
     const response = await ai.models.generateImages({
-      model: model || 'imagen-4.0-generate-001',
+      model: model || 'imagen-4',
       prompt,
       config: finalConfig,
     });
@@ -168,7 +166,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       images,
-      model: model || 'imagen-4.0-generate-001',
+      model: model || 'imagen-4',
       config: finalConfig,
     });
 
