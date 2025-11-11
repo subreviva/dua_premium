@@ -39,20 +39,30 @@ export default function PerfilPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
-    loadUserProfile();
+    let mounted = true;
+    let timeoutId: NodeJS.Timeout;
     
-    // Timeout de segurança - se após 10s ainda estiver carregando, force parar
-    const timeout = setTimeout(() => {
-      if (loading) {
-        console.error('⏱️ Timeout: carregamento demorou muito');
-        setLoading(false);
-        toast.error("Timeout ao carregar perfil", {
-          description: "A página demorou muito. Tente recarregar."
-        });
-      }
-    }, 10000);
+    const init = async () => {
+      // Timeout de segurança
+      timeoutId = setTimeout(() => {
+        if (mounted && loading) {
+          console.error('⏱️ Timeout: carregamento demorou muito');
+          setLoading(false);
+          toast.error("Timeout ao carregar perfil", {
+            description: "A página demorou muito. Tente recarregar."
+          });
+        }
+      }, 10000);
 
-    return () => clearTimeout(timeout);
+      await loadUserProfile();
+    };
+
+    init();
+
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   const loadUserProfile = async () => {
@@ -74,8 +84,14 @@ export default function PerfilPage() {
       setUser(session.user);
       
       // ✅ Verificar admin via admin_accounts (verificação rigorosa)
-      const adminCheck = await verifyAdminClient(supabase);
-      setIsAdmin(adminCheck.isAdmin);
+      // Usar try-catch para evitar erro 406 se tabela não existir
+      try {
+        const adminCheck = await verifyAdminClient(supabase);
+        setIsAdmin(adminCheck.isAdmin);
+      } catch (adminError) {
+        console.warn('⚠️ Não foi possível verificar admin:', adminError);
+        setIsAdmin(false);
+      }
 
       // Carregar dados do perfil
       const { data: userData, error } = await supabase

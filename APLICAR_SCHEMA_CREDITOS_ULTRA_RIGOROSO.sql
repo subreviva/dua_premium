@@ -240,6 +240,45 @@ CREATE POLICY "Pacotes são públicos"
   FOR SELECT
   USING (is_active = true);
 
+-- =====================================================
+-- 8.1. POLÍTICAS PARA admin_accounts (FIX ERRO 406)
+-- =====================================================
+
+-- Criar tabela admin_accounts se não existir
+CREATE TABLE IF NOT EXISTS public.admin_accounts (
+  id UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('admin', 'super_admin')),
+  permissions JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+COMMENT ON TABLE public.admin_accounts IS 'Contas de administradores do sistema';
+
+-- Habilitar RLS em admin_accounts
+ALTER TABLE public.admin_accounts ENABLE ROW LEVEL SECURITY;
+
+-- Policy para SELECT: Admins podem ver sua própria conta
+DROP POLICY IF EXISTS "admin_can_view_own_account" ON public.admin_accounts;
+CREATE POLICY "admin_can_view_own_account"
+  ON public.admin_accounts
+  FOR SELECT
+  USING (auth.uid() = id);
+
+-- Policy para UPDATE: Admins podem atualizar sua própria conta
+DROP POLICY IF EXISTS "admin_can_update_own_account" ON public.admin_accounts;
+CREATE POLICY "admin_can_update_own_account"
+  ON public.admin_accounts
+  FOR UPDATE
+  USING (auth.uid() = id);
+
+-- Policy para INSERT: Service role pode criar admins
+DROP POLICY IF EXISTS "service_role_can_create_admins" ON public.admin_accounts;
+CREATE POLICY "service_role_can_create_admins"
+  ON public.admin_accounts
+  FOR INSERT
+  WITH CHECK (true);
+
 -- 9. GRANTS DE PERMISSÕES
 -- =====================================================
 
@@ -248,6 +287,7 @@ GRANT SELECT, UPDATE ON public.users TO authenticated;
 GRANT SELECT ON public.credit_transactions TO authenticated;
 GRANT SELECT ON public.credit_packages TO authenticated;
 GRANT SELECT ON public.user_balances TO authenticated;
+GRANT SELECT ON public.admin_accounts TO authenticated;
 
 -- Permissões para função
 GRANT EXECUTE ON FUNCTION public.register_credit_transaction TO authenticated;
