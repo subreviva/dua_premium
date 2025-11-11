@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useGeneration } from "@/contexts/generation-context"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
+import { supabaseClient } from "@/lib/supabase"
 
 const PRESETS = [
   {
@@ -152,12 +153,19 @@ export default function CreatePage() {
         }
       }
 
+      // 🔥 OBTER USER ID
+      const { data: { user } } = await supabaseClient.auth.getUser()
+      if (!user) {
+        throw new Error("Você precisa estar autenticado para gerar música")
+      }
+
       const response = await fetch("/api/suno/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          userId: user.id, // 🔥 ENVIAR USER ID
           prompt,
           customMode,
           instrumental,

@@ -15,6 +15,7 @@ import { useGeneration } from "@/contexts/generation-context"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { MusicStudioNavbar } from "@/components/music-studio-navbar"
+import { supabaseClient } from "@/lib/supabase"
 
 const PRESETS = [
   {
