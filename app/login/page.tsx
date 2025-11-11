@@ -20,9 +20,9 @@ import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff, ShieldCheck } from "lucid
 import { supabaseClient } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
-// TEMPORÁRIO: audit desabilitado até audit_logs estar configurado
-// import { audit } from "@/lib/audit";
-const audit = { login: () => {}, pageAccess: () => {}, error: () => {} };
+// Auditoria desativada: removidas chamadas para evitar 401 em audit_logs (RLS bloqueado)
+// Caso precise reativar no futuro, implementar camada segura em lib/audit-safe.ts
+const audit = { pageAccess: () => {} }; // Mantém apenas pageAccess como NO-OP
 
 const supabase = supabaseClient;
 
@@ -36,8 +36,8 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
-    // Registrar acesso à página
-    audit.pageAccess();
+  // Registrar acesso à página (no-op enquanto auditoria está desativada)
+  audit.pageAccess();
     
     // Verificar se já está logado
     checkExistingSession();
@@ -130,8 +130,6 @@ export default function LoginPage() {
           description: errorMessage,
         });
         
-        // Auditar falha de login
-        audit.login();
         return;
       }
 
@@ -139,7 +137,6 @@ export default function LoginPage() {
         toast.error("Erro ao fazer login", {
           description: "Não foi possível autenticar",
         });
-        audit.login();
         return;
       }
 
@@ -156,7 +153,6 @@ export default function LoginPage() {
           description: "Não foi possível verificar suas permissões",
         });
         await supabase.auth.signOut();
-        audit.login();
         return;
       }
 
@@ -165,7 +161,6 @@ export default function LoginPage() {
           description: "Sua conta não tem permissão de acesso",
         });
         await supabase.auth.signOut();
-        audit.login();
         return;
       }
 
@@ -182,9 +177,6 @@ export default function LoginPage() {
         duration: 2000,
       });
 
-      // Auditar login bem-sucedido
-      audit.login();
-
       setTimeout(() => {
         router.push("/chat");
         router.refresh();
@@ -194,7 +186,6 @@ export default function LoginPage() {
       toast.error("Erro de conexão", {
         description: "Não foi possível fazer login",
       });
-      audit.error();
     } finally {
       setIsLoading(false);
     }
@@ -218,7 +209,6 @@ export default function LoginPage() {
         toast.error("Erro ao iniciar login com Google", {
           description: error.message,
         });
-        audit.error();
         setIsGoogleLoading(false);
         return;
       }
@@ -231,7 +221,6 @@ export default function LoginPage() {
       toast.error("Erro de conexão", {
         description: "Não foi possível iniciar login com Google",
       });
-      audit.error();
       setIsGoogleLoading(false);
     }
   };
