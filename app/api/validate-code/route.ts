@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
       .eq('user_id', userId)
       .single();
 
-    if (!existingCoinProfile) {
+  if (!existingCoinProfile) {
       // Criar perfil DUA COIN
       const { error: coinProfileError } = await supabaseAdmin
         .from('duacoin_profiles')
@@ -222,6 +222,26 @@ export async function POST(req: NextRequest) {
       console.log('ℹ️  Perfil DUA COIN já existe para user:', userId);
     }
 
+    // 5.1 Inicializar créditos de serviços (150) em duaia_user_balances
+    // Garantir registro
+    await supabaseAdmin
+      .from('duaia_user_balances')
+      .upsert({ user_id: userId, servicos_creditos: 0, duacoin_balance: 0 }, { onConflict: 'user_id' });
+
+    // Adicionar créditos via RPC com auditoria
+    const { error: addCreditsError } = await supabaseAdmin.rpc('add_servicos_credits', {
+      p_user_id: userId,
+      p_amount: 150,
+      p_transaction_type: 'signup_bonus',
+      p_description: 'Créditos iniciais - Acesso exclusivo',
+      p_admin_email: null,
+      p_metadata: { source: 'validate-code', code: code.toUpperCase() }
+    });
+
+    if (addCreditsError) {
+      console.error('⚠️  Erro ao adicionar créditos iniciais:', addCreditsError);
+    }
+
     // 6. Marcar código como usado
     const { error: updateCodeError } = await supabaseAdmin
       .from('invite_codes')
@@ -254,7 +274,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: `🎉 Acesso concedido! 5000 tokens + 1000 DUA coins adicionados. Verifique seu email para o link de acesso.`,
+        message: `🎉 Acesso concedido! 150 créditos + 5000 tokens + 1000 DUA coins adicionados. Verifique seu email para o link de acesso.`,
         user: updatedUser ? {
           ...updatedUser,
           dua_coins: coinProfile?.balance || 0,
