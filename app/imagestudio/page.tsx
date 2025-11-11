@@ -410,10 +410,9 @@ export default function ImageStudioPage() {
                           <SelectValue placeholder="Modelo" />
                         </SelectTrigger>
                         <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                          <SelectItem value="ultra">Ultra</SelectItem>
-                          <SelectItem value="standard">Standard</SelectItem>
-                          <SelectItem value="fast">Fast</SelectItem>
-                          <SelectItem value="imagen3">Imagen 3</SelectItem>
+                          <SelectItem value="ultra">Ultra (50 cr)</SelectItem>
+                          <SelectItem value="standard">Standard (25 cr)</SelectItem>
+                          <SelectItem value="fast">Fast (15 cr)</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -495,10 +494,9 @@ export default function ImageStudioPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-black/95 backdrop-blur-xl border-white/20">
-                        <SelectItem value="ultra">Imagen Ultra</SelectItem>
-                        <SelectItem value="standard">Standard</SelectItem>
-                        <SelectItem value="fast">Fast</SelectItem>
-                        <SelectItem value="imagen3">Imagen 3</SelectItem>
+                        <SelectItem value="ultra">Ultra (50 cr)</SelectItem>
+                        <SelectItem value="standard">Standard (25 cr)</SelectItem>
+                        <SelectItem value="fast">Fast (15 cr)</SelectItem>
                       </SelectContent>
                     </Select>
 
