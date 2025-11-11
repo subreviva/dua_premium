@@ -258,11 +258,14 @@ COMMENT ON TABLE public.admin_accounts IS 'Contas de administradores do sistema'
 -- Habilitar RLS em admin_accounts
 ALTER TABLE public.admin_accounts ENABLE ROW LEVEL SECURITY;
 
--- Policy para SELECT: Admins podem ver sua própria conta
+-- Policy para SELECT: Qualquer usuário pode consultar, mas RLS filtra
+-- Se não for admin, retorna vazio (sem erro 406)
 DROP POLICY IF EXISTS "admin_can_view_own_account" ON public.admin_accounts;
-CREATE POLICY "admin_can_view_own_account"
+DROP POLICY IF EXISTS "authenticated_can_check_admin" ON public.admin_accounts;
+CREATE POLICY "users_can_check_admin_status"
   ON public.admin_accounts
   FOR SELECT
+  TO authenticated
   USING (auth.uid() = id);
 
 -- Policy para UPDATE: Admins podem atualizar sua própria conta
