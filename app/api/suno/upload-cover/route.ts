@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { SunoAPI } from "@/lib/suno-api"
+import { checkCredits, deductCredits } from "@/lib/credits/credits-service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,6 +10,7 @@ export async function POST(request: NextRequest) {
     console.log("[v0] Request body:", JSON.stringify(body, null, 2))
 
     const {
+      userId, // 🔥 NOVO: userId obrigatório
       uploadUrl,
       prompt,
       style,
@@ -22,6 +24,34 @@ export async function POST(request: NextRequest) {
       weirdnessConstraint,
       audioWeight,
     } = body
+
+    // 🔥 VALIDAÇÃO: userId é obrigatório
+    if (!userId) {
+      return NextResponse.json(
+        { error: "userId é obrigatório para gerar música" },
+        { status: 400 }
+      )
+    }
+
+    // 🔥 PASSO 1: VERIFICAR CRÉDITOS ANTES DE GERAR
+    console.log(`🎵 [Suno Upload] Verificando créditos para usuário ${userId}...`)
+    const creditCheck = await checkCredits(userId, 'music_add_instrumental')
+
+    if (!creditCheck.hasCredits) {
+      console.log(`❌ [Suno Upload] Créditos insuficientes: ${creditCheck.message}`)
+      return NextResponse.json(
+        {
+          error: 'Créditos insuficientes',
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+          message: creditCheck.message,
+        },
+        { status: 402 } // 402 Payment Required
+      )
+    }
+
+    console.log(`✅ [Suno Upload] Créditos OK (saldo: ${creditCheck.currentBalance}, necessário: ${creditCheck.required})`)
 
     if (!uploadUrl) {
       console.error("[v0] Missing uploadUrl")
@@ -99,6 +129,23 @@ export async function POST(request: NextRequest) {
       weirdnessConstraint: weirdnessConstraint !== undefined ? Math.round(weirdnessConstraint * 100) / 100 : undefined,
       audioWeight: audioWeight !== undefined ? Math.round(audioWeight * 100) / 100 : undefined,
     })
+
+    // 🔥 PASSO 2: DEDUZIR CRÉDITOS APÓS SUCESSO
+    console.log(`💰 [Suno Upload] Deduzindo ${creditCheck.required} créditos...`)
+    const deduction = await deductCredits(userId, 'music_add_instrumental', {
+      operation: 'music_add_instrumental',
+      cost: creditCheck.required,
+      category: 'music',
+      model: model,
+      prompt: (prompt || title || 'Melodia').substring(0, 100),
+    })
+
+    if (!deduction.success) {
+      console.error(`❌ [Suno Upload] Falha ao deduzir créditos: ${deduction.error}`)
+      // Música já foi gerada, apenas loggar o erro
+    } else {
+      console.log(`✅ [Suno Upload] Créditos deduzidos. Novo saldo: ${deduction.newBalance}`)
+    }
 
     console.log("[v0] Upload cover successful, taskId:", taskId)
     return NextResponse.json({ taskId })

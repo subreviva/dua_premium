@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ButtonColorful } from "@/components/ui/button-colorful"
+import { supabaseClient } from "@/lib/supabase"
 import {
   Settings,
   X,
@@ -415,6 +416,12 @@ export default function MelodyPage() {
     setIsGenerating(true)
 
     try {
+      // 🔥 OBTER USER ID
+      const { data: { user } } = await supabaseClient.auth.getUser()
+      if (!user) {
+        throw new Error("Você precisa estar autenticado para gerar música")
+      }
+
       // Upload audio first
       const audioUrl = await uploadAudioToBlob()
 
@@ -424,6 +431,7 @@ export default function MelodyPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          userId: user.id, // 🔥 ENVIAR USER ID
           uploadUrl: audioUrl, // Changed from audioUrl to uploadUrl per API docs
           prompt: prompt || "Criar música baseada no áudio fornecido",
           customMode: true,
