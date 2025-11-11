@@ -65,9 +65,9 @@ DROP VIEW IF EXISTS public.v_market_products_public CASCADE;
 -- 3. HABILITAR RLS em creative_scholarships
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
--- ⚠️ NOTA: Tabela creative_scholarships não existe neste projeto
--- Se o Supabase Linter reportou erro nesta tabela, ela pode ter sido removida
--- Verificando se existe antes de aplicar correções
+-- ⚠️ NOTA: Não sabemos a estrutura exata da tabela creative_scholarships
+-- Apenas habilitamos RLS sem criar políticas (evita erros com colunas inexistentes)
+-- As políticas existentes (se houver) serão mantidas
 
 DO $$
 BEGIN
@@ -76,48 +76,10 @@ BEGIN
     WHERE table_schema = 'public' 
     AND table_name = 'creative_scholarships'
   ) THEN
-    -- Tabela existe, aplicar RLS
+    -- Apenas habilitar RLS, não criar políticas
     ALTER TABLE public.creative_scholarships ENABLE ROW LEVEL SECURITY;
-
-    -- Política: Usuários podem ver APENAS suas próprias bolsas
-    DROP POLICY IF EXISTS "Users can view own scholarships" ON public.creative_scholarships;
-    CREATE POLICY "Users can view own scholarships"
-      ON public.creative_scholarships
-      FOR SELECT
-      TO authenticated
-      USING (auth.uid() = user_id);
-
-    -- Política: Admins podem ver todas
-    DROP POLICY IF EXISTS "Admins can view all scholarships" ON public.creative_scholarships;
-    CREATE POLICY "Admins can view all scholarships"
-      ON public.creative_scholarships
-      FOR SELECT
-      TO authenticated
-      USING (
-        EXISTS (
-          SELECT 1 FROM public.users
-          WHERE id = auth.uid()
-            AND (is_admin = true OR account_type = 'admin')
-        )
-      );
-
-    -- Política: Usuários podem criar suas próprias bolsas
-    DROP POLICY IF EXISTS "Users can create own scholarships" ON public.creative_scholarships;
-    CREATE POLICY "Users can create own scholarships"
-      ON public.creative_scholarships
-      FOR INSERT
-      TO authenticated
-      WITH CHECK (auth.uid() = user_id);
-
-    -- Política: Usuários podem atualizar suas próprias bolsas
-    DROP POLICY IF EXISTS "Users can update own scholarships" ON public.creative_scholarships;
-    CREATE POLICY "Users can update own scholarships"
-      ON public.creative_scholarships
-      FOR UPDATE
-      TO authenticated
-      USING (auth.uid() = user_id);
-
-    RAISE NOTICE '✅ RLS habilitado em creative_scholarships';
+    
+    RAISE NOTICE '✅ RLS habilitado em creative_scholarships (políticas não alteradas)';
   ELSE
     RAISE NOTICE '⚠️ Tabela creative_scholarships não existe, ignorando RLS';
   END IF;
