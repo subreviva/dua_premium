@@ -21,6 +21,14 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
+// Validação no build time
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ SUPABASE ENV VARS MISSING!');
+  console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'SET' : 'MISSING');
+  console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'SET' : 'MISSING');
+  throw new Error('Missing Supabase environment variables!');
+}
+
 // Singleton instances
 let _clientInstance: SupabaseClient | null = null;
 let _adminInstance: SupabaseClient | null = null;
