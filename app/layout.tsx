@@ -125,7 +125,10 @@ export default function RootLayout({
         
         {/* 🔧 Desabilitar Service Worker em desenvolvimento */}
         {process.env.NODE_ENV === 'development' && (
-          <script src="/disable-sw.js" defer />
+          <>
+            <script src="/clear-all-sw.js" defer />
+            <script src="/disable-sw.js" defer />
+          </>
         )}
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
