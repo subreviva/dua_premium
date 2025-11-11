@@ -29,18 +29,22 @@ export function GlobalMusicPlayer() {
   const progressPercentage = duration > 0 ? (progress / duration) * 100 : 0
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
-      <div className="backdrop-blur-2xl bg-black/80 border-t border-white/[0.08]">
+    <div className="fixed bottom-0 left-0 right-0 z-[50]">
+      {/* iOS-style backdrop blur container */}
+      <div className="backdrop-blur-3xl bg-black/85 border-t border-white/[0.12] shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* Progress Bar */}
-          <div className="relative h-1 bg-white/10 cursor-pointer" onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect()
-            const x = e.clientX - rect.left
-            const percentage = x / rect.width
-            seek(percentage * duration)
-          }}>
+          {/* Progress Bar - Touch-friendly */}
+          <div 
+            className="relative h-1.5 md:h-1 bg-white/[0.12] cursor-pointer group" 
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect()
+              const x = e.clientX - rect.left
+              const percentage = x / rect.width
+              seek(percentage * duration)
+            }}
+          >
             <div 
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-purple-400 to-pink-500 transition-all rounded-full"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -49,7 +53,7 @@ export function GlobalMusicPlayer() {
           <div className="flex items-center gap-4 py-3 md:py-4">
             {/* Track Info */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 md:w-14 md:h-14">
+              <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl overflow-hidden shrink-0 shadow-lg">
                 <Image
                   src={currentTrack.cover}
                   alt={currentTrack.title}
@@ -58,10 +62,10 @@ export function GlobalMusicPlayer() {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-sm font-semibold text-white truncate md:text-base">
+                <h4 className="text-sm md:text-base font-semibold text-white truncate">
                   {currentTrack.title}
                 </h4>
-                <p className="text-xs text-zinc-400 truncate md:text-sm">
+                <p className="text-xs md:text-sm text-zinc-400 truncate">
                   {currentTrack.artist}
                 </p>
               </div>
@@ -112,16 +116,16 @@ export function GlobalMusicPlayer() {
             <div className="flex md:hidden items-center gap-3">
               <Button
                 size="icon"
-                className="w-9 h-9 rounded-full bg-white text-black hover:bg-white/90 active:scale-95 transition-transform"
+                className="w-12 h-12 rounded-full bg-white text-black hover:bg-white/90 active:scale-95 transition-all shadow-lg"
                 onClick={isPlaying ? pause : resume}
               >
                 {isPlaying ? (
-                  <Pause className="w-4 h-4" fill="currentColor" />
+                  <Pause className="w-5 h-5" fill="currentColor" />
                 ) : (
-                  <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
+                  <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
                 )}
               </Button>
-              <div className="text-[10px] text-zinc-400 tabular-nums">
+              <div className="text-[11px] text-zinc-400 tabular-nums font-medium">
                 {formatTime(progress)}
               </div>
             </div>
@@ -144,6 +148,9 @@ export function GlobalMusicPlayer() {
           </div>
         </div>
       </div>
+      
+      {/* Safe area padding for iOS/Android */}
+      <div className="bg-black/85 pb-[env(safe-area-inset-bottom)]" />
     </div>
   )
 }

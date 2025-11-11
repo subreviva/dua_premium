@@ -46,8 +46,8 @@ export default function HomePage() {
         {/* Navbar superior - sempre visível */}
         <MusicStudioNavbar />
         
-        {/* Conteúdo com scroll */}
-        <div className="flex-1 overflow-y-auto pb-safe-mobile md:pb-0">
+        {/* Conteúdo com scroll - padding-bottom safe para navbar + player */}
+        <div className="flex-1 overflow-y-auto pb-safe-nav md:pb-0">
           <div className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0 z-0">
               <Image 
@@ -69,20 +69,21 @@ export default function HomePage() {
                 transition={{ duration: 0.6 }}
                 className="text-center mb-10 md:mb-16 max-w-4xl"
               >
-                <h1 className="text-[32px] leading-[1.15] font-semibold tracking-tight md:text-6xl lg:text-7xl text-white mb-4 md:mb-6">
+                <h1 className="text-[34px] leading-[1.12] font-bold tracking-tight md:text-6xl lg:text-7xl text-white mb-4 md:mb-6">
                   Crie Música
                   <br />
-                  <span className="bg-gradient-to-r from-white via-white/90 to-white/80 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
                     Além da Imaginação
                   </span>
                 </h1>
-                <p className="text-[15px] text-white/60 mt-3 font-light leading-relaxed md:text-lg max-w-2xl mx-auto">
+                <p className="text-[15px] text-white/70 mt-3 font-light leading-relaxed md:text-lg max-w-2xl mx-auto">
                   Transforme ideias em música profissional com IA
                 </p>
               </motion.div>
 
               <div className="w-full md:max-w-3xl">
-                <div className="md:hidden overflow-x-auto scrollbar-hide -mx-5 px-5 pb-4">
+                {/* Mobile: Horizontal scroll com snap */}
+                <div className="md:hidden overflow-x-auto scrollbar-hide -mx-5 px-5 pb-4 snap-x snap-mandatory">
                   <div className="flex gap-3" style={{ width: 'max-content' }}>
                     {quickActions.map((action, index) => (
                       <motion.div
@@ -90,18 +91,19 @@ export default function HomePage() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
+                        className="snap-start"
                       >
                         <Link href={action.href}>
-                          <div className="w-[280px] backdrop-blur-xl bg-white/[0.06] border border-white/[0.08] rounded-2xl p-5 active:bg-white/[0.10] transition-all active:scale-[0.97]">
+                          <div className="w-[280px] backdrop-blur-2xl bg-white/[0.08] border border-white/[0.12] rounded-[20px] p-6 active:bg-white/[0.14] transition-all active:scale-[0.97] shadow-xl">
                             <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 rounded-xl bg-white/[0.08] border border-white/[0.12] backdrop-blur-xl flex items-center justify-center flex-shrink-0">
-                                <action.icon className="w-5 h-5 text-white/90" strokeWidth={2} />
+                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/[0.12] to-white/[0.06] border border-white/[0.15] backdrop-blur-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                                <action.icon className="w-6 h-6 text-white" strokeWidth={2.5} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-[15px] font-medium text-white/95 mb-1 tracking-tight">
+                                <h3 className="text-[16px] font-semibold text-white mb-1.5 tracking-tight">
                                   {action.title}
                                 </h3>
-                                <p className="text-[13px] text-white/50 font-light leading-snug">
+                                <p className="text-[13px] text-white/60 font-light leading-relaxed">
                                   {action.description}
                                 </p>
                               </div>

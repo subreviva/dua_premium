@@ -53,12 +53,13 @@ export function UnifiedMusicPlayer() {
   const trackInfo = getTrackInfo()
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
-      <div className="backdrop-blur-2xl bg-black/80 border-t border-white/[0.08]">
+    <div className="fixed bottom-0 left-0 right-0 z-[50]">
+      {/* iOS-style backdrop blur container */}
+      <div className="backdrop-blur-3xl bg-black/85 border-t border-white/[0.12] shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* Progress Bar */}
+          {/* Progress Bar - Touch-friendly */}
           <div 
-            className="relative h-1 bg-white/10 cursor-pointer" 
+            className="relative h-1.5 md:h-1 bg-white/[0.12] cursor-pointer group" 
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect()
               const x = e.clientX - rect.left
@@ -67,16 +68,18 @@ export function UnifiedMusicPlayer() {
             }}
           >
             <div 
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-purple-400 to-pink-500 transition-all rounded-full"
               style={{ width: `${progressPercentage}%` }}
             />
+            {/* Hover indicator on desktop */}
+            <div className="absolute inset-y-0 left-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           </div>
 
           {/* Player Controls */}
           <div className="flex items-center gap-4 py-3 md:py-4">
             {/* Track Info */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 md:w-14 md:h-14">
+              <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl overflow-hidden shrink-0 shadow-lg">
                 <Image
                   src={trackInfo.image}
                   alt={trackInfo.title}
@@ -86,20 +89,20 @@ export function UnifiedMusicPlayer() {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-sm font-semibold text-white truncate md:text-base">
+                <h4 className="text-sm md:text-base font-semibold text-white truncate">
                   {trackInfo.title}
                 </h4>
-                <p className="text-xs text-zinc-400 truncate md:text-sm">
+                <p className="text-xs md:text-sm text-zinc-400 truncate">
                   {trackInfo.artist}
                 </p>
               </div>
             </div>
 
             {/* Controls - Mobile */}
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex md:hidden items-center gap-3">
               <Button
                 size="icon"
-                className="w-10 h-10 rounded-full bg-white text-black hover:bg-white/90 hover:scale-105 transition-transform active:scale-95"
+                className="w-12 h-12 rounded-full bg-white text-black hover:bg-white/90 hover:scale-105 transition-all active:scale-95 shadow-lg"
                 onClick={isPlaying ? pause : resume}
               >
                 {isPlaying ? (
@@ -112,7 +115,7 @@ export function UnifiedMusicPlayer() {
               <Button
                 size="icon"
                 variant="ghost"
-                className="w-8 h-8 text-zinc-400 hover:text-white hover:bg-white/10"
+                className="w-9 h-9 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl"
                 onClick={stop}
               >
                 <X className="w-4 h-4" />
@@ -221,6 +224,9 @@ export function UnifiedMusicPlayer() {
           )}
         </div>
       </div>
+      
+      {/* Safe area padding for iOS/Android */}
+      <div className="bg-black/85 pb-[env(safe-area-inset-bottom)]" />
     </div>
   )
 }

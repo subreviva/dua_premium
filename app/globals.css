@@ -382,6 +382,16 @@ html {
     .pb-safe-mobile {
       padding-bottom: calc(96px + env(safe-area-inset-bottom));
     }
+    
+    /* Enhanced mobile padding for navbar + player combo */
+    .pb-safe-nav-player {
+      padding-bottom: calc(180px + env(safe-area-inset-bottom));
+    }
+    
+    /* Navbar only safe padding */
+    .pb-safe-nav {
+      padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    }
   }
 
   /* Premium typography with refined line heights and dramatic letter spacing */
