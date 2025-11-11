@@ -318,8 +318,11 @@ export default function AcessoPage() {
         has_access: true,
         email_verified: true,
         registration_completed: true,
-        creditos_servicos: 150,
-        saldo_dua: 50,
+        credits: 150, // ✅ NOVA COLUNA DO SCHEMA
+        duaia_credits: 0,
+        duacoin_balance: 0,
+        creditos_servicos: 150, // ⚠️ Mantido para compatibilidade
+        saldo_dua: 50, // ⚠️ Mantido para compatibilidade
         account_type: 'normal',
       }).select();
 

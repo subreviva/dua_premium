@@ -45,13 +45,13 @@ export function useCredits() {
         {
           event: '*',
           schema: 'public',
-          table: 'duaia_user_balances',
-          filter: `user_id=eq.${userId}`,
+          table: 'users', // ✅ MUDADO: De duaia_user_balances para users
+          filter: `id=eq.${userId}`,
         },
         (payload) => {
           console.log('[USE-CREDITS] Change detected:', payload)
-          if (payload.new && 'servicos_creditos' in payload.new) {
-            setCredits((payload.new as any).servicos_creditos)
+          if (payload.new && 'credits' in payload.new) {
+            setCredits((payload.new as any).credits)
           }
         }
       )
@@ -76,10 +76,11 @@ export function useCredits() {
         setUserId(user.id)
       }
 
-      const { data: balanceData, error } = await supabase
-        .from('duaia_user_balances')
-        .select('servicos_creditos')
-        .eq('user_id', targetUserId || userId)
+      // ✅ MUDADO: Ler de users.credits em vez de duaia_user_balances
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('credits')
+        .eq('id', targetUserId || userId)
         .single()
       
       if (error) {
@@ -88,8 +89,8 @@ export function useCredits() {
         return
       }
 
-      if (balanceData) {
-        setCredits(balanceData.servicos_creditos || 0)
+      if (userData) {
+        setCredits(userData.credits || 0)
       }
       
       setLoading(false)
