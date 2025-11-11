@@ -143,6 +143,23 @@ COMMENT ON FUNCTION public.touch_updated_at IS
 'Atualiza updated_at automaticamente - SEARCH_PATH FIXO';
 
 -- 4.3. log_login_attempt
+-- ⚠️ Múltiplas versões podem existir com diferentes assinaturas - dropar todas primeiro
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN 
+    SELECT proname, oidvectortypes(proargtypes) as args
+    FROM pg_proc 
+    WHERE proname = 'log_login_attempt' 
+      AND pronamespace = 'public'::regnamespace
+  LOOP
+    EXECUTE 'DROP FUNCTION IF EXISTS public.log_login_attempt(' || func_record.args || ')';
+    RAISE NOTICE 'Dropada função: log_login_attempt(%)', func_record.args;
+  END LOOP;
+END $$;
+
+-- Recriar com assinatura correta e search_path fixo
 CREATE OR REPLACE FUNCTION public.log_login_attempt(
   p_email TEXT,
   p_success BOOLEAN,
@@ -171,7 +188,7 @@ BEGIN
 END;
 $$;
 
-COMMENT ON FUNCTION public.log_login_attempt IS 
+COMMENT ON FUNCTION public.log_login_attempt(TEXT, BOOLEAN, TEXT, TEXT) IS 
 'Registra tentativas de login - SEARCH_PATH FIXO para segurança';
 
 -- 4.4. increment_view_count (FUNÇÃO NÃO USADA - community_posts não tem views_count)
