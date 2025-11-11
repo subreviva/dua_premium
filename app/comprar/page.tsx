@@ -1,21 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Sparkles as SparklesComp } from "@/components/ui/sparkles"
-import { TimelineContent } from "@/components/ui/timeline-animation"
-import { VerticalCutReveal } from "@/components/ui/vertical-cut-reveal"
+import { useState, useEffect } from "react"
 import { PremiumNavbar } from "@/components/ui/premium-navbar"
-import { 
-  Coins, 
-  Check, 
-  Loader2, 
-  Zap, 
-  Rocket,
-  Sparkles,
-  Star,
-  Shield
-} from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { supabaseClient } from "@/lib/supabase"
@@ -31,495 +18,379 @@ interface CreditPackage {
   description: string
   creditos: number
   price_eur: number
-  yearlyPrice?: number
+  yearlyPrice: number
+  savings: number
+  yearlyCredits: number
   popular?: boolean
-  icon: any
-  gradient: string
   features: string[]
+  usage: {
+    music: number
+    images: number
+    videos: number
+  }
 }
 
 const CREDIT_PACKAGES: CreditPackage[] = [
   {
     id: "starter",
     name: "Starter",
-    description: "Perfeito para começar a explorar todo o potencial criativo da plataforma DUA",
-    creditos: 170,
-    price_eur: 5,
-    icon: Zap,
-    gradient: "from-blue-500 to-cyan-600",
+    description: "Experimentar e validar",
+    creditos: 340,
+    price_eur: 10,
+    yearlyPrice: 100,
+    savings: 20,
+    yearlyCredits: 4080,
     features: [
-      "Starter includes:",
-      "170 créditos de serviços",
-      "28 músicas completas",
-      "6-11 imagens Fast",
-      "8 vídeos (5s)",
-      "50 chats/dia gratuitos",
-      "Válido por 30 dias"
-    ]
+      "340 créditos",
+      "Todos os estúdios",
+      "Funcionalidades premium",
+      "56 músicas OU 13 imagens OU 17 vídeos"
+    ],
+    usage: {
+      music: 56,
+      images: 13,
+      videos: 17
+    }
   },
   {
-    id: "standard",
-    name: "Standard",
-    description: "Melhor valor para criadores que procuram recursos avançados e mais liberdade criativa",
-    creditos: 1250,
-    price_eur: 30,
-    yearlyPrice: 299,
+    id: "pro",
+    name: "Pro",
+    description: "Criadores e profissionais",
+    creditos: 1560,
+    price_eur: 40,
+    yearlyPrice: 400,
+    savings: 80,
+    yearlyCredits: 18720,
     popular: true,
-    icon: Star,
-    gradient: "from-purple-500 to-pink-600",
     features: [
-      "Tudo no Starter, mais:",
-      "1.250 créditos de serviços",
-      "208 músicas completas",
-      "50-83 imagens Fast/Standard",
-      "62 vídeos (5s)",
-      "Bonus de 10%",
-      "Melhor custo-benefício",
-      "Válido por 60 dias"
-    ]
+      "1.560 créditos (+20% bonus)",
+      "Todos os estúdios",
+      "Funcionalidades premium",
+      "Prioridade processamento",
+      "260 músicas OU 62 imagens OU 78 vídeos",
+      "50% dos clientes escolhem este"
+    ],
+    usage: {
+      music: 260,
+      images: 62,
+      videos: 78
+    }
   },
   {
     id: "premium",
     name: "Premium",
-    description: "Plano avançado com segurança aprimorada e acesso ilimitado para equipas grandes",
-    creditos: 6250,
-    price_eur: 150,
-    yearlyPrice: 1499,
-    icon: Rocket,
-    gradient: "from-orange-500 to-red-600",
+    description: "Agências e empresas",
+    creditos: 5200,
+    price_eur: 120,
+    yearlyPrice: 1200,
+    savings: 240,
+    yearlyCredits: 62400,
     features: [
-      "Tudo no Standard, mais:",
-      "6.250 créditos de serviços",
-      "1.041 músicas completas",
-      "250-416 imagens Fast/Standard",
-      "312 vídeos (5s)",
-      "Bonus de 25% 👑",
+      "5.200 créditos (+30% bonus)",
       "Chat ILIMITADO",
-      "Suporte 24/7 VIP",
-      "Válido por 180 dias"
-    ]
+      "Suporte 24/7 prioritário",
+      "API access",
+      "Avatar Studio incluído",
+      "866 músicas OU 208 imagens OU 260 vídeos"
+    ],
+    usage: {
+      music: 866,
+      images: 208,
+      videos: 260
+    }
   }
 ]
 
-const PricingSwitch = ({ onSwitch }: { onSwitch: (value: string) => void }) => {
-  const [selected, setSelected] = useState("0")
-
-  const handleSwitch = (value: string) => {
-    setSelected(value)
-    onSwitch(value)
-  }
-
-  return (
-    <div className="flex justify-center">
-      <div className="relative z-10 mx-auto flex w-fit rounded-full bg-neutral-900 border border-gray-700 p-1">
-        <button
-          onClick={() => handleSwitch("0")}
-          className={cn(
-            "relative z-10 w-fit h-10 rounded-full sm:px-6 px-3 sm:py-2 py-1 font-medium transition-colors",
-            selected === "0" ? "text-white" : "text-gray-200"
-          )}
-        >
-          {selected === "0" && (
-            <motion.span
-              layoutId={"switch"}
-              className="absolute top-0 left-0 h-10 w-full rounded-full border-4 shadow-sm shadow-blue-600 border-blue-600 bg-gradient-to-t from-blue-500 to-blue-600"
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          )}
-          <span className="relative">Mensal</span>
-        </button>
-
-        <button
-          onClick={() => handleSwitch("1")}
-          className={cn(
-            "relative z-10 w-fit h-10 flex-shrink-0 rounded-full sm:px-6 px-3 sm:py-2 py-1 font-medium transition-colors",
-            selected === "1" ? "text-white" : "text-gray-200"
-          )}
-        >
-          {selected === "1" && (
-            <motion.span
-              layoutId={"switch"}
-              className="absolute top-0 left-0 h-10 w-full rounded-full border-4 shadow-sm shadow-blue-600 border-blue-600 bg-gradient-to-t from-blue-500 to-blue-600"
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          )}
-          <span className="relative flex items-center gap-2">Anual</span>
-        </button>
-      </div>
-    </div>
-  )
-}
-
 export default function ComprarPage() {
-  const [loading, setLoading] = useState(true)
-  const [processing, setProcessing] = useState(false)
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [userCredits, setUserCredits] = useState<number>(0)
-  const [isYearly, setIsYearly] = useState(false)
-  const pricingRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
 
-  useEffect(() => {
-    checkAuth()
-  }, [])
+  const handlePurchase = async (packageId: string, isYearly: boolean) => {
+    setSelectedPlan(packageId)
+    setLoading(true)
 
-  // Listener em tempo real para atualizar créditos após compra
-  useEffect(() => {
-    if (!currentUser) return
-
-    const channel = supabase
-      .channel('purchase-credits-update')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'duaia_user_balances',
-          filter: `user_id=eq.${currentUser.id}`,
-        },
-        (payload) => {
-          console.log('[COMPRAR] Credits updated:', payload)
-          if (payload.new && 'servicos_creditos' in payload.new) {
-            setUserCredits((payload.new as any).servicos_creditos)
-            toast.success('Créditos atualizados!', {
-              description: `Novo saldo: ${(payload.new as any).servicos_creditos} créditos`
-            })
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [currentUser])
-
-  const checkAuth = async () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
       
-      if (error || !user) {
-        toast.error('Por favor, faça login primeiro')
-        router.push('/acesso')
+      if (!session) {
+        toast.error("Autenticação necessária", {
+          description: "Por favor, faça login para continuar"
+        })
+        router.push('/login')
         return
       }
 
-      setCurrentUser(user)
-      
-      const { data: balanceData } = await supabase
-        .from('duaia_user_balances')
-        .select('servicos_creditos')
-        .eq('user_id', user.id)
-        .single()
-      
-      if (balanceData) {
-        setUserCredits(balanceData.servicos_creditos || 0)
+      const pkg = CREDIT_PACKAGES.find(p => p.id === packageId)
+      if (!pkg) {
+        toast.error("Pacote inválido")
+        return
       }
-    } catch (error) {
-      console.error('Auth error:', error)
+
+      const amount = isYearly ? pkg.yearlyPrice : pkg.price_eur
+      const credits = isYearly ? pkg.yearlyCredits : pkg.creditos
+
+      toast.success("Processando pagamento", {
+        description: `${pkg.name} - €${amount}${isYearly ? '/ano' : '/mês'}`
+      })
+
+      // Aqui você integraria com Stripe/PayPal
+      console.log('Purchase:', { packageId, isYearly, amount, credits })
+
+    } catch (error: any) {
+      console.error('Erro ao processar compra:', error)
+      toast.error("Erro ao processar pagamento", {
+        description: error.message || "Tente novamente"
+      })
     } finally {
       setLoading(false)
+      setSelectedPlan(null)
     }
-  }
-
-  const handlePurchase = async (pkg: CreditPackage) => {
-    if (!currentUser) {
-      toast.error('Por favor, faça login primeiro')
-      router.push('/acesso')
-      return
-    }
-
-    setProcessing(true)
-    
-    try {
-      toast.loading('A redirecionar para pagamento...', { id: 'purchase' })
-      
-      const response = await fetch('/api/stripe/create-checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          packId: pkg.id,
-          userId: currentUser.id,
-        }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erro ao criar sessão de pagamento')
-      }
-
-      const { url } = await response.json()
-      
-      if (!url) {
-        throw new Error('URL de checkout não recebida')
-      }
-
-      toast.success('A redirecionar para Stripe Checkout...', { id: 'purchase' })
-      window.location.href = url
-      
-    } catch (error: any) {
-      console.error('Purchase error:', error)
-      toast.error('Erro ao processar compra', { 
-        id: 'purchase',
-        description: error.message || 'Tente novamente mais tarde'
-      })
-      setProcessing(false)
-    }
-  }
-
-  const togglePricingPeriod = (value: string) =>
-    setIsYearly(Number.parseInt(value) === 1)
-
-  const revealVariants = {
-    visible: (i: number) => ({
-      y: 0,
-      opacity: 1,
-      filter: "blur(0px)",
-      transition: {
-        delay: i * 0.4,
-        duration: 0.5,
-      },
-    }),
-    hidden: {
-      filter: "blur(10px)",
-      y: -20,
-      opacity: 0,
-    },
-  }
-
-  if (loading) {
-    return (
-      <div className="relative w-full min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="w-12 h-12 text-white animate-spin" />
-      </div>
-    )
   }
 
   return (
-    <div
-      className="min-h-screen mx-auto relative bg-black overflow-x-hidden"
-      ref={pricingRef}
-    >
-      <PremiumNavbar className="relative z-50" />
+    <div className="min-h-screen bg-black">
+      <PremiumNavbar />
       
-      <TimelineContent
-        animationNum={4}
-        timelineRef={pricingRef}
-        customVariants={revealVariants}
-        className="absolute top-0 h-96 w-screen overflow-hidden [mask-image:radial-gradient(50%_50%,white,transparent)]"
-      >
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#ffffff2c_1px,transparent_1px),linear-gradient(to_bottom,#3a3a3a01_1px,transparent_1px)] bg-[size:70px_80px]"></div>
-        <SparklesComp
-          density={1800}
-          direction="bottom"
-          speed={1}
-          color="#FFFFFF"
-          className="absolute inset-x-0 bottom-0 h-full w-full [mask-image:radial-gradient(50%_50%,white,transparent_85%)]"
-        />
-      </TimelineContent>
-      
-      <TimelineContent
-        animationNum={5}
-        timelineRef={pricingRef}
-        customVariants={revealVariants}
-        className="absolute left-0 top-[-114px] w-full h-[113.625vh] flex flex-col items-start justify-start content-start flex-none flex-nowrap gap-2.5 overflow-hidden p-0 z-0"
-      >
-        <div className="framer-1i5axl2">
-          <div
-            className="absolute left-[-568px] right-[-568px] top-0 h-[2053px] flex-none rounded-full"
-            style={{
-              border: "200px solid #3131f5",
-              filter: "blur(92px)",
-              WebkitFilter: "blur(92px)",
-            }}
-            data-border="true"
-          ></div>
-        </div>
-      </TimelineContent>
-
-      <article className="text-center mb-6 pt-32 max-w-4xl mx-auto space-y-4 relative z-50 px-4">
-        <TimelineContent
-          as="div"
-          animationNum={0}
-          timelineRef={pricingRef}
-          customVariants={revealVariants}
-          className="flex justify-center mb-6"
+      <div className="pt-20 pb-24 px-4">
+        {/* Header */}
+        <motion.div 
+          className="max-w-7xl mx-auto text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-            <Coins className="w-5 h-5 text-yellow-400" />
-            <span className="text-white font-semibold">
-              Saldo atual: {userCredits.toLocaleString('pt-PT')} créditos
-            </span>
-          </div>
-        </TimelineContent>
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-6">
+            Escolha o seu plano
+          </h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            Planos flexíveis para criadores, profissionais e empresas
+          </p>
+        </motion.div>
 
-        <h2 className="text-4xl md:text-5xl font-medium text-white">
-          <VerticalCutReveal
-            splitBy="words"
-            staggerDuration={0.15}
-            staggerFrom="first"
-            reverse={true}
-            containerClassName="justify-center"
-            transition={{
-              type: "spring",
-              stiffness: 250,
-              damping: 40,
-              delay: 0,
-            }}
-          >
-            Planos que funcionam melhor para si
-          </VerticalCutReveal>
-        </h2>
-
-        <TimelineContent
-          as="p"
-          animationNum={0}
-          timelineRef={pricingRef}
-          customVariants={revealVariants}
-          className="text-gray-300 text-lg"
+        {/* Billing Toggle */}
+        <motion.div 
+          className="max-w-md mx-auto mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Confiado por milhões, ajudamos equipas em todo o mundo. Explore qual opção é ideal para si.
-        </TimelineContent>
-
-        <TimelineContent
-          as="div"
-          animationNum={1}
-          timelineRef={pricingRef}
-          customVariants={revealVariants}
-        >
-          <PricingSwitch onSwitch={togglePricingPeriod} />
-        </TimelineContent>
-      </article>
-
-      <div
-        className="absolute top-0 left-[10%] right-[10%] w-[80%] h-full z-0"
-        style={{
-          backgroundImage: `radial-gradient(circle at center, #206ce8 0%, transparent 70%)`,
-          opacity: 0.6,
-          mixBlendMode: "multiply",
-        }}
-      />
-
-      <div className="grid md:grid-cols-3 max-w-6xl gap-6 py-6 mx-auto px-4 pb-20">
-        {CREDIT_PACKAGES.map((plan, index) => (
-          <TimelineContent
-            key={plan.id}
-            as="div"
-            animationNum={2 + index}
-            timelineRef={pricingRef}
-            customVariants={revealVariants}
-          >
-            <Card
-              className={`relative text-white border-neutral-800 h-full ${
-                plan.popular
-                  ? "bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 shadow-[0px_-13px_300px_0px_#0900ff] z-20 scale-105 md:scale-110"
-                  : "bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 z-10"
-              }`}
+          <div className="flex items-center justify-center gap-4 p-1.5 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              className={cn(
+                "flex-1 py-3 px-6 rounded-full text-sm font-medium transition-all duration-300",
+                billingCycle === 'monthly'
+                  ? "bg-white text-black shadow-lg"
+                  : "text-gray-400 hover:text-white"
+              )}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-                  ⭐ MAIS POPULAR
+              Mensal
+            </button>
+            <button
+              onClick={() => setBillingCycle('yearly')}
+              className={cn(
+                "flex-1 py-3 px-6 rounded-full text-sm font-medium transition-all duration-300",
+                billingCycle === 'yearly'
+                  ? "bg-white text-black shadow-lg"
+                  : "text-gray-400 hover:text-white"
+              )}
+            >
+              Anual <span className="text-emerald-400 ml-1">(2 meses grátis)</span>
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Pricing Cards */}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {CREDIT_PACKAGES.map((pkg, index) => (
+            <motion.div
+              key={pkg.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+              className="relative group"
+            >
+              {/* Popular Badge */}
+              {pkg.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
+                    MAIS POPULAR
+                  </div>
                 </div>
               )}
 
-              <CardHeader className="text-left">
-                <div className="flex justify-between items-start mb-4">
-                  <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center", plan.gradient)}>
-                    <plan.icon className="w-6 h-6 text-white" />
+              {/* Card */}
+              <div className={cn(
+                "relative h-full p-8 rounded-3xl backdrop-blur-xl transition-all duration-500",
+                "bg-white/5 border border-white/10",
+                "hover:bg-white/10 hover:border-white/20 hover:scale-105",
+                pkg.popular && "border-amber-500/30 bg-amber-500/5"
+              )}>
+                {/* Plan Name */}
+                <div className="mb-8">
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {pkg.name}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {pkg.description}
+                  </p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-bold text-white">
+                      <NumberFlow 
+                        value={billingCycle === 'yearly' ? pkg.yearlyPrice : pkg.price_eur}
+                        format={{ style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }}
+                      />
+                    </span>
+                    <span className="text-gray-400">
+                      /{billingCycle === 'yearly' ? 'ano' : 'mês'}
+                    </span>
+                  </div>
+                  
+                  {billingCycle === 'yearly' && (
+                    <div className="mt-2 text-sm text-emerald-400">
+                      Economize €{pkg.savings} por ano
+                    </div>
+                  )}
+
+                  <div className="mt-4 text-sm text-gray-400">
+                    <NumberFlow 
+                      value={billingCycle === 'yearly' ? pkg.yearlyCredits : pkg.creditos}
+                      format={{ notation: 'compact' }}
+                    /> créditos
+                    {billingCycle === 'monthly' && '/mês'}
                   </div>
                 </div>
-                <h3 className="text-3xl mb-2 font-bold">{plan.name}</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg text-white/90">€</span>
-                  <NumberFlow
-                    value={isYearly && plan.yearlyPrice ? plan.yearlyPrice : plan.price_eur}
-                    className="text-4xl font-semibold text-white"
-                  />
-                  <span className="text-gray-300 ml-1 text-sm">
-                    /{isYearly ? "ano" : "mês"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-300 mb-4 min-h-[60px]">{plan.description}</p>
-              </CardHeader>
 
-              <CardContent className="pt-0">
+                {/* Features */}
+                <div className="space-y-4 mb-8">
+                  {pkg.features.map((feature, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className="mt-0.5 flex-shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-300 leading-tight">
+                        {feature}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA Button */}
                 <button
-                  onClick={() => handlePurchase(plan)}
-                  disabled={processing}
-                  className={`w-full mb-6 p-4 text-lg font-semibold rounded-xl transition-all ${
-                    plan.popular
-                      ? "bg-gradient-to-t from-blue-500 to-blue-600 shadow-lg shadow-blue-800 border border-blue-500 text-white hover:from-blue-600 hover:to-blue-700"
-                      : "bg-gradient-to-t from-neutral-950 to-neutral-600 shadow-lg shadow-neutral-900 border border-neutral-800 text-white hover:from-neutral-900 hover:to-neutral-500"
-                  } ${processing ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={() => handlePurchase(pkg.id, billingCycle === 'yearly')}
+                  disabled={loading && selectedPlan === pkg.id}
+                  className={cn(
+                    "w-full py-4 rounded-xl font-semibold transition-all duration-300",
+                    "bg-white text-black hover:bg-gray-100",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    pkg.popular && "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                  )}
                 >
-                  {processing ? (
-                    <span className="flex items-center justify-center gap-2">
+                  {loading && selectedPlan === pkg.id ? (
+                    <div className="flex items-center justify-center gap-2">
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      A processar...
-                    </span>
+                      Processando...
+                    </div>
                   ) : (
-                    "Começar Agora"
+                    'Começar agora'
                   )}
                 </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-                <div className="space-y-3 pt-4 border-t border-neutral-700">
-                  <h4 className="font-medium text-base mb-3 text-white/90">
-                    {plan.features[0]}
-                  </h4>
-                  <ul className="space-y-2.5">
-                    {plan.features.slice(1).map((feature, featureIndex) => (
-                      <li
-                        key={featureIndex}
-                        className="flex items-start gap-3"
-                      >
-                        <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-300 leading-tight">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </TimelineContent>
-        ))}
-      </div>
-
-      {/* Info Section */}
-      <div className="max-w-6xl mx-auto px-4 pb-16">
-        <TimelineContent
-          animationNum={6}
-          timelineRef={pricingRef}
-          customVariants={revealVariants}
+        {/* Comparison Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="max-w-5xl mx-auto mt-24"
         >
-          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-3xl border border-purple-500/20 p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-white">Pagamento Seguro & Garantido</h3>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6 text-white/70">
-              <div>
-                <Coins className="w-6 h-6 text-yellow-400 mb-3" />
-                <h4 className="font-semibold text-white mb-2">Créditos Permanentes</h4>
-                <p className="text-sm">Os seus créditos nunca expiram e ficam sempre disponíveis na sua conta.</p>
-              </div>
-              <div>
-                <Shield className="w-6 h-6 text-green-400 mb-3" />
-                <h4 className="font-semibold text-white mb-2">Pagamento Seguro</h4>
-                <p className="text-sm">Processamento através de Stripe - gateway certificado e encriptado.</p>
-              </div>
-              <div>
-                <Star className="w-6 h-6 text-purple-400 mb-3" />
-                <h4 className="font-semibold text-white mb-2">Suporte Premium</h4>
-                <p className="text-sm">Equipa de suporte sempre disponível para ajudar com qualquer questão.</p>
-              </div>
-            </div>
+          <h2 className="text-3xl font-bold text-center text-white mb-12">
+            Comparação de planos
+          </h2>
+
+          <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left p-6 text-sm font-semibold text-gray-400">
+                    Plano
+                  </th>
+                  <th className="text-center p-6 text-sm font-semibold text-gray-400">
+                    Mensal
+                  </th>
+                  <th className="text-center p-6 text-sm font-semibold text-gray-400">
+                    Anual (2 meses grátis)
+                  </th>
+                  <th className="text-center p-6 text-sm font-semibold text-gray-400">
+                    Economia
+                  </th>
+                  <th className="text-right p-6 text-sm font-semibold text-gray-400">
+                    Total Créditos/Ano
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {CREDIT_PACKAGES.map((pkg, index) => (
+                  <tr 
+                    key={pkg.id}
+                    className={cn(
+                      "border-b border-white/5",
+                      index === CREDIT_PACKAGES.length - 1 && "border-b-0"
+                    )}
+                  >
+                    <td className="p-6">
+                      <div className="flex items-center gap-3">
+                        <span className="text-white font-semibold">{pkg.name}</span>
+                        {pkg.popular && (
+                          <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">
+                            POPULAR
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-6 text-center text-white">
+                      €{pkg.price_eur}/mês
+                    </td>
+                    <td className="p-6 text-center text-white">
+                      €{pkg.yearlyPrice}/ano
+                    </td>
+                    <td className="p-6 text-center text-emerald-400">
+                      €{pkg.savings}
+                    </td>
+                    <td className="p-6 text-right text-white font-semibold">
+                      {pkg.yearlyCredits.toLocaleString()} créditos
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </TimelineContent>
+        </motion.div>
+
+        {/* FAQ/Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="max-w-3xl mx-auto mt-24 text-center"
+        >
+          <p className="text-gray-400 text-sm leading-relaxed">
+            Todos os planos incluem acesso completo aos estúdios de criação.
+            <br />
+            Cancele a qualquer momento. Suporte disponível 24/7 para planos Premium.
+          </p>
+        </motion.div>
       </div>
     </div>
   )
