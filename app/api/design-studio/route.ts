@@ -3,7 +3,6 @@ import { GoogleGenAI } from '@google/genai';
 import { withCredits } from '@/lib/credits/credits-middleware';
 import { DesignStudioOperation } from '@/lib/credits/credits-config';
 import { getAdminClient } from '@/lib/supabase';
-import { cookies } from 'next/headers';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -32,42 +31,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar autenticação
-    const supabase = getAdminClient();
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('sb-access-token')?.value;
-    
-    if (!accessToken) {
+    const body = await req.json();
+    const { action, prompt, model, config, user_id } = body;
+
+    // Verificar se user_id foi enviado
+    if (!user_id) {
       return NextResponse.json(
         { error: 'Não autenticado - faça login' },
         { status: 401 }
       );
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
-    
-    if (authError || !user) {
+    // Buscar dados do usuário com admin client
+    const supabase = getAdminClient();
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('id', user_id)
+      .single();
+
+    if (userError || !userData) {
       return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
+        { error: 'Usuário não encontrado' },
         { status: 401 }
       );
     }
-
-    // Buscar role do usuário
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single();
 
     const isAdmin = userData?.role === 'admin';
 
     if (isAdmin) {
       console.log('👑 Admin detectado - geração ilimitada no Design Studio');
     }
-
-    const body = await req.json();
-    const { action, prompt, model, config } = body;
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
