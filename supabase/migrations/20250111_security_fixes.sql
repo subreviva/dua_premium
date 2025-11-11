@@ -35,10 +35,9 @@ SELECT
   cp.description,
   cp.media_url,
   cp.thumbnail_url,
+  cp.firebase_path,
   cp.likes_count,
-  cp.views_count,
-  cp.shares_count,
-  cp.is_featured,
+  cp.comments_count,
   cp.created_at,
   cp.updated_at,
   -- ✅ SEGURO: Buscar dados de users (tabela pública), NÃO de auth.users
