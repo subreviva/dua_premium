@@ -57,105 +57,112 @@ COMMENT ON VIEW public.community_posts_with_user IS
 -- 2. CORRIGIR SECURITY DEFINER em v_market_products_public
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
--- Recriar com SECURITY INVOKER (mais seguro)
+-- ⚠️ NOTA: Tabela market_products não existe neste projeto, ignorando esta correção
+-- Se a view existir, será dropada para evitar erros
 DROP VIEW IF EXISTS public.v_market_products_public CASCADE;
-
-CREATE OR REPLACE VIEW public.v_market_products_public
-WITH (security_invoker = true) AS
-SELECT 
-  id,
-  name,
-  description,
-  price_dua,
-  type,
-  rarity,
-  image_url,
-  stock,
-  available,
-  created_at,
-  updated_at
-FROM public.market_products
-WHERE available = true
-  AND stock > 0;
-
-GRANT SELECT ON public.v_market_products_public TO anon, authenticated;
-
-COMMENT ON VIEW public.v_market_products_public IS 
-'View pública de produtos do mercado - SECURITY INVOKER para segurança';
 
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 -- 3. HABILITAR RLS em creative_scholarships
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-ALTER TABLE public.creative_scholarships ENABLE ROW LEVEL SECURITY;
+-- ⚠️ NOTA: Tabela creative_scholarships não existe neste projeto
+-- Se o Supabase Linter reportou erro nesta tabela, ela pode ter sido removida
+-- Verificando se existe antes de aplicar correções
 
--- Política: Usuários podem ver APENAS suas próprias bolsas
-DROP POLICY IF EXISTS "Users can view own scholarships" ON public.creative_scholarships;
-CREATE POLICY "Users can view own scholarships"
-  ON public.creative_scholarships
-  FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'creative_scholarships'
+  ) THEN
+    -- Tabela existe, aplicar RLS
+    ALTER TABLE public.creative_scholarships ENABLE ROW LEVEL SECURITY;
 
--- Política: Admins podem ver todas
-DROP POLICY IF EXISTS "Admins can view all scholarships" ON public.creative_scholarships;
-CREATE POLICY "Admins can view all scholarships"
-  ON public.creative_scholarships
-  FOR SELECT
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid()
-        AND (is_admin = true OR account_type = 'admin')
-    )
-  );
+    -- Política: Usuários podem ver APENAS suas próprias bolsas
+    DROP POLICY IF EXISTS "Users can view own scholarships" ON public.creative_scholarships;
+    CREATE POLICY "Users can view own scholarships"
+      ON public.creative_scholarships
+      FOR SELECT
+      TO authenticated
+      USING (auth.uid() = user_id);
 
--- Política: Usuários podem criar suas próprias bolsas
-DROP POLICY IF EXISTS "Users can create own scholarships" ON public.creative_scholarships;
-CREATE POLICY "Users can create own scholarships"
-  ON public.creative_scholarships
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
+    -- Política: Admins podem ver todas
+    DROP POLICY IF EXISTS "Admins can view all scholarships" ON public.creative_scholarships;
+    CREATE POLICY "Admins can view all scholarships"
+      ON public.creative_scholarships
+      FOR SELECT
+      TO authenticated
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.users
+          WHERE id = auth.uid()
+            AND (is_admin = true OR account_type = 'admin')
+        )
+      );
 
--- Política: Usuários podem atualizar suas próprias bolsas
-DROP POLICY IF EXISTS "Users can update own scholarships" ON public.creative_scholarships;
-CREATE POLICY "Users can update own scholarships"
-  ON public.creative_scholarships
-  FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = user_id);
+    -- Política: Usuários podem criar suas próprias bolsas
+    DROP POLICY IF EXISTS "Users can create own scholarships" ON public.creative_scholarships;
+    CREATE POLICY "Users can create own scholarships"
+      ON public.creative_scholarships
+      FOR INSERT
+      TO authenticated
+      WITH CHECK (auth.uid() = user_id);
 
-COMMENT ON TABLE public.creative_scholarships IS 
-'Tabela de bolsas criativas - RLS HABILITADO para proteção';
+    -- Política: Usuários podem atualizar suas próprias bolsas
+    DROP POLICY IF EXISTS "Users can update own scholarships" ON public.creative_scholarships;
+    CREATE POLICY "Users can update own scholarships"
+      ON public.creative_scholarships
+      FOR UPDATE
+      TO authenticated
+      USING (auth.uid() = user_id);
+
+    RAISE NOTICE '✅ RLS habilitado em creative_scholarships';
+  ELSE
+    RAISE NOTICE '⚠️ Tabela creative_scholarships não existe, ignorando RLS';
+  END IF;
+END $$;
 
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 -- 4. CORRIGIR search_path em FUNÇÕES CRÍTICAS
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 -- 4.1. update_artist_current_amount
-CREATE OR REPLACE FUNCTION public.update_artist_current_amount()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-BEGIN
-  UPDATE public.music_requests
-  SET current_amount = (
-    SELECT COALESCE(SUM(amount), 0)
-    FROM public.music_contributions
-    WHERE request_id = NEW.request_id
-  )
-  WHERE id = NEW.request_id;
-  
-  RETURN NEW;
-END;
-$$;
+-- ⚠️ Esta função pode não ser necessária se music_requests/music_contributions não existem
+DROP FUNCTION IF EXISTS public.update_artist_current_amount();
 
-COMMENT ON FUNCTION public.update_artist_current_amount IS 
-'Atualiza valor atual de contribuições - SEARCH_PATH FIXO para segurança';
+-- Apenas recriar se as tabelas existirem
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name IN ('music_requests', 'music_contributions')
+  ) THEN
+    CREATE OR REPLACE FUNCTION public.update_artist_current_amount()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+    SET search_path = public, pg_temp
+    AS $func$
+    BEGIN
+      UPDATE public.music_requests
+      SET current_amount = (
+        SELECT COALESCE(SUM(amount), 0)
+        FROM public.music_contributions
+        WHERE request_id = NEW.request_id
+      )
+      WHERE id = NEW.request_id;
+      
+      RETURN NEW;
+    END;
+    $func$;
+
+    RAISE NOTICE '✅ Função update_artist_current_amount recriada com search_path fixo';
+  ELSE
+    RAISE NOTICE '⚠️ Tabelas music_requests/music_contributions não existem, função não criada';
+  END IF;
+END $$;
 
 -- 4.2. touch_updated_at
 CREATE OR REPLACE FUNCTION public.touch_updated_at()
@@ -205,22 +212,9 @@ $$;
 COMMENT ON FUNCTION public.log_login_attempt IS 
 'Registra tentativas de login - SEARCH_PATH FIXO para segurança';
 
--- 4.4. increment_view_count
-CREATE OR REPLACE FUNCTION public.increment_view_count(post_id UUID)
-RETURNS VOID
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-BEGIN
-  UPDATE public.community_posts
-  SET views_count = views_count + 1
-  WHERE id = post_id;
-END;
-$$;
-
-COMMENT ON FUNCTION public.increment_view_count IS 
-'Incrementa contador de views - SEARCH_PATH FIXO';
+-- 4.4. increment_view_count (FUNÇÃO NÃO USADA - community_posts não tem views_count)
+-- ⚠️ Esta função será dropada pois a coluna views_count não existe
+DROP FUNCTION IF EXISTS public.increment_view_count(UUID);
 
 -- 4.5. increment_likes_count
 CREATE OR REPLACE FUNCTION public.increment_likes_count(post_id UUID)
@@ -290,11 +284,13 @@ $$;
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SELECT 
-  '✅ CORREÇÕES APLICADAS COM SUCESSO' as status,
+  '✅ CORREÇÕES DE SEGURANÇA APLICADAS' as status,
   jsonb_build_object(
-    'views_protegidas', 5,
-    'views_recriadas_seguras', 2,
-    'rls_habilitado', 'creative_scholarships',
-    'funcoes_corrigidas', 6,
-    'search_path_fixado', true
+    'views_admin_protegidas', 5,
+    'community_posts_with_user_corrigida', true,
+    'v_market_products_public_removida', true,
+    'funcoes_search_path_fixado', 3,
+    'increment_view_count_removida', true,
+    'creative_scholarships_rls', 'aplicado se tabela existir',
+    'music_functions', 'aplicadas se tabelas existirem'
   ) as detalhes;
