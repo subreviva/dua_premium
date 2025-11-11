@@ -67,20 +67,20 @@ const CREDIT_PACKAGES: CreditPackage[] = [
   {
     id: "basic",
     name: "Basic",
-    creditos: 350,
-    price_eur: 10,
-    total_creditos: 350,
+    creditos: 570,
+    price_eur: 15,
+    total_creditos: 570,
     icon: Sparkles,
     gradient: "from-green-500 via-emerald-500 to-green-600",
     bonus_percent: 3,
-    musicas: 58,
-    imagens_fast: "14-23",
-    videos: 17,
+    musicas: 95,
+    imagens_fast: "22-38",
+    videos: 28,
     features: [
-      "350 créditos de serviços",
-      "58 músicas completas",
-      "14-23 imagens Fast",
-      "17 vídeos (5 segundos)",
+      "570 créditos de serviços",
+      "95 músicas completas",
+      "22-38 imagens Fast",
+      "28 vídeos (5 segundos)",
       "Bonus de 3%",
       "Válido por 60 dias"
     ]
@@ -88,64 +88,65 @@ const CREDIT_PACKAGES: CreditPackage[] = [
   {
     id: "standard",
     name: "Standard",
-    creditos: 550,
-    price_eur: 15,
-    total_creditos: 550,
+    creditos: 1250,
+    price_eur: 30,
+    total_creditos: 1250,
+    popular: true,
     icon: Star,
     gradient: "from-purple-500 via-pink-500 to-purple-600",
     bonus_percent: 10,
-    musicas: 91,
-    imagens_fast: "22-36",
-    videos: 27,
+    musicas: 208,
+    imagens_fast: "50-83",
+    videos: 62,
     features: [
-      "550 créditos de serviços",
-      "91 músicas completas",
-      "22-36 imagens Fast/Standard",
-      "27 vídeos (5 segundos)",
+      "1.250 créditos de serviços",
+      "208 músicas completas",
+      "50-83 imagens Fast/Standard",
+      "62 vídeos (5 segundos)",
       "Bonus de 10%",
+      "Melhor custo-benefício",
       "Válido por 60 dias"
     ]
   },
   {
     id: "plus",
     name: "Plus",
-    creditos: 1150,
-    price_eur: 30,
-    total_creditos: 1150,
-    popular: true,
+    creditos: 2650,
+    price_eur: 60,
+    total_creditos: 2650,
     icon: Rocket,
     gradient: "from-orange-500 via-red-500 to-pink-600",
     bonus_percent: 15,
-    musicas: 191,
-    imagens_fast: "46-76",
-    videos: 57,
+    musicas: 441,
+    imagens_fast: "106-176",
+    videos: 132,
     features: [
-      "1.150 créditos de serviços",
-      "191 músicas completas",
-      "46-76 imagens Fast/Standard",
-      "57 vídeos (5 segundos)",
+      "2.650 créditos de serviços",
+      "441 músicas completas",
+      "106-176 imagens Fast/Standard",
+      "132 vídeos (5 segundos)",
       "Bonus de 15% ⭐",
-      "Melhor custo-benefício",
+      "Prioridade de processamento",
       "Válido por 90 dias"
     ]
   },
   {
     id: "pro",
     name: "Pro",
-    creditos: 2400,
-    price_eur: 60,
-    total_creditos: 2400,
+    creditos: 4700,
+    price_eur: 100,
+    total_creditos: 4700,
     icon: Star,
     gradient: "from-purple-600 via-pink-600 to-red-500",
     bonus_percent: 20,
-    musicas: 400,
-    imagens_fast: "96-160",
-    videos: 120,
+    musicas: 783,
+    imagens_fast: "188-313",
+    videos: 235,
     features: [
-      "2.400 créditos de serviços",
-      "400 músicas completas",
-      "96-160 imagens Fast/Standard",
-      "120 vídeos (5 segundos)",
+      "4.700 créditos de serviços",
+      "783 músicas completas",
+      "188-313 imagens Fast/Standard",
+      "235 vídeos (5 segundos)",
       "Bonus de 20%",
       "Prioridade máxima",
       "Suporte VIP dedicado",
@@ -247,55 +248,42 @@ export default function ComprarPage() {
     setProcessing(true)
     
     try {
-      toast.loading('A processar pagamento...', { id: 'purchase' })
+      toast.loading('A redirecionar para pagamento...', { id: 'purchase' })
       
-      // TODO: Integração real com gateway de pagamento (Stripe/MBWay/Multibanco)
-      // Por agora, simular compra bem-sucedida para demonstração
-      
-      // Simular delay de processamento
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Adicionar créditos à conta do usuário
-      const newCreditsBalance = userCredits + pkg.total_creditos
-      
-      const { error: updateError } = await supabase
-        .from('duaia_user_balances')
-        .update({ 
-          servicos_creditos: newCreditsBalance
-        })
-        .eq('user_id', currentUser.id)
-      
-      if (updateError) throw updateError
-      
-      // Registar transação de compra (opcional - para histórico)
-      try {
-        await supabase.from('purchase_history').insert({
-          user_id: currentUser.id,
-          package_id: pkg.id,
-          package_name: pkg.name,
-          credits_amount: pkg.total_creditos,
-          price_eur: pkg.price_eur,
-          payment_status: 'completed'
-        })
-      } catch {
-        // Se tabela não existe, ignorar (não crítico)
-      }
-      
-      toast.success(`${pkg.total_creditos} créditos adicionados!`, { 
-        id: 'purchase',
-        description: `Compra de ${pkg.name} por €${pkg.price_eur} concluída com sucesso`
+      // Criar Stripe Checkout Session
+      const response = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packId: pkg.id,
+          userId: currentUser.id,
+        }),
       })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Erro ao criar sessão de pagamento')
+      }
+
+      const { url } = await response.json()
       
-      // Atualizar estado local
-      setUserCredits(newCreditsBalance)
+      if (!url) {
+        throw new Error('URL de checkout não recebida')
+      }
+
+      toast.success('A redirecionar para Stripe Checkout...', { id: 'purchase' })
       
-    } catch (error) {
+      // Redirecionar para Stripe Checkout
+      window.location.href = url
+      
+    } catch (error: any) {
       console.error('Purchase error:', error)
       toast.error('Erro ao processar compra', { 
         id: 'purchase',
-        description: 'Tente novamente mais tarde'
+        description: error.message || 'Tente novamente mais tarde'
       })
-    } finally {
       setProcessing(false)
     }
   }

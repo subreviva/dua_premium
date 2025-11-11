@@ -23,10 +23,10 @@ const PRICE_IDS: Record<string, string> = {
 
 const CREDITS_MAP: Record<string, number> = {
   starter: 170,
-  basic: 350,
-  standard: 550,
-  plus: 1150,
-  pro: 2400,
+  basic: 570,
+  standard: 1250,
+  plus: 2650,
+  pro: 4700,
   premium: 6250,
 };
 
@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
         credits: CREDITS_MAP[packId].toString(),
         tierName: packId,
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/comprar?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/comprar?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/comprar/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/comprar/cancel`,
     });
 
     console.log(`✅ Checkout criado: ${session.id}`);
