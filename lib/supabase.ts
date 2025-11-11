@@ -36,6 +36,9 @@ let _adminInstance: SupabaseClient | null = null;
 /**
  * Cliente Supabase padrão (com RLS)
  * Use este para operações normais de frontend
+ * 
+ * ✅ Tratamento automático de erros de refresh token
+ * ✅ Auto-logout em caso de sessão inválida
  */
 function getSupabaseClient(): SupabaseClient {
   if (!_clientInstance) {
@@ -43,8 +46,36 @@ function getSupabaseClient(): SupabaseClient {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce',
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
       },
     });
+
+    // Listener para erros de autenticação
+    if (typeof window !== 'undefined') {
+      _clientInstance.auth.onAuthStateChange((event, session) => {
+        // Log apenas em desenvolvimento
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔐 Auth event:', event);
+        }
+
+        // Se houve erro de refresh token, fazer logout automático
+        if (event === 'TOKEN_REFRESHED' && !session) {
+          console.warn('⚠️ Token refresh failed - clearing session');
+          _clientInstance?.auth.signOut();
+        }
+
+        // Se sessão foi revogada/invalidada
+        if (event === 'SIGNED_OUT') {
+          // Limpar localStorage
+          localStorage.removeItem('supabase.auth.token');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🚪 User signed out - session cleared');
+          }
+        }
+      });
+    }
   }
   return _clientInstance;
 }
