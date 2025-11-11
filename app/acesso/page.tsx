@@ -174,6 +174,62 @@ export default function AcessoPage() {
 
       if (loginError) {
         console.error('[REGISTER] Erro login:', loginError);
+        
+        // Se erro é "Email not confirmed", usar API para confirmar
+        if (loginError.message.includes('Email not confirmed')) {
+          console.log('[REGISTER] Email não confirmado, confirmando via API...');
+          
+          const confirmResponse = await fetch('/api/auth/confirm-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email.toLowerCase(),
+              password,
+              name,
+              userId,
+              inviteCode: validatedCode,
+            }),
+          });
+          
+          if (!confirmResponse.ok) {
+            const errorData = await confirmResponse.json();
+            console.error('[REGISTER] Erro API confirm:', errorData);
+            toast.error("Erro ao confirmar conta", {
+              description: "Por favor, contacta suporte.",
+            });
+            return;
+          }
+          
+          console.log('[REGISTER] Email confirmado! Fazendo login...');
+          
+          // Aguardar 1 segundo e tentar login novamente
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          const { error: retryLoginError } = await supabase.auth.signInWithPassword({
+            email: email.toLowerCase(),
+            password,
+          });
+          
+          if (retryLoginError) {
+            console.error('[REGISTER] Erro retry login:', retryLoginError);
+            toast.error("Conta criada! Faça login manualmente", {
+              description: "Redirecionando para login...",
+            });
+            setTimeout(() => router.push('/login'), 1500);
+            return;
+          }
+          
+          // Login bem-sucedido após confirmação!
+          toast.success("Bem-vindo à DUA! 🎉", {
+            description: "150 créditos adicionados à sua conta",
+            duration: 3000,
+          });
+          
+          setTimeout(() => router.push("/"), 1500);
+          return;
+        }
+        
+        // Outro tipo de erro
         toast.error("Conta criada! Faça login manualmente", {
           description: "Redirecionando para login...",
         });
