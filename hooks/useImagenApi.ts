@@ -3,11 +3,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Imagen 4 Models (2025 - Nomes corretos da API)
+// Imagen 4 Models (Junho 2025 - Documentação oficial)
 export const IMAGEN_MODELS = {
-  ultra: 'imagen-4-ultra',
-  standard: 'imagen-4',
-  fast: 'imagen-3',
+  ultra: 'imagen-4.0-ultra-generate-001',
+  standard: 'imagen-4.0-generate-001',
+  fast: 'imagen-4.0-fast-generate-001',
+  imagen3: 'imagen-3.0-generate-002',
 } as const;
 
 export type ImagenModel = keyof typeof IMAGEN_MODELS;
