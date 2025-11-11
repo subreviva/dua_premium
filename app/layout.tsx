@@ -118,8 +118,10 @@ export default function RootLayout({
         {/* iOS Splash Screens - Placeholder */}
         <link rel="apple-touch-startup-image" href="/splash/default.png" />
         
-        {/* Manifest Link */}
-        <link rel="manifest" href="/manifest.webmanifest" />
+        {/* Manifest Link - Apenas em produção */}
+        {process.env.NODE_ENV === 'production' && (
+          <link rel="manifest" href="/manifest.webmanifest" />
+        )}
         
         {/* 🔧 Desabilitar Service Worker em desenvolvimento */}
         {process.env.NODE_ENV === 'development' && (
