@@ -23,44 +23,58 @@ if (!API_KEY) {
 }
 
 export async function POST(req: NextRequest) {
-  try {
-    if (!API_KEY) {
-      return NextResponse.json(
-        { error: 'API Key não configurada no servidor' },
-        { status: 500 }
-      );
-    }
+  const body = await req.json();
+  const { action, prompt, model, config, user_id } = body;
 
-    const body = await req.json();
-    const { action, prompt, model, config, user_id } = body;
+  if (!API_KEY) {
+    return NextResponse.json(
+      { error: 'API Key não configurada no servidor' },
+      { status: 500 }
+    );
+  }
 
-    // Verificar se user_id foi enviado
-    if (!user_id) {
-      return NextResponse.json(
-        { error: 'Não autenticado - faça login' },
-        { status: 401 }
-      );
-    }
+  // Determinar a operação de créditos baseada na action
+  let operation: DesignStudioOperation;
+  switch (action) {
+    case 'generateImage':
+      operation = 'design_generate_image';
+      break;
+    case 'analyzeImage':
+      operation = 'design_analyze_image';
+      break;
+    case 'chat':
+      operation = 'design_assistant'; // Chat assistente
+      break;
+    case 'enhance':
+    case 'editImage':
+      operation = 'design_edit_image';
+      break;
+    case 'removeBackground':
+      operation = 'design_remove_background';
+      break;
+    case 'upscale':
+      operation = 'design_upscale_image';
+      break;
+    default:
+      return NextResponse.json({ error: 'Ação inválida' }, { status: 400 });
+  }
 
-    // Buscar dados do usuário com admin client
+  // Usar withCredits para validar e debitar créditos automaticamente
+  return withCredits(req, operation, async (userId, context) => {
+    // withCredits já valida o userId, então podemos usá-lo diretamente
+    console.log(`🎨 Design Studio - ${action} - User: ${userId}`);
+
+    // Verificar se é admin (sem debitar créditos)
     const supabase = getAdminClient();
-    const { data: userData, error: userError } = await supabase
+    const { data: userData } = await supabase
       .from('users')
-      .select('id, role')
-      .eq('id', user_id)
+      .select('role')
+      .eq('id', userId)
       .single();
 
-    if (userError || !userData) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 401 }
-      );
-    }
-
     const isAdmin = userData?.role === 'admin';
-
     if (isAdmin) {
-      console.log('👑 Admin detectado - geração ilimitada no Design Studio');
+      console.log('👑 Admin detectado - geração SEM cobrar créditos');
     }
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
@@ -254,27 +268,5 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
     }
-
-  } catch (error: any) {
-    console.error('❌ Erro na API Design Studio:', error);
-
-    if (error.message?.includes('API key expired')) {
-      return NextResponse.json(
-        { error: 'API key expirada. Por favor, atualize a chave.' },
-        { status: 401 }
-      );
-    }
-
-    if (error.message?.includes('400')) {
-      return NextResponse.json(
-        { error: 'Requisição inválida. Verifique os parâmetros.' },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: error.message || 'Erro ao processar requisição' },
-      { status: 500 }
-    );
-  }
+  });
 }
