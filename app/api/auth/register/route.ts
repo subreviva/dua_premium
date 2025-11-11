@@ -121,7 +121,8 @@ export async function POST(request: NextRequest) {
     const { data: inviteCodeData, error: inviteError } = await supabase
       .from('invite_codes')
       .select('*')
-      .eq('code', inviteCode)
+      .eq('active', true)
+      .ilike('code', inviteCode)
       .single();
 
     if (inviteError || !inviteCodeData) {
@@ -210,8 +211,8 @@ export async function POST(request: NextRequest) {
         avatar_set: false,
         welcome_seen: false,
         session_active: true,
-        creditos_servicos: 150, // ✅ 150 créditos de serviços iniciais
-        saldo_dua: 50,          // ✅ 50 DUA coins iniciais
+        creditos_servicos: 150, // ✅ 150 (legado - para compatibilidade)
+        saldo_dua: 50,          // ✅ 50 (legado - para compatibilidade)
         account_type: 'normal',
         registration_ip: request.headers.get('x-forwarded-for') || 'unknown',
         registration_user_agent: request.headers.get('user-agent') || 'unknown',
@@ -234,7 +235,37 @@ export async function POST(request: NextRequest) {
       }
 
       // ════════════════════════════════════════════════════════════════
-      // PASSO 5: Marcar código de convite como usado
+      // PASSO 5: Inicializar saldo em duaia_user_balances + transação
+      // ════════════════════════════════════════════════════════════════
+      // Garantir que registro existe
+      await supabase
+        .from('duaia_user_balances')
+        .upsert({
+          user_id: userId,
+          servicos_creditos: 0,
+          duacoin_balance: 0,
+        }, { onConflict: 'user_id' });
+
+      // Adicionar 150 créditos iniciais via RPC (auditoria atômica)
+      const { error: addCreditsError } = await supabase.rpc('add_servicos_credits', {
+        p_user_id: userId,
+        p_amount: 150,
+        p_transaction_type: 'signup_bonus',
+        p_description: 'Créditos iniciais - Registo',
+        p_admin_email: null,
+        p_metadata: {
+          source: 'register',
+          invite_code: inviteCodeData.code,
+        }
+      });
+
+      if (addCreditsError) {
+        console.error('Erro ao adicionar créditos iniciais:', addCreditsError);
+        // Não falhar o registo por causa disto, seguir em frente
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // PASSO 6: Marcar código de convite como usado
       // ════════════════════════════════════════════════════════════════
       await supabase
         .from('invite_codes')
@@ -243,10 +274,10 @@ export async function POST(request: NextRequest) {
           used_by: userId,
           used_at: new Date().toISOString(),
         })
-        .eq('code', inviteCode);
+        .eq('code', inviteCodeData.code);
 
       // ════════════════════════════════════════════════════════════════
-      // PASSO 6: Criar sessão ativa (24h)
+      // PASSO 7: Criar sessão ativa (24h)
       // ════════════════════════════════════════════════════════════════
       const sessionToken = crypto.randomUUID();
       const expiresAt = new Date();
@@ -266,7 +297,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       // ════════════════════════════════════════════════════════════════
-      // PASSO 7: Registar atividade
+      // PASSO 8: Registar atividade
       // ════════════════════════════════════════════════════════════════
       await supabase.from('user_activity_logs').insert({
         user_id: userId,
@@ -275,8 +306,8 @@ export async function POST(request: NextRequest) {
           invite_code: inviteCode,
           name,
           email,
-          creditos_servicos: 150, // ✅ ATUALIZADO
-          saldo_dua: 50,          // ✅ ATUALIZADO
+          creditos_servicos: 150, // ✅
+          saldo_dua: 50,          // ✅
           account_type: 'normal',
         },
         ip_address: request.headers.get('x-forwarded-for') || 'unknown',
@@ -305,7 +336,7 @@ export async function POST(request: NextRequest) {
           expiresAt: expiresAt.toISOString(),
         },
         welcomeMessage: `Bem-vindo à DUA IA, ${firstName}! 🎉`,
-        emailVerificationRequired: true, // ✅ NOVO: Indicar que precisa verificar
+        emailVerificationRequired: true, // ✅
         onboardingRequired: true,
         nextSteps: [
           '📧 Verifica o teu email para ativar a conta',
