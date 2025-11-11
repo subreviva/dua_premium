@@ -120,6 +120,11 @@ export default function RootLayout({
         
         {/* Manifest Link */}
         <link rel="manifest" href="/manifest.webmanifest" />
+        
+        {/* 🔧 Desabilitar Service Worker em desenvolvimento */}
+        {process.env.NODE_ENV === 'development' && (
+          <script src="/disable-sw.js" defer />
+        )}
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <GlobalPlayerProvider>
