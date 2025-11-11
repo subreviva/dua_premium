@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabaseClient } from "@/lib/supabase";
 import Link from "next/link";
-import { audit } from "@/lib/audit";
+import { audit } from "@/lib/audit-safe";
 import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
 import { validatePassword } from "@/lib/password-validation";
 import { Eye, EyeOff } from "lucide-react";
@@ -44,7 +44,12 @@ export default function AcessoPage() {
     }
     setIsValidatingCode(true);
     try {
-      const { data, error } = await supabase.from('invite_codes').select('code, active, used_by').eq('code', code.toUpperCase()).single();
+      const { data, error } = await supabase
+        .from('invite_codes')
+        .select('code, active, used_by')
+        .ilike('code', code)
+        .limit(1)
+        .single();
       if (error || !data) {
         toast.error("Código inválido", { description: "Este código não existe" });
         audit.codeValidation(code, false, 1);
@@ -132,6 +137,25 @@ export default function AcessoPage() {
       const data = await response.json();
       
       if (!response.ok) {
+        // Fallback: se a rota /api/auth/register não existir em produção, usar /api/validate-code (magic link)
+        if (response.status === 404 && validatedCode) {
+          const fallback = await fetch('/api/validate-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: validatedCode, email: email.toLowerCase() })
+          });
+
+          const fbData = await fallback.json();
+          if (fallback.ok && fbData.success) {
+            toast.success('Código validado! Verifica o teu email para entrar.', {
+              description: 'Enviámos um link mágico para o teu email',
+              duration: 6000,
+            });
+            audit.registration(true, validatedCode || undefined);
+            setTimeout(() => router.push('/login'), 1500);
+            return;
+          }
+        }
         // Mostrar mensagens de erro empáticas
         toast.error(data.error || "Erro ao criar conta", { 
           description: data.message || "Por favor, tenta novamente",
