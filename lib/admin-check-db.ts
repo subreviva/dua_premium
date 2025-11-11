@@ -1,34 +1,41 @@
-// Admin Check - Via Database Role
+/**
+ * ⚠️ DEPRECATED: Use lib/admin-auth.ts para verificações rigorosas
+ * Mantido para compatibilidade com código existente
+ */
 import { supabaseClient } from '@/lib/supabase';
+import { verifyAdminClient } from '@/lib/admin-auth';
 
 export async function checkAdminAccess(supabaseUrl: string, supabaseKey: string, userEmail?: string) {
   const supabase = supabaseClient;
   
   try {
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Usar nova verificação rigorosa
+    const adminCheck = await verifyAdminClient(supabase);
     
-    if (authError || !user) {
-      return { isAdmin: false, user: null, error: 'Not authenticated' };
+    if (!adminCheck.isAdmin) {
+      return { 
+        isAdmin: false, 
+        user: null, 
+        error: adminCheck.error || 'Not admin' 
+      };
     }
 
-    // Check admin status from database
+    // Buscar dados do user para compatibilidade
     const { data: userData, error: dbError } = await supabase
       .from('users')
       .select('id, email, role, name, avatar_url')
-      .eq('id', user.id)
+      .eq('id', adminCheck.userId!)
       .single();
 
     if (dbError || !userData) {
-      return { isAdmin: false, user, error: 'User not found in database' };
+      return { isAdmin: false, user: null, error: 'User not found' };
     }
 
-    const isAdmin = ['admin', 'super_admin'].includes(userData.role);
-
     return {
-      isAdmin,
+      isAdmin: true,
       user: userData,
-      role: userData.role,
+      role: adminCheck.role,
+      permissions: adminCheck.permissions,
       error: null
     };
 
@@ -48,28 +55,33 @@ export async function serverCheckAdmin() {
 // For client components
 export async function clientCheckAdmin(supabase: any) {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // ✅ Usar verificação rigorosa do admin-auth.ts
+    const adminCheck = await verifyAdminClient(supabase);
     
-    if (authError || !user) {
-      return { isAdmin: false, user: null, error: 'Not authenticated' };
+    if (!adminCheck.isAdmin) {
+      return { 
+        isAdmin: false, 
+        user: null, 
+        error: adminCheck.error || 'Not admin' 
+      };
     }
 
+    // Buscar dados completos do user
     const { data: userData, error: dbError } = await supabase
       .from('users')
       .select('id, email, role, name, avatar_url')
-      .eq('id', user.id)
+      .eq('id', adminCheck.userId!)
       .single();
 
     if (dbError || !userData) {
-      return { isAdmin: false, user, error: 'User not found in database' };
+      return { isAdmin: false, user: null, error: 'User not found' };
     }
 
-    const isAdmin = ['admin', 'super_admin'].includes(userData.role);
-
     return {
-      isAdmin,
+      isAdmin: true,
       user: userData,
-      role: userData.role,
+      role: adminCheck.role,
+      permissions: adminCheck.permissions,
       error: null
     };
 

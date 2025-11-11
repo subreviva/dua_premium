@@ -36,30 +36,33 @@ export default function HomePage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
+      {/* Sidebar - apenas desktop */}
       <div className="hidden md:block">
         <AppSidebar />
       </div>
 
-      <div className="md:hidden">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Navbar superior - sempre visível */}
         <MusicStudioNavbar />
-      </div>
+        
+        {/* Conteúdo com scroll */}
+        <div className="flex-1 overflow-y-auto pb-safe-mobile md:pb-0">
+          <div className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 z-0">
+              <Image 
+                src="/images/hero-background.jpeg" 
+                alt="Background" 
+                fill 
+                className="object-cover" 
+                priority 
+              />
+              <div className="absolute inset-0 backdrop-blur-3xl bg-black/70" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+            </div>
 
-  <div className="flex-1 overflow-y-auto pb-safe-mobile md:pb-0">
-        <div className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <Image 
-              src="/images/hero-background.jpeg" 
-              alt="Background" 
-              fill 
-              className="object-cover" 
-              priority 
-            />
-            <div className="absolute inset-0 backdrop-blur-3xl bg-black/70" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
-          </div>
-
-          <main className="relative z-10 w-full pt-[68px] md:pt-0">
-            <div className="flex flex-col items-center justify-center px-5 py-10 md:px-8 md:py-16">
+            <main className="relative z-10 w-full pt-4 md:pt-0">
+              <div className="flex flex-col items-center justify-center px-5 py-10 md:px-8 md:py-16">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -172,6 +175,7 @@ export default function HomePage() {
               <p>© 2025 DUA. Criando o futuro da música.</p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

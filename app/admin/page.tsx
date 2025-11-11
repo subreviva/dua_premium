@@ -12,11 +12,12 @@ import {
   Lock, Unlock, Search, TrendingUp, Database, Clock, Download, FileText,
   History, Eye, ChevronDown, ChevronUp, Calendar, Filter, CheckSquare,
   Square, BarChart3, Zap, AlertCircle, CheckCircle, XCircle, Info,
-  Home, MessageSquare, ArrowLeft, Wallet, Ticket
+  Home, MessageSquare, ArrowLeft, Wallet, Ticket, UserCheck
 } from "lucide-react";
 import { clientCheckAdmin } from "@/lib/admin-check-db";
 import AdminCreditsPanel from "@/components/admin/AdminCreditsPanel";
 import AdminInviteCodesPanel from "@/components/admin/AdminInviteCodesPanel";
+import UserApprovalPanel from "@/components/admin/UserApprovalPanel";
 
 interface UserData {
   id: string;
@@ -108,6 +109,10 @@ export default function AdminPanelPage() {
   
   // Gestão de Códigos de Acesso
   const [showCodesPanel, setShowCodesPanel] = useState(false);
+  
+  // Gestão de Aprovação de Utilizadores
+  const [showApprovalPanel, setShowApprovalPanel] = useState(false);
+  const [pendingUsersCount, setPendingUsersCount] = useState(0);
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -170,6 +175,10 @@ export default function AdminPanelPage() {
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const newUsers = usersData.filter(u => new Date(u.created_at) > fiveMinutesAgo);
         setNewUsersCount(newUsers.length);
+        
+        // Count pending users (without access)
+        const pending = usersData.filter(u => !u.has_access).length;
+        setPendingUsersCount(pending);
       }
     } catch (error) {
       toast.error('Error loading admin panel');
@@ -786,6 +795,21 @@ export default function AdminPanelPage() {
             >
               <Ticket className="w-4 h-4 mr-2" />
               Invite Codes
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowApprovalPanel(!showApprovalPanel)}
+              className="border-white/10 hover:bg-white/5 relative"
+            >
+              <UserCheck className="w-4 h-4 mr-2" />
+              User Approval
+              {pendingUsersCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {pendingUsersCount}
+                </span>
+              )}
             </Button>
 
             <div className="ml-auto flex items-center gap-2">
@@ -1524,6 +1548,14 @@ export default function AdminPanelPage() {
           </div>
           <AdminInviteCodesPanel />
         </div>
+      )}
+
+      {/* User Approval Panel */}
+      {showApprovalPanel && (
+        <UserApprovalPanel 
+          onClose={() => setShowApprovalPanel(false)}
+          onUsersApproved={() => checkAdminAndLoadData(true)}
+        />
       )}
 
       <style jsx global>{`

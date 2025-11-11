@@ -52,9 +52,16 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
+    // ✅ Verificar admin via admin_accounts (verificação rigorosa)
+    const { data: adminAccount } = await supabase
+      .from('admin_accounts')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('chat_images_generated, role')
+      .select('chat_images_generated')
       .eq('id', user.id)
       .single();
 
@@ -68,11 +75,11 @@ export async function POST(request: NextRequest) {
 
     const creditosAtuais = balanceData?.servicos_creditos || 0;
     const imagensGeradas = userData?.chat_images_generated || 0;
-    const isAdmin = userData?.role === 'admin';
+    const isAdmin = !!adminAccount;
 
     // 🎯 ADMIN: Geração ilimitada sem cobrar créditos
     if (isAdmin) {
-      console.log('👑 Admin detectado - geração ilimitada sem cobrança');
+      console.log('👑 Admin detectado (via admin_accounts) - geração ilimitada sem cobrança');
     }
 
     // Verificar se precisa de créditos (apenas para não-admins)

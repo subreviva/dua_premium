@@ -4,13 +4,17 @@ import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { VideoGenerationProvider } from "@/contexts/video-generation-context"
 import { UnifiedMusicProvider } from "@/contexts/unified-music-context"
+import { GlobalPlayerProvider } from "@/contexts/global-player-context"
 import { VideoGenerationNotifications } from "@/components/ui/video-generation-notifications"
 import { UnifiedMusicPlayer } from "@/components/unified-music-player"
+import { GlobalMusicPlayer } from "@/components/global-music-player"
+import { FloatingMiniPlayer } from "@/components/floating-mini-player"
 import { StagewiseToolbar } from "@/components/stagewise-toolbar"
 import { PremiumToaster } from "@/components/ui/premium-toaster"
 import { PremiumLoading } from "@/components/ui/premium-loading"
 import PWAInstallPrompt, { ConnectionStatus } from "@/components/PWAInstallPrompt"
 import CookieConsent from "@/components/cookie-consent"
+import { WelcomeScreenWrapper } from "@/components/welcome-screen-wrapper"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -118,30 +122,41 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
-        <UnifiedMusicProvider>
-          <VideoGenerationProvider>
-            {children}
-            <VideoGenerationNotifications />
-            
-            {/* Unified Music Player - Funciona em TODO o site */}
-            <UnifiedMusicPlayer />
-            
-            {/* Stagewise Toolbar - Dev Mode Only */}
-            <StagewiseToolbar />
-            
-            {/* PWA Components */}
-            <PWAInstallPrompt />
-            <ConnectionStatus />
-            
-            {/* Cookie Consent Banner - GDPR Compliance */}
-            <CookieConsent />
-            
-            {/* Premium Components */}
-            <PremiumToaster />
-            
-            <Analytics />
-          </VideoGenerationProvider>
-        </UnifiedMusicProvider>
+        <GlobalPlayerProvider>
+          <UnifiedMusicProvider>
+            <VideoGenerationProvider>
+              {children}
+              <VideoGenerationNotifications />
+              
+              {/* Unified Music Player - Funciona em TODO o site */}
+              <UnifiedMusicPlayer />
+              
+              {/* Global Music Player - Player fixo no bottom (dentro do Music Studio) */}
+              <GlobalMusicPlayer />
+              
+              {/* Floating Mini Player - Mini player flutuante (fora do Music Studio) */}
+              <FloatingMiniPlayer />
+              
+              {/* Stagewise Toolbar - Dev Mode Only */}
+              <StagewiseToolbar />
+              
+              {/* PWA Components */}
+              <PWAInstallPrompt />
+              <ConnectionStatus />
+              
+              {/* Cookie Consent Banner - GDPR Compliance */}
+              <CookieConsent />
+              
+              {/* Welcome Screen - First time user experience */}
+              <WelcomeScreenWrapper />
+              
+              {/* Premium Components */}
+              <PremiumToaster />
+              
+              <Analytics />
+            </VideoGenerationProvider>
+          </UnifiedMusicProvider>
+        </GlobalPlayerProvider>
       </body>
     </html>
   )

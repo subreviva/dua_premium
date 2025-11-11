@@ -76,17 +76,17 @@ export async function POST(req: NextRequest) {
       // withCredits já valida o userId, então podemos usá-lo diretamente
       console.log(`🎨 Design Studio - ${action} - User: ${validatedUserId}`);
 
-    // Verificar se é admin (sem debitar créditos)
+    // ✅ Verificar se é admin usando verificação rigorosa
     const supabase = getAdminClient();
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
+    const { data: adminAccount } = await supabase
+      .from('admin_accounts')
+      .select('id')
       .eq('id', validatedUserId)
       .single();
 
-    const isAdmin = userData?.role === 'admin';
+    const isAdmin = !!adminAccount;
     if (isAdmin) {
-      console.log('👑 Admin detectado - geração SEM cobrar créditos');
+      console.log('👑 Admin detectado (via admin_accounts) - geração SEM cobrar créditos');
     }
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });

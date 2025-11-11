@@ -194,6 +194,26 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
+    // ────────────────────────────────────────────────────────────────────────
+    // 🛡️ PROTEÇÃO ADMIN: Rotas /admin/* (VERIFICAÇÃO RIGOROSA)
+    // ────────────────────────────────────────────────────────────────────────
+    if (path.startsWith('/admin')) {
+      // Verificar se é admin via admin_accounts
+      const { data: adminAccount } = await supabase
+        .from('admin_accounts')
+        .select('id, role')
+        .eq('id', user.id)
+        .single();
+      
+      if (!adminAccount) {
+        console.warn(`[MIDDLEWARE] ❌ User ${user.email} tentou /admin sem admin_accounts`);
+        return NextResponse.redirect(new URL('/acesso-negado', req.url));
+      }
+      
+      console.log(`[MIDDLEWARE] ✅ Admin ${user.email} (${adminAccount.role}) acessou ${path}`);
+      return NextResponse.next();
+    }
+
     // 🔓 BYPASS PARA DESENVOLVEDORES - Acesso total sem verificações
     const DEV_EMAILS = ['dev@dua.com', 'admin@dua.com', 'developer@dua.com'];
     if (DEV_EMAILS.includes(user.email || '')) {

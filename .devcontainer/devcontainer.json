@@ -1,0 +1,10 @@
+{
+  "name": "DUA Codespace Devcontainer",
+  "customizations": {},
+  "postCreateCommand": "bash .devcontainer/sync-env.sh",
+  "remoteUser": "vscode",
+  "features": {},
+  "containerEnv": {
+    "NODE_ENV": "development"
+  }
+}

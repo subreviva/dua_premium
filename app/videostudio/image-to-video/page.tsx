@@ -2,7 +2,8 @@
 
 import { useState, useRef } from "react"
 import { ImageIcon, Upload, Sparkles, Download, Loader2, CheckCircle2, AlertCircle, Play, Pause, Film, RotateCw, X } from "lucide-react"
-import { AppSidebar } from "@/components/app-sidebar"
+import { CinemaSidebar } from "@/components/cinema-sidebar"
+import { VideoStudioNavbar } from "@/components/video-studio-navbar"
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function ImageToVideo() {
@@ -168,13 +169,12 @@ export default function ImageToVideo() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
-      <div className="hidden md:block">
-        <AppSidebar />
-      </div>
+      <VideoStudioNavbar />
+      <CinemaSidebar />
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-14">
         {/* Header Premium */}
-        <div className="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-0 z-50">
+        <div className="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-14 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 sm:gap-4">

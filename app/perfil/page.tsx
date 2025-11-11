@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase";
+import { verifyAdminClient } from "@/lib/admin-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,13 +24,6 @@ import {
 import { PremiumNavbar } from "@/components/ui/premium-navbar";
 
 const supabase = supabaseClient;
-
-const ADMIN_EMAILS = [
-  'admin@dua.pt',
-  'subreviva@gmail.com',
-  'dev@dua.pt',
-  'dev@dua.com'
-];
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -78,7 +72,10 @@ export default function PerfilPage() {
       const userEmail = session.user.email || '';
       
       setUser(session.user);
-      setIsAdmin(ADMIN_EMAILS.includes(userEmail));
+      
+      // ✅ Verificar admin via admin_accounts (verificação rigorosa)
+      const adminCheck = await verifyAdminClient(supabase);
+      setIsAdmin(adminCheck.isAdmin);
 
       // Carregar dados do perfil
       const { data: userData, error } = await supabase

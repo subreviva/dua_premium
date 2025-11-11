@@ -5,11 +5,19 @@ import { Play, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
+import { usePathname } from "next/navigation"
 
 export function GlobalMusicPlayer() {
   const { currentTrack, isPlaying, progress, duration, pause, resume, seek, audioRef } = useGlobalPlayer()
+  const pathname = usePathname()
 
-  if (!currentTrack) return null
+  // Mostrar apenas se estiver no Music Studio
+  const isMusicStudio = pathname?.startsWith('/musicstudio') || 
+                        pathname?.startsWith('/create') || 
+                        pathname?.startsWith('/melody') || 
+                        pathname?.startsWith('/library')
+
+  if (!currentTrack || !isMusicStudio) return null
 
   const formatTime = (seconds: number) => {
     if (!isFinite(seconds)) return "0:00"

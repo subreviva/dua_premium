@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🎯 SQL EXEC - Helper rápido para executar SQL no Supabase
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Uso:
+#   sql-exec "SELECT * FROM users LIMIT 5;"
+#   sql-exec schema.sql
+
+# Carregar .env.local
+if [ -f .env.local ]; then
+  export $(grep -v '^#' .env.local | xargs -d '\n' 2>/dev/null) || true
+fi
+
+export SUPABASE_ACCESS_TOKEN="${SUPABASE_ACCESS_TOKEN:-}"
+export PROJECT_REF="${SUPABASE_PROJECT_REF:-nranmngyocaqjwcokcxm}"
+
+# Se argumento é um arquivo
+if [ -f "$1" ]; then
+  echo "📝 Executando SQL do arquivo: $1"
+  node .devcontainer/execute-sql.mjs --file "$1"
+else
+  # Caso contrário, trata como SQL inline
+  echo "📝 Executando SQL inline..."
+  node .devcontainer/execute-sql.mjs --sql "$1"
+fi

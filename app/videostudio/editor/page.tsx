@@ -4,7 +4,8 @@ import { useState, useRef } from "react"
 import { Wand2, Upload, Video, Sparkles, Download, Loader2, CheckCircle2, AlertCircle, Play, Pause, RotateCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { AppSidebar } from "@/components/app-sidebar"
+import { CinemaSidebar } from "@/components/cinema-sidebar"
+import { VideoStudioNavbar } from "@/components/video-studio-navbar"
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function VideoEditorPage() {
@@ -202,15 +203,13 @@ export default function VideoEditorPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
-      {/* Sidebar */}
-      <div className="hidden md:block">
-        <AppSidebar />
-      </div>
+      <VideoStudioNavbar />
+      <CinemaSidebar />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-14">
         {/* Header */}
-        <div className="border-b border-white/10 bg-black/50 backdrop-blur-xl sticky top-0 z-10">
+        <div className="border-b border-white/10 bg-black/50 backdrop-blur-xl sticky top-14 z-10">
           <div className="max-w-7xl mx-auto px-6 py-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">

@@ -1,0 +1,27 @@
+# Supabase CLI configuration file
+# This file is created automatically by `supabase link`
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+port = 54325
+
+[project]
+id = "nranmngyocaqjwcokcxm"
+
+[db.pooler]
+enabled = false

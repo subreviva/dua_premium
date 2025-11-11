@@ -10,6 +10,7 @@ import ToastContainer from '@/components/designstudio-original/ui/ToastContainer
 import SidePanelTabs from '@/components/designstudio-original/SidePanelTabs';
 import ToolsModal from '@/components/designstudio-original/ToolsModal';
 import ToolsBar from '@/components/designstudio-original/ToolsBar';
+import { DesignStudioNavbar } from '@/components/design-studio-navbar';
 
 export default function DesignStudioPage() {
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
@@ -90,8 +91,11 @@ export default function DesignStudioPage() {
   return (
     <ToastProvider>
       <div className="design-studio-container flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900">
-        {/* Mobile: iOS Premium Toolbar - Fixed top */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-30" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        {/* Navbar fixa no topo com créditos - z-50 sempre no topo */}
+        <DesignStudioNavbar />
+        
+        {/* Mobile: iOS Premium Toolbar - Fixed após navbar */}
+        <div className="md:hidden fixed left-0 right-0 z-40" style={{ top: '56px' }}>
           <div className="bg-black/90 backdrop-blur-3xl border-b border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
             <Toolbar 
               activeTool={activeTool} 
@@ -101,13 +105,13 @@ export default function DesignStudioPage() {
           </div>
         </div>
 
-        {/* Desktop: Toolbar vertical lateral */}
-        <div className="hidden md:block">
+        {/* Desktop: Toolbar vertical lateral - começa após navbar */}
+        <div className="hidden md:block pt-14">
           <Toolbar activeTool={activeTool} onToolSelect={handleToolSelect} />
         </div>
         
         {/* Canvas - iOS Premium Scroll com bounce */}
-        <main className="flex-1 flex items-start md:items-center justify-center transition-all duration-300 relative overflow-y-auto overflow-x-hidden md:p-8">
+        <main className="flex-1 flex items-start md:items-center justify-center transition-all duration-300 relative overflow-y-auto overflow-x-hidden md:p-8 pt-14">
           <style jsx>{`
             /* iOS Bounce Scroll */
             main {
@@ -116,8 +120,8 @@ export default function DesignStudioPage() {
             }
             @media (max-width: 768px) {
               main {
-                /* Safe area top + navbar (56px) + espaço superior */
-                padding-top: calc(env(safe-area-inset-top) + 4rem);
+                /* Safe area top + navbar (56px) + toolbar (56px) */
+                padding-top: calc(env(safe-area-inset-top) + 7rem);
                 /* Safe area bottom + tools bar (64px) + painel + espaço para download button */
                 padding-bottom: calc(env(safe-area-inset-bottom) + 4rem + ${showToolPanel ? (panelHeight === 'full' ? '85vh' : '50vh') : '0px'});
                 padding-left: max(1rem, env(safe-area-inset-left));

@@ -9,13 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MessageSquare, Settings, User, Coins, ChevronLeft, Menu, PanelLeft, PanelLeftClose, LogOut } from "lucide-react"
+import { MessageSquare, Settings, User, Coins, ChevronLeft, Menu, PanelLeft, PanelLeftClose, LogOut, ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { supabaseClient } from "@/lib/supabase"
 import { UserAvatarGlobal } from "@/components/ui/user-avatar-global"
+import { useCredits } from "@/hooks/use-credits"
 
 const supabase = supabaseClient;
 
@@ -46,7 +47,7 @@ export function PremiumNavbar({
 }: PremiumNavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [userCredits, setUserCredits] = useState<number | null>(null)
+  const { credits: hookCredits, loading: creditsLoading } = useCredits()
   const router = useRouter()
 
   useEffect(() => {
@@ -57,88 +58,7 @@ export function PremiumNavbar({
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // ⚡ CRITICAL: Carregar créditos SEMPRE que o componente montar
-  useEffect(() => {
-    // Sempre carregar créditos ao montar (independente de propCredits)
-    loadUserCredits();
-    
-    // ✅ Refresh automático a cada 10 segundos para manter atualizado
-    const interval = setInterval(() => {
-      loadUserCredits();
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, []); // ✅ Sem dependências - carrega sempre
-
-  // ⚡ CRITICAL: Escutar mudanças de autenticação
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[NAVBAR] Auth event:', event, 'User:', session?.user?.id?.slice(0, 8));
-      
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        // ✅ Recarregar créditos quando user fizer login
-        loadUserCredits();
-      } else if (event === 'SIGNED_OUT') {
-        // ✅ Limpar créditos ao fazer logout
-        setUserCredits(null);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const loadUserCredits = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        console.log('[NAVBAR] Nenhum usuário autenticado');
-        setUserCredits(null);
-        return;
-      }
-
-      console.log(`[NAVBAR] Carregando créditos do usuário ${user.id.slice(0, 8)}...`);
-      
-      // ✅ CORRIGIDO: Buscar de duaia_user_balances (dados reais)
-      const { data: balanceData, error: balanceError } = await supabase
-        .from('duaia_user_balances')
-        .select('servicos_creditos')
-        .eq('user_id', user.id)
-        .single()
-      
-      if (balanceError) {
-        console.error('[NAVBAR] Erro ao buscar balance:', balanceError);
-        
-        // Auto-criar registro se não existe
-        console.log('[NAVBAR] Criando balance inicial...');
-        const { data: newBalance, error: insertError } = await supabase
-          .from('duaia_user_balances')
-          .insert({ 
-            user_id: user.id, 
-            servicos_creditos: 150, // ✅ Créditos iniciais
-            duacoin_balance: 0 
-          })
-          .select('servicos_creditos')
-          .single()
-        
-        if (insertError) {
-          console.error('[NAVBAR] Erro ao criar balance:', insertError);
-          setUserCredits(0);
-        } else {
-          console.log(`[NAVBAR] Balance criado: ${newBalance?.servicos_creditos} créditos`);
-          setUserCredits(newBalance?.servicos_creditos || 150);
-        }
-      } else {
-        console.log(`[NAVBAR] Créditos carregados: ${balanceData.servicos_creditos}`);
-        setUserCredits(balanceData.servicos_creditos || 0);
-      }
-    } catch (error) {
-      console.error('[NAVBAR] Erro geral ao carregar créditos:', error)
-      setUserCredits(0)
-    }
-  }
+  const displayCredits = propCredits !== undefined ? propCredits : hookCredits
 
   const handleBuyCredits = () => {
     router.push('/comprar')
@@ -146,39 +66,13 @@ export function PremiumNavbar({
 
   const handleLogout = async () => {
     try {
-      console.log('[NAVBAR] Fazendo logout...');
-      
-      // ⚡ CRITICAL: Limpar TODO o localStorage antes de fazer logout
-      // Isso previne que dados de um usuário vazem para outro
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith('dua-')) {
-          keysToRemove.push(key);
-        }
-      }
-      
-      keysToRemove.forEach(key => {
-        console.log(`[NAVBAR] Removendo ${key}`);
-        localStorage.removeItem(key);
-      });
-      
-      console.log(`[NAVBAR] ${keysToRemove.length} chaves removidas do localStorage`);
-      
-      // ✅ Fazer logout no Supabase
-      await supabase.auth.signOut();
-      
-      console.log('[NAVBAR] Logout completo, redirecionando...');
-      router.push('/login');
+      await supabase.auth.signOut()
+      router.push('/login')
     } catch (error) {
-      console.error('[NAVBAR] Erro ao fazer logout:', error);
-      
-      // Mesmo com erro, tentar redirecionar
-      router.push('/login');
+      console.error('[NAVBAR] Erro ao fazer logout:', error)
+      router.push('/login')
     }
   }
-
-  const displayCredits = propCredits !== undefined ? propCredits : userCredits
 
   const variantStyles = {
     default: "backdrop-blur-xl bg-black/60 border-b border-white/5",
@@ -270,6 +164,14 @@ export function PremiumNavbar({
               >
                 <MessageSquare className="w-4 h-4" />
                 <span className="font-medium">Chat</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/5 my-2" />
+              <DropdownMenuItem
+                onClick={handleBuyCredits}
+                className="flex items-center gap-3 p-3 cursor-pointer rounded-lg focus:bg-purple-500/10 text-purple-400 hover:text-purple-300 transition-all duration-200 font-semibold"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span className="font-medium">Comprar Créditos</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/5 my-2" />
               <DropdownMenuItem

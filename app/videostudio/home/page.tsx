@@ -3,7 +3,8 @@
 import { Video, Sparkles, ArrowRight, Wand2, ArrowUpCircle, Users } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { AppSidebar } from "@/components/app-sidebar"
+import { CinemaSidebar } from "@/components/cinema-sidebar"
+import { VideoStudioNavbar } from "@/components/video-studio-navbar"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 
@@ -12,13 +13,11 @@ export default function VideoStudioHomePage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block">
-        <AppSidebar />
-      </div>
+      <VideoStudioNavbar />
+      <CinemaSidebar />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-14">
         {/* Hero Section */}
         <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
           {/* Animated Background */}

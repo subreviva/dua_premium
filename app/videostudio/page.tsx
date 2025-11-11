@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Film, ImagePlay, Wand2, ArrowUpCircle, Sparkles, ArrowRight } from "lucide-react"
 import { CinemaSidebar } from "@/components/cinema-sidebar"
+import { VideoStudioNavbar } from "@/components/video-studio-navbar"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 
@@ -57,22 +58,23 @@ export default function VideoStudioHub() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
+      <VideoStudioNavbar />
       <CinemaSidebar />
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-14">
         {/* Header */}
-        <div className="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-0 z-50">
+        <div className="border-b border-white/5 bg-black/40 backdrop-blur-2xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-xl">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center backdrop-blur-xl">
                 <Film className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extralight text-white tracking-tight">
-                  DUA Cinema
+                  Video Studio
                 </h1>
                 <p className="text-sm sm:text-base text-white/40 font-light mt-1">
-                  Estúdio Profissional de Vídeo • 3 Ferramentas Poderosas
+                  Crie Vídeos Profissionais com IA • 3 Ferramentas Poderosas
                 </p>
               </div>
             </div>

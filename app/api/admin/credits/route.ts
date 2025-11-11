@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdminToken, extractBearerToken } from '@/lib/admin-auth';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -13,17 +14,10 @@ import { createClient } from '@supabase/supabase-js';
  * - Gerenciar saldos de todos usuários
  * 
  * SEGURANÇA:
- * - Apenas emails de admin permitidos
+ * - Verificação via admin_accounts + users.role
  * - Service Role Key para operações
  * - Audit trail completo
  */
-
-const ADMIN_EMAILS = [
-  'admin@dua.pt',
-  'subreviva@gmail.com',
-  'dev@dua.pt',
-  'dev@dua.com',
-];
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,24 +25,29 @@ const supabase = createClient(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🔒 VERIFICAÇÃO DE ADMIN
+// 🔒 VERIFICAÇÃO DE ADMIN (ATUALIZADA)
 // ═══════════════════════════════════════════════════════════════════════════
-async function verifyAdmin(req: NextRequest): Promise<{ isAdmin: boolean; adminEmail?: string }> {
+async function verifyAdmin(req: NextRequest): Promise<{ isAdmin: boolean; adminEmail?: string; userId?: string }> {
   try {
     const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const token = extractBearerToken(authHeader);
+    
+    if (!token) {
       return { isAdmin: false };
     }
 
-    const token = authHeader.substring(7);
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-
-    if (error || !user?.email) {
+    // ✅ VERIFICAÇÃO RIGOROSA via admin-auth.ts
+    const adminCheck = await verifyAdminToken(token);
+    
+    if (!adminCheck.isAdmin) {
       return { isAdmin: false };
     }
 
-    const isAdmin = ADMIN_EMAILS.includes(user.email);
-    return { isAdmin, adminEmail: user.email };
+    return { 
+      isAdmin: true, 
+      adminEmail: adminCheck.email,
+      userId: adminCheck.userId
+    };
   } catch {
     return { isAdmin: false };
   }

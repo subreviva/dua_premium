@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { AppSidebar } from "@/components/app-sidebar"
+import { CinemaSidebar } from "@/components/cinema-sidebar"
+import { VideoStudioNavbar } from "@/components/video-studio-navbar"
 import { Upload, Sparkles, Check, Wand2, FileVideo, Loader2, Ratio } from "lucide-react"
 
 const ASPECT_RATIOS = [
@@ -110,11 +111,10 @@ export default function EditorPage() {
 
   return (
     <div className="flex h-screen bg-black overflow-hidden">
-      <div className="hidden md:block">
-        <AppSidebar />
-      </div>
+      <VideoStudioNavbar />
+      <CinemaSidebar />
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pt-14">
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           {/* Header */}
           <motion.div

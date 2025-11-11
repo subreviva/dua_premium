@@ -36,16 +36,16 @@ export function CinemaSidebar() {
   ]
 
   return (
-    <div className="flex h-screen w-64 flex-col border-r border-white/10 bg-black/40 backdrop-blur-2xl">
+    <div className="flex h-screen w-64 flex-col border-r border-white/10 bg-black/40 backdrop-blur-2xl pt-14">
       {/* Header */}
       <div className="border-b border-white/5 p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
             <Film className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-light text-white tracking-tight">DUA Cinema</h2>
-            <p className="text-xs text-white/40 font-light">Estúdio de Vídeo</p>
+            <h2 className="text-lg font-light text-white tracking-tight">Video Studio</h2>
+            <p className="text-xs text-white/40 font-light">Criação de Vídeos</p>
           </div>
         </div>
       </div>
