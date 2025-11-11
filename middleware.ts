@@ -92,41 +92,54 @@ export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const clientIP = getClientIP(req);
 
-  // Aplicar rate limiting COM CATEGORIZAÇÃO INTELIGENTE
-  let rateLimitType: 'auth_critical' | 'registration' | 'general' | 'api';
-  
-  if (path.startsWith('/api')) {
-    rateLimitType = 'api';
-  } else if (path === '/acesso' || path === '/registo' || path.startsWith('/api/auth/register')) {
-    // ROTAS DE REGISTRO - MAIS PERMISSIVO
-    rateLimitType = 'registration';
-  } else if (path === '/login' || path.startsWith('/api/auth/login') || path.startsWith('/api/auth/callback')) {
-    // ROTAS DE LOGIN CRÍTICAS - MAIS RESTRITIVO
-    rateLimitType = 'auth_critical';
-  } else {
-    rateLimitType = 'general';
-  }
+  // ⚡ ROTAS ISENTAS DE RATE LIMITING (páginas públicas críticas)
+  const RATE_LIMIT_EXEMPT = [
+    '/acesso',               // ✅ CRÍTICO - Página de registo
+    '/registo',              // ✅ CRÍTICO - Página de waitlist
+    '/',                     // Home pública
+    '/sobre',                // Sobre
+    '/termos',               // Termos
+    '/privacidade',          // Privacidade
+  ];
 
-  if (!checkRateLimit(clientIP, rateLimitType)) {
-    console.log(`🚫 Rate limit exceeded for ${clientIP} on ${path} (type: ${rateLimitType})`);
-    return new NextResponse(
-      JSON.stringify({ 
-        error: 'Rate limit exceeded',
-        message: 'Too many requests. Please try again later.',
-        retryAfter: 60,
-        type: rateLimitType
-      }),
-      { 
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': '60',
+  // Se é rota isenta, PULAR rate limiting
+  const isExempt = RATE_LIMIT_EXEMPT.some(exemptPath => path === exemptPath);
+
+  // Aplicar rate limiting APENAS se NÃO for isenta
+  if (!isExempt) {
+    let rateLimitType: 'auth_critical' | 'registration' | 'general' | 'api';
+    
+    if (path.startsWith('/api')) {
+      rateLimitType = 'api';
+    } else if (path.startsWith('/api/auth/register')) {
+      rateLimitType = 'registration';
+    } else if (path === '/login' || path.startsWith('/api/auth/login') || path.startsWith('/api/auth/callback')) {
+      rateLimitType = 'auth_critical';
+    } else {
+      rateLimitType = 'general';
+    }
+
+    if (!checkRateLimit(clientIP, rateLimitType)) {
+      console.log(`🚫 Rate limit exceeded for ${clientIP} on ${path} (type: ${rateLimitType})`);
+      return new NextResponse(
+        JSON.stringify({ 
+          error: 'Rate limit exceeded',
+          message: 'Too many requests. Please try again later.',
+          retryAfter: 60,
+          type: rateLimitType
+        }),
+        { 
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': '60',
+          }
         }
-      }
-    );
+      );
+    }
   }
 
-  // Rotas que NÃO precisam de proteção
+  // Rotas que NÃO precisam de proteção (autenticação)
   const publicPaths = [
     '/',                      // Home page pública
     '/acesso',               // Página de código de acesso
