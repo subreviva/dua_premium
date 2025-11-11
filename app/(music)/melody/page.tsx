@@ -495,10 +495,11 @@ export default function MelodyPage() {
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black">
-      {/* Elegant gradient overlays */}
+      {/* 🍊 Elegant gradient overlays com tons laranja */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-orange-500/[0.08] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-amber-500/[0.06] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-orange-600/[0.04] rounded-full blur-3xl" />
       </div>
       
       <audio ref={audioRef} className="hidden" preload="auto" />
@@ -528,11 +529,12 @@ export default function MelodyPage() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 pt-[80px] pb-safe-mobile md:pb-0">
-          {/* Cover Art */}
+          {/* Cover Art com gradient laranja */}
           <div className="w-full max-w-[280px] mb-8">
-            <div className="aspect-square w-full bg-white/[0.03] rounded-2xl flex items-center justify-center overflow-hidden relative border border-white/[0.06] backdrop-blur-xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent" />
-              <Mic className="relative w-20 h-20 text-white/30" strokeWidth={1.5} />
+            <div className="aspect-square w-full bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent rounded-2xl flex items-center justify-center overflow-hidden relative border border-orange-500/20 backdrop-blur-xl shadow-2xl shadow-orange-500/10">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-400/[0.12] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(251,146,60,0.15),transparent_70%)]" />
+              <Mic className="relative w-24 h-24 text-orange-400/40 drop-shadow-lg" strokeWidth={1.5} />
             </div>
           </div>
 
@@ -545,7 +547,7 @@ export default function MelodyPage() {
             Grave ou carregue um áudio para criar música profissional
           </p>
 
-          {/* Main Record Button */}
+          {/* Main Record Button com tom laranja */}
           <button
             onClick={() => {
               setShowRecorder(true)
@@ -553,22 +555,23 @@ export default function MelodyPage() {
             }}
             className="group relative mb-6 active:scale-95 transition-all"
           >
-            <div className="h-20 w-20 rounded-full bg-white/[0.12] border-2 border-white/[0.20] backdrop-blur-xl flex items-center justify-center hover:bg-white/[0.15] active:bg-white/[0.18] transition-all shadow-lg shadow-black/30">
-              <div className="h-6 w-6 rounded-full bg-white/95" />
+            <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl group-hover:blur-2xl transition-all"></div>
+            <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-2 border-orange-400/40 backdrop-blur-xl flex items-center justify-center hover:from-orange-500/30 hover:to-amber-500/30 hover:border-orange-400/60 active:scale-95 transition-all shadow-lg shadow-orange-500/20">
+              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg shadow-orange-500/50" />
             </div>
           </button>
 
-          {/* Secondary Actions */}
+          {/* Secondary Actions com accent laranja */}
           <div className="flex items-center justify-center gap-8">
             {/* Upload button */}
             <button
               onClick={() => fileInputRef.current?.click()}
               className="group flex flex-col items-center gap-2 active:scale-95 transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl flex items-center justify-center hover:bg-white/[0.10] active:bg-white/[0.12] transition-all">
-                <Upload className="h-5 w-5 text-white/70" strokeWidth={2} />
+              <div className="h-12 w-12 rounded-xl bg-orange-500/[0.08] border border-orange-400/[0.15] backdrop-blur-xl flex items-center justify-center hover:bg-orange-500/[0.15] active:bg-orange-500/[0.20] transition-all shadow-lg shadow-orange-500/5">
+                <Upload className="h-5 w-5 text-orange-300/80" strokeWidth={2} />
               </div>
-              <span className="text-[11px] text-white/40 font-light">Carregar</span>
+              <span className="text-[11px] text-orange-200/50 font-light">Carregar</span>
             </button>
 
             {/* Library button */}
@@ -576,10 +579,10 @@ export default function MelodyPage() {
               onClick={() => router.push("/library")}
               className="group flex flex-col items-center gap-2 active:scale-95 transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl flex items-center justify-center hover:bg-white/[0.10] active:bg-white/[0.12] transition-all">
-                <Music className="h-5 w-5 text-white/70" strokeWidth={2} />
+              <div className="h-12 w-12 rounded-xl bg-amber-500/[0.08] border border-amber-400/[0.15] backdrop-blur-xl flex items-center justify-center hover:bg-amber-500/[0.15] active:bg-amber-500/[0.20] transition-all shadow-lg shadow-amber-500/5">
+                <Music className="h-5 w-5 text-amber-300/80" strokeWidth={2} />
               </div>
-              <span className="text-[11px] text-white/40 font-light">Biblioteca</span>
+              <span className="text-[11px] text-amber-200/50 font-light">Biblioteca</span>
             </button>
           </div>
 
@@ -595,10 +598,11 @@ export default function MelodyPage() {
       {/* Recording Modal */}
       {showRecorder && (
         <div className="lg:hidden fixed inset-0 z-50 animate-in fade-in duration-500 flex flex-col h-[100dvh] overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black">
-          {/* Elegant gradient overlays */}
+          {/* 🍊 Elegant gradient overlays com tons laranja */}
           <div className="fixed inset-0 z-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-3xl" />
-            <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/[0.015] rounded-full blur-3xl" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-orange-500/[0.08] rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-amber-500/[0.06] rounded-full blur-3xl" />
+            <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-orange-600/[0.04] rounded-full blur-3xl" />
           </div>
 
           {/* Top Navbar */}
@@ -647,11 +651,12 @@ export default function MelodyPage() {
                   {waveformData.map((height, i) => (
                     <div
                       key={i}
-                      className="flex-1 max-w-[3px] rounded-full bg-white/90"
+                      className="flex-1 max-w-[3px] rounded-full bg-gradient-to-t from-orange-400 via-amber-400 to-orange-300"
                       style={{
                         height: `${height}%`,
-                        opacity: 0.4 + (height / 100) * 0.6,
+                        opacity: 0.5 + (height / 100) * 0.5,
                         transition: "all 120ms cubic-bezier(0.4, 0, 0.2, 1)",
+                        boxShadow: `0 0 ${height / 10}px rgba(251, 146, 60, ${height / 200})`,
                       }}
                     />
                   ))}
@@ -667,23 +672,24 @@ export default function MelodyPage() {
           <div className="px-6 pb-8 pb-safe-mobile md:pb-0 flex items-center justify-center gap-8">
             <button
               onClick={resetRecording}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl active:scale-95 transition-all hover:bg-white/[0.10]"
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/[0.08] border border-orange-400/[0.15] backdrop-blur-xl active:scale-95 transition-all hover:bg-orange-500/[0.15] shadow-lg shadow-orange-500/5"
             >
-              <RotateCcw className="h-5 w-5 text-white/80" strokeWidth={2} />
+              <RotateCcw className="h-5 w-5 text-orange-300/80" strokeWidth={2} />
             </button>
 
             <button
               onClick={stopRecording}
-              className="h-16 w-16 rounded-xl bg-white/[0.12] border-2 border-white/[0.20] backdrop-blur-xl flex items-center justify-center active:scale-95 transition-all hover:bg-white/[0.15]"
+              className="relative h-16 w-16 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-2 border-orange-400/40 backdrop-blur-xl flex items-center justify-center active:scale-95 transition-all hover:from-orange-500/30 hover:to-amber-500/30 shadow-lg shadow-orange-500/20"
             >
-              <div className="h-5 w-5 rounded bg-white/90" />
+              <div className="absolute inset-0 bg-orange-500/20 rounded-xl blur-xl"></div>
+              <div className="relative h-5 w-5 rounded bg-gradient-to-br from-orange-400 to-amber-500" />
             </button>
 
             <button
               onClick={deleteRecording}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl active:scale-95 transition-all hover:bg-white/[0.10]"
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/[0.08] border border-red-400/[0.15] backdrop-blur-xl active:scale-95 transition-all hover:bg-red-500/[0.15] shadow-lg shadow-red-500/5"
             >
-              <Trash2 className="h-5 w-5 text-white/80" strokeWidth={2} />
+              <Trash2 className="h-5 w-5 text-red-300/80" strokeWidth={2} />
             </button>
           </div>
         </div>
