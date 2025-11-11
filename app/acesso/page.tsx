@@ -310,7 +310,8 @@ export default function AcessoPage() {
       console.log('[REGISTER] Login bem-sucedido, criando perfil...');
 
       // PASSO 3: Criar perfil (agora com sessão ativa, RLS permite)
-      const { error: profileError } = await supabase.from('users').insert({
+      console.log('[REGISTER] Inserindo perfil na tabela users...');
+      const { data: profileData, error: profileError } = await supabase.from('users').insert({
         id: userId,
         email: email.toLowerCase(),
         name,
@@ -320,25 +321,47 @@ export default function AcessoPage() {
         creditos_servicos: 150,
         saldo_dua: 50,
         account_type: 'normal',
-      });
+      }).select();
 
       if (profileError) {
-        console.error('[REGISTER] Erro perfil:', profileError);
+        console.error('[REGISTER] ❌ Erro perfil:', profileError);
         // Não falhar aqui, continuar
+      } else {
+        console.log('[REGISTER] ✅ Perfil criado:', profileData);
       }
 
       // PASSO 4: Criar balance
-      const { error: balanceError } = await supabase
+      console.log('[REGISTER] Inserindo balance na tabela duaia_user_balances...');
+      const { data: balanceData, error: balanceError } = await supabase
         .from('duaia_user_balances')
         .insert({
           user_id: userId,
           servicos_creditos: 150,
           duacoin_balance: 0,
-        });
+        })
+        .select();
 
       if (balanceError) {
-        console.error('[REGISTER] Erro balance:', balanceError);
-        // Não falhar aqui, continuar
+        console.error('[REGISTER] ❌ Erro balance:', balanceError);
+        
+        // ⚡ CRITICAL: Tentar com upsert se falhar
+        console.log('[REGISTER] Tentando upsert...');
+        const { data: upsertData, error: upsertError } = await supabase
+          .from('duaia_user_balances')
+          .upsert({
+            user_id: userId,
+            servicos_creditos: 150,
+            duacoin_balance: 0,
+          })
+          .select();
+        
+        if (upsertError) {
+          console.error('[REGISTER] ❌ Erro upsert:', upsertError);
+        } else {
+          console.log('[REGISTER] ✅ Balance criado via upsert:', upsertData);
+        }
+      } else {
+        console.log('[REGISTER] ✅ Balance criado:', balanceData);
       }
 
       // PASSO 5: Marcar código como usado

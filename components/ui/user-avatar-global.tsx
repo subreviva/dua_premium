@@ -32,29 +32,77 @@ export function UserAvatarGlobal({
 }: UserAvatarGlobalProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("User");
+  const [userId, setUserId] = useState<string | null>(null);
 
+  // ⚡ CRITICAL: Carregar avatar ao montar
   useEffect(() => {
     loadUserAvatar();
   }, []);
+
+  // ⚡ CRITICAL: Atualizar avatar quando usuário mudar (login/logout)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[AVATAR] Auth event:', event, 'User:', session?.user?.id?.slice(0, 8));
+      
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        loadUserAvatar();
+      } else if (event === 'SIGNED_OUT') {
+        setAvatarUrl(null);
+        setUserName('User');
+        setUserId(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // ⚡ CRITICAL: Refresh a cada 30 segundos para pegar mudanças de avatar
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userId) {
+        loadUserAvatar();
+      }
+    }, 30000); // 30 segundos
+
+    return () => clearInterval(interval);
+  }, [userId]);
 
   const loadUserAvatar = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (user) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('avatar_url, name, username')
-          .eq('id', user.id)
-          .single();
+      if (!user) {
+        console.log('[AVATAR] Nenhum usuário autenticado');
+        setAvatarUrl(null);
+        setUserName('User');
+        setUserId(null);
+        return;
+      }
 
-        if (userData) {
-          setAvatarUrl(userData.avatar_url);
-          setUserName(userData.name || userData.username || user.email?.split('@')[0] || 'User');
-        }
+      console.log(`[AVATAR] Carregando avatar do usuário ${user.id.slice(0, 8)}...`);
+      setUserId(user.id);
+
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('avatar_url, name, username')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('[AVATAR] Erro ao carregar dados:', error);
+        
+        // Fallback para user metadata
+        setUserName(user.user_metadata?.name || user.email?.split('@')[0] || 'User');
+        setAvatarUrl(user.user_metadata?.avatar_url || null);
+      } else if (userData) {
+        console.log(`[AVATAR] Avatar carregado:`, userData.avatar_url ? 'SIM' : 'NÃO');
+        setAvatarUrl(userData.avatar_url);
+        setUserName(userData.name || userData.username || user.email?.split('@')[0] || 'User');
       }
     } catch (error) {
-      console.error('Error loading avatar:', error);
+      console.error('[AVATAR] Erro geral:', error);
     }
   };
 
