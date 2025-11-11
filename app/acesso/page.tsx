@@ -121,7 +121,7 @@ export default function AcessoPage() {
     setIsRegistering(true);
     
     try {
-      // Usar API de registo enterprise
+      // FLUXO DIRETO: Criar conta + Login automático
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,26 +137,6 @@ export default function AcessoPage() {
       const data = await response.json();
       
       if (!response.ok) {
-        // Fallback: se a rota /api/auth/register não existir em produção, usar /api/validate-code (magic link)
-        if (response.status === 404 && validatedCode) {
-          const fallback = await fetch('/api/validate-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: validatedCode, email: email.toLowerCase() })
-          });
-
-          const fbData = await fallback.json();
-          if (fallback.ok && fbData.success) {
-            toast.success('Código validado! Verifica o teu email para entrar.', {
-              description: 'Enviámos um link mágico para o teu email',
-              duration: 6000,
-            });
-            audit.registration(true, validatedCode || undefined);
-            setTimeout(() => router.push('/login'), 1500);
-            return;
-          }
-        }
-        // Mostrar mensagens de erro empáticas
         toast.error(data.error || "Erro ao criar conta", { 
           description: data.message || "Por favor, tenta novamente",
           duration: 5000,
@@ -166,17 +146,31 @@ export default function AcessoPage() {
       }
       
       if (data.success) {
-        toast.success(data.welcomeMessage || "Conta criada com sucesso", { 
-          description: "📧 Verifica o teu email para ativar a conta",
-          duration: 6000,
+        toast.success("Bem-vindo à DUA! 🎉", { 
+          description: "150 créditos adicionados à sua conta",
+          duration: 3000,
         });
         
         audit.registration(true, validatedCode || undefined);
         
-        // Redirecionar para página de verificação de email
+        // Fazer login automático
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email: email.toLowerCase(),
+          password: password,
+        });
+        
+        if (loginError) {
+          toast.error("Conta criada! Por favor, faça login", {
+            description: "Redireccionando...",
+          });
+          setTimeout(() => router.push('/login'), 1500);
+          return;
+        }
+        
+        // Redirecionar para home com sucesso
         setTimeout(() => { 
-          router.push("/auth/verify-email"); 
-        }, 2000);
+          router.push("/"); 
+        }, 1500);
       }
       
     } catch (error) {

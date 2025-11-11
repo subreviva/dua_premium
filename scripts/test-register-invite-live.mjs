@@ -6,7 +6,7 @@ import 'dotenv/config'
 import fetch from 'node-fetch'
 import { createClient } from '@supabase/supabase-js'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://v0-remix-of-untitled-chat-ktgpa943m.vercel.app'
+const APP_URL = process.env.TEST_APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://v0-remix-of-untitled-chat-hqs8ugzge.vercel.app'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -43,7 +43,7 @@ async function main() {
 
   console.log('▶️ Registering with invite code', inviteCode, 'email', email)
 
-  // 2) call production API
+  // 2) call production API (register). If 404, fallback to /api/validate-code
   const res = await fetch(`${APP_URL}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -52,13 +52,36 @@ async function main() {
 
   const body = await res.json().catch(() => ({}))
 
+  let userId
   if (!res.ok) {
-    console.error('Register failed:', res.status, body)
-    process.exit(3)
+    console.warn('Register failed:', res.status)
+    console.log('➡️  Falling back to /api/validate-code (magic link)')
+    const fb = await fetch(`${APP_URL}/api/validate-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: inviteCode, email })
+    })
+    const fbBody = await fb.json().catch(() => ({}))
+    if (!fb.ok || !fbBody?.success) {
+      console.error('Fallback failed:', fb.status, fbBody)
+      process.exit(3)
+    }
+    // We don't get userId from /api/validate-code directly; fetch by email
+    const { data: userRow, error: userErr } = await admin
+      .from('users')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .single()
+    if (userErr || !userRow?.id) {
+      console.error('Cannot resolve user id after fallback', userErr)
+      process.exit(3)
+    }
+    userId = userRow.id
+  } else {
+    userId = body.user?.id
   }
 
-  console.log('✅ Register ok:', body.user?.id)
-  const userId = body.user?.id
+  console.log('✅ User id:', userId)
   if (!userId) {
     console.error('Missing userId in response')
     process.exit(4)

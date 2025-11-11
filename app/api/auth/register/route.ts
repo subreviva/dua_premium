@@ -163,16 +163,14 @@ export async function POST(request: NextRequest) {
     }
 
     // ════════════════════════════════════════════════════════════════
-    // PASSO 3: Criar conta Supabase Auth (Email verification automática)
+    // PASSO 3: Criar conta Supabase Auth (AUTO-CONFIRMADA)
     // ════════════════════════════════════════════════════════════════
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: {
-          name,
-        },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://dua.ai'}/auth/callback`,
+      email_confirm: true, // ✅ Auto-confirmar email (sem verificação necessária)
+      user_metadata: {
+        name,
       },
     });
 
@@ -204,7 +202,7 @@ export async function POST(request: NextRequest) {
         email,
         name,
         has_access: true,
-        email_verified: false, // ✅ ENTERPRISE: Será true após verificar email
+        email_verified: true, // ✅ DIRETO: Auto-confirmado no registo
         registration_completed: true,
         onboarding_completed: false, // Será true após onboarding
         username_set: false,
@@ -316,7 +314,7 @@ export async function POST(request: NextRequest) {
       });
 
       // ════════════════════════════════════════════════════════════════
-      // PASSO 8: Retornar sucesso com mensagem de boas-vindas
+      // PASSO 9: Retornar sucesso + dados para login automático
       // ════════════════════════════════════════════════════════════════
       const firstName = name.split(' ')[0];
       
@@ -326,22 +324,21 @@ export async function POST(request: NextRequest) {
           id: userId,
           email,
           name,
-          creditosServicos: 150, // ✅ ATUALIZADO: 150 créditos iniciais
-          saldoDua: 50,          // ✅ ATUALIZADO: 50 DUA coins iniciais
+          creditosServicos: 150, // ✅ 150 créditos iniciais
+          saldoDua: 50,          // ✅ 50 DUA coins iniciais
           accountType: 'normal',
-          emailVerified: false, // ✅ ENTERPRISE: Requer verificação
+          emailVerified: true,   // ✅ Auto-confirmado
         },
         session: {
           token: sessionToken,
           expiresAt: expiresAt.toISOString(),
         },
         welcomeMessage: `Bem-vindo à DUA IA, ${firstName}! 🎉`,
-        emailVerificationRequired: true, // ✅
-        onboardingRequired: true,
+        creditsMessage: '150 créditos adicionados à sua conta',
         nextSteps: [
-          '📧 Verifica o teu email para ativar a conta',
-          '👤 Completa o teu perfil (username + avatar)',
-          '🚀 Começa a explorar DUA IA'
+          '🎨 Explore os estúdios de criação',
+          '� Converse com a IA',
+          '🎵 Crie música, imagens e vídeos'
         ]
       });
 
