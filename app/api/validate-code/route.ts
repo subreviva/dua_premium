@@ -24,6 +24,9 @@ export const maxDuration = 30;
 interface ValidateCodeRequest {
   code: string;
   email: string;
+  name?: string;
+  password?: string;
+  createAccount?: boolean;
 }
 
 interface ValidateCodeResponse {
@@ -45,7 +48,7 @@ export async function POST(req: NextRequest) {
     
     // 1. Parse e validação do body
     const body: ValidateCodeRequest = await req.json();
-    const { code, email } = body;
+    const { code, email, name, password, createAccount } = body;
 
     // Validar inputs
     if (!code || !email) {
@@ -100,30 +103,57 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Criar ou obter user via Supabase Auth
-    // Tenta fazer sign in com magic link
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
-      email: email.toLowerCase(),
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/chat`,
-      },
-    });
+    // 3. Criar user com password ou magic link
+    let userId: string;
+    
+    if (createAccount && password && name) {
+      // NOVO: Criar conta com password (auto-confirmada)
+      console.log('[VALIDATE-CODE] Criando conta com password...');
+      
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: email.toLowerCase(),
+        password,
+        email_confirm: true, // Auto-confirmar
+        user_metadata: { name },
+      });
 
-    if (authError) {
-      // console.error('Erro ao gerar magic link:', authError);
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Erro ao criar conta. Tente novamente.',
-        } as ValidateCodeResponse,
-        { status: 500 }
-      );
-    }
+      if (authError || !authData.user) {
+        console.error('[VALIDATE-CODE] Erro ao criar user:', authError);
+        return NextResponse.json(
+          {
+            success: false,
+            message: authError?.message || 'Erro ao criar conta',
+          } as ValidateCodeResponse,
+          { status: 500 }
+        );
+      }
 
-    const userId = authData.user.id;
+      userId = authData.user.id;
+      console.log('[VALIDATE-CODE] User criado:', userId);
+      
+    } else {
+      // LEGACY: Magic link
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: email.toLowerCase(),
+        options: {
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/chat`,
+        },
+      });
 
-    // 4. Atualizar ou criar registro em public.users (DUA IA)
+      if (authError) {
+        // console.error('Erro ao gerar magic link:', authError);
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Erro ao criar conta. Tente novamente.',
+          } as ValidateCodeResponse,
+          { status: 500 }
+        );
+      }
+
+      userId = authData.user.id;
+    }    // 4. Atualizar ou criar registro em public.users (DUA IA)
     const { data: existingUser } = await supabaseAdmin
       .from('users')
       .select('*')
@@ -158,8 +188,14 @@ export async function POST(req: NextRequest) {
         .insert({
           id: userId,
           email: email.toLowerCase(),
+          name: name || email.split('@')[0],
           has_access: true,
+          email_verified: true, // Auto-confirmado
+          registration_completed: true,
           subscription_tier: 'premium', // Acesso exclusivo = premium
+          creditos_servicos: 150, // 150 créditos iniciais
+          saldo_dua: 50, // 50 DUA coins iniciais
+          account_type: 'normal',
           total_tokens: 5000, // 5000 tokens iniciais
           tokens_used: 0,
           invite_code_used: code.toUpperCase(),
@@ -176,6 +212,25 @@ export async function POST(req: NextRequest) {
           { status: 500 }
         );
       }
+      
+      // Inicializar duaia_user_balances
+      await supabaseAdmin
+        .from('duaia_user_balances')
+        .upsert({
+          user_id: userId,
+          servicos_creditos: 0,
+          duacoin_balance: 0,
+        }, { onConflict: 'user_id' });
+
+      // Adicionar 150 créditos via RPC
+      await supabaseAdmin.rpc('add_servicos_credits', {
+        p_user_id: userId,
+        p_amount: 150,
+        p_transaction_type: 'signup_bonus',
+        p_description: 'Créditos iniciais - Registo via código',
+        p_admin_email: null,
+        p_metadata: { source: 'validate_code', invite_code: code.toUpperCase() }
+      });
     }
 
     // 5. Criar perfil DUA COIN (sempre, mesmo se user já existe)

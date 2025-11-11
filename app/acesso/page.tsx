@@ -115,104 +115,59 @@ export default function AcessoPage() {
     setIsRegistering(true);
     
     try {
-      console.log('[REGISTER] Iniciando registo direto...');
+      console.log('[REGISTER] Usando API /api/validate-code para registo direto...');
       
-      // PASSO 1: Criar conta no Supabase Auth
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: email.toLowerCase(),
-        password,
-        options: {
-          data: {
-            name,
-            invite_code: validatedCode,
-          },
-          emailRedirectTo: undefined, // Sem confirmação de email
-        },
+      // Usar a API que JÁ FUNCIONA (/api/validate-code) mas com password
+      const response = await fetch('/api/validate-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: validatedCode,
+          email: email.toLowerCase(),
+          name,
+          password, // Adicionar password para criar conta completa
+          createAccount: true, // Flag para criar conta com password
+        }),
       });
 
-      if (signUpError || !authData.user) {
-        console.error('[REGISTER] Erro no signup:', signUpError);
-        toast.error("Erro ao criar conta", {
-          description: signUpError?.message || "Tenta novamente",
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+        toast.error(data.error || "Erro ao criar conta", {
+          description: data.message || "Tenta novamente",
           duration: 5000,
         });
         return;
       }
 
-      console.log('[REGISTER] User criado:', authData.user.id);
-      const userId = authData.user.id;
+      const data = await response.json();
+      console.log('[REGISTER] Resposta API:', data);
 
-      // PASSO 2: Criar perfil em public.users
-      const { error: profileError } = await supabase.from('users').insert({
-        id: userId,
-        email: email.toLowerCase(),
-        name,
-        has_access: true,
-        email_verified: true,
-        registration_completed: true,
-        creditos_servicos: 150,
-        saldo_dua: 50,
-        account_type: 'normal',
-      });
-
-      if (profileError) {
-        console.error('[REGISTER] Erro ao criar perfil:', profileError);
-        // Continuar mesmo assim
-      }
-
-      // PASSO 3: Inicializar duaia_user_balances
-      const { error: balanceError } = await supabase
-        .from('duaia_user_balances')
-        .insert({
-          user_id: userId,
-          servicos_creditos: 150,
-          duacoin_balance: 0,
+      if (data.success) {
+        toast.success("Bem-vindo à DUA! 🎉", { 
+          description: "150 créditos adicionados à sua conta",
+          duration: 3000,
         });
 
-      if (balanceError) {
-        console.error('[REGISTER] Erro ao criar balance:', balanceError);
-        // Continuar mesmo assim
-      }
-
-      // PASSO 4: Marcar código como usado
-      if (validatedCode) {
-        await supabase
-          .from('invite_codes')
-          .update({
-            active: false,
-            used_by: userId,
-            used_at: new Date().toISOString(),
-          })
-          .ilike('code', validatedCode);
-      }
-
-      console.log('[REGISTER] Registo completo! Fazendo login...');
-
-      // PASSO 5: Login automático
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email: email.toLowerCase(),
-        password,
-      });
-
-      if (loginError) {
-        console.error('[REGISTER] Erro no login:', loginError);
-        toast.success("Conta criada! Por favor, faça login", {
-          description: "Redireccionando para login...",
+        // Login automático
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email: email.toLowerCase(),
+          password,
         });
-        setTimeout(() => router.push('/login'), 1500);
-        return;
+
+        if (loginError) {
+          console.error('[REGISTER] Erro no login:', loginError);
+          toast.error("Conta criada! Por favor, faça login", {
+            description: "Redireccionando...",
+          });
+          setTimeout(() => router.push('/login'), 1500);
+          return;
+        }
+
+        // Sucesso total!
+        setTimeout(() => { 
+          router.push("/"); 
+        }, 1500);
       }
-
-      // SUCESSO!
-      toast.success("Bem-vindo à DUA! 🎉", { 
-        description: "150 créditos adicionados à sua conta",
-        duration: 3000,
-      });
-
-      // Redirecionar para home
-      setTimeout(() => { 
-        router.push("/"); 
-      }, 1500);
       
     } catch (error) {
       console.error('[REGISTER] Erro geral:', error);
