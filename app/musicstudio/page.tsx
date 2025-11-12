@@ -170,9 +170,12 @@ export default function HomePage() {
                           transition={{ duration: 0.6, delay: 0.2 }}
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 mb-5 shadow-2xl shadow-orange-500/10"
                         >
-                          <Music className="w-3.5 h-3.5 text-orange-400" />
+                          <div className="relative">
+                            <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                            <div className="absolute inset-0 w-2 h-2 rounded-full bg-orange-400 animate-ping" />
+                          </div>
                           <span className="text-[12px] font-bold text-white tracking-wider uppercase">
-                            Music Studio
+                            Ao Vivo
                           </span>
                         </motion.div>
 
@@ -190,7 +193,7 @@ export default function HomePage() {
 
                         {/* CTA Button - Ultra Premium */}
                         <motion.button
-                          onClick={() => router.push('/create')}
+                          onClick={() => router.push('/musicstudio/create')}
                           whileTap={{ scale: 0.96 }}
                           className="group relative inline-flex items-center gap-2.5 px-7 py-4 bg-white backdrop-blur-xl rounded-full shadow-2xl shadow-black/50 transition-all overflow-hidden"
                         >
