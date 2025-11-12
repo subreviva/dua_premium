@@ -42,52 +42,114 @@ export default function Navbar() {
       
       if (authUser) {
         // Carregar avatar e créditos da tabela users (fonte única da verdade)
-        const { data: userData } = await supabaseClient
-          .from('users')
-          .select('avatar_url, creditos_servicos')
-          .eq('id', authUser.id)
-          .single()
-        
-        if (userData?.avatar_url) {
-          setAvatarUrl(userData.avatar_url)
-        }
-        
-        // Créditos REAIS de users.creditos_servicos (mesma fonte que home page)
-        if (userData?.creditos_servicos !== undefined) {
-          setCredits(userData.creditos_servicos)
+        const { data: balanceData } = await supabaseClient
+          .from('duaia_user_balances')
+          .select('servicos_creditos')
+          .eq('user_id', authUser.id)
+          .single();
+
+        // Se existir balance, usar como fonte de verdade
+        if (balanceData && balanceData.servicos_creditos !== undefined) {
+          setCredits(balanceData.servicos_creditos ?? 0)
+        } else {
+          // Fallback para users.creditos_servicos
+          const { data: userData } = await supabaseClient
+            .from('users')
+            .select('avatar_url, creditos_servicos')
+            .eq('id', authUser.id)
+            .single()
+
+          if (userData?.avatar_url) {
+            setAvatarUrl(userData.avatar_url)
+          }
+          if (userData?.creditos_servicos !== undefined) {
+            setCredits(userData.creditos_servicos)
+          }
         }
       }
     }
     checkAuth()
 
+    // Realtime channel para updates de credits (será criado se houver user)
+    let channel: any = null;
+
+    const setupRealtime = async (userId?: string) => {
+      try {
+        // Limpar canal antigo se existir
+        if (channel) {
+          await supabaseClient.removeChannel(channel);
+          channel = null;
+        }
+
+        const uid = userId;
+        if (!uid) return;
+
+        channel = supabaseClient
+          .channel(`credits-user-${uid}`)
+          .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'duaia_user_balances', filter: `user_id=eq.${uid}` },
+            (payload: any) => {
+              const newVal = payload.new?.servicos_creditos ?? payload.record?.servicos_creditos;
+              if (newVal !== undefined && newVal !== null) {
+                setCredits(newVal);
+              }
+            }
+          )
+          .subscribe();
+      } catch (err) {
+        console.error('Erro ao configurar realtime credits channel:', err);
+      }
+    };
+
+    // Inicializar canal realtime após checkAuth
+    (async () => {
+      const { data: { user: authUser } } = await supabaseClient.auth.getUser();
+      if (authUser) await setupRealtime(authUser.id);
+    })();
+
     // Listener para mudanças de autenticação
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       setIsAuthenticated(!!session?.user)
       setUser(session?.user || null)
-      
+
       if (session?.user) {
-        // Carregar avatar e créditos da tabela users (fonte única da verdade)
-        const { data: userData } = await supabaseClient
-          .from('users')
-          .select('avatar_url, creditos_servicos')
-          .eq('id', session.user.id)
-          .single()
-        
-        if (userData?.avatar_url) {
-          setAvatarUrl(userData.avatar_url)
+        // Ao iniciar sessão, carregar o balance real
+        const { data: balanceData } = await supabaseClient
+          .from('duaia_user_balances')
+          .select('servicos_creditos')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (balanceData && balanceData.servicos_creditos !== undefined) {
+          setCredits(balanceData.servicos_creditos ?? 0)
+        } else {
+          const { data: userData } = await supabaseClient
+            .from('users')
+            .select('avatar_url, creditos_servicos')
+            .eq('id', session.user.id)
+            .single()
+
+          if (userData?.avatar_url) setAvatarUrl(userData.avatar_url)
+          if (userData?.creditos_servicos !== undefined) setCredits(userData.creditos_servicos)
         }
-        
-        // Créditos REAIS de users.creditos_servicos (mesma fonte que home page)
-        if (userData?.creditos_servicos !== undefined) {
-          setCredits(userData.creditos_servicos)
-        }
+        // configurar realtime para o novo user
+        await setupRealtime(session.user.id);
       } else {
         setAvatarUrl("")
         setCredits(0)
+        // limpar canal quando logout
+        if (channel) {
+          await supabaseClient.removeChannel(channel);
+          channel = null;
+        }
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe();
+      if (channel) supabaseClient.removeChannel(channel);
+    }
   }, [])
 
   const handleProtectedNavigation = (href: string, label: string) => {

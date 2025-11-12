@@ -26,7 +26,7 @@ export function CreditsDisplay({
   useEffect(() => {
     loadCredits();
 
-    // Listener para atualizações em tempo real da tabela users
+    // Listener para atualizações em tempo real da tabela duaia_user_balances (fonte de desconto)
     const channel = supabaseClient
       .channel('credits-changes')
       .on(
@@ -34,10 +34,10 @@ export function CreditsDisplay({
         {
           event: '*',
           schema: 'public',
-          table: 'users'
+          table: 'duaia_user_balances'
         },
         (payload) => {
-          // Recarregar créditos quando houver mudanças
+          // Recarregar créditos quando houver mudanças na tabela de balances
           loadCredits();
         }
       )
@@ -58,15 +58,28 @@ export function CreditsDisplay({
         return;
       }
 
-      // Buscar créditos reais de users.creditos_servicos (mesma fonte que home page)
-      const { data: userData, error } = await supabaseClient
+      // Primeiro, tentar buscar o saldo real de desconto
+      const { data: balanceData, error: balanceError } = await supabaseClient
+        .from('duaia_user_balances')
+        .select('servicos_creditos')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!balanceError && balanceData) {
+        setCredits(balanceData?.servicos_creditos ?? 0);
+        setLoading(false);
+        return;
+      }
+
+      // Se não existir balance, fallback para users.creditos_servicos
+      const { data: userData, error: userError } = await supabaseClient
         .from('users')
         .select('creditos_servicos')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error loading credits:', error);
+      if (userError) {
+        console.error('Error loading credits:', userError);
         setCredits(0);
       } else {
         setCredits(userData?.creditos_servicos || 0);
