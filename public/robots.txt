@@ -1,0 +1,53 @@
+# robots.txt otimizado para SEO Premium - Google Portugal
+# DUA IA - 2 LADOS
+
+User-agent: *
+Allow: /
+
+# Priorizar crawling de páginas principais
+Allow: /chat
+Allow: /video-studio
+Allow: /music-studio
+Allow: /image-studio
+Allow: /design-studio
+Allow: /comunidade
+Allow: /sobre
+Allow: /comprar
+Allow: /blog
+
+# Bloquear páginas administrativas e de autenticação
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /perfil/
+Disallow: /configuracoes/
+Disallow: /dashboard/
+
+# Permitir recursos estáticos importantes
+Allow: /_next/static/
+Allow: /images/
+Allow: /icons/
+Allow: /og-image.jpg
+
+# Crawl-delay para não sobrecarregar
+Crawl-delay: 0.5
+
+# Googlebot específico (sem delay)
+User-agent: Googlebot
+Crawl-delay: 0
+Allow: /
+
+# Googlebot Imagens
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /og-image.jpg
+
+# Bing
+User-agent: Bingbot
+Crawl-delay: 0.5
+Allow: /
+
+# Sitemap
+Sitemap: https://dua.2lados.pt/sitemap.xml
+Sitemap: https://dua.2lados.pt/sitemap-blog.xml
+Sitemap: https://dua.2lados.pt/sitemap-studios.xml

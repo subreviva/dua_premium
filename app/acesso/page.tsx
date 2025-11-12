@@ -1,22 +1,30 @@
+/**
+ * Página: /acesso
+ * 
+ * Sistema de Acesso Ultra-Premium - Estilo Vercel/v0.dev
+ * - Validação de código de convite
+ * - Registo com validação em tempo real
+ * - Design minimalista e elegante
+ * - Sistema de créditos inicial
+ * - Animações fluidas
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Loader2, Mail, Lock, User, Eye, EyeOff, 
+  Sparkles, ArrowRight, Check, ShieldCheck, Gift 
+} from "lucide-react";
 import { supabaseClient } from "@/lib/supabase";
 import Link from "next/link";
-import { audit } from "@/lib/audit-safe";
-import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
-import { validatePassword } from "@/lib/password-validation";
-import { Eye, EyeOff } from "lucide-react";
 
 const supabase = supabaseClient;
 
-// ⚡ HELPER: Retry com exponential backoff para rate limiting
+// Retry com backoff para rate limiting
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
@@ -30,25 +38,13 @@ async function retryWithBackoff<T>(
     } catch (error: any) {
       lastError = error;
       
-      // Se não é erro de rate limit, falhar imediatamente
       if (error?.status !== 429 && !error?.message?.includes('rate limit')) {
         throw error;
       }
       
-      // Se é último retry, falhar
-      if (i === maxRetries - 1) {
-        throw error;
-      }
+      if (i === maxRetries - 1) throw error;
       
-      // Aguardar com exponential backoff
       const delay = initialDelay * Math.pow(2, i);
-      console.log(`[RETRY] Aguardando ${delay}ms antes de retry ${i + 1}/${maxRetries}...`);
-      
-      toast.info(`Rate limit detectado`, {
-        description: `Aguardando ${delay/1000}s antes de tentar novamente...`,
-        duration: delay,
-      });
-      
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -56,12 +52,37 @@ async function retryWithBackoff<T>(
   throw lastError;
 }
 
+// Validação de password em tempo real
+const validatePasswordStrength = (pwd: string) => {
+  const checks = {
+    length: pwd.length >= 8,
+    uppercase: /[A-Z]/.test(pwd),
+    lowercase: /[a-z]/.test(pwd),
+    number: /[0-9]/.test(pwd),
+  };
+  
+  const score = Object.values(checks).filter(Boolean).length;
+  
+  return {
+    ...checks,
+    score,
+    strength: score <= 1 ? 'Fraca' : score <= 2 ? 'Média' : score <= 3 ? 'Boa' : 'Forte',
+    color: score <= 1 ? 'red' : score <= 2 ? 'orange' : score <= 3 ? 'yellow' : 'green',
+  };
+};
+
 export default function AcessoPage() {
   const router = useRouter();
-  const [step, setStep] = useState("code");
+  
+  // Steps: code -> register -> success
+  const [step, setStep] = useState<'code' | 'register' | 'success'>('code');
+  
+  // Code validation
   const [code, setCode] = useState("");
   const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [validatedCode, setValidatedCode] = useState<string | null>(null);
+  
+  // Registration
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,20 +91,49 @@ export default function AcessoPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  
+  // Validation errors
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [nameError, setNameError] = useState("");
 
+  // Password strength
+  const passwordStrength = password ? validatePasswordStrength(password) : null;
+
+  // Email validation
+  const validateEmail = (value: string) => {
+    if (!value) {
+      setEmailError("");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      setEmailError("Email inválido");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  // Password matching validation
   useEffect(() => {
-    // Silent page access tracking (no DB calls)
-  }, []);
+    if (confirmPassword && password !== confirmPassword) {
+      setPasswordError("As passwords não coincidem");
+    } else {
+      setPasswordError("");
+    }
+  }, [password, confirmPassword]);
 
   const handleValidateCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!code || code.length < 6) {
-      toast.error("Código inválido", { description: "O código deve ter no mínimo 6 caracteres" });
+      toast.error("Código inválido");
       return;
     }
+
     setIsValidatingCode(true);
+
     try {
-      // ⚡ RETRY AUTOMÁTICO em caso de rate limit
       const { data, error } = await retryWithBackoff(async () => {
         return await supabase
           .from('invite_codes')
@@ -92,28 +142,37 @@ export default function AcessoPage() {
           .limit(1)
           .single();
       });
-      
+
       if (error || !data) {
-        toast.error("Código inválido", { description: "Este código não existe" });
+        toast.error("Código não encontrado");
+        setIsValidatingCode(false);
         return;
       }
+
       if (!data.active) {
-        toast.error("Código inativo", { description: "Este código já foi utilizado" });
+        toast.error("Código desativado");
+        setIsValidatingCode(false);
         return;
       }
-      setValidatedCode(data.code);
-      setStep("register");
-      toast.success("Código válido", { description: "Complete seu registo para continuar" });
-    } catch (error: any) {
-      console.error('[VALIDATE] Erro:', error);
-      if (error?.status === 429) {
-        toast.error("Muitas tentativas", { 
-          description: "Por favor aguarda 1 minuto e tenta novamente",
-          duration: 5000 
-        });
-      } else {
-        toast.error("Erro de conexão", { description: "Não foi possível validar o código" });
+
+      if (data.used_by) {
+        toast.error("Código já utilizado");
+        setIsValidatingCode(false);
+        return;
       }
+
+      // Código válido!
+      setValidatedCode(data.code);
+      toast.success("Código válido!", {
+        description: "Complete o seu registo",
+      });
+      
+      setTimeout(() => {
+        setStep('register');
+      }, 500);
+
+    } catch (error) {
+      toast.error("Erro ao validar código");
     } finally {
       setIsValidatingCode(false);
     }
@@ -121,583 +180,508 @@ export default function AcessoPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validações básicas
+
+    // Validations
     if (!name || name.length < 2) {
-      toast.error("Nome inválido", { 
-        description: "O teu nome deve ter pelo menos 2 caracteres" 
-      });
+      setNameError("Nome deve ter pelo menos 2 caracteres");
+      toast.error("Verifique o nome");
       return;
     }
-    
-    if (!email || !email.includes("@")) {
-      toast.error("Email inválido", { 
-        description: "Por favor, verifica o formato do email" 
-      });
+
+    if (!email || emailError) {
+      toast.error("Verifique o email");
       return;
     }
-    
-    // Validação ENTERPRISE de password
-    const passwordValidation = validatePassword(password, { name, email });
-    
-    if (!passwordValidation.isValid) {
-      toast.error("Password não cumpre requisitos", { 
-        description: passwordValidation.feedback[0],
-        duration: 5000,
-      });
+
+    if (!password || password.length < 8) {
+      toast.error("Password deve ter pelo menos 8 caracteres");
       return;
     }
-    
+
     if (password !== confirmPassword) {
-      toast.error("Passwords não coincidem", { 
-        description: "Confirma a password corretamente" 
-      });
+      toast.error("As passwords não coincidem");
       return;
     }
-    
-    // GDPR: Verificar consentimento
+
     if (!acceptedTerms) {
-      toast.error("Termos não aceites", { 
-        description: "Deves aceitar os Termos de Serviço e Política de Privacidade",
-        duration: 5000,
-      });
+      toast.error("Aceite os termos para continuar");
       return;
     }
-    
+
     setIsRegistering(true);
-    
+
     try {
-      console.log('[REGISTER] Registo 100% FRONTEND - COM PROTEÇÃO RATE LIMIT');
-      
-      // PASSO 1: Criar conta Supabase Auth (usa anon key - público)
-      // ⚡ RETRY AUTOMÁTICO em caso de rate limit
-      const { data: signUpData, error: signUpError } = await retryWithBackoff(async () => {
-        return await supabase.auth.signUp({
-          email: email.toLowerCase(),
-          password,
-          options: {
-            data: { name },
-            emailRedirectTo: undefined, // Sem email de confirmação
+      // 1. Criar conta no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email.toLowerCase().trim(),
+        password: password,
+        options: {
+          data: {
+            name: name.trim(),
+            invite_code: validatedCode,
           },
-        });
+        },
       });
 
-      if (signUpError) {
-        console.error('[REGISTER] Erro signup:', signUpError);
-        
-        // Se o erro é "User already registered", tentar login direto
-        if (signUpError.message.includes('already registered')) {
-          // ⚡ RETRY AUTOMÁTICO em caso de rate limit
-          const { error: loginError } = await retryWithBackoff(async () => {
-            return await supabase.auth.signInWithPassword({
-              email: email.toLowerCase(),
-              password,
-            });
-          });
-          
-          if (!loginError) {
-            toast.success("Login bem-sucedido!", {
-              description: "Redirecionando...",
-            });
-            setTimeout(() => router.push("/"), 1500);
-            return;
-          }
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          toast.error("Este email já está registado");
+        } else {
+          toast.error("Erro ao criar conta");
         }
-        
-        // Verificar se é erro de rate limit
-        if (signUpError.status === 429 || signUpError.message?.includes('rate limit')) {
-          toast.error("Muitas tentativas", {
-            description: "Por favor aguarda 1 minuto e tenta novamente",
-            duration: 5000,
-          });
-          return;
-        }
-        
-        toast.error("Erro ao criar conta", {
-          description: signUpError.message,
-          duration: 5000,
-        });
+        setIsRegistering(false);
         return;
       }
 
-      if (!signUpData.user) {
-        toast.error("Erro ao criar conta", {
-          description: "Não foi possível criar utilizador",
-        });
+      if (!authData.user) {
+        toast.error("Erro ao criar conta");
+        setIsRegistering(false);
         return;
       }
 
-      const userId = signUpData.user.id;
-      console.log('[REGISTER] User criado:', userId);
-
-      // Aguardar um pouco para o auth processar
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // PASSO 2: Fazer login IMEDIATAMENTE para ter sessão ativa
-      // ⚡ RETRY AUTOMÁTICO em caso de rate limit
-      const { error: loginError } = await retryWithBackoff(async () => {
-        return await supabase.auth.signInWithPassword({
-          email: email.toLowerCase(),
-          password,
+      // 2. Criar perfil em users com has_access = true e créditos iniciais
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          email: email.toLowerCase().trim(),
+          name: name.trim(),
+          has_access: true,
+          credits: 100, // Créditos iniciais
+          invite_code_used: validatedCode,
+          created_at: new Date().toISOString(),
         });
-      });
-
-      if (loginError) {
-        console.error('[REGISTER] Erro login:', loginError);
-        
-        // Se erro é "Email not confirmed", usar API para confirmar
-        if (loginError.message.includes('Email not confirmed')) {
-          console.log('[REGISTER] Email não confirmado, confirmando via API...');
-          
-          const confirmResponse = await fetch('/api/auth/confirm-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: email.toLowerCase(),
-              password,
-              name,
-              userId,
-              inviteCode: validatedCode,
-            }),
-          });
-          
-          if (!confirmResponse.ok) {
-            const errorData = await confirmResponse.json();
-            console.error('[REGISTER] Erro API confirm:', errorData);
-            toast.error("Erro ao confirmar conta", {
-              description: "Por favor, contacta suporte.",
-            });
-            return;
-          }
-          
-          console.log('[REGISTER] Email confirmado! Fazendo login...');
-          
-          // Aguardar 1 segundo e tentar login novamente
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          const { error: retryLoginError } = await supabase.auth.signInWithPassword({
-            email: email.toLowerCase(),
-            password,
-          });
-          
-          if (retryLoginError) {
-            console.error('[REGISTER] Erro retry login:', retryLoginError);
-            toast.error("Conta criada! Faça login manualmente", {
-              description: "Redirecionando para login...",
-            });
-            setTimeout(() => router.push('/login'), 1500);
-            return;
-          }
-          
-          // Login bem-sucedido após confirmação!
-          toast.success("Bem-vindo à DUA! 🎉", {
-            description: "150 créditos adicionados à sua conta",
-            duration: 3000,
-          });
-          
-          setTimeout(() => router.push("/"), 1500);
-          return;
-        }
-        
-        // Outro tipo de erro
-        toast.error("Conta criada! Faça login manualmente", {
-          description: "Redirecionando para login...",
-        });
-        setTimeout(() => router.push('/login'), 1500);
-        return;
-      }
-
-      console.log('[REGISTER] Login bem-sucedido, criando perfil...');
-
-      // PASSO 3: Criar perfil (agora com sessão ativa, RLS permite)
-      console.log('[REGISTER] Inserindo perfil na tabela users...');
-      const { data: profileData, error: profileError } = await supabase.from('users').insert({
-        id: userId,
-        email: email.toLowerCase(),
-        name,
-        has_access: true,
-        email_verified: true,
-        registration_completed: true,
-        credits: 150, // ✅ NOVA COLUNA DO SCHEMA
-        duaia_credits: 0,
-        duacoin_balance: 0,
-        creditos_servicos: 150, // ⚠️ Mantido para compatibilidade
-        saldo_dua: 50, // ⚠️ Mantido para compatibilidade
-        account_type: 'normal',
-      }).select();
 
       if (profileError) {
-        console.error('[REGISTER] ❌ Erro perfil:', profileError);
-        // Não falhar aqui, continuar
-      } else {
-        console.log('[REGISTER] ✅ Perfil criado:', profileData);
+        console.error('Erro ao criar perfil:', profileError);
+        // Não bloqueamos - perfil pode ser criado via trigger
       }
 
-      // PASSO 4: Criar balance
-      console.log('[REGISTER] Inserindo balance na tabela duaia_user_balances...');
-      const { data: balanceData, error: balanceError } = await supabase
-        .from('duaia_user_balances')
-        .insert({
-          user_id: userId,
-          servicos_creditos: 150,
-          duacoin_balance: 0,
+      // 3. Marcar código como usado
+      await supabase
+        .from('invite_codes')
+        .update({ 
+          used_by: authData.user.id,
+          used_at: new Date().toISOString(),
         })
-        .select();
+        .eq('code', validatedCode);
 
-      if (balanceError) {
-        console.error('[REGISTER] ❌ Erro balance:', balanceError);
-        
-        // ⚡ CRITICAL: Tentar com upsert se falhar
-        console.log('[REGISTER] Tentando upsert...');
-        const { data: upsertData, error: upsertError } = await supabase
-          .from('duaia_user_balances')
-          .upsert({
-            user_id: userId,
-            servicos_creditos: 150,
-            duacoin_balance: 0,
-          })
-          .select();
-        
-        if (upsertError) {
-          console.error('[REGISTER] ❌ Erro upsert:', upsertError);
-        } else {
-          console.log('[REGISTER] ✅ Balance criado via upsert:', upsertData);
-        }
-      } else {
-        console.log('[REGISTER] ✅ Balance criado:', balanceData);
-      }
-
-      // PASSO 5: Marcar código como usado
-      if (validatedCode) {
-        await supabase
-          .from('invite_codes')
-          .update({
-            active: false,
-            used_by: userId,
-            used_at: new Date().toISOString(),
-          })
-          .ilike('code', validatedCode);
-      }
-
-      // SUCESSO!
-      toast.success("Bem-vindo à DUA! 🎉", {
-        description: "150 créditos adicionados à sua conta",
-        duration: 3000,
-      });
-
-      console.log('[REGISTER] Registo completo! Redirecionando...');
+      // Sucesso!
+      setStep('success');
       
-      // Redirecionar para home
       setTimeout(() => {
-        router.push("/");
-      }, 1500);
-      
-    } catch (error: any) {
-      console.error('[REGISTER] Erro geral:', error);
-      
-      // Verificar se é erro de rate limit
-      if (error?.status === 429 || error?.message?.includes('rate limit')) {
-        toast.error("Muitas tentativas", {
-          description: "Por favor aguarda 1 minuto e tenta novamente",
-          duration: 5000,
-        });
-      } else {
-        toast.error("Erro de conexão", {
-          description: "Não foi possível completar o registo. Tenta novamente."
-        });
-      }
+        router.push('/chat');
+      }, 3000);
+
+    } catch (error) {
+      console.error('Erro no registo:', error);
+      toast.error("Erro ao completar registo");
     } finally {
       setIsRegistering(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-black overflow-hidden">
-      {/* Sophisticated background gradient - Sora style */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(236,72,153,0.06),transparent_50%)]" />
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0, y: 30 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 w-full max-w-xl px-6"
-      >
-        
-        {/* Ultra-minimal header - No icons, no logos, just typography */}
-        <div className="text-center mb-16">
-          <motion.h1 
+    <div className="min-h-screen w-full flex items-center justify-center bg-black p-4">
+      {/* Background gradient */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-black to-black" />
+      
+      <AnimatePresence mode="wait">
+        {step === 'code' && (
+          <motion.div
+            key="code"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-6xl font-light tracking-tight text-white mb-4"
-            style={{ fontFamily: 'var(--font-geist-sans)' }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="relative z-10 w-full max-w-[440px]"
           >
-            DUA
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-neutral-500 text-sm font-light tracking-wide"
-          >
-            {step === "code" ? "Insira seu código de acesso" : "Complete seu registo"}
-          </motion.p>
-        </div>
-
-        {/* Minimal progress indicator - No colors, just subtle dots */}
-        <div className="flex items-center justify-center gap-3 mb-12">
-          <div 
-            className={`transition-all duration-500 ${
-              step === "code" 
-                ? "w-12 h-0.5 bg-white" 
-                : "w-2 h-0.5 bg-neutral-800"
-            }`} 
-          />
-          <div 
-            className={`transition-all duration-500 ${
-              step === "register" 
-                ? "w-12 h-0.5 bg-white" 
-                : "w-2 h-0.5 bg-neutral-800"
-            }`} 
-          />
-        </div>
-
-        {/* Main card - Ultra clean, no borders, just subtle shadow */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="bg-neutral-950/40 backdrop-blur-2xl rounded-none p-12 shadow-2xl shadow-black/50"
-        >
-          <AnimatePresence mode="wait">
-            {step === "code" ? (
-              <motion.form 
-                key="code-form" 
-                initial={{ opacity: 0, x: -20 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.4 }}
-                onSubmit={handleValidateCode} 
-                className="space-y-8"
+            {/* Logo */}
+            <div className="text-center mb-10">
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1, type: "spring" }}
+                className="inline-flex items-center gap-2 mb-6"
               >
-                {/* Code input - No label, just placeholder */}
-                <div className="space-y-4">
-                  <Input 
-                    type="text" 
-                    placeholder="Código de convite" 
-                    value={code} 
-                    onChange={(e) => setCode(e.target.value.toUpperCase())} 
+                <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-black" />
+                </div>
+                <span className="text-2xl font-bold text-white">DUA</span>
+              </motion.div>
+              <h1 className="text-3xl font-semibold text-white mb-2">Obter Acesso</h1>
+              <p className="text-[15px] text-white/50">
+                Insira o seu código de convite
+              </p>
+            </div>
+
+            {/* Code Card */}
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-8 shadow-2xl space-y-6">
+              
+              {/* Benefits */}
+              <div className="space-y-3 p-5 bg-white/[0.04] rounded-2xl border border-white/[0.06]">
+                <p className="text-sm font-medium text-white/80 flex items-center gap-2">
+                  <Gift className="w-4 h-4" />
+                  Benefícios do Acesso
+                </p>
+                <ul className="space-y-2 text-sm text-white/60">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-400" />
+                    100 créditos iniciais grátis
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-400" />
+                    Acesso a todos os studios IA
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-400" />
+                    Suporte prioritário
+                  </li>
+                </ul>
+              </div>
+
+              {/* Code Form */}
+              <form onSubmit={handleValidateCode} className="space-y-5">
+                <div className="space-y-2.5">
+                  <label className="text-[15px] font-medium text-white/80 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4" />
+                    Código de Convite
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="DUA-XXXX-XXXX"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
                     disabled={isValidatingCode}
-                    className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-700 focus:border-white h-16 text-center text-2xl font-light tracking-[0.5em] rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
-                    maxLength={20}
+                    className="w-full h-14 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-white placeholder:text-white/30 px-5 text-[15px] font-mono tracking-wider text-center focus:border-white/[0.25] focus:ring-2 focus:ring-white/10 transition-all disabled:opacity-40 outline-none"
                     required
-                    autoFocus
+                    minLength={6}
                   />
+                  <p className="text-xs text-white/40 text-center">
+                    Formato: DUA-3CTK-MVZ
+                  </p>
                 </div>
 
-                {/* Submit button - Minimal */}
-                <Button 
-                  type="submit" 
-                  disabled={isValidatingCode || !code}
-                  className="w-full h-14 bg-white hover:bg-neutral-200 text-black font-light text-base tracking-wide rounded-none transition-all duration-300 disabled:opacity-30"
+                <button
+                  type="submit"
+                  disabled={isValidatingCode || !code || code.length < 6}
+                  className="w-full h-16 rounded-2xl bg-white text-black hover:bg-white/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-[15px] shadow-xl flex items-center justify-center gap-2"
                 >
-                  {isValidatingCode ? "Validando" : "Continuar"}
-                </Button>
+                  {isValidatingCode ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Validando...
+                    </>
+                  ) : (
+                    <>
+                      Validar Código
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </form>
 
-                {/* Footer links - Ultra subtle */}
-                <div className="pt-8 border-t border-neutral-900 space-y-3">
-                  <p className="text-xs text-neutral-700 text-center font-light">
-                    Não tem um código? Entre em contato para acesso antecipado
-                  </p>
-                  <p className="text-sm text-neutral-600 text-center font-light">
-                    Já tem conta?{" "}
-                    <Link 
-                      href="/login" 
-                      className="text-neutral-400 hover:text-white transition-colors duration-300"
-                    >
-                      Fazer login
-                    </Link>
-                  </p>
-                </div>
-              </motion.form>
-            ) : (
-              <motion.form 
-                key="register-form" 
-                initial={{ opacity: 0, x: 20 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4 }}
-                onSubmit={handleRegister} 
-                className="space-y-6"
+              {/* Login Link */}
+              <div className="pt-6 border-t border-white/[0.08] text-center">
+                <p className="text-[15px] text-white/60">
+                  Já tem conta?{" "}
+                  <Link 
+                    href="/login"
+                    className="text-white font-medium hover:underline transition-all"
+                  >
+                    Fazer login
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <p className="text-center text-white/30 text-xs mt-8">
+              Precisa de um código? Contacte-nos • © 2025 DUA
+            </p>
+          </motion.div>
+        )}
+
+        {step === 'register' && (
+          <motion.div
+            key="register"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="relative z-10 w-full max-w-[440px]"
+          >
+            {/* Logo */}
+            <div className="text-center mb-10">
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1, type: "spring" }}
+                className="inline-flex items-center gap-2 mb-6"
               >
-                {/* Validated code indicator - Minimal */}
-                <div className="py-3 border-b border-neutral-800 mb-8">
-                  <p className="text-sm text-neutral-500 font-light text-center">
-                    Código {validatedCode} validado
-                  </p>
+                <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-black" />
                 </div>
+                <span className="text-2xl font-bold text-white">DUA</span>
+              </motion.div>
+              <h1 className="text-3xl font-semibold text-white mb-2">Complete o Registo</h1>
+              <p className="text-[15px] text-white/50">
+                Código validado • Crie a sua conta
+              </p>
+            </div>
 
-                {/* Form fields - No icons, clean labels */}
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
-                      Nome completo
-                    </label>
-                    <Input 
-                      type="text" 
-                      placeholder="Seu nome" 
-                      value={name} 
-                      onChange={(e) => setName(e.target.value)} 
-                      disabled={isRegistering}
-                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
-                      Email
-                    </label>
-                    <Input 
-                      type="email" 
-                      placeholder="seu@email.com" 
-                      value={email} 
-                      onChange={(e) => setEmail(e.target.value.toLowerCase())} 
-                      disabled={isRegistering}
-                      className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <Input 
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Mínimo 12 caracteres" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        disabled={isRegistering}
-                        className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 pr-10"
-                        required
-                        minLength={12}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    
-                    {/* Password Strength Meter */}
-                    {password && (
-                      <PasswordStrengthMeter 
-                        password={password}
-                        userInfo={{ name, email }}
-                        showRequirements={true}
-                        showEstimate={true}
-                      />
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs text-neutral-600 font-light tracking-wide uppercase">
-                      Confirmar password
-                    </label>
-                    <div className="relative">
-                      <Input 
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirme sua password" 
-                        value={confirmPassword} 
-                        onChange={(e) => setConfirmPassword(e.target.value)} 
-                        disabled={isRegistering}
-                        className="bg-transparent border-0 border-b border-neutral-800 text-white placeholder:text-neutral-800 focus:border-white h-12 text-base font-light rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 pr-10"
-                        required
-                        minLength={12}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-xs text-red-500 mt-1">Passwords não coincidem</p>
-                    )}
-                  </div>
-                  
-                  {/* GDPR Consent Checkbox */}
-                  <div className="flex items-start gap-3 pt-4">
-                    <Checkbox
-                      id="terms"
-                      checked={acceptedTerms}
-                      onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
-                      className="mt-1 border-neutral-700 data-[state=checked]:bg-white data-[state=checked]:border-white"
-                    />
-                    <label 
-                      htmlFor="terms" 
-                      className="text-xs text-neutral-500 leading-relaxed cursor-pointer"
-                    >
-                      Li e aceito os{' '}
-                      <Link 
-                        href="/termos" 
-                        target="_blank"
-                        className="text-neutral-300 hover:text-white underline underline-offset-2"
-                      >
-                        Termos de Serviço
-                      </Link>
-                      {' '}e a{' '}
-                      <Link 
-                        href="/privacidade" 
-                        target="_blank"
-                        className="text-neutral-300 hover:text-white underline underline-offset-2"
-                      >
-                        Política de Privacidade
-                      </Link>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Action buttons - Minimal spacing */}
-                <div className="flex gap-4 pt-8">
-                  <Button 
-                    type="button" 
-                    onClick={() => { setStep("code"); setValidatedCode(null); }} 
+            {/* Register Card */}
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-8 shadow-2xl space-y-6">
+              
+              <form onSubmit={handleRegister} className="space-y-5">
+                {/* Name */}
+                <div className="space-y-2.5">
+                  <label className="text-[15px] font-medium text-white/80 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Nome
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Seu nome completo"
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      setNameError("");
+                    }}
                     disabled={isRegistering}
-                    variant="ghost"
-                    className="flex-1 h-14 border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700 rounded-none font-light text-base transition-all duration-300"
-                  >
-                    Voltar
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={isRegistering || !acceptedTerms}
-                    className="flex-1 h-14 bg-white hover:bg-neutral-200 text-black font-light text-base rounded-none transition-all duration-300 disabled:opacity-30"
-                  >
-                    {isRegistering ? "Criando" : "Criar conta"}
-                  </Button>
+                    className={`w-full h-14 rounded-2xl bg-white/[0.04] border ${
+                      nameError ? 'border-red-500/50' : 'border-white/[0.12]'
+                    } text-white placeholder:text-white/30 px-5 text-[15px] focus:border-white/[0.25] focus:ring-2 focus:ring-white/10 transition-all disabled:opacity-40 outline-none`}
+                    required
+                    minLength={2}
+                  />
+                  {nameError && (
+                    <p className="text-xs text-red-400">{nameError}</p>
+                  )}
                 </div>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </motion.div>
 
-        {/* Minimal footer */}
-        <p className="text-center text-neutral-800 text-xs mt-12 font-light tracking-wide">
-          DUA 2025
-        </p>
-      </motion.div>
+                {/* Email */}
+                <div className="space-y-2.5">
+                  <label className="text-[15px] font-medium text-white/80 flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value.toLowerCase());
+                      validateEmail(e.target.value);
+                    }}
+                    onBlur={() => validateEmail(email)}
+                    disabled={isRegistering}
+                    className={`w-full h-14 rounded-2xl bg-white/[0.04] border ${
+                      emailError ? 'border-red-500/50' : 'border-white/[0.12]'
+                    } text-white placeholder:text-white/30 px-5 text-[15px] focus:border-white/[0.25] focus:ring-2 focus:ring-white/10 transition-all disabled:opacity-40 outline-none`}
+                    required
+                  />
+                  {emailError && (
+                    <p className="text-xs text-red-400">{emailError}</p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div className="space-y-2.5">
+                  <label className="text-[15px] font-medium text-white/80 flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Mínimo 8 caracteres"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isRegistering}
+                      className="w-full h-14 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-white placeholder:text-white/30 px-5 pr-14 text-[15px] focus:border-white/[0.25] focus:ring-2 focus:ring-white/10 transition-all disabled:opacity-40 outline-none"
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {passwordStrength && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-300 ${
+                              passwordStrength.color === 'red' ? 'bg-red-500 w-1/4' :
+                              passwordStrength.color === 'orange' ? 'bg-orange-500 w-1/2' :
+                              passwordStrength.color === 'yellow' ? 'bg-yellow-500 w-3/4' :
+                              'bg-green-500 w-full'
+                            }`}
+                          />
+                        </div>
+                        <span className={`text-xs font-medium ${
+                          passwordStrength.color === 'red' ? 'text-red-400' :
+                          passwordStrength.color === 'orange' ? 'text-orange-400' :
+                          passwordStrength.color === 'yellow' ? 'text-yellow-400' :
+                          'text-green-400'
+                        }`}>
+                          {passwordStrength.strength}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div className="space-y-2.5">
+                  <label className="text-[15px] font-medium text-white/80 flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Confirmar Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Repita a password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={isRegistering}
+                      className={`w-full h-14 rounded-2xl bg-white/[0.04] border ${
+                        passwordError ? 'border-red-500/50' : 'border-white/[0.12]'
+                      } text-white placeholder:text-white/30 px-5 pr-14 text-[15px] focus:border-white/[0.25] focus:ring-2 focus:ring-white/10 transition-all disabled:opacity-40 outline-none`}
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {passwordError && (
+                    <p className="text-xs text-red-400">{passwordError}</p>
+                  )}
+                </div>
+
+                {/* Terms */}
+                <div className="flex items-start gap-3 p-4 bg-white/[0.04] rounded-2xl border border-white/[0.06]">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-white checked:border-white"
+                  />
+                  <label htmlFor="terms" className="text-xs text-white/60 leading-relaxed cursor-pointer">
+                    Aceito os{" "}
+                    <Link href="/termos" className="text-white hover:underline">
+                      Termos de Serviço
+                    </Link>
+                    {" "}e{" "}
+                    <Link href="/privacidade" className="text-white hover:underline">
+                      Política de Privacidade
+                    </Link>
+                  </label>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={
+                    isRegistering || 
+                    !name || 
+                    !email || 
+                    !password || 
+                    !confirmPassword || 
+                    !acceptedTerms ||
+                    !!emailError ||
+                    !!passwordError ||
+                    !!nameError
+                  }
+                  className="w-full h-16 rounded-2xl bg-white text-black hover:bg-white/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-[15px] shadow-xl flex items-center justify-center gap-2 mt-6"
+                >
+                  {isRegistering ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Criando conta...
+                    </>
+                  ) : (
+                    <>
+                      Criar Conta
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Back to code */}
+              <div className="pt-6 border-t border-white/[0.08] text-center">
+                <button
+                  onClick={() => setStep('code')}
+                  className="text-[15px] text-white/60 hover:text-white/80 transition-colors"
+                >
+                  ← Voltar ao código
+                </button>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <p className="text-center text-white/30 text-xs mt-8">
+              Registo seguro via Supabase • © 2025 DUA
+            </p>
+          </motion.div>
+        )}
+
+        {step === 'success' && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="relative z-10 w-full max-w-[440px] text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="mx-auto w-20 h-20 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mb-6"
+            >
+              <Check className="w-10 h-10 text-green-400" />
+            </motion.div>
+
+            <h1 className="text-3xl font-semibold text-white mb-3">
+              Conta Criada!
+            </h1>
+            <p className="text-[15px] text-white/60 mb-2">
+              Bem-vindo ao DUA
+            </p>
+            <p className="text-sm text-white/40 mb-8">
+              Redirecionando para o chat...
+            </p>
+
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/60">Créditos iniciais</span>
+                  <span className="text-white font-semibold">100</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/60">Acesso completo</span>
+                  <Check className="w-4 h-4 text-green-400" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

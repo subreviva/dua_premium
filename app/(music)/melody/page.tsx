@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -30,12 +31,14 @@ import {
   Volume2,
   Trash,
   Mic,
+  Music2,
 } from "lucide-react"
 import { useGeneration } from "@/contexts/generation-context"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MobileNav } from "@/components/mobile-nav"
+import Image from "next/image"
 
 const AVAILABLE_STYLES = [
   "ambient",
@@ -494,208 +497,415 @@ export default function MelodyPage() {
   }
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black">
-      {/* 🍊 Elegant gradient overlays com tons laranja */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-orange-500/[0.08] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-amber-500/[0.06] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-orange-600/[0.04] rounded-full blur-3xl" />
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-black">
+      {/* 🎨 BACKGROUND GRADIENT PREMIUM */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-red-600/20 to-pink-600/30" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,100,50,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-black/40" />
       </div>
       
       <audio ref={audioRef} className="hidden" preload="auto" />
 
-      {/* Mobile Main Screen */}
+      {/* 🎵 MOBILE ULTRA PREMIUM - Estilo Suno */}
       <div className="lg:hidden relative z-10 flex h-[100dvh] flex-col">
-        {/* Top Navbar */}
-        <div className="fixed top-0 left-0 right-0 z-50 pt-safe">
-          <div className="backdrop-blur-2xl bg-black/60 border-b border-white/[0.06]">
-            <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-              <button
-                onClick={() => router.push("/musicstudio")}
-                className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
-              >
-                <X className="w-4 h-4" strokeWidth={2} />
-              </button>
-              <span className="text-[15px] font-medium text-white/90">Melodia</span>
-              <button
-                onClick={() => setShowSettings(true)}
-                className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
-              >
-                <Settings className="w-4 h-4" strokeWidth={2} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 pt-[80px] pb-safe-mobile md:pb-0">
-          {/* Cover Art com gradient laranja */}
-          <div className="w-full max-w-[280px] mb-8">
-            <div className="aspect-square w-full bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent rounded-2xl flex items-center justify-center overflow-hidden relative border border-orange-500/20 backdrop-blur-xl shadow-2xl shadow-orange-500/10">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-400/[0.12] via-transparent to-transparent" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(251,146,60,0.15),transparent_70%)]" />
-              <Mic className="relative w-24 h-24 text-orange-400/40 drop-shadow-lg" strokeWidth={1.5} />
-            </div>
-          </div>
-
-          {/* Title */}
-          <h2 className="text-2xl font-medium text-center text-white/95 mb-2 tracking-tight">
-            Cantarole uma melodia
-          </h2>
-
-          <p className="text-center text-sm text-white/50 font-light mb-8 max-w-[280px]">
-            Grave ou carregue um áudio para criar música profissional
-          </p>
-
-          {/* Main Record Button com tom laranja */}
-          <button
-            onClick={() => {
-              setShowRecorder(true)
-              startRecording()
-            }}
-            className="group relative mb-6 active:scale-95 transition-all"
+        
+        {/* 🔝 HEADER COM BOTÕES FLUTUANTES */}
+        <div className="flex items-center justify-between px-6 py-4 pt-safe shrink-0">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowSettings(true)}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-zinc-900/80 to-zinc-950/80 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/40"
           >
-            <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl group-hover:blur-2xl transition-all"></div>
-            <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-2 border-orange-400/40 backdrop-blur-xl flex items-center justify-center hover:from-orange-500/30 hover:to-amber-500/30 hover:border-orange-400/60 active:scale-95 transition-all shadow-lg shadow-orange-500/20">
-              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg shadow-orange-500/50" />
-            </div>
-          </button>
-
-          {/* Secondary Actions com accent laranja */}
-          <div className="flex items-center justify-center gap-8">
-            {/* Upload button */}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="group flex flex-col items-center gap-2 active:scale-95 transition-all"
-            >
-              <div className="h-12 w-12 rounded-xl bg-orange-500/[0.08] border border-orange-400/[0.15] backdrop-blur-xl flex items-center justify-center hover:bg-orange-500/[0.15] active:bg-orange-500/[0.20] transition-all shadow-lg shadow-orange-500/5">
-                <Upload className="h-5 w-5 text-orange-300/80" strokeWidth={2} />
-              </div>
-              <span className="text-[11px] text-orange-200/50 font-light">Carregar</span>
-            </button>
-
-            {/* Library button */}
-            <button
-              onClick={() => router.push("/library")}
-              className="group flex flex-col items-center gap-2 active:scale-95 transition-all"
-            >
-              <div className="h-12 w-12 rounded-xl bg-amber-500/[0.08] border border-amber-400/[0.15] backdrop-blur-xl flex items-center justify-center hover:bg-amber-500/[0.15] active:bg-amber-500/[0.20] transition-all shadow-lg shadow-amber-500/5">
-                <Music className="h-5 w-5 text-amber-300/80" strokeWidth={2} />
-              </div>
-              <span className="text-[11px] text-amber-200/50 font-light">Biblioteca</span>
-            </button>
-          </div>
-
-          {/* Info text */}
-          <p className="text-center text-[10px] text-white/30 font-light mt-6">
-            Limite de 8 min para uploads de áudio
-          </p>
+            <Settings className="h-5 w-5 text-white" strokeWidth={2} />
+          </motion.button>
+          
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => router.push('/musicstudio')}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-zinc-900/80 to-zinc-950/80 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/40"
+          >
+            <X className="h-5 w-5 text-white" strokeWidth={2} />
+          </motion.button>
         </div>
+
+        {/* ESTADOS: Initial / Recording / Preview */}
+        <AnimatePresence mode="wait">
+          {!showRecorder && !audioBlob && (
+            /* 🎨 ESTADO INICIAL - Tela de Boas-Vindas */
+            <motion.div
+              key="initial"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.4 }}
+              className="flex-1 flex flex-col items-center justify-center px-6 pb-24"
+            >
+              {/* Card Premium com Collage */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="relative w-full max-w-sm"
+              >
+                {/* Container da Collage Estilo Suno */}
+                <div className="relative aspect-square rounded-[32px] bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 border border-white/10 backdrop-blur-3xl p-8 overflow-hidden shadow-2xl shadow-black/40">
+                  {/* Subtle glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-pink-500/5" />
+                  
+                  {/* Collage de 3 imagens estilo cassete */}
+                  <div className="relative w-full h-full flex items-center justify-center gap-3">
+                    {/* Imagem Esquerda - Rotacionada */}
+                    <motion.div
+                      animate={{ rotate: [-2, 2, -2] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-24 h-32 rounded-2xl overflow-hidden shadow-2xl shadow-black/60 border-4 border-white/20 -rotate-12"
+                    >
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dreamina-2025-11-04-2343-homem%20a%20gravar%20uma%20mensagem%20de%20audio%20no%20...-vbUzBtujrVIUBzEVVjKDxgOoOnXUVY.jpeg"
+                        alt="Studio"
+                        fill
+                        className="object-cover"
+                      />
+                    </motion.div>
+
+                    {/* Cassete Central - Maior */}
+                    <motion.div
+                      animate={{ y: [-4, 4, -4] }}
+                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                      className="relative w-40 h-40 rounded-3xl overflow-hidden shadow-2xl shadow-black/60 border-4 border-white/30 z-10"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900" />
+                      {/* Cassete visual */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="relative w-32 h-28 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-2xl border-2 border-zinc-600 shadow-inner">
+                          {/* Reel circles */}
+                          <div className="absolute top-4 left-4 w-8 h-8 rounded-full bg-gradient-to-br from-zinc-900 to-black border-2 border-zinc-700" />
+                          <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gradient-to-br from-zinc-900 to-black border-2 border-zinc-700" />
+                          {/* Tape window */}
+                          <div className="absolute bottom-4 left-4 right-4 h-6 bg-gradient-to-r from-orange-900/40 via-amber-900/40 to-orange-900/40 rounded border border-zinc-700" />
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Imagem Direita - Rotacionada */}
+                    <motion.div
+                      animate={{ rotate: [2, -2, 2] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-24 h-32 rounded-2xl overflow-hidden shadow-2xl shadow-black/60 border-4 border-white/20 rotate-12"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900" />
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dreamina-2025-11-04-2343-homem%20a%20gravar%20uma%20mensagem%20de%20audio%20no%20...-vbUzBtujrVIUBzEVVjKDxgOoOnXUVY.jpeg"
+                        alt="Creative"
+                        fill
+                        className="object-cover mix-blend-overlay"
+                      />
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Texto Abaixo */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className="mt-10 text-center"
+                >
+                  <h1 className="text-[28px] font-light text-white mb-3 tracking-tight">
+                    Toque uma batida
+                  </h1>
+                  
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-[15px] text-white/60 font-light">
+                      Toque para gravar
+                    </span>
+                    <Info className="w-4 h-4 text-white/40" strokeWidth={2} />
+                  </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {showRecorder && isRecording && (
+            /* 🎤 ESTADO GRAVANDO - Waveform Animado */
+            <motion.div
+              key="recording"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex-1 flex flex-col items-center justify-center px-6 pb-24"
+            >
+              {/* Container do Waveform */}
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="relative w-full max-w-sm aspect-square rounded-[36px] bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 border border-white/10 backdrop-blur-3xl overflow-hidden shadow-2xl shadow-black/40"
+              >
+                {/* Glow pulsante */}
+                <motion.div
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-pink-500/10 to-orange-500/10"
+                />
+
+                {/* Indicator de gravação no topo */}
+                <motion.div
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="absolute top-6 left-1/2 -translate-x-1/2 z-10"
+                >
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 backdrop-blur-xl border border-red-500/30 shadow-lg">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                      className="w-2 h-2 rounded-full bg-red-500"
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Waveform Premium */}
+                <div className="absolute inset-0 flex items-center justify-center p-12">
+                  <div className="w-full h-full flex items-end justify-center gap-[3px]">
+                    {waveformData.map((height, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ scaleY: 0 }}
+                        animate={{ scaleY: 1 }}
+                        transition={{ delay: i * 0.02 }}
+                        className="flex-1 max-w-[4px] rounded-full origin-bottom"
+                        style={{
+                          height: `${height}%`,
+                          background: `linear-gradient(to top, rgb(251, 146, 60), rgb(236, 72, 153))`,
+                          opacity: 0.6 + (height / 100) * 0.4,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Timer */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="absolute bottom-10 left-0 right-0 text-center"
+                >
+                  <div className="text-[44px] font-light text-white tracking-wider tabular-nums">
+                    {formatTime(recordingTime)}
+                  </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {audioBlob && !isRecording && (
+            /* ✅ ESTADO PREVIEW - Áudio Gravado */
+            <motion.div
+              key="preview"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.4 }}
+              className="flex-1 flex flex-col items-center justify-center px-6 pb-24"
+            >
+              {/* Card de Preview */}
+              <motion.div
+                className="relative w-full max-w-sm"
+              >
+                <div className="relative aspect-square rounded-[36px] bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 border border-white/10 backdrop-blur-3xl overflow-hidden shadow-2xl shadow-black/40 p-8">
+                  {/* Success glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-green-500/5" />
+                  
+                  {/* Waveform estático */}
+                  <div className="relative w-full h-48 flex items-end justify-center gap-[3px] mb-8">
+                    {waveformData.map((height, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 max-w-[4px] rounded-full"
+                        style={{
+                          height: `${height}%`,
+                          background: 'linear-gradient(to top, rgb(134, 239, 172), rgb(74, 222, 128))',
+                          opacity: 0.5,
+                        }}
+                      />
+                    ))}
+                    
+                    {/* Play indicator */}
+                    {isPlaying && (
+                      <motion.div
+                        initial={{ x: 0 }}
+                        animate={{ x: '100%' }}
+                        transition={{ duration: audioDuration, ease: "linear" }}
+                        className="absolute top-0 bottom-0 w-0.5 bg-white/80"
+                      />
+                    )}
+                  </div>
+
+                  {/* Controles */}
+                  <div className="space-y-6">
+                    {/* Play/Pause */}
+                    <div className="flex items-center justify-center gap-6">
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={isPlaying ? () => audioRef.current?.pause() : () => audioRef.current?.play()}
+                        className="relative w-16 h-16 rounded-full bg-gradient-to-br from-white to-white/90 shadow-2xl shadow-white/20 flex items-center justify-center"
+                      >
+                        {isPlaying ? (
+                          <Pause className="w-7 h-7 text-black" fill="black" />
+                        ) : (
+                          <Play className="w-7 h-7 text-black ml-1" fill="black" />
+                        )}
+                      </motion.button>
+                    </div>
+
+                    {/* Duration */}
+                    <div className="text-center text-[32px] font-light text-white tracking-wider tabular-nums">
+                      {formatTime(Math.floor(audioProgress))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ações */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="mt-8 flex items-center justify-center gap-4"
+                >
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={deleteRecording}
+                    className="px-6 py-3 rounded-full bg-red-500/20 border border-red-500/30 backdrop-blur-xl text-red-300 font-medium text-[15px] flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Eliminar
+                  </motion.button>
+
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowConfig(true)}
+                    className="px-8 py-3 rounded-full bg-white text-black font-semibold text-[15px] shadow-xl"
+                  >
+                    Continuar
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 🎯 BOTTOM ACTION BUTTONS */}
+        {!showRecorder && !audioBlob && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="px-6 pb-safe pb-8 shrink-0"
+          >
+            <div className="flex items-center justify-center gap-12">
+              {/* Upload */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => fileInputRef.current?.click()}
+                className="flex flex-col items-center gap-2"
+              >
+                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-white" strokeWidth={2} />
+                </div>
+              </motion.button>
+
+              {/* RECORD BUTTON - MAIN CTA */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setShowRecorder(true)
+                  startRecording()
+                }}
+                className="relative"
+              >
+                {/* Glow */}
+                <motion.div
+                  animate={{
+                    opacity: [0.4, 0.8, 0.4],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute -inset-4 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 blur-2xl opacity-60"
+                />
+                
+                {/* Button */}
+                <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-orange-600 shadow-2xl shadow-orange-500/40 flex items-center justify-center border-4 border-white/10">
+                  <div className="absolute inset-2 rounded-full bg-gradient-to-br from-orange-600 to-pink-600" />
+                </div>
+              </motion.button>
+
+              {/* Music Library */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => router.push('/library')}
+                className="flex flex-col items-center gap-2"
+              >
+                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center">
+                  <Music2 className="w-6 h-6 text-white" strokeWidth={2} />
+                </div>
+              </motion.button>
+            </div>
+
+            {/* Info Text */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-center text-[11px] text-white/40 font-mono tracking-wider uppercase mt-6"
+            >
+              Limite de 8 min para uploads de áudio
+            </motion.p>
+          </motion.div>
+        )}
+
+        {showRecorder && isRecording && (
+          /* Botão STOP quando está gravando */
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="px-6 pb-safe pb-8 shrink-0"
+          >
+            <div className="flex items-center justify-center gap-10">
+              {/* Reset */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={resetRecording}
+                className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center"
+              >
+                <RotateCcw className="w-5 h-5 text-white" strokeWidth={2} />
+              </motion.button>
+
+              {/* STOP */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={stopRecording}
+                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-white/90 shadow-2xl shadow-white/20 flex items-center justify-center"
+              >
+                <div className="w-6 h-6 rounded bg-black" />
+              </motion.button>
+
+              {/* Delete */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={deleteRecording}
+                className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center"
+              >
+                <Trash className="w-5 h-5 text-white" strokeWidth={2} />
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
 
         <input ref={fileInputRef} type="file" accept="audio/*" onChange={handleFileUpload} className="hidden" />
       </div>
-
-      {/* Recording Modal */}
-      {showRecorder && (
-        <div className="lg:hidden fixed inset-0 z-50 animate-in fade-in duration-500 flex flex-col h-[100dvh] overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black">
-          {/* 🍊 Elegant gradient overlays com tons laranja */}
-          <div className="fixed inset-0 z-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-orange-500/[0.08] rounded-full blur-3xl" />
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-amber-500/[0.06] rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-orange-600/[0.04] rounded-full blur-3xl" />
-          </div>
-
-          {/* Top Navbar */}
-          <div className="fixed top-0 left-0 right-0 z-50 pt-safe">
-            <div className="backdrop-blur-2xl bg-black/60 border-b border-white/[0.06]">
-              <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-                <button
-                  onClick={deleteRecording}
-                  className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
-                >
-                  <X className="w-4 h-4" strokeWidth={2} />
-                </button>
-                <span className="text-[15px] font-medium text-white/90">Gravando</span>
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="h-8 w-8 rounded-lg hover:bg-white/[0.08] text-white/90 active:scale-95 transition-all flex items-center justify-center"
-                >
-                  <Settings className="w-4 h-4" strokeWidth={2} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 flex-1 flex items-center justify-center px-6 pt-[68px] pb-safe-mobile md:pb-0">
-            <div className="w-full max-w-sm backdrop-blur-xl bg-white/[0.06] border border-white/[0.08] p-8 rounded-3xl">
-              {recordingSuccess && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/95 backdrop-blur-xl rounded-3xl z-10 animate-in fade-in duration-300">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="h-16 w-16 rounded-full bg-white/[0.12] border border-white/[0.15] flex items-center justify-center animate-in zoom-in duration-300">
-                      <Check className="h-8 w-8 text-white/90" strokeWidth={2.5} />
-                    </div>
-                    <p className="text-white/90 font-light text-sm">Gravação concluída</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="relative h-56 flex items-center justify-center px-3">
-                {isRecording && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-white/[0.08] backdrop-blur-xl rounded-full border border-white/[0.10] animate-in fade-in duration-300">
-                    <div className="h-2 w-2 rounded-full bg-white/90 animate-pulse" />
-                    <span className="text-xs text-white/80 font-light">Gravando</span>
-                  </div>
-                )}
-
-                <div className="flex items-end justify-center gap-1 h-full py-10 w-full">
-                  {waveformData.map((height, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 max-w-[3px] rounded-full bg-gradient-to-t from-orange-400 via-amber-400 to-orange-300"
-                      style={{
-                        height: `${height}%`,
-                        opacity: 0.5 + (height / 100) * 0.5,
-                        transition: "all 120ms cubic-bezier(0.4, 0, 0.2, 1)",
-                        boxShadow: `0 0 ${height / 10}px rgba(251, 146, 60, ${height / 200})`,
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="text-center text-2xl font-light text-white/95 mt-4 tracking-wider tabular-nums">
-                {formatTime(recordingTime)}
-              </div>
-            </div>
-          </div>
-
-          <div className="px-6 pb-8 pb-safe-mobile md:pb-0 flex items-center justify-center gap-8">
-            <button
-              onClick={resetRecording}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/[0.08] border border-orange-400/[0.15] backdrop-blur-xl active:scale-95 transition-all hover:bg-orange-500/[0.15] shadow-lg shadow-orange-500/5"
-            >
-              <RotateCcw className="h-5 w-5 text-orange-300/80" strokeWidth={2} />
-            </button>
-
-            <button
-              onClick={stopRecording}
-              className="relative h-16 w-16 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-2 border-orange-400/40 backdrop-blur-xl flex items-center justify-center active:scale-95 transition-all hover:from-orange-500/30 hover:to-amber-500/30 shadow-lg shadow-orange-500/20"
-            >
-              <div className="absolute inset-0 bg-orange-500/20 rounded-xl blur-xl"></div>
-              <div className="relative h-5 w-5 rounded bg-gradient-to-br from-orange-400 to-amber-500" />
-            </button>
-
-            <button
-              onClick={deleteRecording}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/[0.08] border border-red-400/[0.15] backdrop-blur-xl active:scale-95 transition-all hover:bg-red-500/[0.15] shadow-lg shadow-red-500/5"
-            >
-              <Trash2 className="h-5 w-5 text-red-300/80" strokeWidth={2} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Config Modal */}
 
       {/* Config Modal */}
       {showConfig && (

@@ -188,19 +188,19 @@ export function UserAvatar() {
     );
   }
 
-  // Não logado - mostra botão de acesso exclusivo
+    // Não logado - mostra botões premium ultra elegantes
   if (!user) {
     return (
       <div className="flex items-center gap-3">
         <Button
           variant="outline"
-          className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all"
+          className="border-white/20 bg-white/[0.05] text-white/90 hover:bg-white/[0.12] hover:border-white/30 backdrop-blur-2xl transition-all duration-300 rounded-full px-6 h-11 font-medium active:scale-[0.97] shadow-sm hover:shadow-md hidden sm:flex"
           onClick={() => router.push("/acesso")}
         >
           Obter Acesso
         </Button>
         <Button
-          className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold px-6"
+          className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold px-7 h-11 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.97]"
           onClick={() => router.push("/registo")}
         >
           Começar
@@ -209,94 +209,121 @@ export function UserAvatar() {
     );
   }
 
-  // Logado - mostra avatar com dropdown
+  // Logado - mostra avatar premium com dropdown ultra elegante e profissional
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="relative group">
-          <Avatar className="w-10 h-10 border-2 border-white/20 group-hover:border-white/40 transition-all cursor-pointer ring-2 ring-transparent group-hover:ring-purple-500/50">
-            <AvatarImage src={getAvatarUrl()} alt={user.email} />
-            <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white font-semibold">
+        <button className="relative group outline-none focus:outline-none focus-visible:outline-none">
+          <Avatar className="w-10 h-10 border border-white/15 group-hover:border-white/30 transition-all duration-300 cursor-pointer ring-0 group-hover:ring-1 group-hover:ring-white/20 group-hover:ring-offset-1 group-hover:ring-offset-transparent group-active:scale-95 shadow-sm hover:shadow-md">
+            <AvatarImage src={getAvatarUrl()} alt={user.email} className="object-cover" />
+            <AvatarFallback className="bg-white/10 text-white/90 font-medium text-sm backdrop-blur-xl">
               {getInitials()}
             </AvatarFallback>
           </Avatar>
           {(isAdmin || isSuperAdmin) && (
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-black flex items-center justify-center">
-              <Shield className="w-2.5 h-2.5 text-black" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-white/90 rounded-full border border-black/50 shadow-sm flex items-center justify-center">
+              <Shield className="w-2.5 h-2.5 text-black/70" />
             </div>
           )}
         </button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-56 bg-black/95 backdrop-blur-xl border border-white/10">
-        <DropdownMenuLabel className="text-white">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{getDisplayName()}</p>
-            <p className="text-xs text-white/60 truncate">{user.email}</p>
-            {isSuperAdmin && (
-              <span className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
-                <Shield className="w-3 h-3" />
-                Super Administrador
-              </span>
-            )}
-            {isAdmin && !isSuperAdmin && (
-              <span className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
-                <Shield className="w-3 h-3" />
-                Administrador
-              </span>
-            )}
+      <DropdownMenuContent 
+        align="end" 
+        className="w-[calc(100vw-32px)] sm:w-80 bg-gradient-to-b from-white/[0.08] to-white/[0.03] backdrop-blur-2xl border border-white/15 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9)] rounded-[28px] p-0 mt-3 max-h-[85vh] overflow-y-auto"
+        sideOffset={14}
+      >
+        {/* Header do Perfil - Ultra Premium */}
+        <DropdownMenuLabel className="p-0 mb-0 sticky top-0 z-50 bg-gradient-to-b from-white/[0.08] to-transparent">
+          <div className="px-4 pt-4 pb-3">
+            <div className="flex items-center gap-3.5">
+              <div className="relative flex-shrink-0">
+                <Avatar className="w-14 h-14 border-2 border-white/25 shadow-lg">
+                  <AvatarImage src={getAvatarUrl()} alt={user.email} className="object-cover" />
+                  <AvatarFallback className="bg-gradient-to-br from-white/15 to-white/5 text-white font-semibold backdrop-blur-xl text-sm">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                {(isAdmin || isSuperAdmin) && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white/95 rounded-full border-2 border-black/40 shadow-md flex items-center justify-center">
+                    <Shield className="w-2.5 h-2.5 text-black/70" />
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white/95 truncate leading-tight tracking-tight">{getDisplayName()}</p>
+                <p className="text-xs text-white/45 truncate mt-1 font-medium">{user.email}</p>
+              </div>
+            </div>
           </div>
         </DropdownMenuLabel>
         
-        <DropdownMenuSeparator className="bg-white/10" />
+        <div className="bg-gradient-to-r from-white/5 via-white/8 to-white/5 h-px border-0" />
         
-        {/* Link para Perfil - todos os usuários */}
-        <DropdownMenuItem 
-          onClick={() => router.push('/perfil')}
-          className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
-        >
-          <User className="w-4 h-4" />
-          Meu Perfil
-        </DropdownMenuItem>
-        
-        {(isAdmin || isSuperAdmin) && (
-          // Admin - link adicional para painel
-          <>
+        {/* Menu Items - Ultra Premium Minimal */}
+        <div className="space-y-1 px-2 py-2">
+          {/* Perfil */}
+          <DropdownMenuItem 
+            onClick={() => router.push('/perfil')}
+            className="text-white/80 hover:text-white/95 hover:bg-white/[0.08] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.08] backdrop-blur-xl group data-[highlighted]:bg-white/[0.08]"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05] flex items-center justify-center transition-all duration-200 border border-white/10 flex-shrink-0">
+              <User className="w-4.5 h-4.5 text-white/70" />
+            </div>
+            <span className="font-semibold text-sm text-white/85">Meu Perfil</span>
+          </DropdownMenuItem>
+          
+          {/* Painel Admin (se for admin) */}
+          {(isAdmin || isSuperAdmin) && (
             <DropdownMenuItem 
               onClick={() => router.push('/admin')}
-              className="text-yellow-400 hover:bg-yellow-500/10 cursor-pointer flex items-center gap-2 font-semibold"
+              className="text-white/80 hover:text-white/95 hover:bg-white/[0.08] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.08] backdrop-blur-xl group data-[highlighted]:bg-white/[0.08]"
             >
-              <Shield className="w-4 h-4" />
-              Painel Administrador
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05] flex items-center justify-center transition-all duration-200 border border-white/10 flex-shrink-0">
+                <Shield className="w-4.5 h-4.5 text-white/70" />
+              </div>
+              <span className="font-semibold text-sm text-white/85">Painel Admin</span>
             </DropdownMenuItem>
-          </>
-        )}
+          )}
+          
+          {/* Configurações */}
+          <DropdownMenuItem 
+            onClick={() => router.push('/settings')}
+            className="text-white/80 hover:text-white/95 hover:bg-white/[0.08] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.08] backdrop-blur-xl group data-[highlighted]:bg-white/[0.08]"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05] flex items-center justify-center transition-all duration-200 border border-white/10 flex-shrink-0">
+              <Settings className="w-4.5 h-4.5 text-white/70" />
+            </div>
+            <span className="font-semibold text-sm text-white/85">Configurações</span>
+          </DropdownMenuItem>
+          
+          {/* Comprar Créditos */}
+          <DropdownMenuItem 
+            onClick={() => router.push('/comprar')}
+            className="text-white/80 hover:text-white/95 hover:bg-white/[0.08] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.08] backdrop-blur-xl group data-[highlighted]:bg-white/[0.08]"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05] flex items-center justify-center transition-all duration-200 border border-white/10 flex-shrink-0">
+              <ShoppingCart className="w-4.5 h-4.5 text-white/70" />
+            </div>
+            <span className="font-semibold text-sm text-white/85">Comprar Créditos</span>
+          </DropdownMenuItem>
+        </div>
         
-        <DropdownMenuItem 
-          onClick={() => router.push('/settings')}
-          className="text-white hover:bg-white/10 cursor-pointer flex items-center gap-2"
-        >
-          <Settings className="w-4 h-4" />
-          Configurações
-        </DropdownMenuItem>
+        <div className="bg-gradient-to-r from-white/5 via-white/8 to-white/5 h-px border-0 mx-2" />
         
-        <DropdownMenuItem 
-          onClick={() => router.push('/comprar')}
-          className="text-purple-400 hover:bg-purple-500/10 cursor-pointer flex items-center gap-2 font-semibold"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          Comprar Créditos
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator className="bg-white/10" />
-        
-        <DropdownMenuItem 
-          onClick={handleLogout}
-          className="text-red-400 hover:bg-red-500/10 cursor-pointer flex items-center gap-2"
-        >
-          <LogOut className="w-4 h-4" />
-          Sair
-        </DropdownMenuItem>
+        {/* Logout - Premium Minimal */}
+        <div className="px-2 py-2">
+          <DropdownMenuItem 
+            onClick={handleLogout}
+            className="text-white/70 hover:text-white/90 hover:bg-white/[0.06] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.06] backdrop-blur-xl group data-[highlighted]:bg-white/[0.06]"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.06] to-white/[0.01] group-hover:from-white/[0.10] group-hover:to-white/[0.03] flex items-center justify-center transition-all duration-200 border border-white/8 flex-shrink-0">
+              <LogOut className="w-4.5 h-4.5 text-white/65" />
+            </div>
+            <span className="font-semibold text-sm text-white/75">Sair da Conta</span>
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

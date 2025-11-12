@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
-import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Building2, Coins, X } from "lucide-react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Building2, Coins } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRef, useState, useEffect } from "react"
+import { useRef } from "react"
 import { FeatureSteps } from "@/components/ui/feature-steps"
 import { Gallery6 } from "@/components/ui/gallery6"
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase"
@@ -19,52 +19,7 @@ import { HeroFounder } from "@/components/ui/hero-founder"
 export default function HomePage() {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
-  const [showIOSBanner, setShowIOSBanner] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
 
-  // Detectar mobile e verificar se já instalou
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth <= 768
-      setIsMobile(mobile)
-      
-      // Mostrar banner apenas em mobile e se não instalou antes
-      if (mobile && !localStorage.getItem('dua-app-installed')) {
-        setShowIOSBanner(true)
-      }
-    }
-
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  // Função para instalar PWA automaticamente
-  const handleInstallPWA = async () => {
-    // Marcar como instalado
-    localStorage.setItem('dua-app-installed', 'true')
-    setShowIOSBanner(false)
-    
-    // Tentar instalar PWA automaticamente
-    if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
-      // PWA já deve estar registrado pelo Next.js
-      // Mostrar prompt de instalação nativo se disponível
-      const deferredPrompt = (window as any).deferredPrompt
-      if (deferredPrompt) {
-        deferredPrompt.prompt()
-        const { outcome } = await deferredPrompt.userChoice
-        console.log(`User response to install prompt: ${outcome}`)
-        ;(window as any).deferredPrompt = null
-      }
-    }
-    
-    // iOS: usuário precisa adicionar manualmente via Safari
-    // Mostrar instrução apenas se iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
-    if (isIOS) {
-      alert('Para instalar:\n1. Toque no botão compartilhar\n2. Selecione "Adicionar à Tela de Início"')
-    }
-  }
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
@@ -78,54 +33,7 @@ export default function HomePage() {
     <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
       <Navbar />
 
-      {/* iOS APP BANNER - PILL DISCRETO */}
-      <AnimatePresence>
-        {showIOSBanner && isMobile && (
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-          >
-            <div className="pointer-events-auto">
-              {/* Pill ultra-discreto */}
-              <div className="relative bg-black/70 backdrop-blur-xl border border-white/20 rounded-full px-3 py-1.5 shadow-lg">
-                <div className="flex items-center gap-2">
-                  {/* Ícone mini */}
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[9px] font-bold text-white">D</span>
-                  </div>
-
-                  {/* Texto compacto */}
-                  <span className="text-white/90 text-xs font-medium">
-                    Instalar App
-                  </span>
-
-                  {/* Botão compacto */}
-                  <button
-                    onClick={handleInstallPWA}
-                    className="px-3 py-1 bg-blue-500/90 hover:bg-blue-600 text-white text-[11px] font-semibold rounded-full transition-all"
-                  >
-                    OK
-                  </button>
-
-                  {/* Close mini */}
-                  <button
-                    onClick={() => setShowIOSBanner(false)}
-                    className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
-                    aria-label="Fechar"
-                  >
-                    <X className="w-3 h-3 text-white/70" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* HERO SECTION - Ultra Premium iOS-like */}
+      {/* HERO SECTION - Ultra Premium iOS-like Mobile First */}
       <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
         <motion.div 
           style={{ 
@@ -192,87 +100,149 @@ export default function HomePage() {
           {/* Fallback gradient se vídeo não carregar */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-black to-pink-900/30" style={{ zIndex: -1 }} />
           
-          {/* Gradient overlays ULTRA PREMIUM - Estilo FLOW */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          {/* Gradient overlays ULTRA PREMIUM - iOS Style */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
           
-          {/* Vignette lateral para depth */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
+          {/* Vignette lateral premium - mais pronunciado no mobile */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50 md:from-black/40 md:to-black/40" />
           
-          {/* Vignette radial premium */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.3)_60%,rgba(0,0,0,0.7)_100%)]" />
+          {/* Vignette radial iOS-like */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,rgba(0,0,0,0.4)_50%,rgba(0,0,0,0.8)_100%)]" />
         </motion.div>
 
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-32 lg:py-40">
-          <div className="flex flex-col gap-8 sm:gap-10 lg:gap-14 items-center justify-center max-w-7xl w-full mx-auto text-center">
+        {/* Content Container - iOS Premium Spacing - Ultra compacto mobile */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24 md:py-32 lg:py-40">
+          <div className="flex flex-col gap-3 sm:gap-6 md:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center">
 
+            {/* Badge UPDATE - FIXO NO TOPO - NÃO MEXER */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-0"
+            >
+              <p className="text-xs sm:text-sm md:text-base text-white/70 font-light tracking-wide">
+                A criatividade lusófona tem uma nova casa
+              </p>
+            </motion.div>
+
+            {/* ESPAÇADOR - Empurra DUA para baixo */}
+            <div className="h-16 sm:h-0" />
+
+            {/* Logo "DUA" - Estilo Google Flow gigante */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="font-extralight leading-[0.75] tracking-[-0.12em] text-white"
+              className="font-extralight text-white w-full text-center"
               style={{ 
-                fontSize: 'clamp(12rem, 35vw, 38rem)',
+                fontSize: 'clamp(10rem, 32vw, 42rem)',
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 100,
                 textShadow: '0 30px 150px rgba(0,0,0,0.99), 0 15px 75px rgba(0,0,0,0.95), 0 8px 40px rgba(0,0,0,0.9)',
-                letterSpacing: '-0.12em',
+                letterSpacing: '-0.08em',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
                 textRendering: 'optimizeLegibility',
-                lineHeight: '0.75'
+                lineHeight: '0.8',
+                margin: '0 auto',
               }}
             >
               DUA
             </motion.h1>
 
+            {/* Tagline - Estilo Google Flow */}
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/95 font-light max-w-4xl leading-relaxed px-4"
-              style={{ textShadow: '0 4px 30px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.7)' }}
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-3xl leading-relaxed px-6 sm:px-8"
+              style={{ 
+                textShadow: '0 4px 30px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.7)',
+                letterSpacing: '-0.01em'
+              }}
             >
-              Onde a próxima onda de criatividade
-              <br /> 
-              lusófona acontece
+              Onde a próxima onda de criatividade lusófona acontece
             </motion.p>
 
-            {/* Botão Elegante Transparente - Ultra Premium */}
+            {/* Botão Google Flow Style - Glassmorphism Premium */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full sm:w-auto px-4 sm:px-0 mt-6 sm:mt-8"
+              className="w-full sm:w-auto px-6 sm:px-0 mt-0 sm:mt-4 md:mt-8"
             >
-              <div className="relative group">
-                {/* Glow effect sutil */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 via-white/20 to-white/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <Button
+                size="lg"
+                className="w-full sm:w-auto rounded-full px-10 sm:px-12 py-4 sm:py-5 bg-white/[0.12] hover:bg-white/[0.18] active:bg-white/[0.15] text-white font-normal text-base sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_1px_4px_rgba(255,255,255,0.1)_inset] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4),0_2px_8px_rgba(255,255,255,0.15)_inset] border-0"
+                onClick={() => router.push("/acesso")}
+                style={{
+                  backdropFilter: 'blur(20px) saturate(160%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+                }}
+              >
+                <span className="relative z-10 tracking-wide">
+                  Obter Acesso
+                </span>
+              </Button>
+            </motion.div>
+
+            {/* Ícone Scroll Ultra Premium iOS - Animado */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="mt-2 sm:mt-10 md:mt-14"
+            >
+              <motion.div
+                animate={{ 
+                  y: [0, 8, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="flex flex-col items-center gap-3 cursor-pointer group"
+                onClick={() => {
+                  window.scrollTo({ 
+                    top: window.innerHeight, 
+                    behavior: 'smooth' 
+                  })
+                }}
+              >
+                {/* Mouse/Scroll Indicator Premium */}
+                <div className="relative w-7 h-11 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-all duration-500 backdrop-blur-xl bg-white/[0.05]">
+                  {/* Scroll Dot Animado */}
+                  <motion.div
+                    animate={{
+                      y: [4, 16, 4],
+                      opacity: [0.5, 1, 0.5]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/80 rounded-full"
+                  />
+                </div>
                 
-                <Button
-                  size="lg"
-                  className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-4 sm:py-5 bg-white/5 hover:bg-white/10 text-white font-light text-base sm:text-lg transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_48px_rgba(255,255,255,0.15)] border border-white/20 hover:border-white/40"
-                  onClick={() => router.push("/acesso")}
-                  style={{
-                    backdropFilter: 'blur(24px)',
-                    WebkitBackdropFilter: 'blur(24px)'
-                  }}
-                >
-                  <span className="relative z-10 flex items-center gap-2.5 sm:gap-3 justify-center tracking-wide">
-                    Obter Acesso
-                    <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-700 group-hover:translate-x-1" />
-                  </span>
-                </Button>
-              </div>
+                {/* Texto discreto */}
+                <span className="text-[10px] sm:text-xs text-white/40 group-hover:text-white/60 transition-colors font-light tracking-widest uppercase">
+                  Scroll
+                </span>
+              </motion.div>
             </motion.div>
           </div>
         </div>
 
-        {/* Enhanced gradient transition - NÃO afeta o botão */}
+        {/* Enhanced gradient transition - iOS Premium Bottom Fade */}
         <div 
           className="absolute bottom-0 left-0 right-0 h-80 pointer-events-none z-[5]"
           style={{
-            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.3) 30%, rgba(10,10,10,0.7) 60%, rgba(10,10,10,0.95) 90%, rgba(10,10,10,1) 100%)'
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.4) 30%, rgba(10,10,10,0.75) 60%, rgba(10,10,10,0.95) 85%, rgba(10,10,10,1) 100%)'
           }}
         />
       </section>

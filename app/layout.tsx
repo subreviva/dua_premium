@@ -21,14 +21,78 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" })
 
 export const metadata: Metadata = {
-  title: "DUA - Plataforma de IA Criativa",
-  description: "Plataforma completa com Inteligência Artificial - Crie vídeos, imagens, designs e muito mais",
-  generator: "v0.app",
+  metadataBase: new URL('https://dua.2lados.pt'),
+  title: {
+    default: "DUA IA - Assistente de IA Criativa Portuguesa | Estúdios de Criação com Inteligência Artificial",
+    template: "%s | DUA IA"
+  },
+  description: "DUA é a primeira assistente de IA criativa lusófona. Crie música, vídeos, designs e imagens com inteligência artificial. Plataforma portuguesa de criação digital com IA generativa para artistas, criadores e marcas.",
+  keywords: [
+    "ia portugal", "inteligencia artificial portugal", "criação com ia", "assistente ia português",
+    "dua ia", "2 lados", "criar musica com ia", "gerar imagens ia portugal", "editor video ia",
+    "design grafico ia", "chat ia portugues", "music studio ia", "image studio ia",
+    "plataforma criativa portuguesa", "ia generativa em portugues", "ferramentas ia para artistas",
+    "kyntal", "dua coin", "distribuicao musical portugal", "startup portuguesa ia",
+    "alternativa midjourney portugal", "alternativa chatgpt portugues", "alternativa suno portugal"
+  ],
+  authors: [{ name: "2 LADOS", url: "https://www.2lados.pt" }],
+  creator: "2 LADOS",
+  publisher: "2 LADOS",
+  generator: "Next.js",
   manifest: "/manifest.webmanifest",
+  
+  openGraph: {
+    type: "website",
+    locale: "pt_PT",
+    alternateLocale: ["pt_BR", "pt_AO", "pt_MZ", "pt_CV"],
+    url: "https://dua.2lados.pt",
+    title: "DUA IA - Assistente de IA Criativa Portuguesa",
+    description: "Crie música, vídeos, designs e imagens com IA. A primeira plataforma criativa lusófona alimentada por inteligência artificial.",
+    siteName: "DUA IA",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "DUA - Assistente de IA Criativa Portuguesa",
+      },
+    ],
+  },
+  
+  twitter: {
+    card: "summary_large_image",
+    title: "DUA IA - Assistente de IA Criativa Portuguesa",
+    description: "Crie música, vídeos, designs e imagens com IA. Plataforma criativa lusófona.",
+    images: ["/og-image.jpg"],
+    creator: "@2lados",
+  },
+  
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  
+  alternates: {
+    canonical: "https://dua.2lados.pt",
+    languages: {
+      'pt-PT': 'https://dua.2lados.pt',
+      'pt-BR': 'https://dua.2lados.pt/br',
+    },
+  },
+  
+  category: "Technology",
+  
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "DUA AI",
+    title: "DUA IA",
     startupImage: [
       {
         url: "/splash/iphone5_splash.png",
@@ -104,16 +168,87 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt" data-scroll-behavior="smooth">
+    <html lang="pt-PT" data-scroll-behavior="smooth">
       <head>
+        {/* SEO Premium - Schemas JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: '2 LADOS',
+              alternateName: 'DUA IA',
+              url: 'https://www.2lados.pt',
+              logo: 'https://dua.2lados.pt/logo.png',
+              description: 'Plataforma de criação com inteligência artificial para artistas e criadores lusófonos',
+              foundingDate: '2024',
+              contactPoint: {
+                '@type': 'ContactPoint',
+                telephone: '+351-964-696-576',
+                contactType: 'Customer Service',
+                email: 'info@2lados.pt',
+                availableLanguage: ['pt', 'pt-PT', 'pt-BR'],
+              },
+              sameAs: [
+                'https://www.instagram.com/_2lados/',
+                'https://www.instagram.com/soudua_/',
+                'https://www.instagram.com/kyntal_/',
+                'https://www.facebook.com/p/2-Lados-61575605463692/',
+                'https://www.tiktok.com/@2.lados',
+                'https://www.tiktok.com/@soudua',
+              ],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'DUA IA',
+              url: 'https://dua.2lados.pt',
+              description: 'Assistente de IA criativa portuguesa para criação de música, imagens, vídeos e designs',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: 'https://dua.2lados.pt/pesquisar?q={search_term_string}',
+                },
+                'query-input': 'required name=search_term_string',
+              },
+              inLanguage: 'pt-PT',
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'DUA IA',
+              applicationCategory: 'MultimediaApplication',
+              operatingSystem: 'Web, iOS, Android',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'EUR',
+              },
+              description: 'Plataforma de criação com IA: música, imagens, vídeos, designs e chat inteligente em português',
+            }),
+          }}
+        />
+        
         {/* PWA Meta Tags */}
-        <meta name="application-name" content="DUA AI" />
+        <meta name="application-name" content="DUA IA" />
         <meta name="mobile-web-app-capable" content="yes" />
         
         {/* iOS Specific Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="DUA AI" />
+        <meta name="apple-mobile-web-app-title" content="DUA IA" />
         
         {/* iOS Splash Screens - Placeholder */}
         <link rel="apple-touch-startup-image" href="/splash/default.png" />

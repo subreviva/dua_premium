@@ -135,10 +135,10 @@ export function PremiumNavbar({
 
           <Button
             onClick={handleBuyCredits}
-            className="hidden sm:flex bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0 transition-all duration-300 rounded-xl px-4 h-9 text-sm font-semibold"
+            className="hidden sm:flex bg-white/[0.08] hover:bg-white/[0.15] text-white/90 hover:text-white border border-white/15 hover:border-white/25 transition-all duration-300 rounded-full px-5 h-10 text-sm font-medium backdrop-blur-xl active:scale-95 shadow-sm hover:shadow-md"
           >
             <Coins className="w-4 h-4 mr-2" />
-            COMPRAR
+            Comprar
           </Button>
 
           <DropdownMenu>
@@ -149,38 +149,59 @@ export function PremiumNavbar({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-64 bg-black/95 backdrop-blur-2xl border-white/10 rounded-xl p-2 mt-2"
+              className="w-[calc(100vw-32px)] sm:w-80 bg-gradient-to-b from-white/[0.08] to-white/[0.03] backdrop-blur-2xl border border-white/15 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9)] rounded-[28px] p-0 mt-3 max-h-[85vh] overflow-y-auto"
+              sideOffset={14}
             >
-              <DropdownMenuItem
-                onClick={() => router.push("/perfil")}
-                className="flex items-center gap-3 p-3 cursor-pointer rounded-lg focus:bg-white/5 text-white/90 hover:text-white transition-all duration-200"
-              >
-                <User className="w-4 h-4" />
-                <span className="font-medium">Perfil</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push("/chat")}
-                className="flex items-center gap-3 p-3 cursor-pointer rounded-lg focus:bg-white/5 text-white/90 hover:text-white transition-all duration-200"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span className="font-medium">Chat</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/5 my-2" />
-              <DropdownMenuItem
-                onClick={handleBuyCredits}
-                className="flex items-center gap-3 p-3 cursor-pointer rounded-lg focus:bg-purple-500/10 text-purple-400 hover:text-purple-300 transition-all duration-200 font-semibold"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                <span className="font-medium">Comprar Créditos</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/5 my-2" />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="flex items-center gap-3 p-3 cursor-pointer rounded-lg focus:bg-red-500/10 text-red-400 hover:text-red-300 transition-all duration-200"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="font-medium">Sair</span>
-              </DropdownMenuItem>
+              {/* Menu Items - Ultra Premium Minimal */}
+              <div className="space-y-1 px-2 py-2">
+                {/* Perfil */}
+                <DropdownMenuItem
+                  onClick={() => router.push("/perfil")}
+                  className="text-white/80 hover:text-white/95 hover:bg-white/[0.08] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.08] backdrop-blur-xl group data-[highlighted]:bg-white/[0.08]"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05] flex items-center justify-center transition-all duration-200 border border-white/10 flex-shrink-0">
+                    <User className="w-4.5 h-4.5 text-white/70" />
+                  </div>
+                  <span className="font-semibold text-sm text-white/85">Meu Perfil</span>
+                </DropdownMenuItem>
+
+                {/* Chat */}
+                <DropdownMenuItem
+                  onClick={() => router.push("/chat")}
+                  className="text-white/80 hover:text-white/95 hover:bg-white/[0.08] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.08] backdrop-blur-xl group data-[highlighted]:bg-white/[0.08]"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05] flex items-center justify-center transition-all duration-200 border border-white/10 flex-shrink-0">
+                    <MessageSquare className="w-4.5 h-4.5 text-white/70" />
+                  </div>
+                  <span className="font-semibold text-sm text-white/85">Chat</span>
+                </DropdownMenuItem>
+
+                {/* Comprar Créditos */}
+                <DropdownMenuItem
+                  onClick={handleBuyCredits}
+                  className="text-white/80 hover:text-white/95 hover:bg-white/[0.08] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.08] backdrop-blur-xl group data-[highlighted]:bg-white/[0.08]"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05] flex items-center justify-center transition-all duration-200 border border-white/10 flex-shrink-0">
+                    <ShoppingCart className="w-4.5 h-4.5 text-white/70" />
+                  </div>
+                  <span className="font-semibold text-sm text-white/85">Comprar Créditos</span>
+                </DropdownMenuItem>
+              </div>
+
+              <div className="bg-gradient-to-r from-white/5 via-white/8 to-white/5 h-px border-0 mx-2" />
+
+              {/* Logout - Premium Minimal */}
+              <div className="px-2 py-2">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-white/70 hover:text-white/90 hover:bg-white/[0.06] cursor-pointer flex items-center gap-3.5 rounded-2xl px-4 py-3.5 transition-all duration-200 active:scale-[0.95] focus:bg-white/[0.06] backdrop-blur-xl group data-[highlighted]:bg-white/[0.06]"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.06] to-white/[0.01] group-hover:from-white/[0.10] group-hover:to-white/[0.03] flex items-center justify-center transition-all duration-200 border border-white/8 flex-shrink-0">
+                    <LogOut className="w-4.5 h-4.5 text-white/65" />
+                  </div>
+                  <span className="font-semibold text-sm text-white/75">Sair da Conta</span>
+                </DropdownMenuItem>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
