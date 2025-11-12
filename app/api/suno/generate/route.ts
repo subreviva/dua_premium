@@ -52,8 +52,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 🔥 PASSO 1: VERIFICAR CRÉDITOS ANTES DE GERAR
-    console.log(`🎵 [Suno] Verificando créditos para usuário ${userId}...`)
-    const creditCheck = await checkCredits(userId, 'music_generate_v5')
+    // Mapear modelo para service_name correto
+    const modelToService: Record<string, string> = {
+      'V3_5': 'music_generate_v3_5',
+      'V4': 'music_generate_v4',
+      'V4_5': 'music_generate_v4_5',
+      'V4_5PLUS': 'music_generate_v4_5_plus',
+      'V5': 'music_generate_v5',
+    }
+    const serviceName = modelToService[model] || 'music_generate_v5'
+
+    console.log(`🎵 [Suno] Verificando créditos para usuário ${userId} (modelo: ${model})...`)
+    const creditCheck = await checkCredits(userId, serviceName)
 
     if (!creditCheck.hasCredits) {
       console.log(`❌ [Suno] Créditos insuficientes: ${creditCheck.message}`)
@@ -176,8 +186,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 🔥 PASSO 3: DEDUZIR CRÉDITOS APÓS SUCESSO
-    console.log(`💳 [Suno] Deduzindo ${creditCheck.required} créditos...`)
-    const deduction = await deductCredits(userId, 'music_generate_v5', {
+    console.log(`💳 [Suno] Deduzindo ${creditCheck.required} créditos (${serviceName})...`)
+    const deduction = await deductCredits(userId, serviceName, {
       prompt: prompt.substring(0, 200),
       model: model || "V3_5",
       customMode,

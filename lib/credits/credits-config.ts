@@ -21,11 +21,27 @@
 // 🎵 MÚSICA - Geração e processamento de áudio
 // ═══════════════════════════════════════════════════════════════════════════
 export const MUSIC_CREDITS = {
-  music_generate_v5: 6,           // Gerar música com Suno V5
-  music_add_instrumental: 6,       // Adicionar instrumental
+  // Geração de música (todos os modelos - mesmo custo)
+  music_generate_v3: 6,            // Gerar música com Suno V3 (Chirp-v3)
+  music_generate_v3_5: 6,          // Gerar música com Suno V3.5 (Chirp-v3-5)
+  music_generate_v4: 6,            // Gerar música com Suno V4
+  music_generate_v4_5: 6,          // Gerar música com Suno V4.5
+  music_generate_v4_5plus: 6,      // Gerar música com Suno V4.5+
+  music_generate_v5: 6,            // Gerar música com Suno V5 (latest)
+  
+  // Operações de áudio
+  music_add_instrumental: 6,       // Adicionar instrumental (Upload Cover)
   music_add_vocals: 6,             // Adicionar vocais
-  music_separate_vocals: 5,        // Separar vocais (stem separation)
+  music_extend: 6,                 // Estender música existente
+  music_cover: 6,                  // Criar cover de música
+  
+  // Separação de stems
+  music_separate_vocals: 5,        // Separar vocais (2-stem: vocal + instrumental)
+  music_split_stem_full: 50,       // Separação completa (12-stem: todos os instrumentos) 🔥 PREMIUM
+  
+  // Conversões e processamento
   music_convert_wav: 1,            // Converter para WAV (barato)
+  music_generate_midi: 1,          // Gerar arquivo MIDI
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -169,11 +185,20 @@ export function calculateBatchCost(operations: CreditOperation[]): number {
  */
 export const OPERATION_NAMES: Record<CreditOperation, string> = {
   // Música
+  music_generate_v3: 'Gerar Música (Suno V3)',
+  music_generate_v3_5: 'Gerar Música (Suno V3.5)',
+  music_generate_v4: 'Gerar Música (Suno V4)',
+  music_generate_v4_5: 'Gerar Música (Suno V4.5)',
+  music_generate_v4_5plus: 'Gerar Música (Suno V4.5 Plus)',
   music_generate_v5: 'Gerar Música (Suno V5)',
   music_add_instrumental: 'Adicionar Instrumental',
   music_add_vocals: 'Adicionar Vocais',
-  music_separate_vocals: 'Separar Vocais',
+  music_extend: 'Estender Música',
+  music_cover: 'Criar Cover',
+  music_separate_vocals: 'Separar Vocais (2-stem)',
+  music_split_stem_full: 'Separação Completa (12-stem)',
   music_convert_wav: 'Converter para WAV',
+  music_generate_midi: 'Gerar MIDI',
   
   // Imagem
   image_fast: 'Imagen-4 Fast (1K, ~2-3s)',
