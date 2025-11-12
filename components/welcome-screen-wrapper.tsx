@@ -1,6 +1,6 @@
 "use client"
 
-import { WelcomeScreen } from "./welcome-screen"
+import { WelcomeScreenPremium } from "./welcome-screen-premium"
 import { useWelcomeScreen } from "@/hooks/use-welcome-screen"
 
 export function WelcomeScreenWrapper() {
@@ -10,5 +10,5 @@ export function WelcomeScreenWrapper() {
     return null
   }
 
-  return <WelcomeScreen user={user} onComplete={markWelcomeAsSeen} />
+  return <WelcomeScreenPremium user={user} onComplete={markWelcomeAsSeen} />
 }
