@@ -1,35 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { createClient } from '@supabase/supabase-js';
-import { consumirCreditos } from '@/lib/creditos-helper';
+import { checkCredits, deductCredits } from '@/lib/credits/credits-service';
+import type { CreditOperation } from '@/lib/credits/credits-config';
 
 /**
  * API Route: /api/imagen/generate
  * 
  * Gera imagens usando os modelos Google Imagen (Junho 2025):
- * - imagen-4.0-ultra-generate-001 (Ultra qualidade, máximo realismo)
- * - imagen-4.0-generate-001 (Standard, balanço perfeito)
- * - imagen-4.0-fast-generate-001 (Fast, geração rápida)
- * - imagen-3.0-generate-002 (Imagen 3)
+ * - imagen-4.0-ultra-generate-001 (Ultra qualidade, máximo realismo) - 35 créditos
+ * - imagen-4.0-generate-001 (Standard, balanço perfeito) - 25 créditos ⭐
+ * - imagen-4.0-fast-generate-001 (Fast, geração rápida) - 15 créditos
+ * - imagen-3.0-generate-002 (Imagen 3) - 10 créditos
  * 
  * Documentação oficial: https://ai.google.dev/gemini-api/docs/imagen
  * 
- * 🔥 NOVO: Sistema de créditos integrado com custos dinâmicos!
+ * 🔥 Sistema de créditos com verificação ANTES e dedução APÓS sucesso
  */
 
-// Mapeamento de modelos para service_name
-const SERVICE_NAME_MAP: Record<string, string> = {
-  'imagen-4.0-ultra-generate-001': 'image_ultra',
-  'imagen-4.0-generate-001': 'image_standard',
-  'imagen-4.0-fast-generate-001': 'image_fast',
-  'imagen-3.0-generate-002': 'image_3',
+// Mapeamento de modelos Google → operações de créditos
+const MODEL_TO_OPERATION: Record<string, CreditOperation> = {
+  'imagen-4.0-ultra-generate-001': 'image_ultra',      // 35 créditos
+  'imagen-4.0-generate-001': 'image_standard',         // 25 créditos ⭐
+  'imagen-4.0-fast-generate-001': 'image_fast',        // 15 créditos
+  'imagen-3.0-generate-002': 'image_3',                // 10 créditos
 };
 
 export async function POST(req: NextRequest) {
   try {
     const { prompt, model, config, user_id } = await req.json();
 
-    // Validação
+    // 🔥 VALIDAÇÃO: userId obrigatório
+    if (!user_id) {
+      return NextResponse.json(
+        { error: 'user_id é obrigatório para gerar imagem' },
+        { status: 400 }
+      );
+    }
+
+    // Validação do prompt
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json(
         { error: 'Prompt é obrigatório e deve ser uma string' },
@@ -44,11 +52,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ========================================
-    // 🔥 VERIFICAR E CONSUMIR CRÉDITOS
-    // ========================================
-    
-    // Configuração padrão (precisa estar antes do consumo de créditos)
+    // Configuração padrão
     const finalConfig = {
       numberOfImages: 4,
       aspectRatio: '1:1',
@@ -56,51 +60,46 @@ export async function POST(req: NextRequest) {
       ...config,
     };
 
-    if (user_id) {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    // Validar número de imagens
+    if (finalConfig.numberOfImages < 1 || finalConfig.numberOfImages > 4) {
+      return NextResponse.json(
+        { error: 'numberOfImages deve estar entre 1 e 4' },
+        { status: 400 }
       );
-
-      // Determinar service_name baseado no modelo
-      const modelId = model || 'imagen-4.0-generate-001';
-      const serviceName = SERVICE_NAME_MAP[modelId] || 'image_standard';
-
-      // Consultar custo do serviço via RPC (mantém custo dinâmico)
-      const { data: costData, error: costError } = await supabase.rpc('get_service_cost', {
-        p_service_name: serviceName
-      });
-
-      if (costError) {
-        console.error('Erro ao obter custo do serviço:', costError);
-        return NextResponse.json({
-          error: 'Erro ao consultar custo do serviço',
-        }, { status: 500 });
-      }
-
-      const CUSTO_GERACAO_IMAGEM = costData || 25; // fallback para standard
-
-      console.log(`💰 Serviço: ${serviceName} → ${CUSTO_GERACAO_IMAGEM} créditos`);
-
-      // Delegar consumo para o adapter unificado (server side)
-      const resultado = await consumirCreditos(user_id, serviceName, {
-        creditos: CUSTO_GERACAO_IMAGEM,
-        prompt: prompt.substring(0, 100),
-        model: modelId,
-        service_name: serviceName,
-        config: finalConfig,
-      });
-
-      if (!resultado.success) {
-        return NextResponse.json({
-          error: 'Créditos insuficientes ou erro ao consumir créditos',
-          details: resultado.error || resultado.details,
-          redirect: '/loja-creditos',
-        }, { status: 402 });
-      }
     }
 
-    // API Key
+    // ========================================
+    // 🔥 PASSO 1: VERIFICAR CRÉDITOS ANTES
+    // ========================================
+    
+    const modelId = model || 'imagen-4.0-generate-001';
+    const operation = MODEL_TO_OPERATION[modelId] || 'image_standard';
+
+    console.log(`🎨 [Imagen] Verificando créditos para usuário ${user_id} (modelo: ${modelId})...`);
+    const creditCheck = await checkCredits(user_id, operation);
+
+    if (!creditCheck.hasCredits) {
+      console.log(`❌ [Imagen] Créditos insuficientes: ${creditCheck.message}`);
+      return NextResponse.json(
+        {
+          error: 'Créditos insuficientes',
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+          message: creditCheck.message,
+          model: modelId,
+          redirect: '/loja-creditos',
+        },
+        { status: 402 } // 402 Payment Required
+      );
+    }
+
+    console.log(`✅ [Imagen] Créditos OK (saldo: ${creditCheck.currentBalance}, necessário: ${creditCheck.required})`);
+
+    // ========================================
+    // 🔥 PASSO 2: GERAR IMAGEM
+    // ========================================
+    
     const API_KEY = process.env.GOOGLE_API_KEY;
     if (!API_KEY) {
       console.error('❌ GOOGLE_API_KEY não configurada');
@@ -114,38 +113,86 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log('🎨 Iniciando geração de imagem...');
+    console.log('�� Iniciando geração de imagem...');
     console.log('📝 Prompt:', prompt);
-    console.log('🤖 Modelo:', model || 'imagen-4.0-generate-001');
+    console.log('🤖 Modelo:', modelId);
     console.log('⚙️ Config:', finalConfig);
 
     // Inicializar cliente
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
-    // Validar número de imagens
-    if (finalConfig.numberOfImages < 1 || finalConfig.numberOfImages > 4) {
-      return NextResponse.json(
-        { error: 'numberOfImages deve estar entre 1 e 4' },
-        { status: 400 }
-      );
-    }
-
     console.log('🚀 Chamando Google Imagen API...');
 
     // Gerar imagens
-    const response = await ai.models.generateImages({
-      model: model || 'imagen-4.0-generate-001',
-      prompt,
-      config: finalConfig,
-    });
+    let response;
+    try {
+      response = await ai.models.generateImages({
+        model: modelId,
+        prompt,
+        config: finalConfig,
+      });
+    } catch (apiError: any) {
+      console.error('❌ [Imagen] Erro ao gerar imagem:', apiError);
+      // NÃO deduzir créditos se API falhou
+      
+      // Erros específicos da API
+      if (apiError.message?.includes('API key')) {
+        return NextResponse.json(
+          { error: 'API Key inválida ou sem permissões para Imagen' },
+          { status: 401 }
+        );
+      }
+
+      if (apiError.message?.includes('quota')) {
+        return NextResponse.json(
+          { error: 'Quota da API excedida. Tente novamente mais tarde.' },
+          { status: 429 }
+        );
+      }
+
+      if (apiError.message?.includes('safety')) {
+        return NextResponse.json(
+          { error: 'Prompt bloqueado por políticas de segurança. Tente um prompt diferente.' },
+          { status: 400 }
+        );
+      }
+
+      throw apiError;
+    }
     
     console.log('✅ Resposta recebida da API');
 
     if (!response.generatedImages || response.generatedImages.length === 0) {
+      // NÃO deduzir créditos se nenhuma imagem foi gerada
       return NextResponse.json(
         { error: 'Nenhuma imagem foi gerada pela API' },
         { status: 500 }
       );
+    }
+
+    // ========================================
+    // 🔥 PASSO 3: DEDUZIR CRÉDITOS APÓS SUCESSO
+    // ========================================
+
+    console.log(`💰 [Imagen] Deduzindo ${creditCheck.required} créditos (${operation})...`);
+    const deduction = await deductCredits(user_id, operation, {
+      prompt: prompt.substring(0, 100),
+      model: modelId,
+      numberOfImages: finalConfig.numberOfImages,
+      aspectRatio: finalConfig.aspectRatio,
+    });
+
+    if (!deduction.success) {
+      console.error(`❌ [Imagen] Falha ao deduzir créditos: ${deduction.error}`);
+      // Imagens foram geradas mas créditos não foram deduzidos
+      // Log crítico para análise posterior
+      console.error('⚠️ [CRITICAL] Imagens geradas sem cobrança de créditos!', {
+        user_id,
+        model: modelId,
+        error: deduction.error,
+      });
+    } else {
+      console.log(`✅ [Imagen] Créditos deduzidos! Novo saldo: ${deduction.newBalance}`);
     }
 
     // Processar imagens geradas
@@ -153,12 +200,9 @@ export async function POST(req: NextRequest) {
       const imageBytes = generatedImage.image.imageBytes;
       const base64Image = `data:image/png;base64,${imageBytes}`;
       
-      // ✅ FIX: Não incluir 'prompt' no objeto retornado
-      // Isso causava o texto sobreposto na imagem
       return {
         url: base64Image,
         mimeType: 'image/png',
-        // prompt: prompt, ❌ REMOVIDO - causava texto na imagem
         index: index + 1,
       };
     });
@@ -168,38 +212,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       images,
-      model: model || 'imagen-4.0-generate-001',
+      model: modelId,
       config: finalConfig,
+      creditsUsed: creditCheck.required,
+      newBalance: deduction.newBalance,
+      transactionId: deduction.transactionId,
     });
 
   } catch (error: any) {
     console.error('❌ Erro na API Imagen:', error);
     console.error('Stack:', error.stack);
 
-    // Erros específicos da API
-    if (error.message?.includes('API key')) {
-      return NextResponse.json(
-        { error: 'API Key inválida ou sem permissões para Imagen' },
-        { status: 401 }
-      );
-    }
-
-    if (error.message?.includes('quota')) {
-      return NextResponse.json(
-        { error: 'Quota da API excedida. Tente novamente mais tarde.' },
-        { status: 429 }
-      );
-    }
-
-    if (error.message?.includes('safety')) {
-      return NextResponse.json(
-        { error: 'Prompt bloqueado por políticas de segurança. Tente um prompt diferente.' },
-        { status: 400 }
-      );
-    }
-
     return NextResponse.json(
-      { error: error.message || 'Erro ao gerar imagens com Imagen' },
+      { error: error.message || 'Erro interno do servidor' },
       { status: 500 }
     );
   }
