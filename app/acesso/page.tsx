@@ -444,9 +444,9 @@ export default function AcessoPage() {
 
       console.log('[REGISTER] Registo completo! Redirecionando...');
       
-      // Redirecionar para home
+      // Redirecionar para página de boas-vindas
       setTimeout(() => {
-        router.push("/");
+        router.push("/welcome");
       }, 1500);
       
     } catch (error: any) {
