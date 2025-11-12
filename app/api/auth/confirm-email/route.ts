@@ -73,16 +73,54 @@ export async function POST(request: NextRequest) {
       // Não falhar aqui, pode já existir
     }
 
-    // 4. Marcar código como usado
+    // 4. Marcar código como usado COM PROTEÇÃO RACE CONDITION
     if (inviteCode) {
-      await supabaseAdmin
+      console.log('[CONFIRM-EMAIL] Verificando código antes de marcar como usado...');
+      
+      // ⚡ PROTEÇÃO: Re-verificar se código ainda está ativo
+      const { data: codeCheck, error: codeCheckError } = await supabaseAdmin
+        .from('invite_codes')
+        .select('code, active, used_by')
+        .ilike('code', inviteCode)
+        .limit(1)
+        .single();
+      
+      if (codeCheckError || !codeCheck) {
+        console.error('[CONFIRM-EMAIL] ❌ Código não encontrado:', codeCheckError);
+        return NextResponse.json(
+          { error: 'Código de acesso inválido' },
+          { status: 400 }
+        );
+      }
+      
+      if (!codeCheck.active || codeCheck.used_by) {
+        console.error('[CONFIRM-EMAIL] ❌ Código já usado por:', codeCheck.used_by);
+        return NextResponse.json(
+          { error: 'Este código já foi utilizado por outro utilizador' },
+          { status: 409 }
+        );
+      }
+      
+      // ✅ Código ainda ativo - marcar como usado COM CONDIÇÃO
+      const { error: updateError } = await supabaseAdmin
         .from('invite_codes')
         .update({
           active: false,
           used_by: userId,
           used_at: new Date().toISOString(),
         })
-        .ilike('code', inviteCode);
+        .ilike('code', inviteCode)
+        .eq('active', true); // ⚡ CRÍTICO: Só atualizar se AINDA estiver ativo
+      
+      if (updateError) {
+        console.error('[CONFIRM-EMAIL] ❌ Erro ao marcar código:', updateError);
+        return NextResponse.json(
+          { error: 'Erro ao processar código. Contacta o suporte.' },
+          { status: 500 }
+        );
+      }
+      
+      console.log('[CONFIRM-EMAIL] ✅ Código marcado como usado');
     }
 
     return NextResponse.json({ 

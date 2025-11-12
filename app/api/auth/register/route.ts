@@ -262,16 +262,54 @@ export async function POST(request: NextRequest) {
       }
 
       // ════════════════════════════════════════════════════════════════
-      // PASSO 6: Marcar código de convite como usado
+      // PASSO 6: Marcar código de convite como usado COM PROTEÇÃO
       // ════════════════════════════════════════════════════════════════
-      await supabase
+      console.log('[REGISTER API] Verificando código antes de marcar como usado...');
+      
+      // ⚡ PROTEÇÃO: Re-verificar se código ainda está ativo (previne race condition)
+      const { data: codeRecheck, error: recheckError } = await supabase
+        .from('invite_codes')
+        .select('code, active, used_by')
+        .eq('code', inviteCodeData.code)
+        .single();
+      
+      if (recheckError || !codeRecheck) {
+        console.error('[REGISTER API] ❌ Código não encontrado na verificação final:', recheckError);
+        return NextResponse.json(
+          { error: 'Código de convite inválido. Por favor, tenta novamente.' },
+          { status: 400 }
+        );
+      }
+      
+      if (!codeRecheck.active || codeRecheck.used_by) {
+        console.error('[REGISTER API] ❌ Código já usado por:', codeRecheck.used_by);
+        return NextResponse.json(
+          { error: 'Este código já foi utilizado por outro utilizador.' },
+          { status: 409 }
+        );
+      }
+      
+      // ✅ Código ainda ativo - marcar como usado COM CONDIÇÃO
+      const { error: updateCodeError } = await supabase
         .from('invite_codes')
         .update({
           active: false,
           used_by: userId,
           used_at: new Date().toISOString(),
         })
-        .eq('code', inviteCodeData.code);
+        .eq('code', inviteCodeData.code)
+        .eq('active', true); // ⚡ CRÍTICO: Só atualizar se AINDA estiver ativo
+      
+      if (updateCodeError) {
+        console.error('[REGISTER API] ❌ Erro ao marcar código:', updateCodeError);
+        // Este erro é crítico - pode indicar race condition
+        return NextResponse.json(
+          { error: 'Erro ao processar código. Outro utilizador pode ter usado este código.' },
+          { status: 409 }
+        );
+      }
+      
+      console.log('[REGISTER API] ✅ Código marcado como usado com sucesso');
 
       // ════════════════════════════════════════════════════════════════
       // PASSO 7: Criar sessão ativa (24h)

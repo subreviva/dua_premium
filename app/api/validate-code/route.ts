@@ -297,7 +297,39 @@ export async function POST(req: NextRequest) {
       console.error('⚠️  Erro ao adicionar créditos iniciais:', addCreditsError);
     }
 
-    // 6. Marcar código como usado
+    // 6. Marcar código como usado COM PROTEÇÃO RACE CONDITION
+    console.log('[VALIDATE-CODE] Verificando código antes de marcar como usado...');
+    
+    // ⚡ PROTEÇÃO: Re-verificar se código ainda está ativo
+    const { data: codeRecheck, error: recheckError } = await supabaseAdmin
+      .from('invite_codes')
+      .select('id, code, active, used_by')
+      .eq('id', inviteCode.id)
+      .single();
+    
+    if (recheckError || !codeRecheck) {
+      console.error('[VALIDATE-CODE] ❌ Código não encontrado na verificação final:', recheckError);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Código de acesso inválido. Por favor, tenta novamente.',
+        } as ValidateCodeResponse,
+        { status: 400 }
+      );
+    }
+    
+    if (!codeRecheck.active || codeRecheck.used_by) {
+      console.error('[VALIDATE-CODE] ❌ Código já usado por:', codeRecheck.used_by);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Este código já foi utilizado por outro utilizador.',
+        } as ValidateCodeResponse,
+        { status: 409 }
+      );
+    }
+    
+    // ✅ Código ainda ativo - marcar como usado COM CONDIÇÃO
     const { error: updateCodeError } = await supabaseAdmin
       .from('invite_codes')
       .update({
@@ -305,12 +337,22 @@ export async function POST(req: NextRequest) {
         used_by: userId,
         used_at: new Date().toISOString(),
       })
-      .eq('id', inviteCode.id);
+      .eq('id', inviteCode.id)
+      .eq('active', true); // ⚡ CRÍTICO: Só atualizar se AINDA estiver ativo
 
     if (updateCodeError) {
-      console.error('⚠️  Erro ao marcar código como usado:', updateCodeError);
-      // Não retornar erro aqui, pois o user já foi criado
+      console.error('[VALIDATE-CODE] ⚠️  Erro ao marcar código como usado:', updateCodeError);
+      // Retornar erro crítico - pode indicar race condition
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Erro ao processar código. Outro utilizador pode ter usado este código.',
+        } as ValidateCodeResponse,
+        { status: 409 }
+      );
     }
+    
+    console.log('[VALIDATE-CODE] ✅ Código marcado como usado com sucesso');
 
     // 7. Obter dados atualizados do user
     const { data: updatedUser } = await supabaseAdmin

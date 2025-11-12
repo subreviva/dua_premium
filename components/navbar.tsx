@@ -41,18 +41,20 @@ export default function Navbar() {
       setUser(authUser)
       
       if (authUser) {
-        // Carregar avatar e créditos do usuário
+        // Carregar avatar e créditos da tabela users (fonte única da verdade)
         const { data: userData } = await supabaseClient
           .from('users')
-          .select('avatar_url, credits')
+          .select('avatar_url, creditos_servicos')
           .eq('id', authUser.id)
           .single()
         
         if (userData?.avatar_url) {
           setAvatarUrl(userData.avatar_url)
         }
-        if (userData?.credits !== undefined) {
-          setCredits(userData.credits)
+        
+        // Créditos REAIS de users.creditos_servicos (mesma fonte que home page)
+        if (userData?.creditos_servicos !== undefined) {
+          setCredits(userData.creditos_servicos)
         }
       }
     }
@@ -64,17 +66,20 @@ export default function Navbar() {
       setUser(session?.user || null)
       
       if (session?.user) {
+        // Carregar avatar e créditos da tabela users (fonte única da verdade)
         const { data: userData } = await supabaseClient
           .from('users')
-          .select('avatar_url, credits')
+          .select('avatar_url, creditos_servicos')
           .eq('id', session.user.id)
           .single()
         
         if (userData?.avatar_url) {
           setAvatarUrl(userData.avatar_url)
         }
-        if (userData?.credits !== undefined) {
-          setCredits(userData.credits)
+        
+        // Créditos REAIS de users.creditos_servicos (mesma fonte que home page)
+        if (userData?.creditos_servicos !== undefined) {
+          setCredits(userData.creditos_servicos)
         }
       } else {
         setAvatarUrl("")

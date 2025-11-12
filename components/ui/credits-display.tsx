@@ -26,7 +26,7 @@ export function CreditsDisplay({
   useEffect(() => {
     loadCredits();
 
-    // Listener para atualizações em tempo real
+    // Listener para atualizações em tempo real da tabela users
     const channel = supabaseClient
       .channel('credits-changes')
       .on(
@@ -34,7 +34,7 @@ export function CreditsDisplay({
         {
           event: '*',
           schema: 'public',
-          table: 'duaia_user_balances'
+          table: 'users'
         },
         (payload) => {
           // Recarregar créditos quando houver mudanças
@@ -58,33 +58,18 @@ export function CreditsDisplay({
         return;
       }
 
-      // Buscar créditos reais de duaia_user_balances
-      const { data: balanceData, error } = await supabaseClient
-        .from('duaia_user_balances')
-        .select('servicos_creditos')
-        .eq('user_id', user.id)
+      // Buscar créditos reais de users.creditos_servicos (mesma fonte que home page)
+      const { data: userData, error } = await supabaseClient
+        .from('users')
+        .select('creditos_servicos')
+        .eq('id', user.id)
         .single();
 
       if (error) {
-        // Se não existe, criar registro
-        if (error.code === 'PGRST116') {
-          const { data: newBalance } = await supabaseClient
-            .from('duaia_user_balances')
-            .insert({
-              user_id: user.id,
-              servicos_creditos: 100, // Créditos iniciais
-              duacoin_balance: 50
-            })
-            .select('servicos_creditos')
-            .single();
-          
-          setCredits(newBalance?.servicos_creditos || 0);
-        } else {
-          console.error('Error loading credits:', error);
-          setCredits(0);
-        }
+        console.error('Error loading credits:', error);
+        setCredits(0);
       } else {
-        setCredits(balanceData?.servicos_creditos || 0);
+        setCredits(userData?.creditos_servicos || 0);
       }
     } catch (error) {
       console.error('Error loading credits:', error);
