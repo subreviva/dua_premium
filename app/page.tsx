@@ -160,7 +160,7 @@ export default function HomePage() {
               Onde a próxima onda de criatividade lusófona acontece
             </motion.p>
 
-            {/* Botões Google Flow Style - Ainda menores e mais elegantes mobile */}
+            {/* Botões estilo imagem anexo - Finos, elegantes, border arredondado */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -169,14 +169,10 @@ export default function HomePage() {
             >
               <Button
                 size="lg"
-                className="w-full sm:w-auto rounded-full px-7 sm:px-12 py-3 sm:py-5 bg-white/[0.12] hover:bg-white/[0.18] active:bg-white/[0.15] text-white font-light text-[13px] sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_1px_4px_rgba(255,255,255,0.1)_inset] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4),0_2px_8px_rgba(255,255,255,0.15)_inset] border-0"
+                className="w-full sm:w-auto rounded-full px-6 sm:px-10 py-2.5 sm:py-4 bg-white text-black hover:bg-white/90 active:bg-white/80 font-medium text-[13px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] border-0"
                 onClick={() => router.push("/waitlist")}
-                style={{
-                  backdropFilter: 'blur(20px) saturate(160%)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-                }}
               >
-                <span className="relative z-10 tracking-wide">
+                <span className="relative z-10 tracking-normal">
                   Obter Acesso
                 </span>
               </Button>
@@ -184,14 +180,10 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto rounded-full px-7 sm:px-12 py-3 sm:py-5 bg-transparent hover:bg-white/[0.08] active:bg-white/[0.05] text-white font-light text-[13px] sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] border border-white/20 hover:border-white/30"
+                className="w-full sm:w-auto rounded-full px-6 sm:px-10 py-2.5 sm:py-4 bg-transparent hover:bg-white/10 active:bg-white/5 text-white font-medium text-[13px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-white/40 hover:border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
                 onClick={() => router.push("/acesso")}
-                style={{
-                  backdropFilter: 'blur(20px) saturate(160%)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-                }}
               >
-                <span className="relative z-10 tracking-wide">
+                <span className="relative z-10 tracking-normal">
                   Tenho o código
                 </span>
               </Button>
