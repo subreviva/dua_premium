@@ -105,9 +105,9 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.25)_60%,rgba(0,0,0,0.5)_100%)]" />
         </motion.div>
 
-        {/* Content Container - iOS Premium Spacing - Ultra compacto mobile */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24 md:py-32 lg:py-40">
-          <div className="flex flex-col gap-3 sm:gap-6 md:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center">
+        {/* Content Container - iOS Premium Spacing - Conteúdo mais elevado mobile */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-24 md:py-32 lg:py-40">
+          <div className="flex flex-col gap-2 sm:gap-6 md:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center">
 
             {/* Badge UPDATE - FIXO NO TOPO - NÃO MEXER */}
             <motion.div
@@ -121,8 +121,8 @@ export default function HomePage() {
               </p>
             </motion.div>
 
-            {/* ESPAÇADOR - Empurra DUA para baixo */}
-            <div className="h-16 sm:h-0" />
+            {/* ESPAÇADOR - Empurra DUA para baixo - reduzido mobile */}
+            <div className="h-8 sm:h-0" />
 
             {/* Logo "DUA" - Estilo Google Flow gigante */}
             <motion.h1
@@ -160,16 +160,16 @@ export default function HomePage() {
               Onde a próxima onda de criatividade lusófona acontece
             </motion.p>
 
-            {/* Botões Google Flow Style - Glassmorphism Premium */}
+            {/* Botões Google Flow Style - Menores e mais elegantes mobile */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full sm:w-auto px-6 sm:px-0 mt-0 sm:mt-4 md:mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center"
+              className="w-full sm:w-auto px-6 sm:px-0 mt-2 sm:mt-4 md:mt-8 flex flex-col sm:flex-row gap-3 items-center justify-center"
             >
               <Button
                 size="lg"
-                className="w-full sm:w-auto rounded-full px-10 sm:px-12 py-4 sm:py-5 bg-white/[0.12] hover:bg-white/[0.18] active:bg-white/[0.15] text-white font-normal text-base sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_1px_4px_rgba(255,255,255,0.1)_inset] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4),0_2px_8px_rgba(255,255,255,0.15)_inset] border-0"
+                className="w-full sm:w-auto rounded-full px-8 sm:px-12 py-3.5 sm:py-5 bg-white/[0.12] hover:bg-white/[0.18] active:bg-white/[0.15] text-white font-normal text-sm sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_1px_4px_rgba(255,255,255,0.1)_inset] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4),0_2px_8px_rgba(255,255,255,0.15)_inset] border-0"
                 onClick={() => router.push("/waitlist")}
                 style={{
                   backdropFilter: 'blur(20px) saturate(160%)',
@@ -184,7 +184,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto rounded-full px-10 sm:px-12 py-4 sm:py-5 bg-transparent hover:bg-white/[0.08] active:bg-white/[0.05] text-white font-normal text-base sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] border-2 border-white/20 hover:border-white/30"
+                className="w-full sm:w-auto rounded-full px-8 sm:px-12 py-3.5 sm:py-5 bg-transparent hover:bg-white/[0.08] active:bg-white/[0.05] text-white font-normal text-sm sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] border border-white/20 hover:border-white/30"
                 onClick={() => router.push("/acesso")}
                 style={{
                   backdropFilter: 'blur(20px) saturate(160%)',
