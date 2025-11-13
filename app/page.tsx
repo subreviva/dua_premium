@@ -165,7 +165,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full px-5 sm:px-0 mt-3 sm:mt-4 md:mt-8 flex flex-row gap-2 sm:gap-2.5 items-center justify-center max-w-[300px] sm:max-w-md mx-auto"
+              className="w-full px-5 sm:px-0 mt-6 sm:mt-4 md:mt-8 flex flex-row gap-2 sm:gap-2.5 items-center justify-center max-w-[300px] sm:max-w-md mx-auto"
             >
               <Button
                 size="lg"
