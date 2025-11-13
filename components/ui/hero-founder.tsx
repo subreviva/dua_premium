@@ -57,32 +57,31 @@ function HeroFounder() {
         <div className="lg:hidden min-h-screen flex flex-col justify-center py-8">
           {/* Content Container - Centered Vertically */}
           <div className="flex-1 flex flex-col justify-center space-y-5">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true }}
-          >
-            <Badge 
-              variant="outline" 
-              className="border-white/10 bg-white/[0.03] text-white/95 backdrop-blur-xl px-4 py-2 text-[10px] font-light tracking-wider uppercase"
-            >
-              <Sparkles className="w-3 h-3 mr-1.5 inline-block" />
-              A História por Trás da DUA
-            </Badge>
-          </motion.div>
-
           {/* Title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true }}
+            className="text-[34px] tracking-tight font-extralight text-white leading-[1.15] max-w-[320px]"
+          >
+            A DUA não é só
+            <br />
+            <span className="font-light">uma ferramenta</span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             viewport={{ once: true }}
-            className="text-[32px] tracking-tight font-extralight text-white leading-[1.1]"
+            className="text-[16px] text-white/80 font-light leading-[1.5] max-w-[300px]"
           >
-            Quem Criou a DUA
-          </motion.h1>
+            É a resposta de quem decidiu que
+            <br />
+            <span className="text-white font-normal">já chega de esperar</span>
+          </motion.p>
 
           {/* Ultra Premium Card - 100% Fullscreen Optimized */}
           <motion.div
@@ -127,29 +126,33 @@ function HeroFounder() {
             </div>
           </motion.div>
 
-          {/* Action Buttons - Ultra Premium Compact */}
+          {/* Revolution Text */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
+            viewport={{ once: true }}
+            className="text-[15px] text-white/70 font-light leading-[1.5]"
+          >
+            Junta-te à revolução criativa lusófona
+          </motion.p>
+
+          {/* Action Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
             viewport={{ once: true }}
-            className="flex flex-col gap-3 pt-2"
+            className="pt-2"
           >
-            {/* Primary Button - Revolut Style */}
             <Button 
-              size="lg" 
+              size="lg"
+              asChild
               className="w-full gap-2.5 bg-white text-black hover:bg-white/95 active:bg-white/90 font-normal text-[15px] px-6 py-5 rounded-[18px] transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.4)] active:scale-[0.98] touch-manipulation tracking-tight"
             >
-              Conhecer a Visão <MoveRight className="w-4 h-4" />
-            </Button>
-            
-            {/* Secondary Button - Ultra Refined */}
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="w-full gap-2.5 border-[1.5px] border-white/10 bg-white/[0.03] hover:bg-white/[0.06] active:bg-white/[0.08] text-white backdrop-blur-xl font-light text-[15px] px-6 py-5 rounded-[18px] transition-all duration-300 active:scale-[0.98] touch-manipulation tracking-tight"
-            >
-              Junte-se à Comunidade
+              <a href="https://www.2lados.pt" target="_blank" rel="noopener noreferrer">
+                Conhecer a Visão <MoveRight className="w-4 h-4" />
+              </a>
             </Button>
           </motion.div>
           </div>

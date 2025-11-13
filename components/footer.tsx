@@ -60,10 +60,10 @@ export default function Footer() {
   const footerLinks = {
     product: [
       { label: "Chat IA", href: "/chat" },
-      { label: "Vídeo Studio", href: "/video-studio" },
-      { label: "Design Studio", href: "/design-studio" },
-      { label: "Music Studio", href: "/music-studio" },
-      { label: "Image Studio", href: "/image-studio" },
+      { label: "Vídeo Studio", href: "/videostudio" },
+      { label: "Design Studio", href: "/designstudio" },
+      { label: "Music Studio", href: "/musicstudio" },
+      { label: "Image Studio", href: "/imagestudio" },
     ],
     ecosystem: [
       { label: "2 LADOS", href: "https://www.2lados.pt", external: true },
@@ -74,6 +74,12 @@ export default function Footer() {
     company: [
       { label: "Comunidade", href: "/comunidade" },
       { label: "Comprar Créditos", href: "/comprar" },
+      { label: "Sobre", href: "/sobre" },
+    ],
+    legal: [
+      { label: "Política de Privacidade", href: "/privacidade" },
+      { label: "Termos de Uso", href: "/termos" },
+      { label: "Cookies", href: "/cookies" },
     ],
   }
 
@@ -211,38 +217,64 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Column */}
+          {/* Legal Column */}
           <div className="lg:col-span-2">
-            <h4 className="text-white font-semibold mb-5 text-sm tracking-wide uppercase">Contacto</h4>
+            <h4 className="text-white font-semibold mb-5 text-sm tracking-wide uppercase">Legal</h4>
             <ul className="space-y-3">
-              <li>
+              {footerLinks.legal.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-white/60 hover:text-white font-light text-[15px] transition-colors duration-300 hover:translate-x-1 inline-block"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            
+            {/* Contact Info */}
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <h5 className="text-white/90 font-medium mb-3 text-xs tracking-wide uppercase">Contacto</h5>
+              <div className="space-y-2">
                 <a
                   href="mailto:info@2lados.pt"
-                  className="text-white/60 hover:text-white font-light text-[15px] transition-colors duration-300 hover:translate-x-1 inline-block"
+                  className="block text-white/60 hover:text-white font-light text-[13px] transition-colors duration-300"
                 >
                   info@2lados.pt
                 </a>
-              </li>
-              <li>
                 <a
                   href="https://wa.me/351964696576"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/60 hover:text-white font-light text-[15px] transition-colors duration-300 hover:translate-x-1 inline-block"
+                  className="block text-white/60 hover:text-white font-light text-[13px] transition-colors duration-300"
                 >
                   +351 964 696 576
                 </a>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/[0.06]">
-          <div className="flex flex-col md:flex-row justify-center items-center gap-4">
-            <p className="text-white/40 text-sm font-light text-center">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-white/40 text-sm font-light text-center md:text-left">
               © {currentYear} DUA IA & 2 LADOS. Todos os direitos reservados.
             </p>
+            <div className="flex flex-wrap gap-4 text-xs text-white/40">
+              <Link href="/privacidade" className="hover:text-white transition-colors">
+                Privacidade
+              </Link>
+              <span>•</span>
+              <Link href="/termos" className="hover:text-white transition-colors">
+                Termos
+              </Link>
+              <span>•</span>
+              <Link href="/cookies" className="hover:text-white transition-colors">
+                Cookies
+              </Link>
+            </div>
           </div>
         </div>
       </div>

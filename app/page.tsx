@@ -559,15 +559,9 @@ A DUA tem rosto, voz e história."
           >
             <Button
               size="lg"
-              className="w-full gap-3 bg-white text-black hover:bg-white/90 active:bg-white/80 font-medium text-base px-8 py-7 rounded-2xl transition-all duration-300 shadow-2xl shadow-white/20 touch-manipulation"
-            >
-              Começar Agora <ArrowRight className="w-5 h-5" />
-            </Button>
-            
-            <Button
-              size="lg"
               variant="outline"
               className="w-full gap-3 border-2 border-white/30 bg-transparent hover:bg-white/10 active:bg-white/15 text-white font-light text-base px-8 py-7 rounded-2xl transition-all duration-300 touch-manipulation"
+              onClick={() => router.push("/acesso")}
             >
               Explorar Estúdios
             </Button>
@@ -617,23 +611,6 @@ A DUA tem rosto, voz e história."
             viewport={{ once: true, amount: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-6 sm:pt-8 px-4"
           >
-            {/* Botão Premium Transparente - Começar Agora */}
-            <div className="relative group">
-              {/* Glow effect premium */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-white/20 via-white/30 to-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              
-              <Button
-                size="lg"
-                className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-5 sm:py-6 bg-white/5 hover:bg-white/10 text-white font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] border border-white/20 hover:border-white/40 backdrop-blur-xl"
-                onClick={() => router.push("/acesso")}
-              >
-                <span className="relative z-10 flex items-center gap-2 sm:gap-3 justify-center tracking-wide">
-                  Começar Agora
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-700 group-hover:translate-x-2" />
-                </span>
-              </Button>
-            </div>
-            
             {/* Botão Premium Transparente - Explorar */}
             <div className="relative group">
               {/* Glow effect premium */}
@@ -646,7 +623,7 @@ A DUA tem rosto, voz e história."
                 onClick={() => router.push("/acesso")}
               >
                 <span className="flex items-center gap-2 sm:gap-3 tracking-wide">
-                  Explorar o Ecossistema
+                  Explorar Estúdios
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-700 group-hover:translate-x-2" />
                 </span>
               </Button>
