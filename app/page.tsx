@@ -107,7 +107,7 @@ export default function HomePage() {
 
         {/* Content Container - Centralização vertical perfeita estilo Flow/Revolut */}
         <div className="relative z-10 container mx-auto px-5 sm:px-6 lg:px-8 h-full flex items-center justify-center">
-          <div className="flex flex-col gap-2 sm:gap-6 md:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center -mt-8 sm:mt-0">
+          <div className="flex flex-col gap-2 sm:gap-6 md:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center -mt-32 sm:mt-0">
 
             {/* Badge UPDATE - Posicionamento Flow elegante */}
             <motion.div
