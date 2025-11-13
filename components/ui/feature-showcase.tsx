@@ -97,95 +97,100 @@ export function FeatureShowcase({
 
   return (
     <section className={cn("w-full text-white", className)}>
-      {/* MOBILE VERSION - Ultra Premium iOS Design */}
+      {/* MOBILE VERSION - Apple/Revolut Premium Design */}
       <div className="md:hidden w-full py-12 sm:py-16">
-        {/* Header mobile - iOS Typography */}
-        <div className="px-5 sm:px-6 mb-10 sm:mb-12 space-y-6">
+        {/* Header mobile - Minimal Premium Typography */}
+        <div className="px-5 sm:px-6 mb-10 sm:mb-12 space-y-5">
           {eyebrow && (
-            <Badge variant="outline" className="border-white/25 bg-white/[0.08] text-white/95 backdrop-blur-2xl text-[13px] font-medium px-5 py-2 rounded-full shadow-lg">
+            <Badge variant="outline" className="border-white/20 bg-white/5 text-white/80 backdrop-blur-xl text-[11px] font-light px-4 py-1.5 rounded-full">
               {eyebrow}
             </Badge>
           )}
           {title && (
-            <h2 className="text-balance text-[36px] sm:text-[42px] font-extralight leading-[1.1] tracking-[-0.02em] text-white">
+            <h2 className="text-balance text-[32px] sm:text-[38px] font-light leading-[1.1] tracking-[-0.03em] text-white">
               {title}
             </h2>
           )}
           {description && (
-            <p className="text-[17px] text-white/70 font-normal leading-[1.5] tracking-wide max-w-xl">
+            <p className="text-[15px] text-white/60 font-light leading-[1.5] tracking-tight max-w-xl">
               {description}
             </p>
           )}
         </div>
 
-        {/* Carrossel mobile - Ultra Premium Transparent Design */}
+        {/* Carrossel Premium - Apple/Revolut Style */}
         <Carousel
           setApi={setCarouselApi}
           opts={{
-            align: "start",
+            align: "center",
             loop: true,
-            dragFree: false,
+            dragFree: true,
             skipSnaps: false,
           }}
           className="w-full touch-pan-x"
         >
-          <CarouselContent className="ml-4 -mr-4">
+          <CarouselContent className="-ml-3">
             {steps.map((step, idx) => {
               const tab = tabs[idx] || tabs[0];
               const isExpanded = expandedCards[step.id];
               const shouldTruncate = step.text.length > 120;
               
               return (
-                <CarouselItem key={step.id} className="pl-4 basis-[92%] sm:basis-[88%]">
-                  {/* Card com altura fixa e fundo transparente */}
-                  <div className="relative overflow-hidden rounded-[32px] border border-white/20 bg-transparent backdrop-blur-md h-[520px] flex flex-col transition-all duration-300">
-                    {/* Imagem de fundo com overlay */}
-                    <div className="absolute inset-0 z-0">
+                <CarouselItem key={step.id} className="pl-3 basis-[85%] sm:basis-[80%]">
+                  {/* Card Premium Apple Style */}
+                  <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-2xl h-[540px] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.5)] hover:border-white/[0.12]">
+                    
+                    {/* Imagem Full com Gradient Premium */}
+                    <div className="relative h-[280px] w-full overflow-hidden">
                       <img
                         src={tab.src}
                         alt={tab.alt ?? tab.label}
-                        className="h-full w-full object-cover opacity-30"
+                        className="h-full w-full object-cover scale-105"
                         style={{ objectPosition: tab.objectPosition || "center center" }}
                         loading={idx === 0 ? "eager" : "lazy"}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/80" />
+                      {/* Gradient Apple - Suave e elegante */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/90" />
+                      
+                      {/* Badge flutuante premium */}
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-black/40 text-white backdrop-blur-xl border border-white/20 text-[10px] font-medium px-3 py-1 rounded-full">
+                          {tab.label}
+                        </Badge>
+                      </div>
                     </div>
 
-                    {/* Conteúdo */}
-                    <div className="relative z-10 p-8 flex flex-col h-full">
-                      {/* Header com Badge */}
-                      <div className="flex items-start justify-between mb-6">
-                        <div className="h-10 w-10 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-lg">
-                          <span className="text-white/90 text-sm font-medium">{idx + 1}</span>
+                    {/* Content Area - Clean & Spacious */}
+                    <div className="relative z-10 p-6 flex flex-col flex-1 bg-gradient-to-b from-black/60 to-black/80">
+                      
+                      {/* Número elegante */}
+                      <div className="mb-4">
+                        <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 border border-white/10">
+                          <span className="text-white/70 text-xs font-light">{String(idx + 1).padStart(2, '0')}</span>
                         </div>
-                        {tab.label && (
-                          <Badge className="bg-white/15 text-white/95 backdrop-blur-xl border border-white/25 text-xs font-medium px-4 py-2 rounded-full shadow-lg">
-                            {tab.label}
-                          </Badge>
-                        )}
                       </div>
 
-                      {/* Título */}
-                      <h3 className="text-[32px] font-light text-white tracking-tight leading-[1.15] mb-5">
+                      {/* Título Apple Style */}
+                      <h3 className="text-[26px] font-normal text-white tracking-[-0.02em] leading-[1.2] mb-3">
                         {step.title}
                       </h3>
 
-                      {/* Texto com expansão */}
-                      <div className="flex-1 flex flex-col">
-                        <p className="text-[16px] text-white/80 font-normal leading-[1.6] tracking-wide mb-4">
+                      {/* Texto Premium */}
+                      <div className="flex-1">
+                        <p className="text-[14px] text-white/70 font-light leading-[1.6] tracking-tight">
                           {isExpanded || !shouldTruncate ? step.text : truncateText(step.text)}
                         </p>
 
-                        {/* Botão Ver Mais */}
+                        {/* Ver mais discreto */}
                         {shouldTruncate && (
                           <button
                             onClick={() => toggleCard(step.id)}
-                            className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white/90 transition-colors duration-200 font-medium group w-fit"
+                            className="mt-3 inline-flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white/80 transition-colors duration-300 font-light"
                           >
-                            <span>{isExpanded ? "Ver menos" : "Ver mais"}</span>
+                            <span>{isExpanded ? "Menos" : "Mais"}</span>
                             <ChevronDown 
                               className={cn(
-                                "w-4 h-4 transition-transform duration-300",
+                                "w-3.5 h-3.5 transition-transform duration-300",
                                 isExpanded && "rotate-180"
                               )} 
                             />
@@ -193,25 +198,20 @@ export function FeatureShowcase({
                         )}
                       </div>
 
-                      {/* Footer elegante */}
-                      <div className="mt-auto pt-6 border-t border-white/15">
-                        <div className="flex items-center justify-between">
-                          {/* Indicadores de página */}
-                          <div className="flex gap-1.5">
-                            {steps.map((_, i) => (
-                              <div 
-                                key={i} 
-                                className={cn(
-                                  "h-1.5 rounded-full transition-all duration-300",
-                                  i === idx ? "w-8 bg-white/70" : "w-1.5 bg-white/30"
-                                )}
-                              />
-                            ))}
-                          </div>
-                          {/* Texto elegante */}
-                          <span className="text-xs text-white/50 font-light italic tracking-wider">
-                            Deslize para mais
-                          </span>
+                      {/* Progress Dots - Apple Style */}
+                      <div className="mt-6 pt-4 border-t border-white/[0.06]">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {steps.map((_, i) => (
+                            <div 
+                              key={i} 
+                              className={cn(
+                                "rounded-full transition-all duration-300",
+                                i === idx 
+                                  ? "h-1.5 w-6 bg-white/80" 
+                                  : "h-1.5 w-1.5 bg-white/20"
+                              )}
+                            />
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -222,12 +222,24 @@ export function FeatureShowcase({
           </CarouselContent>
         </Carousel>
 
-        {/* CTAs mobile - iOS Premium Style */}
-        <div className="px-5 sm:px-6 mt-12 flex justify-center">
+        {/* Stats Premium - Apple Style */}
+        {stats && stats.length > 0 && (
+          <div className="px-5 mt-8 flex items-center justify-center gap-6">
+            {stats.map((stat, i) => (
+              <React.Fragment key={i}>
+                <span className="text-[12px] text-white/40 font-light tracking-wide">{stat}</span>
+                {i < stats.length - 1 && <div className="h-1 w-1 rounded-full bg-white/20" />}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+
+        {/* CTA Button - Apple Minimal */}
+        <div className="px-5 mt-10 flex justify-center">
           <Button 
             asChild 
             size="lg" 
-            className="bg-white/15 hover:bg-white/25 active:bg-white/20 backdrop-blur-2xl border border-white/30 text-white rounded-2xl text-[17px] font-medium h-14 px-8 min-h-[56px] touch-manipulation shadow-lg transition-all duration-200 active:scale-[0.98] w-full max-w-md"
+            className="bg-white text-black hover:bg-white/90 active:bg-white/80 rounded-full text-[15px] font-medium h-12 px-8 shadow-lg transition-all duration-300 active:scale-[0.96]"
           >
             <Link href="/registo">Começar Agora</Link>
           </Button>
