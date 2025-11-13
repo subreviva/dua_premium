@@ -201,9 +201,6 @@ function HeroFounder() {
                 </Button>
               </div>
             </motion.div>
-                </Button>
-              </div>
-            </motion.div>
           </motion.div>
 
           <motion.div 
