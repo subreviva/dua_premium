@@ -25,6 +25,7 @@ import { supabaseClient } from "@/lib/supabase";
 import Image from "next/image";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { ChatImage } from "@/components/chat/ChatImage";
+import { useRouter } from "next/navigation";
 
 const supabase = supabaseClient;
 
@@ -73,6 +74,88 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: AutoResizeProps) {
 }
 
 export default function ChatPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  
+  // Verificar autenticação
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session?.user);
+    };
+    
+    checkAuth();
+  }, []);
+
+  // Se ainda não verificou autenticação, mostrar loading
+  if (isAuthenticated === null) {
+    return (
+      <div className="w-full h-screen bg-black flex items-center justify-center">
+        <div className="animate-pulse text-white">Carregando...</div>
+      </div>
+    );
+  }
+
+  // Se não está autenticado, mostrar welcome screen
+  if (!isAuthenticated) {
+    return (
+      <div className="w-full h-screen bg-black flex items-center justify-center overflow-hidden relative">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-950 to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_50%)]" />
+        
+        <div className="relative z-10 text-center px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="space-y-8"
+          >
+            <h1 
+              className="text-[72px] sm:text-[100px] md:text-[140px] font-extralight tracking-[-0.04em] leading-none text-white"
+              style={{ textShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+            >
+              DUA
+            </h1>
+            <p className="text-base sm:text-xl text-white/60 font-light tracking-tight max-w-2xl mx-auto">
+              Converse com inteligência artificial avançada
+            </p>
+            
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              onClick={() => router.push('/acesso')}
+              className="group relative px-12 py-4 text-lg font-medium text-white border-2 border-white/40 rounded-full hover:border-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
+            >
+              <span className="flex items-center gap-3">
+                OBTER ACESSO
+                <svg
+                  className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Usuário autenticado - mostrar chat completo
+  return <AuthenticatedChat />;
+}
+
+function AuthenticatedChat() {
   // Persistência de conversas
   const { initialMessages, isLoaded, saveMessages, clearHistory } = useChatPersistence();
 

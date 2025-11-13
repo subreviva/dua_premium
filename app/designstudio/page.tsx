@@ -3,24 +3,54 @@
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import { supabaseClient } from '@/lib/supabase';
+
+const supabase = supabaseClient;
 
 export default function DesignStudioWelcome() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Verificar autenticação
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Se está logado, redirecionar automaticamente para criação
+        setIsAuthenticated(true);
+        router.push('/designstudio/create');
+      } else {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
     // Autoplay video when component mounts
     if (videoRef.current) {
       videoRef.current.play().catch(err => {
         console.log('Autoplay prevented:', err);
       });
     }
-  }, []);
+  }, [router]);
 
   const handleEnter = () => {
-    router.push('/designstudio/create');
+    // Se não está autenticado, vai para /acesso
+    router.push('/acesso');
   };
+
+  // Não mostrar nada enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen bg-black flex items-center justify-center">
+        <div className="animate-pulse text-white">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
