@@ -146,18 +146,19 @@ export default function HomePage() {
               DUA
             </motion.h1>
 
-            {/* Tagline - Estilo Google Flow */}
+            {/* Tagline - Estilo Google Flow - Quebra otimizada */}
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="text-sm sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-3xl leading-relaxed px-6 sm:px-8"
+              className="text-sm sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-[280px] sm:max-w-3xl leading-snug sm:leading-relaxed px-4 sm:px-8"
               style={{ 
                 textShadow: '0 4px 30px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.7)',
                 letterSpacing: '-0.01em'
               }}
             >
-              Onde a próxima onda de criatividade lusófona acontece
+              Onde a próxima onda de{' '}
+              <span className="block sm:inline">criatividade lusófona acontece</span>
             </motion.p>
 
             {/* Botões lado a lado mobile - elegante centralizado */}
@@ -165,11 +166,11 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full px-4 sm:px-0 mt-0.5 sm:mt-4 md:mt-8 flex flex-row gap-2 sm:gap-2.5 items-center justify-center max-w-md mx-auto"
+              className="w-full px-4 sm:px-0 mt-2 sm:mt-4 md:mt-8 flex flex-row gap-2 sm:gap-2.5 items-center justify-center max-w-[320px] sm:max-w-md mx-auto"
             >
               <Button
                 size="lg"
-                className="flex-1 sm:flex-none sm:w-auto rounded-full px-5 sm:px-10 py-2.5 sm:py-4 bg-white text-black hover:bg-white/90 active:bg-white/80 font-medium text-[12px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] border-0"
+                className="flex-1 sm:flex-none sm:w-auto rounded-full px-4 sm:px-10 py-2 sm:py-4 bg-white text-black hover:bg-white/90 active:bg-white/80 font-medium text-[11px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] border-0 whitespace-nowrap"
                 onClick={() => router.push("/waitlist")}
               >
                 <span className="relative z-10 tracking-normal">
@@ -180,7 +181,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="flex-1 sm:flex-none sm:w-auto rounded-full px-5 sm:px-10 py-2.5 sm:py-4 bg-transparent hover:bg-white/10 active:bg-white/5 text-white font-medium text-[12px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-white/40 hover:border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
+                className="flex-1 sm:flex-none sm:w-auto rounded-full px-4 sm:px-10 py-2 sm:py-4 bg-transparent hover:bg-white/10 active:bg-white/5 text-white font-medium text-[11px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-white/40 hover:border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.1)] whitespace-nowrap"
                 onClick={() => router.push("/acesso")}
               >
                 <span className="relative z-10 tracking-normal">
@@ -189,53 +190,54 @@ export default function HomePage() {
               </Button>
             </motion.div>
 
-            {/* Ícone Scroll Ultra Premium iOS - Animado */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="mt-2 sm:mt-10 md:mt-14"
-            >
+            {/* Scroll removido - Layout limpo */}
+            <div className="hidden sm:block mt-10 md:mt-14">
               <motion.div
-                animate={{ 
-                  y: [0, 8, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="flex flex-col items-center gap-3 cursor-pointer group"
-                onClick={() => {
-                  window.scrollTo({ 
-                    top: window.innerHeight, 
-                    behavior: 'smooth' 
-                  })
-                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
               >
-                {/* Mouse/Scroll Indicator Premium */}
-                <div className="relative w-7 h-11 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-all duration-500 backdrop-blur-xl bg-white/[0.05]">
-                  {/* Scroll Dot Animado */}
-                  <motion.div
-                    animate={{
-                      y: [4, 16, 4],
-                      opacity: [0.5, 1, 0.5]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/80 rounded-full"
-                  />
-                </div>
-                
-                {/* Texto discreto */}
-                <span className="text-[10px] sm:text-xs text-white/40 group-hover:text-white/60 transition-colors font-light tracking-widest uppercase">
-                  Scroll
-                </span>
+                <motion.div
+                  animate={{ 
+                    y: [0, 8, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="flex flex-col items-center gap-3 cursor-pointer group"
+                  onClick={() => {
+                    window.scrollTo({ 
+                      top: window.innerHeight, 
+                      behavior: 'smooth' 
+                    })
+                  }}
+                >
+                  {/* Mouse/Scroll Indicator Premium - Apenas Desktop */}
+                  <div className="relative w-7 h-11 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-all duration-500 backdrop-blur-xl bg-white/[0.05]">
+                    {/* Scroll Dot Animado */}
+                    <motion.div
+                      animate={{
+                        y: [4, 16, 4],
+                        opacity: [0.5, 1, 0.5]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/80 rounded-full"
+                    />
+                  </div>
+                  
+                  {/* Texto discreto */}
+                  <span className="text-xs text-white/40 group-hover:text-white/60 transition-colors font-light tracking-widest uppercase">
+                    Scroll
+                  </span>
+                </motion.div>
               </motion.div>
-            </motion.div>
+            </div>
           </div>
         </div>
 
