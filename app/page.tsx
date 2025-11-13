@@ -123,7 +123,7 @@ export default function HomePage() {
             {/* ESPAÇADOR - Ritmo vertical Flow */}
             <div className="h-3 sm:h-0" />
 
-            {/* Logo "DUA" - Premium Bold elegante */}
+            {/* Logo "DUA" - Elegância Apple refinada */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -134,7 +134,7 @@ export default function HomePage() {
                 fontFamily: "var(--font-sans)", 
                 fontWeight: 300,
                 textShadow: '0 30px 150px rgba(0,0,0,0.99), 0 15px 75px rgba(0,0,0,0.95), 0 8px 40px rgba(0,0,0,0.9)',
-                letterSpacing: '0.15em',
+                letterSpacing: '-0.02em',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
                 textRendering: 'optimizeLegibility',
