@@ -26,10 +26,31 @@ interface EcosystemSimpleProps {
 export const EcosystemSimple = ({ pillars }: EcosystemSimpleProps) => {
   const [mounted, setMounted] = React.useState(false);
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = React.useState(0);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-scroll effect - Revolut style
+  React.useEffect(() => {
+    if (!carouselApi) return;
+
+    const interval = setInterval(() => {
+      carouselApi.scrollNext();
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [carouselApi]);
+
+  // Track current slide
+  React.useEffect(() => {
+    if (!carouselApi) return;
+
+    carouselApi.on("select", () => {
+      setCurrentSlide(carouselApi.selectedScrollSnap());
+    });
+  }, [carouselApi]);
 
   if (!mounted) {
     return (
@@ -76,23 +97,22 @@ export const EcosystemSimple = ({ pillars }: EcosystemSimpleProps) => {
         </motion.p>
       </div>
 
-      {/* MOBILE VERSION - Carrossel horizontal */}
+      {/* MOBILE VERSION - Carrossel horizontal auto-scroll Revolut Style */}
       <div className="md:hidden mb-10">
         <Carousel
           setApi={setCarouselApi}
           opts={{
-            align: "start",
+            align: "center",
             loop: true,
-            dragFree: true,
+            dragFree: false,
             skipSnaps: false,
           }}
           className="w-full touch-pan-x"
         >
-          <CarouselContent className="ml-4">
+          <CarouselContent className="-ml-4">
             {pillars.map((pillar, index) => (
-              <CarouselItem key={index} className="pl-4 basis-[90%] sm:basis-[85%]">
-                <motion.a
-                  href="#"
+              <CarouselItem key={index} className="pl-4 basis-[88%]">
+                <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{
@@ -101,51 +121,67 @@ export const EcosystemSimple = ({ pillars }: EcosystemSimpleProps) => {
                     delay: index * 0.1,
                   }}
                   viewport={{ once: true, amount: 0.2 }}
-                  className="group relative flex flex-col overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-white/20 shadow-2xl h-[580px]"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.02] backdrop-blur-xl border border-white/[0.08] transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.3)] h-[520px]"
                 >
-                  {/* Image */}
-                  <div className="relative h-[280px] overflow-hidden flex-shrink-0">
+                  {/* Image Header - Revolut Style */}
+                  <div className="relative h-[240px] overflow-hidden flex-shrink-0">
                     <img
                       src={pillar.image}
                       alt={pillar.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+                    {/* Gradient overlay - clean Revolut style */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/90" />
 
-                    {/* Icon Badge */}
-                    <div className="absolute top-4 left-4 w-14 h-14 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-lg">
-                      <pillar.icon className="w-7 h-7 text-white" />
+                    {/* Icon Badge - Top Left */}
+                    <div className="absolute top-5 left-5 w-12 h-12 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+                      <pillar.icon className="w-6 h-6 text-white/90" />
                     </div>
 
-                    {/* Phase Badge */}
+                    {/* Phase Badge - Top Right */}
                     {pillar.phase && (
-                      <div className="absolute top-4 right-4 px-4 py-2 rounded-full bg-white/15 backdrop-blur-xl border border-white/20 text-sm font-light text-white shadow-lg">
+                      <div className="absolute top-5 right-5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 text-xs font-light text-white/90">
                         {pillar.phase}
                       </div>
                     )}
                   </div>
 
-                  {/* Content */}
-                  <div className="p-8 flex flex-col flex-1 justify-between">
-                    <div className="space-y-5">
-                      <h3 className="text-2xl sm:text-3xl font-extralight text-white tracking-tight leading-tight">
+                  {/* Content - Clean Revolut Typography */}
+                  <div className="p-7 flex flex-col flex-1 bg-gradient-to-b from-black/80 to-black/90">
+                    <div className="space-y-4 flex-1">
+                      {/* Subtitle - Revolut style */}
+                      <p className="text-[11px] uppercase tracking-wider text-white/50 font-medium">
+                        {pillar.subtitle}
+                      </p>
+                      
+                      {/* Title */}
+                      <h3 className="text-[24px] font-light text-white tracking-tight leading-[1.2]">
                         {pillar.title}
                       </h3>
-                      <p className="text-base text-white/70 font-light leading-relaxed">
+                      
+                      {/* Description */}
+                      <p className="text-[14px] text-white/65 font-light leading-[1.6] line-clamp-4">
                         {pillar.description}
                       </p>
                     </div>
 
-                    {/* CTA */}
-                    <div className="flex items-center gap-2 text-base font-light text-white/80 mt-6 group-hover:text-white transition-colors duration-300">
-                      Saber Mais
-                      <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                    {/* Progress Indicator - Revolut Style */}
+                    <div className="mt-6 pt-5 border-t border-white/[0.06]">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {pillars.map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`rounded-full transition-all duration-500 ${
+                              i === currentSlide 
+                                ? "h-1.5 w-8 bg-white/70" 
+                                : "h-1.5 w-1.5 bg-white/20"
+                            }`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
-
-                  {/* Hover gradient */}
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                </motion.a>
+                </motion.div>
               </CarouselItem>
             ))}
           </CarouselContent>
