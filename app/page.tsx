@@ -509,21 +509,21 @@ A DUA tem rosto, voz e história."
         />
         
         {/* MOBILE VERSION - Clean Centered Final CTA */}
-        <div className="lg:hidden max-w-xl mx-auto text-center space-y-10 relative z-10">
+        <div className="lg:hidden max-w-xl mx-auto text-center space-y-8 relative z-10 px-6">
           {/* Main Headline */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             viewport={{ once: true }}
-            className="space-y-8"
+            className="space-y-6"
           >
-            <h2 className="text-5xl font-extralight text-white tracking-tight leading-[1.1]">
+            <h2 className="text-[40px] font-extralight text-white tracking-tight leading-[1.15]">
               A DUA não é só<br />
               <span className="font-light">uma ferramenta</span>
             </h2>
             
-            <p className="text-2xl text-white/90 font-light leading-relaxed">
+            <p className="text-[18px] text-white/90 font-light leading-[1.5]">
               É a resposta de quem decidiu que<br />
               <span className="text-white font-normal">já chega de esperar</span>
             </p>
@@ -535,7 +535,7 @@ A DUA tem rosto, voz e história."
             whileInView={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             viewport={{ once: true }}
-            className="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
           />
 
           {/* Revolution Text */}
@@ -544,23 +544,22 @@ A DUA tem rosto, voz e história."
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
             viewport={{ once: true }}
-            className="text-xl text-white/80 font-light leading-relaxed"
+            className="text-[16px] text-white/70 font-light leading-[1.5]"
           >
             Junta-te à revolução criativa lusófona
           </motion.p>
 
-          {/* Action Buttons - Premium Style */}
+          {/* Action Button - Hero Style */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
             viewport={{ once: true }}
-            className="flex flex-col gap-4 pt-4"
+            className="pt-2"
           >
             <Button
               size="lg"
-              variant="outline"
-              className="w-full gap-3 border-2 border-white/30 bg-transparent hover:bg-white/10 active:bg-white/15 text-white font-light text-base px-8 py-7 rounded-2xl transition-all duration-300 touch-manipulation"
+              className="w-full gap-2.5 bg-white text-black hover:bg-white/95 active:bg-white/90 font-normal text-[15px] px-6 py-5 rounded-[18px] transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.4)] active:scale-[0.98] touch-manipulation tracking-tight"
               onClick={() => router.push("/acesso")}
             >
               Explorar Estúdios
@@ -611,15 +610,14 @@ A DUA tem rosto, voz e história."
             viewport={{ once: true, amount: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-6 sm:pt-8 px-4"
           >
-            {/* Botão Premium Transparente - Explorar */}
+            {/* Botão Premium - Hero Style */}
             <div className="relative group">
               {/* Glow effect premium */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-white/15 via-white/25 to-white/15 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-white/20 via-white/30 to-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               
               <Button
                 size="lg"
-                variant="outline"
-                className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-5 sm:py-6 border border-white/20 hover:border-white/40 text-white/90 hover:text-white hover:bg-white/5 font-light text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] bg-transparent backdrop-blur-xl hover:shadow-[0_8px_32px_rgba(255,255,255,0.1)] active:scale-[0.98]"
+                className="relative w-full sm:w-auto rounded-full px-8 sm:px-10 py-5 sm:py-6 bg-white text-black hover:bg-white/95 font-medium text-sm sm:text-base transition-all duration-700 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_40px_rgba(255,255,255,0.2)] hover:shadow-[0_12px_56px_rgba(255,255,255,0.3)] tracking-tight"
                 onClick={() => router.push("/acesso")}
               >
                 <span className="flex items-center gap-2 sm:gap-3 tracking-wide">

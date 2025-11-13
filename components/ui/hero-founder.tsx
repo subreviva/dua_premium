@@ -57,31 +57,32 @@ function HeroFounder() {
         <div className="lg:hidden min-h-screen flex flex-col justify-center py-8">
           {/* Content Container - Centered Vertically */}
           <div className="flex-1 flex flex-col justify-center space-y-5">
-          {/* Title */}
-          <motion.h1
+          {/* Badge */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             viewport={{ once: true }}
-            className="text-[34px] tracking-tight font-extralight text-white leading-[1.15] max-w-[320px]"
           >
-            A DUA não é só
-            <br />
-            <span className="font-light">uma ferramenta</span>
-          </motion.h1>
+            <Badge 
+              variant="outline" 
+              className="border-white/10 bg-white/[0.03] text-white/95 backdrop-blur-xl px-4 py-2 text-[10px] font-light tracking-wider uppercase"
+            >
+              <Sparkles className="w-3 h-3 mr-1.5 inline-block" />
+              A História por Trás da DUA
+            </Badge>
+          </motion.div>
 
-          {/* Subtitle */}
-          <motion.p
+          {/* Title */}
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             viewport={{ once: true }}
-            className="text-[16px] text-white/80 font-light leading-[1.5] max-w-[300px]"
+            className="text-[32px] tracking-tight font-extralight text-white leading-[1.1]"
           >
-            É a resposta de quem decidiu que
-            <br />
-            <span className="text-white font-normal">já chega de esperar</span>
-          </motion.p>
+            Quem Criou a DUA
+          </motion.h1>
 
           {/* Ultra Premium Card - 100% Fullscreen Optimized */}
           <motion.div
@@ -126,18 +127,7 @@ function HeroFounder() {
             </div>
           </motion.div>
 
-          {/* Revolution Text */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
-            viewport={{ once: true }}
-            className="text-[15px] text-white/70 font-light leading-[1.5]"
-          >
-            Junta-te à revolução criativa lusófona
-          </motion.p>
-
-          {/* Action Button */}
+          {/* Action Button - Hero Style */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -196,28 +186,21 @@ function HeroFounder() {
               viewport={{ once: true, amount: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 pt-6"
             >
-              {/* Primary Button - Ultra Premium White */}
+              {/* Primary Button - Hero Style */}
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-white/30 via-white/40 to-white/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
                 <Button 
-                  size="lg" 
+                  size="lg"
+                  asChild
                   className="relative gap-3 bg-white text-black hover:bg-white/95 font-medium text-lg px-10 py-7 rounded-full transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_40px_rgba(255,255,255,0.2)] hover:shadow-[0_12px_56px_rgba(255,255,255,0.3)] tracking-tight"
                 >
-                  Conhecer a Visão <MoveRight className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-2" />
+                  <a href="https://www.2lados.pt" target="_blank" rel="noopener noreferrer">
+                    Conhecer a Visão <MoveRight className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-2" />
+                  </a>
                 </Button>
               </div>
-              
-              {/* Secondary Button - Ultra Refined Glass */}
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 via-white/20 to-white/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="relative gap-3 border-[1.5px] border-white/10 hover:border-white/30 bg-white/[0.03] text-white hover:bg-white/[0.08] backdrop-blur-2xl font-light text-lg px-10 py-7 rounded-full transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_8px_40px_rgba(255,255,255,0.08)] tracking-tight"
-                >
-                  Junte-se à Comunidade
+            </motion.div>
                 </Button>
               </div>
             </motion.div>
