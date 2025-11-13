@@ -162,7 +162,7 @@ export const CommunityPreview = () => {
           </Carousel>
         </div>
 
-        {/* Ver Mais Button - Premium */}
+        {/* Ver Mais Button - Hero Style */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -172,14 +172,11 @@ export const CommunityPreview = () => {
         >
           <Button
             size="lg"
-            className="group rounded-full px-10 sm:px-14 py-6 sm:py-8 bg-white hover:bg-white text-black font-semibold text-base sm:text-lg transition-all duration-700 hover:scale-[1.08] hover:shadow-[0_20px_80px_rgba(255,255,255,0.3)] active:scale-95 relative overflow-hidden"
+            className="w-full sm:w-auto gap-2.5 bg-white text-black hover:bg-white/95 active:bg-white/90 font-normal text-[15px] px-6 py-5 sm:px-10 sm:py-7 rounded-[18px] sm:rounded-full transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.4)] sm:shadow-[0_8px_40px_rgba(255,255,255,0.2)] hover:shadow-[0_12px_56px_rgba(255,255,255,0.3)] active:scale-[0.98] sm:hover:scale-[1.02] touch-manipulation tracking-tight"
             onClick={() => router.push('/acesso')}
           >
-            <span className="relative z-10 flex items-center gap-3">
-              Fazer Login para Aceder
-              <ArrowRight className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-1" />
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/90 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            Fazer Login para Aceder
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
         </motion.div>
       </div>
