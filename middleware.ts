@@ -157,12 +157,6 @@ export async function middleware(req: NextRequest) {
     '/_next',                // Next.js internals
     '/favicon.ico',          // Favicon
     '/images',               // Imagens públicas
-    // 🎯 WELCOME PAGES DOS ESTÚDIOS (PÚBLICAS)
-    '/chat',                 // Chat welcome (redireciona para /acesso se tentar criar)
-    '/designstudio',         // Design Studio welcome
-    '/musicstudio',          // Music Studio welcome
-    '/videostudio',          // Video Studio welcome (Cinema)
-    '/imagestudio',          // Image Studio welcome
     '/comunidade',           // Comunidade welcome
   ];
 
@@ -172,7 +166,12 @@ export async function middleware(req: NextRequest) {
   );
 
   // 🔒 ROTAS DE CRIAÇÃO DOS ESTÚDIOS - SEMPRE PROTEGIDAS
-  const STUDIO_CREATE_ROUTES = [
+  const STUDIO_ROUTES = [
+    '/chat',                 // Chat (welcome page se não autenticado, dashboard se autenticado)
+    '/designstudio',         // Design Studio (welcome se não autenticado, home se autenticado)
+    '/musicstudio',          // Music Studio (welcome se não autenticado, home se autenticado)
+    '/videostudio',          // Video Studio (welcome se não autenticado, home se autenticado)
+    '/imagestudio',          // Image Studio (welcome se não autenticado, home se autenticado)
     '/chat/c/',              // Chat com conversa específica
     '/designstudio/create',  // Design Studio criação
     '/musicstudio/home',     // Music Studio home (criação)
@@ -184,14 +183,14 @@ export async function middleware(req: NextRequest) {
     '/imagestudio/library',  // Image Studio biblioteca
   ];
 
-  // Verificar se está tentando acessar rota de criação
-  const isStudioCreateRoute = STUDIO_CREATE_ROUTES.some((route) => 
-    path.startsWith(route)
+  // Verificar se está tentando acessar rota de estúdio
+  const isStudioRoute = STUDIO_ROUTES.some((route) => 
+    path === route || path.startsWith(route)
   );
 
-  // Se tentar acessar rota de criação sem estar autenticado, redirecionar para /acesso
-  if (isStudioCreateRoute && !req.cookies.get('sb-access-token')?.value) {
-    console.log(`🚫 Acesso negado a rota de criação sem autenticação: ${path}`);
+  // Se tentar acessar rota de estúdio sem estar autenticado, redirecionar para /acesso
+  if (isStudioRoute && !req.cookies.get('sb-access-token')?.value) {
+    console.log(`🚫 Acesso negado a estúdio sem autenticação: ${path}`);
     const redirectUrl = new URL('/acesso', req.url);
     redirectUrl.searchParams.set('redirect', path);
     return NextResponse.redirect(redirectUrl);

@@ -1103,13 +1103,32 @@ export default function ChatPage() {
         >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-4">
-              <div className="text-center space-y-3 sm:space-y-4">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg">
-                  DUA IA
-                </h1>
-                <p className="text-neutral-300 text-sm sm:text-base lg:text-lg max-w-md mx-auto leading-relaxed">
+              <div className="text-center space-y-6 sm:space-y-8">
+                {/* Ultra Premium DUA Logo - Mobile First */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <h1 className="text-[72px] sm:text-[96px] md:text-[120px] lg:text-[140px] font-extralight text-white tracking-[-0.04em] leading-none"
+                    style={{ 
+                      fontFamily: 'var(--font-geist-sans)',
+                      textShadow: '0 20px 60px rgba(0,0,0,0.5)'
+                    }}
+                  >
+                    DUA
+                  </h1>
+                </motion.div>
+                
+                {/* Subtitle - Ultra Refined */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-white/60 text-base sm:text-lg lg:text-xl max-w-md mx-auto font-light tracking-tight leading-relaxed"
+                >
                   Construa algo incrível — comece a digitar abaixo.
-                </p>
+                </motion.p>
               </div>
             </div>
           ) : (
