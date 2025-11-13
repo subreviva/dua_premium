@@ -53,8 +53,10 @@ function HeroFounder() {
       </div>
 
       <div className="container mx-auto relative z-10 px-4 sm:px-6 lg:px-8">
-        {/* MOBILE VERSION - iOS Style Card Design */}
-        <div className="lg:hidden space-y-6">
+        {/* MOBILE VERSION - 100% Fullscreen Premium Experience */}
+        <div className="lg:hidden min-h-screen flex flex-col justify-center py-8">
+          {/* Content Container - Centered Vertically */}
+          <div className="flex-1 flex flex-col justify-center space-y-5">
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -64,9 +66,9 @@ function HeroFounder() {
           >
             <Badge 
               variant="outline" 
-              className="border-white/10 bg-white/[0.03] text-white/95 backdrop-blur-xl px-5 py-2.5 text-sm font-light tracking-wide"
+              className="border-white/10 bg-white/[0.03] text-white/95 backdrop-blur-xl px-4 py-2 text-[10px] font-light tracking-wider uppercase"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-2 inline-block" />
+              <Sparkles className="w-3 h-3 mr-1.5 inline-block" />
               A História por Trás da DUA
             </Badge>
           </motion.div>
@@ -77,21 +79,21 @@ function HeroFounder() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             viewport={{ once: true }}
-            className="text-4xl tracking-tight font-extralight text-white leading-[1.1]"
+            className="text-[32px] tracking-tight font-extralight text-white leading-[1.1]"
           >
             Quem Criou a DUA
           </motion.h1>
 
-          {/* Ultra Premium Card - Apple/Revolut Style */}
+          {/* Ultra Premium Card - 100% Fullscreen Optimized */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             viewport={{ once: true }}
-            className="relative rounded-[32px] overflow-hidden bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
+            className="relative rounded-2xl overflow-hidden bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
           >
-            {/* Image Section - Enhanced */}
-            <div className="relative h-[450px] overflow-hidden">
+            {/* Image Section - Optimized Height */}
+            <div className="relative h-[340px] overflow-hidden">
               <img 
                 src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-4122-HOMEM%20DENTRO%20DE%20UM%20QUARTO%2C%20NO%20COMPUTADOR....jpeg"
                 alt="Fundador da DUA em estúdios"
@@ -100,56 +102,57 @@ function HeroFounder() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/20" />
               
               {/* Quote on image - Ultra Premium */}
-              <div className="absolute bottom-8 left-6 right-6">
-                <p className="text-white text-xl font-light leading-relaxed tracking-tight">
-                  “A DUA é prova de que é possível reescrever as regras quando o sistema não te deixa jogar.”
+              <div className="absolute bottom-6 left-5 right-5">
+                <p className="text-white text-[17px] font-light leading-[1.5] tracking-tight">
+                  "A DUA é prova de que é possível reescrever as regras quando o sistema não te deixa jogar."
                 </p>
               </div>
             </div>
 
             {/* Content Section - Ultra Refined */}
-            <div className="p-8 space-y-6 bg-gradient-to-b from-black/40 to-black/60">
-              <p className="text-[17px] leading-relaxed text-white/90 font-light tracking-tight">
+            <div className="p-6 space-y-4 bg-gradient-to-b from-black/40 to-black/60">
+              <p className="text-[14px] leading-[1.6] text-white/90 font-light tracking-tight">
                 A DUA nasceu das mãos de alguém que conhece tanto palcos de festivais quanto bairros periféricos. 
                 Alguém que viveu a exploração da indústria musical, a falta de acesso a ferramentas profissionais 
                 e a solidão de tentar construir algo do zero.
               </p>
               
-              <div className="pt-3 pb-2">
+              <div className="py-2">
                 <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
               </div>
               
-              <p className="text-[15px] leading-relaxed text-white/50 font-light tracking-tight">
+              <p className="text-[13px] leading-[1.6] text-white/50 font-light tracking-tight">
                 Sem equipa inicial. Sem investimento externo. Apenas uma visão clara e uma teimosia inabalável.
               </p>
             </div>
           </motion.div>
 
-          {/* Action Buttons - Ultra Premium Exclusive */}
+          {/* Action Buttons - Ultra Premium Compact */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
             viewport={{ once: true }}
-            className="flex flex-col gap-4 pt-4"
+            className="flex flex-col gap-3 pt-2"
           >
             {/* Primary Button - Revolut Style */}
             <Button 
               size="lg" 
-              className="w-full gap-3 bg-white text-black hover:bg-white/95 active:bg-white/90 font-normal text-[17px] px-8 py-7 rounded-[20px] transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.4)] active:scale-[0.98] touch-manipulation tracking-tight"
+              className="w-full gap-2.5 bg-white text-black hover:bg-white/95 active:bg-white/90 font-normal text-[15px] px-6 py-5 rounded-[18px] transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.4)] active:scale-[0.98] touch-manipulation tracking-tight"
             >
-              Conhecer a Visão <MoveRight className="w-5 h-5" />
+              Conhecer a Visão <MoveRight className="w-4 h-4" />
             </Button>
             
             {/* Secondary Button - Ultra Refined */}
             <Button 
               size="lg" 
               variant="outline"
-              className="w-full gap-3 border-[1.5px] border-white/10 bg-white/[0.03] hover:bg-white/[0.06] active:bg-white/[0.08] text-white backdrop-blur-xl font-light text-[17px] px-8 py-7 rounded-[20px] transition-all duration-300 active:scale-[0.98] touch-manipulation tracking-tight"
+              className="w-full gap-2.5 border-[1.5px] border-white/10 bg-white/[0.03] hover:bg-white/[0.06] active:bg-white/[0.08] text-white backdrop-blur-xl font-light text-[15px] px-6 py-5 rounded-[18px] transition-all duration-300 active:scale-[0.98] touch-manipulation tracking-tight"
             >
               Junte-se à Comunidade
             </Button>
           </motion.div>
+          </div>
         </div>
 
         {/* DESKTOP VERSION - Original Grid Layout */}
