@@ -123,16 +123,16 @@ export default function HomePage() {
             {/* ESPAÇADOR - Ritmo vertical Flow */}
             <div className="h-3 sm:h-0" />
 
-            {/* Logo "DUA" - Premium luxury spacing */}
+            {/* Logo "DUA" - Premium Bold elegante */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="font-extralight text-white w-full text-center"
+              className="font-light text-white w-full text-center"
               style={{ 
                 fontSize: 'clamp(10rem, 32vw, 42rem)',
                 fontFamily: "var(--font-sans)", 
-                fontWeight: 100,
+                fontWeight: 300,
                 textShadow: '0 30px 150px rgba(0,0,0,0.99), 0 15px 75px rgba(0,0,0,0.95), 0 8px 40px rgba(0,0,0,0.9)',
                 letterSpacing: '0.15em',
                 WebkitFontSmoothing: 'antialiased',
