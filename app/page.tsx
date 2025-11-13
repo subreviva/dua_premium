@@ -105,9 +105,9 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.25)_60%,rgba(0,0,0,0.5)_100%)]" />
         </motion.div>
 
-        {/* Content Container - iOS Premium Spacing - Conteúdo ainda mais elevado mobile */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-24 md:py-32 lg:py-40">
-          <div className="flex flex-col gap-1.5 sm:gap-6 md:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center">
+        {/* Content Container - iOS Premium Spacing - Mobile centralizado elegante */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-24 md:py-32 lg:py-40">
+          <div className="flex flex-col gap-1 sm:gap-6 md:gap-8 lg:gap-12 items-center justify-center max-w-7xl w-full mx-auto text-center">
 
             {/* Badge UPDATE - FIXO NO TOPO - NÃO MEXER */}
             <motion.div
@@ -116,13 +116,13 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
               className="mb-0"
             >
-              <p className="text-xs sm:text-sm md:text-base text-white/70 font-light tracking-wide">
+              <p className="text-[11px] sm:text-sm md:text-base text-white/70 font-light tracking-wide">
                 A criatividade lusófona tem uma nova casa
               </p>
             </motion.div>
 
             {/* ESPAÇADOR - Empurra DUA para baixo - ainda menor mobile */}
-            <div className="h-6 sm:h-0" />
+            <div className="h-4 sm:h-0" />
 
             {/* Logo "DUA" - Estilo Google Flow gigante */}
             <motion.h1
@@ -151,7 +151,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-3xl leading-relaxed px-6 sm:px-8"
+              className="text-sm sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-3xl leading-relaxed px-6 sm:px-8"
               style={{ 
                 textShadow: '0 4px 30px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.7)',
                 letterSpacing: '-0.01em'
@@ -160,16 +160,16 @@ export default function HomePage() {
               Onde a próxima onda de criatividade lusófona acontece
             </motion.p>
 
-            {/* Botões estilo imagem anexo - Finos, elegantes, border arredondado */}
+            {/* Botões lado a lado mobile - elegante centralizado */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full sm:w-auto px-6 sm:px-0 mt-1.5 sm:mt-4 md:mt-8 flex flex-col sm:flex-row gap-2.5 items-center justify-center"
+              className="w-full px-4 sm:px-0 mt-0.5 sm:mt-4 md:mt-8 flex flex-row gap-2 sm:gap-2.5 items-center justify-center max-w-md mx-auto"
             >
               <Button
                 size="lg"
-                className="w-full sm:w-auto rounded-full px-6 sm:px-10 py-2.5 sm:py-4 bg-white text-black hover:bg-white/90 active:bg-white/80 font-medium text-[13px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] border-0"
+                className="flex-1 sm:flex-none sm:w-auto rounded-full px-5 sm:px-10 py-2.5 sm:py-4 bg-white text-black hover:bg-white/90 active:bg-white/80 font-medium text-[12px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] border-0"
                 onClick={() => router.push("/waitlist")}
               >
                 <span className="relative z-10 tracking-normal">
@@ -180,7 +180,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto rounded-full px-6 sm:px-10 py-2.5 sm:py-4 bg-transparent hover:bg-white/10 active:bg-white/5 text-white font-medium text-[13px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-white/40 hover:border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
+                className="flex-1 sm:flex-none sm:w-auto rounded-full px-5 sm:px-10 py-2.5 sm:py-4 bg-transparent hover:bg-white/10 active:bg-white/5 text-white font-medium text-[12px] sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-white/40 hover:border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
                 onClick={() => router.push("/acesso")}
               >
                 <span className="relative z-10 tracking-normal">
