@@ -116,6 +116,7 @@ export function GlobalNavbar() {
     { label: "Music", href: "/musicstudio" },
     { label: "Imagem", href: "/imagestudio" },
     { label: "Comunidade", href: "/comunidade" },
+    { label: "Código", href: "/acesso" },
   ]
 
   return (

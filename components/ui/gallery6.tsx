@@ -42,7 +42,7 @@ const Gallery6 = ({
       summary:
         "Cria vídeos profissionais com inteligência artificial. Transforma as tuas ideias em conteúdo visual de alta qualidade para redes sociais, publicidade ou cinema.",
       url: "/videostudio",
-      image: "https://images.unsplash.com/photo-1574267432644-f74f8ec574c8?w=800&q=80",
+      image: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-3815-estu%CC%81dio%20criativo%2C%20artistas%20a%20trabalhar%20e....jpeg",
     },
     {
       id: "chat",

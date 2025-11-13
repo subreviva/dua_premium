@@ -133,7 +133,6 @@ export function SmartNavbar() {
     { label: "Design", href: "/designstudio" },
     { label: "Music", href: "/musicstudio" },
     { label: "Imagem", href: "/imagestudio" },
-    { label: "Comunidade", href: "/comunidade" },
   ]
 
   return (
@@ -145,9 +144,9 @@ export function SmartNavbar() {
       className="fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-xl"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* LEFT SIDE */}
-          <div className="flex items-center gap-6">
+        <div className="flex items-center justify-center h-16 relative">
+          {/* LEFT SIDE - Logo Absoluto */}
+          <div className="absolute left-0 flex items-center gap-6">
             {/* Logo */}
             <motion.button
               onClick={() => router.push("/")}
@@ -171,7 +170,7 @@ export function SmartNavbar() {
             )}
           </div>
 
-          {/* CENTER - Desktop Navigation (apenas em modo full) */}
+          {/* CENTER - Desktop Navigation (centrado) */}
           {context.mode === "full" && (
             <div className="hidden md:flex items-center space-x-1">
               {navItems.map((item, index) => (
@@ -196,8 +195,8 @@ export function SmartNavbar() {
             </div>
           )}
 
-          {/* RIGHT SIDE - Sempre visível */}
-          <div className="flex items-center gap-3">
+          {/* RIGHT SIDE - Absoluto direita */}
+          <div className="absolute right-0 flex items-center gap-3">
             {isAuthenticated ? (
               <>
                 {/* Créditos - SEMPRE visível quando autenticado */}
@@ -237,6 +236,13 @@ export function SmartNavbar() {
                   className="hidden md:inline-flex text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10"
                 >
                   Obter Acesso
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/acesso")}
+                  className="hidden md:inline-flex text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10"
+                >
+                  Código
                 </Button>
                 <Button
                   onClick={() => router.push("/login")}

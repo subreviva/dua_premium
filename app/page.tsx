@@ -52,7 +52,7 @@ export default function HomePage() {
             disableRemotePlayback
             className="absolute inset-0 w-full h-full object-cover"
             style={{ 
-              filter: 'brightness(1.15) contrast(1.08) saturate(1.1)',
+              filter: 'brightness(1.35) contrast(1.12) saturate(1.15)',
               WebkitBackfaceVisibility: 'hidden',
               WebkitPerspective: 1000,
               WebkitTransform: 'translate3d(0,0,0)',
@@ -89,18 +89,20 @@ export default function HomePage() {
             />
           </video>
           
-          {/* Fallback gradient se vídeo não carregar */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-black to-pink-900/30" style={{ zIndex: -1 }} />
+          {/* Fallback gradient harmonioso com o vídeo - tons roxo/rosa/verde */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 via-slate-950 to-pink-950/35" style={{ zIndex: -1 }} />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.15),transparent_50%)]" style={{ zIndex: -1 }} />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(236,72,153,0.12),transparent_50%)]" style={{ zIndex: -1 }} />
           
-          {/* Gradient overlays ULTRA PREMIUM - iOS Style */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          {/* Gradient overlays ULTRA PREMIUM - iOS Style - Mais leve para melhor visibilidade */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/15 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           
-          {/* Vignette lateral premium - mais pronunciado no mobile */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50 md:from-black/40 md:to-black/40" />
+          {/* Vignette lateral premium - mais leve */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30 md:from-black/25 md:to-black/25" />
           
-          {/* Vignette radial iOS-like */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,rgba(0,0,0,0.4)_50%,rgba(0,0,0,0.8)_100%)]" />
+          {/* Vignette radial iOS-like - mais suave */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.25)_60%,rgba(0,0,0,0.5)_100%)]" />
         </motion.div>
 
         {/* Content Container - iOS Premium Spacing - Ultra compacto mobile */}
@@ -158,12 +160,12 @@ export default function HomePage() {
               Onde a próxima onda de criatividade lusófona acontece
             </motion.p>
 
-            {/* Botão Google Flow Style - Glassmorphism Premium */}
+            {/* Botões Google Flow Style - Glassmorphism Premium */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full sm:w-auto px-6 sm:px-0 mt-0 sm:mt-4 md:mt-8"
+              className="w-full sm:w-auto px-6 sm:px-0 mt-0 sm:mt-4 md:mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center"
             >
               <Button
                 size="lg"
@@ -176,6 +178,21 @@ export default function HomePage() {
               >
                 <span className="relative z-10 tracking-wide">
                   Obter Acesso
+                </span>
+              </Button>
+              
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto rounded-full px-10 sm:px-12 py-4 sm:py-5 bg-transparent hover:bg-white/[0.08] active:bg-white/[0.05] text-white font-normal text-base sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] border-2 border-white/20 hover:border-white/30"
+                onClick={() => router.push("/acesso")}
+                style={{
+                  backdropFilter: 'blur(20px) saturate(160%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+                }}
+              >
+                <span className="relative z-10 tracking-wide">
+                  Tenho o código
                 </span>
               </Button>
             </motion.div>
@@ -230,42 +247,29 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Enhanced gradient transition - iOS Premium Bottom Fade */}
+        {/* Enhanced gradient transition - Premium Bottom Fade to Pure Black */}
         <div 
           className="absolute bottom-0 left-0 right-0 h-80 pointer-events-none z-[5]"
           style={{
-            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.4) 30%, rgba(10,10,10,0.75) 60%, rgba(10,10,10,0.95) 85%, rgba(10,10,10,1) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.95) 85%, rgba(0,0,0,1) 100%)'
           }}
         />
       </section>
 
       {/* SEÇÃO 2: STUDIOS CAROUSEL - Premium Edition */}
-      <section className="relative py-16 sm:py-32 lg:py-48 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-32 lg:py-48 px-3 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            preload="auto"
-            controls={false}
-            disablePictureInPicture
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
-            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
-          >
-            <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
-              type="video/mp4"
-            />
-          </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
+          {/* Pure black background with subtle accent - Revolut/Apple style */}
+          <div className="absolute inset-0 bg-black" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-950/[0.03] via-black to-purple-950/[0.02]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.03),transparent_50%)]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
         <div 
           className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 30%, transparent 100%)'
           }}
         />        <div className="relative z-10">
           <SectionTitle eyebrow="Explore" title="Estúdios Criativos" kicker="Cinco estúdios especializados para a tua criatividade" />
@@ -276,38 +280,25 @@ export default function HomePage() {
         <div 
           className="absolute bottom-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0.7) 70%, rgba(26,26,26,1) 100%)'
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,1) 100%)'
           }}
         />
       </section>
 
       {/* SEÇÃO 3: FEATURE SHOWCASE - Elegant Tabs */}
-      <section className="relative py-16 sm:py-32 lg:py-48 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-32 lg:py-48 px-3 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            preload="auto"
-            controls={false}
-            disablePictureInPicture
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
-            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
-          >
-            <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
-              type="video/mp4"
-            />
-          </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
+          {/* Pure black with subtle purple gradient - Apple style */}
+          <div className="absolute inset-0 bg-black" />
+          <div className="absolute inset-0 bg-gradient-to-bl from-purple-950/[0.04] via-black to-blue-950/[0.02]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(147,51,234,0.04),transparent_60%)]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
         <div 
           className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 30%, transparent 100%)'
           }}
         />
         
@@ -379,38 +370,25 @@ A DUA tem rosto, voz e história."
         <div 
           className="absolute bottom-0 left-0 right-0 h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0.7) 70%, rgba(26,26,26,1) 100%)'
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,1) 100%)'
           }}
         />
       </section>
 
       {/* SEÇÃO 4: O ECOSSISTEMA 2 LADOS - Simple & Elegant */}
-      <section className="relative py-16 sm:py-28 lg:py-36 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-28 lg:py-36 px-3 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            preload="auto"
-            controls={false}
-            disablePictureInPicture
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
-            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
-          >
-            <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
-              type="video/mp4"
-            />
-          </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
+          {/* Pure black - Awwwards minimalist style */}
+          <div className="absolute inset-0 bg-black" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-950/[0.02] via-black to-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.02),transparent_70%)]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
         <div 
           className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 30%, transparent 100%)'
           }}
         />
         
@@ -447,38 +425,25 @@ A DUA tem rosto, voz e história."
         <div 
           className="absolute bottom-0 left-0 right-0 h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0.7) 70%, rgba(26,26,26,1) 100%)'
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,1) 100%)'
           }}
         />
       </section>
 
       {/* SEÇÃO 4: MONOCHROME BENTO - Premium Grid */}
-      <section className="relative py-16 sm:py-28 lg:py-36 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-16 sm:py-28 lg:py-36 px-3 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            preload="auto"
-            controls={false}
-            disablePictureInPicture
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
-            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
-          >
-            <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
-              type="video/mp4"
-            />
-          </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
+          {/* Pure black - Premium minimal */}
+          <div className="absolute inset-0 bg-black" />
+          <div className="absolute inset-0 bg-gradient-to-tl from-purple-950/[0.03] via-black to-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,51,234,0.03),transparent_70%)]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
         <div 
           className="absolute top-0 left-0 right-0 h-48 sm:h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 30%, transparent 100%)'
           }}
         />
         
@@ -523,43 +488,30 @@ A DUA tem rosto, voz e história."
         <div 
           className="absolute bottom-0 left-0 right-0 h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0.7) 70%, rgba(26,26,26,1) 100%)'
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,1) 100%)'
           }}
         />
       </section>
 
       {/* SEÇÃO 5.5: HERO FUNDADOR - História da DUA */}
-      <section className="relative bg-[#1a1a1a]">
+      <section className="relative" style={{ background: 'linear-gradient(to br, rgba(0,0,0,1) 0%, rgba(10,10,10,1) 50%, rgba(0,0,0,1) 100%)' }}>
         <HeroFounder />
       </section>
 
       {/* SEÇÃO 6: CALL TO ACTION - Ultimate Premium */}
-      <section className="relative py-20 sm:py-36 lg:py-56 px-3 sm:px-6 lg:px-8 bg-[#1a1a1a] overflow-hidden">
+      <section className="relative py-20 sm:py-36 lg:py-56 px-3 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            preload="auto"
-            controls={false}
-            disablePictureInPicture
-            className="absolute inset-0 w-full h-full object-cover opacity-100"
-            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
-          >
-            <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
-              type="video/mp4"
-            />
-          </video>
-          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
+          {/* Pure black - Revolut final CTA style */}
+          <div className="absolute inset-0 bg-black" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-950/[0.02] via-black to-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.03),transparent_70%)]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
         <div 
           className="absolute top-0 left-0 right-0 h-72 pointer-events-none z-20"
           style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 30%, transparent 100%)'
           }}
         />
         
