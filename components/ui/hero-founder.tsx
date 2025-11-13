@@ -57,27 +57,11 @@ function HeroFounder() {
         <div className="lg:hidden min-h-screen flex flex-col justify-center py-8">
           {/* Content Container - Centered Vertically */}
           <div className="flex-1 flex flex-col justify-center space-y-5">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true }}
-          >
-            <Badge 
-              variant="outline" 
-              className="border-white/10 bg-white/[0.03] text-white/95 backdrop-blur-xl px-4 py-2 text-[10px] font-light tracking-wider uppercase"
-            >
-              <Sparkles className="w-3 h-3 mr-1.5 inline-block" />
-              A História por Trás da DUA
-            </Badge>
-          </motion.div>
-
           {/* Title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             viewport={{ once: true }}
             className="text-[32px] tracking-tight font-extralight text-white leading-[1.1]"
           >
