@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Space_Grotesk } from "next/font/google"
+import { Inter, Space_Grotesk, Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { VideoGenerationProvider } from "@/contexts/video-generation-context"
 import { UnifiedMusicProvider } from "@/contexts/unified-music-context"
@@ -15,10 +15,13 @@ import { PremiumLoading } from "@/components/ui/premium-loading"
 import PWAInstallPrompt, { ConnectionStatus } from "@/components/PWAInstallPrompt"
 import CookieConsent from "@/components/cookie-consent"
 import { WelcomeScreenWrapper } from "@/components/welcome-screen-wrapper"
+import { SmartNavbar } from "@/components/smart-navbar"
+import { DynamicContentWrapper } from "@/components/dynamic-content-wrapper"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" })
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dua.2lados.pt'),
@@ -266,11 +269,18 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${playfair.variable} font-sans antialiased`}>
         <GlobalPlayerProvider>
           <UnifiedMusicProvider>
             <VideoGenerationProvider>
-              {children}
+              {/* 🧠 Smart Navbar - Ultra inteligente, adapta-se a qualquer contexto */}
+              <SmartNavbar />
+              
+              {/* Main content with dynamic padding */}
+              <DynamicContentWrapper>
+                {children}
+              </DynamicContentWrapper>
+              
               <VideoGenerationNotifications />
               
               {/* Unified Music Player - Funciona em TODO o site */}

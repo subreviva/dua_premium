@@ -5,7 +5,6 @@ import type React from "react"
 import { useChat } from "ai/react";
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { ChatSidebar } from "@/components/ui/chat-sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
@@ -589,24 +588,6 @@ export default function ChatPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
         </div>
 
-        {/* Navbar - Premium ChatGPT/Gemini Style */}
-        <div 
-          className="relative z-50 flex-shrink-0 bg-black/90 backdrop-blur-xl border-b border-white/[0.06]"
-          style={{ 
-            paddingTop: 'max(env(safe-area-inset-top), 12px)',
-            paddingBottom: '12px'
-          }}
-        >
-          <PremiumNavbar
-            className="relative"
-            variant="transparent"
-            showSidebarToggle={true}
-            onSidebarToggle={toggleSidebar}
-            isSidebarOpen={isSidebarOpen}
-            onNewChat={handleNewChat}
-          />
-        </div>
-
         {/* Sidebar Overlay */}
         <AnimatePresence>
           {isSidebarOpen && (
@@ -1071,15 +1052,6 @@ export default function ChatPage() {
         <div className="absolute inset-0 bg-[#0a0a0a]/50 backdrop-blur-[40px]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </div>
-
-      <PremiumNavbar 
-        className="relative z-[100]" 
-        variant="transparent"
-        showSidebarToggle={true}
-        onSidebarToggle={toggleSidebar}
-        isSidebarOpen={isSidebarOpen}
-        onNewChat={handleNewChat}
-      />
 
       {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) */}
       <div className="fixed top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent z-40 pointer-events-none" />

@@ -30,7 +30,7 @@ const FEATURED_TRACKS: Track[] = [
     title: "Ainda Não Acabou",
     artist: "Riicky",
     genre: "Portuguese Pop",
-    cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
+    cover: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=800&fit=crop&q=80",
     audioUrl: `/audio/featured/ainda-nao-acabou.mp3`,
   },
   {
@@ -38,7 +38,7 @@ const FEATURED_TRACKS: Track[] = [
     title: "Struggle Symphony",
     artist: "FabyJunior",
     genre: "Orchestral Rock",
-    cover: "https://cdn2.suno.ai/image_cb01ecb0-2e67-430c-bdae-d235fa14808a.jpeg",
+    cover: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800&h=800&fit=crop&q=80",
     audioUrl: `/audio/featured/struggle-symphony.mp3`,
   },
   {
@@ -46,7 +46,7 @@ const FEATURED_TRACKS: Track[] = [
     title: "Bo Surrize Ta Alegra-m Nha Dia",
     artist: "Joana_Goncalves",
     genre: "Cabo Verde",
-    cover: "https://cdn2.suno.ai/image_5de28091-36c4-4d33-8c15-af93d6c0a220.jpeg",
+    cover: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=800&fit=crop&q=80",
     audioUrl: `/audio/featured/bo-surrize.mp3`,
   },
   {
@@ -54,7 +54,7 @@ const FEATURED_TRACKS: Track[] = [
     title: "Amor e Paz",
     artist: "Riicky",
     genre: "Reggae",
-    cover: "https://cdn2.suno.ai/image_76f26d38-5ef4-4510-bcab-e4f50d4c7125.jpeg",
+    cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop&q=80",
     audioUrl: `/audio/featured/amor-e-paz.mp3`,
   },
   {
@@ -62,7 +62,7 @@ const FEATURED_TRACKS: Track[] = [
     title: "Revolution in the Air",
     artist: "Joana_Goncalves",
     genre: "Rock Anthem",
-    cover: "https://cdn2.suno.ai/image_b132bd86-120b-45bd-af5d-54ec65b471aa.jpeg",
+    cover: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&h=800&fit=crop&q=80",
     audioUrl: `/audio/featured/revolution-in-the-air.mp3`,
   }
 ]
@@ -112,7 +112,7 @@ export function FeaturedTracksCarousel() {
         <CarouselContent className="-ml-3 md:-ml-4">
           {FEATURED_TRACKS.map((track, index) => (
             <CarouselItem key={track.id} className="pl-3 md:pl-4 basis-[75%] md:basis-[320px]">
-              <Card className="bg-white/[0.04] border-white/[0.06] overflow-hidden group active:bg-white/[0.08] transition-all backdrop-blur-xl shadow-xl shadow-black/20">
+              <Card className="bg-white/[0.02] border-white/[0.08] hover:border-white/20 overflow-hidden group hover:bg-white/[0.04] transition-all duration-500 backdrop-blur-xl shadow-2xl hover:shadow-3xl hover:scale-[1.02] rounded-3xl">
                 <CardContent className="p-0">
                   {/* Cover Image */}
                   <div className="relative aspect-square overflow-hidden">
@@ -148,8 +148,8 @@ export function FeaturedTracksCarousel() {
 
                     {/* Genre Badge - Mais elegante */}
                     <div className="absolute top-3 right-3">
-                      <div className="px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-lg">
-                        <span className="text-[10px] font-semibold text-white/90 tracking-wide uppercase">
+                      <div className="px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+                        <span className="text-xs font-medium text-white/70 tracking-wide">
                           {track.genre}
                         </span>
                       </div>
@@ -164,7 +164,7 @@ export function FeaturedTracksCarousel() {
                             <div className="w-0.5 h-3 bg-white rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
                             <div className="w-0.5 h-3 bg-white rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
                           </div>
-                          <span className="text-[11px] font-bold text-white tracking-tight">
+                          <span className="text-[11px] font-semibold text-white tracking-tight">
                             Tocando
                           </span>
                         </div>
@@ -173,11 +173,11 @@ export function FeaturedTracksCarousel() {
                   </div>
 
                   {/* Track Info - Design mais limpo */}
-                  <div className="p-4 bg-gradient-to-b from-white/[0.02] to-transparent">
-                    <h3 className="font-semibold text-[16px] text-white mb-1 truncate tracking-tight">
+                  <div className="p-5 bg-gradient-to-b from-white/[0.02] to-transparent">
+                    <h3 className="font-semibold text-base text-white mb-1.5 truncate tracking-tight">
                       {track.title}
                     </h3>
-                    <p className="text-[13px] text-white/50 font-light truncate">
+                    <p className="text-sm text-white/50 font-light truncate">
                       {track.artist}
                     </p>
                   </div>

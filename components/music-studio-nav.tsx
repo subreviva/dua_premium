@@ -44,7 +44,7 @@ export function MusicStudioNav() {
       if (e.altKey && ["1", "2", "3", "4"].includes(e.key)) {
         e.preventDefault()
         const index = parseInt(e.key) - 1
-        const routes = ["/musicstudio", "/create", "/melody", "/library"]
+        const routes = ["/musicstudio", "/create", "/melody", "/musicstudio/library"]
         router.push(routes[index])
       }
       // Alt + K = Show shortcuts
@@ -78,7 +78,7 @@ export function MusicStudioNav() {
       shortcut: "Alt+3",
     },
     {
-      href: "/library",
+      href: "/musicstudio/library",
       label: "Biblioteca",
       description: "Suas músicas salvas",
       shortcut: "Alt+4",

@@ -1856,10 +1856,19 @@ export default function StemsPage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Music2 className="h-12 w-12 animate-pulse text-zinc-600 mx-auto" />
-          <p className="text-zinc-400 text-sm">Loading stems...</p>
+      <div className="min-h-screen bg-black flex items-center justify-center relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-zinc-950" />
+        <div className="text-center space-y-6 relative z-10">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 to-pink-600/20 blur-3xl" />
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-orange-600/20 to-red-700/20 mx-auto backdrop-blur-xl border border-white/10">
+              <Music2 className="h-12 w-12 animate-pulse text-orange-500" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-white">Carregando Stems</h3>
+            <p className="text-sm text-zinc-400">Preparando suas faixas...</p>
+          </div>
         </div>
       </div>
     )
@@ -1867,30 +1876,37 @@ export default function StemsPage({ params }: { params: { id: string } }) {
 
   if (stems.length === 0 && isProcessing) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md px-4">
+      <div className="min-h-screen bg-black flex items-center justify-center relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-zinc-950" />
+        <div className="text-center space-y-6 max-w-md px-4 relative z-10">
           <div className="relative">
-            <Music2 className="h-16 w-16 text-blue-500 mx-auto" />
-            <Loader2 className="h-8 w-8 text-blue-500 animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 to-pink-600/20 blur-3xl" />
+            <div className="relative flex h-24 w-24 items-center justify-center mx-auto">
+              <Music2 className="h-16 w-16 text-orange-500" />
+              <Loader2 className="h-10 w-10 text-orange-400 animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            </div>
           </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-light text-white">Processing stems...</h2>
-            <p className="text-sm text-zinc-400">Separating audio tracks. This may take a few minutes.</p>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold text-white">Processando Stems</h2>
+            <p className="text-sm text-zinc-400 leading-relaxed">Separando faixas de áudio. Isso pode levar alguns minutos.</p>
             {processingTask && (
-              <div className="mt-4">
-                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="mt-6">
+                <div className="h-2.5 bg-white/[0.05] rounded-full overflow-hidden border border-white/[0.08]">
                   <div
-                    className="h-full bg-blue-500 transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 transition-all duration-500 shadow-lg shadow-orange-500/50"
                     style={{ width: `${processingTask.progress}%` }}
                   />
                 </div>
-                <p className="text-xs text-zinc-500 mt-2">{processingTask.progress}% complete</p>
+                <p className="text-xs font-semibold text-orange-400 mt-3">{processingTask.progress}% completo</p>
               </div>
             )}
           </div>
-          <Button onClick={() => router.push("/library")} variant="outline" className="gap-2">
+          <Button 
+            onClick={() => router.push("/musicstudio/library")} 
+            className="gap-2 bg-white/[0.08] hover:bg-white/[0.12] text-white border border-white/[0.12] rounded-xl font-medium transition-all duration-300 hover:scale-105"
+          >
             <ArrowLeft className="h-4 w-4" />
-            Back to Library
+            Voltar à Biblioteca
           </Button>
         </div>
       </div>
@@ -1899,13 +1915,25 @@ export default function StemsPage({ params }: { params: { id: string } }) {
 
   if (stems.length === 0) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Music2 className="h-12 w-12 text-zinc-600 mx-auto" />
-          <p className="text-zinc-400 text-sm">No stems found for this track</p>
-          <Button onClick={() => router.push("/library")} variant="outline">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Library
+      <div className="min-h-screen bg-black flex items-center justify-center relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-zinc-950" />
+        <div className="text-center space-y-6 relative z-10">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 to-pink-600/20 blur-3xl" />
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 mx-auto backdrop-blur-xl border border-white/10">
+              <Music2 className="h-12 w-12 text-zinc-600" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold text-white">Nenhum Stem Encontrado</h3>
+            <p className="text-sm text-zinc-400">Esta faixa não possui stems separados</p>
+          </div>
+          <Button 
+            onClick={() => router.push("/musicstudio/library")} 
+            className="gap-2 bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:shadow-2xl hover:shadow-orange-500/50 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar à Biblioteca
           </Button>
         </div>
       </div>
@@ -1916,64 +1944,79 @@ export default function StemsPage({ params }: { params: { id: string } }) {
   // const maxDuration = Math.max(0, ...Array.from(stemDurations.values())) // Removed duplicate declaration
 
   return (
-    <div className="h-screen bg-gradient-to-br from-black via-zinc-950 to-black flex flex-col overflow-hidden">
-      {/* Top bar - Enhanced glassmorphism effect */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/50 bg-zinc-950/90 backdrop-blur-xl shadow-lg shadow-black/20">
-        <div className="flex items-center gap-3">
+    <div className="h-screen bg-black flex flex-col overflow-hidden relative">
+      {/* Background Premium */}
+      <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-zinc-950 pointer-events-none" />
+      
+      {/* Top bar - Premium glassmorphism effect */}
+      <div className="relative z-10 flex items-center justify-between px-4 md:px-6 py-3 border-b border-white/[0.05] bg-black/60 backdrop-blur-3xl shadow-2xl shadow-black/30">
+        <div className="flex items-center gap-3 md:gap-4">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push("/library")}
-            className="h-8 w-8 text-zinc-400 hover:text-white transition-all duration-200 hover:scale-110 active:scale-95"
+            onClick={() => router.push("/musicstudio/library")}
+            className="h-9 w-9 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-110 active:scale-95"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-sm font-light text-white">{trackTitle}</h1>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/20 to-pink-600/20 border border-orange-500/30">
+              <Music2 className="h-4 w-4 text-orange-400" />
+            </div>
+            <div>
+              <h1 className="text-sm md:text-base font-bold text-white tracking-tight">{trackTitle}</h1>
+              <p className="text-[10px] md:text-xs text-zinc-500 font-medium">{stems.length} stems</p>
+            </div>
+          </div>
 
-          <SessionInfoPanel bpm={bpm} duration={maxDuration} trackCount={stems.length} sampleRate={44100} />
+          <div className="hidden md:block">
+            <SessionInfoPanel bpm={bpm} duration={maxDuration} trackCount={stems.length} sampleRate={44100} />
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <ZoomControls zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onZoomFit={handleZoomFit} />
 
-          <div className="h-4 w-px bg-zinc-800/50" />
+          <div className="h-5 w-px bg-white/[0.08]" />
 
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setAddTrackModalOpen(true)}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95"
+            className="h-8 md:h-9 gap-1.5 text-xs md:text-sm hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 font-medium"
           >
-            <Plus className="h-3 w-3" />
+            <Plus className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Add Track</span>
           </Button>
 
-          <div className="h-4 w-px bg-zinc-800/50" />
+          <div className="hidden md:block h-5 w-px bg-white/[0.08]" />
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={undo}
-            disabled={!canUndo}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30"
-            title="Undo (Ctrl+Z)"
-          >
-            <RotateCcw className="h-3 w-3" />
-            <span className="hidden md:inline">Undo</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={redo}
-            disabled={!canRedo}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30"
-            title="Redo (Ctrl+Y)"
-          >
-            <RotateCcw className="h-3 w-3 scale-x-[-1]" />
-            <span className="hidden md:inline">Redo</span>
-          </Button>
+          <div className="hidden md:flex items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={undo}
+              disabled={!canUndo}
+              className="h-9 gap-1.5 text-xs hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Undo (Ctrl+Z)"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Undo</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={redo}
+              disabled={!canRedo}
+              className="h-9 gap-1.5 text-xs hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Redo (Ctrl+Y)"
+            >
+              <RotateCcw className="h-3.5 w-3.5 scale-x-[-1]" />
+              <span>Redo</span>
+            </Button>
+          </div>
 
-          <div className="h-4 w-px bg-zinc-800/50" />
+          <div className="h-5 w-px bg-white/[0.08]" />
 
           <Button
             variant="ghost"

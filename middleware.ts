@@ -157,6 +157,13 @@ export async function middleware(req: NextRequest) {
     '/_next',                // Next.js internals
     '/favicon.ico',          // Favicon
     '/images',               // Imagens públicas
+    // 🎯 WELCOME PAGES DOS ESTÚDIOS (PÚBLICAS)
+    '/chat',                 // Chat welcome (redireciona para /acesso se tentar criar)
+    '/designstudio',         // Design Studio welcome
+    '/musicstudio',          // Music Studio welcome
+    '/videostudio',          // Video Studio welcome (Cinema)
+    '/imagestudio',          // Image Studio welcome
+    '/comunidade',           // Comunidade welcome
   ];
 
   // Verificar se a rota é pública
@@ -164,7 +171,33 @@ export async function middleware(req: NextRequest) {
     path.startsWith(publicPath)
   );
 
-  // Se for rota pública, permitir acesso (com rate limiting já aplicado)
+  // 🔒 ROTAS DE CRIAÇÃO DOS ESTÚDIOS - SEMPRE PROTEGIDAS
+  const STUDIO_CREATE_ROUTES = [
+    '/chat/c/',              // Chat com conversa específica
+    '/designstudio/create',  // Design Studio criação
+    '/musicstudio/home',     // Music Studio home (criação)
+    '/musicstudio/create',   // Music Studio criação
+    '/musicstudio/library',  // Music Studio biblioteca
+    '/videostudio/criar',    // Video Studio criação
+    '/videostudio/library',  // Video Studio biblioteca
+    '/imagestudio/create',   // Image Studio criação
+    '/imagestudio/library',  // Image Studio biblioteca
+  ];
+
+  // Verificar se está tentando acessar rota de criação
+  const isStudioCreateRoute = STUDIO_CREATE_ROUTES.some((route) => 
+    path.startsWith(route)
+  );
+
+  // Se tentar acessar rota de criação sem estar autenticado, redirecionar para /acesso
+  if (isStudioCreateRoute && !req.cookies.get('sb-access-token')?.value) {
+    console.log(`🚫 Acesso negado a rota de criação sem autenticação: ${path}`);
+    const redirectUrl = new URL('/acesso', req.url);
+    redirectUrl.searchParams.set('redirect', path);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Se for rota pública (welcome pages), permitir acesso (com rate limiting já aplicado)
   if (isPublicPath) {
     return NextResponse.next();
   }
@@ -237,20 +270,28 @@ export async function middleware(req: NextRequest) {
     // 🎯 VERIFICAÇÃO UNIFIED ARCHITECTURE: Acesso por produto
     // 🔒 ROTAS PROTEGIDAS - Requerem autenticação + has_access = true
     const PROTECTED_ROUTES = [
-      '/chat',              // Chat IA
-      '/designstudio',      // Design Studio (imagens, designs)
-      '/musicstudio',       // Music Studio (música)
-      '/videostudio',       // Video Studio (cinema/vídeo)
-      '/imagestudio',       // Image Studio (geração de imagens)
-      '/community',         // Community (criações compartilhadas)
+      '/chat/c/',           // Chat com conversas (criar/acessar)
+      '/designstudio/create', // Design Studio criação
+      '/musicstudio/home',  // Music Studio home
+      '/musicstudio/create',// Music Studio criação
+      '/musicstudio/library',// Music Studio biblioteca
+      '/videostudio/criar', // Video Studio criação
+      '/videostudio/library',// Video Studio biblioteca
+      '/imagestudio/create',// Image Studio criação
+      '/imagestudio/library',// Image Studio biblioteca
       '/dashboard',         // Dashboard
       '/perfil',            // Perfil do usuário
       '/admin',             // Painel admin
       '/mercado',           // Mercado
+      '/loja',              // Loja
       '/api/chat',          // API de chat
       '/api/conversations', // API de conversas
       '/api/comprar-item',  // API de compra
       '/api/community',     // API de community
+      '/api/music',         // API de música
+      '/api/video',         // API de vídeo
+      '/api/image',         // API de imagem
+      '/api/design',        // API de design
     ];
     
     // Verificar se rota é protegida

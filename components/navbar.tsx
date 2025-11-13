@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Menu, X, ShoppingCart } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { Menu, X, ShoppingCart, Music2 } from "lucide-react"
+import { useRouter, usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { UserAvatar } from "@/components/user-avatar"
 import { supabaseClient } from "@/lib/supabase"
@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function Navbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -203,6 +204,8 @@ export default function Navbar() {
     { label: "Comunidade", href: "/community", protected: false },
   ]
 
+  const isMusicStudio = pathname?.startsWith('/musicstudio') && pathname !== '/musicstudio'
+
   return (
     <>
       <motion.nav
@@ -253,6 +256,18 @@ export default function Navbar() {
               {isAuthenticated && (
                 <>
                   <CreditsDisplay variant="compact" />
+                  {isMusicStudio && (
+                    <Button
+                      onClick={() => {
+                        const event = new CustomEvent('toggle-music-library')
+                        window.dispatchEvent(event)
+                      }}
+                      className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 text-white border-0 transition-all duration-300 rounded-full px-5 h-10 text-sm font-semibold backdrop-blur-xl active:scale-95 shadow-lg hover:shadow-xl hover:shadow-orange-500/50"
+                    >
+                      <Music2 className="w-4 h-4 mr-2" />
+                      Biblioteca
+                    </Button>
+                  )}
                   <Button
                     onClick={() => router.push('/comprar')}
                     className="bg-white/[0.08] hover:bg-white/[0.15] text-white/90 hover:text-white border border-white/15 hover:border-white/25 transition-all duration-300 rounded-full px-5 h-10 text-sm font-medium backdrop-blur-xl active:scale-95 shadow-sm hover:shadow-md"

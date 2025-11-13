@@ -4,19 +4,30 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
-import { Scissors, Home, MessageSquare, ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
+import { 
+  Scissors, 
+  Home, 
+  MessageSquare, 
+  ArrowLeft, 
+  Music2, 
+  Sparkles, 
+  Wand2, 
+  Library,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react"
 
 const navigation = [
-  { name: "Início", href: "/musicstudio", icon: null },
-  { name: "Criar", href: "/create", icon: null },
-  { name: "Melodia", href: "/melody", icon: null },
-  { name: "Biblioteca", href: "/library", icon: null },
-  { name: "Estúdio", href: "", icon: Scissors, isStudio: true }, // href vazio, será gerido dinamicamente
+  { name: "Início", href: "/musicstudio", icon: Home, gradient: "from-blue-500 to-cyan-500" },
+  { name: "Criar", href: "/musicstudio/create", icon: Sparkles, gradient: "from-orange-500 to-pink-600" },
+  { name: "Melodia", href: "/melody", icon: Wand2, gradient: "from-purple-500 to-pink-500" },
+  { name: "Biblioteca", href: "/musicstudio/library", icon: Library, gradient: "from-green-500 to-emerald-500" },
+  { name: "Estúdio", href: "", icon: Scissors, gradient: "from-red-500 to-orange-500", isStudio: true },
 ]
 
 const exitNav = [
-  { name: "Home", href: "/", icon: Home, description: "Página principal do site" },
+  { name: "Home", href: "/", icon: Home, description: "Página principal" },
   { name: "Chat", href: "/chat", icon: MessageSquare, description: "Conversar com DUA" },
 ]
 
@@ -25,23 +36,18 @@ export function AppSidebar() {
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [availableStems, setAvailableStems] = useState<string[]>([])
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   useEffect(() => {
     const checkForStems = () => {
       try {
         const stemsData = localStorage.getItem("track-stems")
-        console.log("[v0] Checking for any stems in localStorage")
 
         if (stemsData) {
           const allStems = JSON.parse(stemsData)
-          console.log("[v0] All stems:", allStems)
-
-          // Get all track IDs that have stems
           const trackIdsWithStems = Object.keys(allStems).filter(
             (trackId) => allStems[trackId]?.stems && allStems[trackId].stems.length > 0,
           )
-
-          console.log("[v0] Track IDs with stems:", trackIdsWithStems)
           setAvailableStems(trackIdsWithStems)
         } else {
           setAvailableStems([])
@@ -53,7 +59,6 @@ export function AppSidebar() {
     }
 
     checkForStems()
-
     const interval = setInterval(checkForStems, 2000)
     return () => clearInterval(interval)
   }, [])
@@ -61,119 +66,242 @@ export function AppSidebar() {
   const stemsTrackId = availableStems.length > 0 ? availableStems[0] : null
 
   return (
-    <div
-      className={cn(
-        "flex h-screen flex-col border-r border-border/30 bg-sidebar/50 backdrop-blur-xl transition-all duration-500 ease-out pt-14",
-        isCollapsed ? "w-20" : "w-64",
-      )}
+    <motion.div
+      initial={false}
+      animate={{ width: isCollapsed ? 80 : 280 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="relative flex h-screen flex-col border-r border-white/5 bg-gradient-to-b from-black via-zinc-950 to-black backdrop-blur-2xl z-20"
     >
-      <div className="flex h-20 items-center justify-between border-b border-border/30 px-6">
-        {!isCollapsed && (
-          <div className="flex flex-col">
-            <span className="text-2xl font-light tracking-tight text-foreground">DUA</span>
-            <span className="text-xs font-light tracking-widest text-muted-foreground/60">MUSIC STUDIO</span>
-          </div>
-        )}
-        <button
-          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground/60 transition-all hover:bg-sidebar-accent/50 hover:text-foreground"
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-pink-500/5 pointer-events-none" />
+      
+      {/* Glass effect border */}
+      <div className="absolute inset-0 border-r border-white/[0.02] pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative flex h-24 items-center justify-between border-b border-white/5 px-6 mt-16">
+        <AnimatePresence mode="wait">
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center gap-3"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-pink-600 rounded-xl blur-lg opacity-50" />
+                <Music2 className="relative h-8 w-8 text-orange-500" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 bg-clip-text text-transparent">
+                  DUA
+                </span>
+                <span className="text-[10px] font-light tracking-[0.2em] text-white/40">MUSIC STUDIO</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative group flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl transition-all hover:bg-white/10"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          <svg
-            className={cn("h-4 w-4 transition-transform duration-300", isCollapsed && "rotate-180")}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-pink-600/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+          {isCollapsed ? (
+            <ChevronRight className="relative h-4 w-4 text-white/60 group-hover:text-white" />
+          ) : (
+            <ChevronLeft className="relative h-4 w-4 text-white/60 group-hover:text-white" />
+          )}
+        </motion.button>
       </div>
 
-      <nav className="flex-1 space-y-1 px-4 py-8">
-        {/* Exit Navigation - Sair do Music Studio */}
-        <div className="mb-6 pb-6 border-b border-border/20">
-          {!isCollapsed && (
-            <div className="mb-3 px-4">
-              <span className="text-xs font-light text-muted-foreground/40 tracking-widest">SAIR DO ESTÚDIO</span>
-            </div>
-          )}
-          {exitNav.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-xl px-4 py-3 mb-2 text-sm font-light tracking-wide transition-all duration-300",
-                "text-muted-foreground/70 hover:bg-sidebar-accent/30 hover:text-foreground",
-                "border border-transparent hover:border-primary/20"
-              )}
-              title={isCollapsed ? item.description : undefined}
-            >
-              <item.icon className="h-4 w-4 flex-shrink-0" />
-              {!isCollapsed && (
-                <div className="flex flex-col flex-1">
-                  <span className="font-medium">{item.name}</span>
-                  <span className="text-xs text-muted-foreground/50">{item.description}</span>
-                </div>
-              )}
-              {!isCollapsed && (
-                <ArrowLeft className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-              )}
-            </Link>
-          ))}
+      {/* Navigation */}
+      <nav className="relative flex-1 px-3 py-4 overflow-y-auto custom-scrollbar">
+        {/* Exit Navigation */}
+        <div className="mb-4 pb-4 border-b border-white/5">
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-2 px-3"
+              >
+                <span className="text-[10px] font-medium text-white/30 tracking-[0.2em]">SAIR</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <div className="space-y-1">
+            {exitNav.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                onMouseEnter={() => setHoveredItem(item.name)}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors">
+                    <item.icon className="h-4 w-4 text-white/40 group-hover:text-white/70 transition-colors" />
+                  </div>
+                  <AnimatePresence>
+                    {!isCollapsed && (
+                      <motion.div
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        className="flex flex-col overflow-hidden"
+                      >
+                        <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">
+                          {item.name}
+                        </span>
+                        <span className="text-[10px] text-white/30">{item.description}</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  {!isCollapsed && (
+                    <ArrowLeft className="ml-auto h-3 w-3 text-white/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </motion.div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Music Studio Navigation */}
-        {!isCollapsed && (
-          <div className="mb-3 px-4">
-            <span className="text-xs font-light text-muted-foreground/40 tracking-widest">MUSIC STUDIO</span>
-          </div>
-        )}
-        {navigation.map((item) => {
-          const isActive = pathname === item.href || (item.isStudio && pathname.startsWith("/stems"))
-          
-          // Para o botão Estúdio, usa o primeiro stem disponível ou vai para /stems/demo
-          const href = item.isStudio 
-            ? (stemsTrackId ? `/stems/${stemsTrackId}` : `/stems/demo`)
-            : item.href
-
-          return (
-            <Link
-              key={item.name}
-              href={href}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-light tracking-wide transition-all duration-300",
-                isActive
-                  ? "bg-gradient-to-r from-primary/10 to-accent/10 text-foreground shadow-lg shadow-primary/5"
-                  : "text-muted-foreground/70 hover:bg-sidebar-accent/30 hover:text-foreground",
-              )}
-              title={isCollapsed ? item.name : undefined}
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-2 px-3"
             >
-              {isActive && (
-                <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-primary to-accent" />
-              )}
-              {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
-              {!isCollapsed && (
-                <span className="relative">
-                  {item.name}
-                  {isActive && (
-                    <div className="absolute -bottom-0.5 left-0 h-px w-full bg-gradient-to-r from-primary/50 to-transparent" />
+              <span className="text-[10px] font-medium text-white/30 tracking-[0.2em]">ESTÚDIO</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <div className="space-y-1">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href || (item.isStudio && pathname.startsWith("/stems"))
+            const href = item.isStudio 
+              ? (stemsTrackId ? `/stems/${stemsTrackId}` : `/stems/demo`)
+              : item.href
+
+            return (
+              <Link
+                key={item.name}
+                href={href}
+                onMouseEnter={() => setHoveredItem(item.name)}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-xl px-3 py-3 transition-all overflow-hidden",
+                    isActive && "shadow-lg"
                   )}
-                </span>
-              )}
-              {isCollapsed && !item.icon && <span className="text-xs">{item.name.charAt(0)}</span>}
-            </Link>
-          )
-        })}
+                >
+                  {/* Active indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-gradient-to-b from-orange-500 via-red-500 to-pink-600"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  
+                  {/* Background effects */}
+                  <div className={cn(
+                    "absolute inset-0 rounded-xl opacity-0 transition-opacity",
+                    isActive ? "opacity-100" : "group-hover:opacity-100"
+                  )}>
+                    <div className={cn(
+                      "absolute inset-0 bg-gradient-to-r rounded-xl",
+                      isActive ? `${item.gradient} opacity-10` : "from-white/5 to-transparent opacity-100"
+                    )} />
+                    {isActive && (
+                      <div className={cn(
+                        "absolute inset-0 bg-gradient-to-r rounded-xl blur-xl",
+                        item.gradient,
+                        "opacity-20"
+                      )} />
+                    )}
+                  </div>
+
+                  {/* Icon */}
+                  <div className={cn(
+                    "relative flex h-9 w-9 items-center justify-center rounded-lg transition-all",
+                    isActive 
+                      ? `bg-gradient-to-br ${item.gradient} shadow-lg` 
+                      : "bg-white/5 border border-white/10 group-hover:border-white/20"
+                  )}>
+                    <item.icon className={cn(
+                      "h-4 w-4 transition-colors",
+                      isActive ? "text-white" : "text-white/40 group-hover:text-white/70"
+                    )} />
+                  </div>
+
+                  {/* Label */}
+                  <AnimatePresence>
+                    {!isCollapsed && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        className={cn(
+                          "relative text-sm font-medium transition-colors overflow-hidden whitespace-nowrap",
+                          isActive 
+                            ? "text-white" 
+                            : "text-white/60 group-hover:text-white"
+                        )}
+                      >
+                        {item.name}
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeUnderline"
+                            className={cn(
+                              "absolute -bottom-0.5 left-0 h-[2px] w-full bg-gradient-to-r rounded-full",
+                              item.gradient
+                            )}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
-      <div className="border-t border-border/30 px-6 py-4">
-        {!isCollapsed && (
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-light text-muted-foreground/40">Version 1.0</span>
-            <span className="text-xs font-light text-muted-foreground/40">© 2025 DUA Music</span>
-          </div>
-        )}
+      {/* Footer */}
+      <div className="relative border-t border-white/5 px-6 py-4">
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col gap-0.5"
+            >
+              <span className="text-[10px] font-light text-white/20">Version 1.0</span>
+              <span className="text-[10px] font-light text-white/20">© 2025 DUA Music</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   )
 }

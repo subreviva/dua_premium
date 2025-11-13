@@ -4,7 +4,7 @@ import React from 'react';
 import { CanvasContent, ApiFunctions } from '@/types/designstudio';
 import Spinner from './ui/Spinner';
 import { useToast } from '@/hooks/useToast';
-import { Download, Sparkles, FileText } from 'lucide-react';
+import { Download, Loader2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QuickActionsBar from './QuickActionsBar';
 
@@ -94,11 +94,11 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage, api
         return (
           <div className="text-center space-y-6 md:space-y-8 p-6 md:p-8">
             <div className="relative inline-block">
-              {/* iOS Premium Sparkles */}
+              {/* Simple elegant icon */}
               <div className="relative">
-                <Sparkles className="w-16 h-16 md:w-20 md:h-20 text-white/40 animate-pulse" />
-                <div className="absolute inset-0 blur-2xl bg-blue-500/30 animate-pulse"></div>
-                <div className="absolute inset-0 blur-3xl bg-purple-500/20 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border border-white/10 flex items-center justify-center">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-500/20 border border-orange-500/30" />
+                </div>
               </div>
             </div>
             <div className="space-y-3">
@@ -204,22 +204,21 @@ const Canvas: React.FC<CanvasProps> = ({ content, isLoading, loadingMessage, api
             "absolute z-10 transition-all duration-300 group",
             // Mobile: bottom center, grande e visível
             "bottom-3 left-1/2 -translate-x-1/2 md:top-4 md:right-4 md:left-auto md:translate-x-0",
-            // iOS Premium Design
+            // Premium Design
             "flex items-center gap-2 px-6 py-3.5 md:p-3",
-            "bg-gradient-to-br from-blue-500/90 to-purple-500/90 md:from-black/70 md:to-black/70",
-            "backdrop-blur-3xl rounded-full md:rounded-2xl",
+            "bg-orange-500/90 md:bg-transparent md:backdrop-blur-2xl",
+            "rounded-full md:rounded-2xl",
             "text-white font-semibold text-sm md:text-white/80 md:font-normal",
-            "border-2 border-white/30 md:border md:border-white/20",
-            "hover:from-blue-500 hover:to-purple-500 md:hover:bg-gradient-to-br md:hover:from-blue-500/30 md:hover:to-purple-500/30",
-            "hover:border-white/50 md:hover:border-blue-400/40",
+            "border border-orange-500/50 md:border-white/[0.08]",
+            "hover:bg-orange-600 md:hover:bg-white/[0.03]",
+            "hover:border-orange-400 md:hover:border-orange-500/30",
             "hover:scale-105 md:hover:scale-110",
             "active:scale-95 md:active:scale-90",
-            "shadow-[0_8px_32px_rgba(59,130,246,0.5)] md:shadow-lg md:shadow-black/40",
             // Evitar sobreposição com QuickActionsBar no desktop quando presente
             api && onContentUpdate && content.type === 'image' ? 'md:block' : ''
           )}
         >
-          <Download className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
+          <Download className="w-5 h-5 transition-transform group-hover:translate-y-0.5" strokeWidth={0.75} />
           <span className="md:hidden">Download</span>
         </button>
       )}

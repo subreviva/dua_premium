@@ -1,7 +1,7 @@
 
 import { Chat } from '@google/genai';
 
-export type ToolId = 'generate-image' | 'edit-image' | 'generate-logo' | 'generate-icon' | 'color-palette' | 'product-mockup' | 'generate-pattern' | 'generate-variations' | 'generate-svg' | 'analyze-image' | 'design-trends' | 'design-assistant' | 'export-project' | 'remove-background' | 'upscale-image';
+export type ToolId = 'generate-image' | 'edit-image' | 'generate-logo' | 'generate-icon' | 'color-palette' | 'product-mockup' | 'generate-pattern' | 'generate-variations' | 'generate-svg' | 'analyze-image' | 'design-trends' | 'design-assistant' | 'export-project' | 'remove-background' | 'upscale-image' | 'gemini-flash-image';
 
 export interface Tool {
   id: ToolId;

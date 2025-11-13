@@ -102,26 +102,6 @@ export function HowItWorksSection() {
             )
           })}
         </div>
-
-        {/* Stats */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-light text-white mb-2">2M+</div>
-            <div className="text-sm text-zinc-400 font-light">Músicas Criadas</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-light text-white mb-2">500K+</div>
-            <div className="text-sm text-zinc-400 font-light">Criadores Ativos</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-light text-white mb-2">30s</div>
-            <div className="text-sm text-zinc-400 font-light">Tempo Médio</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-light text-white mb-2">100+</div>
-            <div className="text-sm text-zinc-400 font-light">Gêneros Musicais</div>
-          </div>
-        </div>
       </div>
     </div>
   )

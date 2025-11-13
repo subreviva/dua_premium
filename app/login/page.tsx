@@ -11,7 +11,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -28,6 +28,9 @@ const supabase = supabaseClient;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/chat';
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -88,7 +91,7 @@ export default function LoginPage() {
         toast.info("Já está autenticado", {
           description: "Redirecionando...",
         });
-        router.push("/chat");
+        router.push(redirectPath);
       }
     } catch (error) {
       // Usuário não está logado, continua na página
@@ -173,12 +176,12 @@ export default function LoginPage() {
             // Login bem-sucedido!
       const userName = (userData && userData.name) || email.split('@')[0];
       toast.success(`Bem-vindo, ${userName}`, {
-        description: "Redirecionando para o chat...",
+        description: "Redirecionando...",
         duration: 2000,
       });
 
       setTimeout(() => {
-        router.push("/chat");
+        router.push(redirectPath);
         router.refresh();
       }, 1000);
 

@@ -5,7 +5,6 @@ import { ToolId } from '@/types/designstudio';
 import { 
   ImagePlus, 
   Wand2, 
-  Sparkles, 
   Boxes, 
   Code2, 
   Grid3x3, 
@@ -28,60 +27,66 @@ interface ToolsModalProps {
 }
 
 const TOOL_ICONS: Record<ToolId, React.ReactNode> = {
-  'generate-image': <ImagePlus className="w-5 h-5" />,
-  'edit-image': <Wand2 className="w-5 h-5" />,
-  'generate-logo': <Sparkles className="w-5 h-5" />,
-  'generate-icon': <Boxes className="w-5 h-5" />,
-  'generate-svg': <Code2 className="w-5 h-5" />,
-  'generate-pattern': <Grid3x3 className="w-5 h-5" />,
-  'product-mockup': <Package className="w-5 h-5" />,
-  'color-palette': <Palette className="w-5 h-5" />,
-  'generate-variations': <Copy className="w-5 h-5" />,
-  'analyze-image': <ScanEye className="w-5 h-5" />,
-  'design-trends': <TrendingUp className="w-5 h-5" />,
-  'design-assistant': <Bot className="w-5 h-5" />,
-  'export-project': <Package className="w-5 h-5" />,
+  'generate-image': <ImagePlus className="w-5 h-5" strokeWidth={0.75} />,
+  'edit-image': <Wand2 className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-logo': <Wand2 className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-icon': <Boxes className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-svg': <Code2 className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-pattern': <Grid3x3 className="w-5 h-5" strokeWidth={0.75} />,
+  'product-mockup': <Package className="w-5 h-5" strokeWidth={0.75} />,
+  'color-palette': <Palette className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-variations': <Copy className="w-5 h-5" strokeWidth={0.75} />,
+  'analyze-image': <ScanEye className="w-5 h-5" strokeWidth={0.75} />,
+  'design-trends': <TrendingUp className="w-5 h-5" strokeWidth={0.75} />,
+  'design-assistant': <Bot className="w-5 h-5" strokeWidth={0.75} />,
+  'export-project': <Package className="w-5 h-5" strokeWidth={0.75} />,
+  'remove-background': <Wand2 className="w-5 h-5" strokeWidth={0.75} />,
+  'upscale-image': <Wand2 className="w-5 h-5" strokeWidth={0.75} />,
+  'gemini-flash-image': <Wand2 className="w-5 h-5 text-orange-500" strokeWidth={0.75} />,
 };
 
 const TOOL_NAMES: Record<ToolId, string> = {
   'generate-image': 'Gerar Imagem',
-  'edit-image': 'Editar',
-  'generate-logo': 'Logo',
-  'generate-icon': 'Ícone',
-  'generate-svg': 'SVG',
-  'generate-pattern': 'Padrão',
-  'product-mockup': 'Mockup',
-  'color-palette': 'Cores',
+  'edit-image': 'Editar Imagem',
+  'generate-logo': 'Gerar Logo',
+  'generate-icon': 'Gerar Ícone',
+  'generate-svg': 'Gerar SVG',
+  'generate-pattern': 'Gerar Padrão',
+  'product-mockup': 'Mockup Produto',
+  'color-palette': 'Paleta Cores',
   'generate-variations': 'Variações',
-  'analyze-image': 'Analisar',
-  'design-trends': 'Trends',
-  'design-assistant': 'Assistente IA',
+  'analyze-image': 'Analisar Imagem',
+  'design-trends': 'Tendências',
+  'design-assistant': 'Assistente',
   'export-project': 'Exportar',
+  'remove-background': 'Remover Fundo',
+  'upscale-image': 'Upscale',
+  'gemini-flash-image': 'Gerar Imagem',
 };
 
 const TOOL_CATEGORIES = [
   {
     id: 'create',
     name: 'Criar',
-    icon: <Sparkles className="w-4 h-4 text-blue-400" />,
-    tools: ['generate-image', 'generate-logo', 'generate-icon', 'generate-svg', 'generate-pattern'] as ToolId[],
+    icon: <Wand2 className="w-4 h-4 text-orange-400" strokeWidth={0.75} />,
+    tools: ['gemini-flash-image', 'generate-image', 'generate-logo', 'generate-icon', 'generate-svg', 'generate-pattern'] as ToolId[],
   },
   {
     id: 'edit',
     name: 'Editar',
-    icon: <Wand2 className="w-4 h-4 text-purple-400" />,
-    tools: ['edit-image', 'generate-variations', 'color-palette'] as ToolId[],
+    icon: <Wand2 className="w-4 h-4 text-orange-400" strokeWidth={0.75} />,
+    tools: ['edit-image', 'generate-variations', 'color-palette', 'remove-background', 'upscale-image'] as ToolId[],
   },
   {
     id: 'tools',
     name: 'Ferramentas',
-    icon: <Package className="w-4 h-4 text-cyan-400" />,
+    icon: <Package className="w-4 h-4 text-orange-400" strokeWidth={0.75} />,
     tools: ['product-mockup', 'analyze-image', 'export-project'] as ToolId[],
   },
   {
     id: 'ai',
     name: 'IA',
-    icon: <Bot className="w-4 h-4 text-pink-400" />,
+    icon: <Bot className="w-4 h-4 text-orange-400" strokeWidth={0.75} />,
     tools: ['design-trends', 'design-assistant'] as ToolId[],
   },
 ];
@@ -122,9 +127,9 @@ const ToolsModal: React.FC<ToolsModalProps> = ({ isOpen, onClose, activeTool, on
               <h2 className="text-white font-bold text-2xl tracking-tight">Ferramentas</h2>
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/15 active:scale-90 transition-all flex items-center justify-center border border-white/10"
+                className="w-10 h-10 rounded-full bg-transparent hover:bg-white/[0.05] active:scale-90 transition-all flex items-center justify-center border border-white/[0.08]"
               >
-                <X className="w-5 h-5 text-white/90" />
+                <X className="w-5 h-5 text-white/90" strokeWidth={0.75} />
               </button>
             </div>
 
@@ -137,29 +142,29 @@ const ToolsModal: React.FC<ToolsModalProps> = ({ isOpen, onClose, activeTool, on
                     
                     const categoryColors = {
                       create: {
-                        active: "from-blue-500/25 to-purple-500/25 border-blue-400/50",
-                        icon: "from-blue-500/40 to-purple-500/40",
-                        glow: "shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                        active: "from-orange-500/15 to-orange-600/15 border-orange-500/40",
+                        icon: "from-orange-500/30 to-orange-600/30",
+                        glow: "shadow-[0_0_15px_rgba(249,115,22,0.2)]"
                       },
                       edit: {
-                        active: "from-purple-500/25 to-pink-500/25 border-purple-400/50",
-                        icon: "from-purple-500/40 to-pink-500/40",
-                        glow: "shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+                        active: "from-orange-500/15 to-orange-600/15 border-orange-500/40",
+                        icon: "from-orange-500/30 to-orange-600/30",
+                        glow: "shadow-[0_0_15px_rgba(249,115,22,0.2)]"
                       },
                       tools: {
-                        active: "from-cyan-500/25 to-blue-500/25 border-cyan-400/50",
-                        icon: "from-cyan-500/40 to-blue-500/40",
-                        glow: "shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                        active: "from-orange-500/15 to-orange-600/15 border-orange-500/40",
+                        icon: "from-orange-500/30 to-orange-600/30",
+                        glow: "shadow-[0_0_15px_rgba(249,115,22,0.2)]"
                       },
                       ai: {
-                        active: "from-pink-500/25 to-rose-500/25 border-pink-400/50",
-                        icon: "from-pink-500/40 to-rose-500/40",
-                        glow: "shadow-[0_0_20px_rgba(244,114,182,0.3)]"
+                        active: "from-orange-500/15 to-orange-600/15 border-orange-500/40",
+                        icon: "from-orange-500/30 to-orange-600/30",
+                        glow: "shadow-[0_0_15px_rgba(249,115,22,0.2)]"
                       }
                     }[category.id] || {
-                      active: "from-gray-500/25 to-gray-600/25 border-gray-400/50",
-                      icon: "from-gray-500/40 to-gray-600/40",
-                      glow: "shadow-[0_0_20px_rgba(128,128,128,0.3)]"
+                      active: "from-white/5 to-white/10 border-white/[0.08]",
+                      icon: "from-white/10 to-white/15",
+                      glow: ""
                     };
 
                     return (
@@ -170,26 +175,21 @@ const ToolsModal: React.FC<ToolsModalProps> = ({ isOpen, onClose, activeTool, on
                           "flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all",
                           "active:scale-95 min-h-[110px]",
                           isActive
-                            ? `bg-gradient-to-br ${categoryColors.active} border-2 ${categoryColors.glow}`
-                            : "bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-white/20"
+                            ? `bg-gradient-to-br ${categoryColors.active} border ${categoryColors.glow}`
+                            : "bg-transparent hover:bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.1]"
                         )}
                       >
                         <div className={cn(
                           "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
                           isActive 
-                            ? `bg-gradient-to-br ${categoryColors.icon} scale-110` 
-                            : "bg-white/10"
+                            ? `bg-transparent text-orange-500 scale-110` 
+                            : "bg-transparent text-white/70"
                         )}>
-                          <div className={cn(
-                            "transition-all",
-                            isActive ? "text-white" : "text-white/70"
-                          )}>
-                            {TOOL_ICONS[toolId]}
-                          </div>
+                          {TOOL_ICONS[toolId]}
                         </div>
                         <span className={cn(
-                          "text-xs font-semibold text-center leading-tight px-1",
-                          isActive ? "text-white" : "text-white/70"
+                          "text-xs font-medium text-center leading-tight px-1",
+                          isActive ? "text-orange-500" : "text-white/70"
                         )}>
                           {TOOL_NAMES[toolId]}
                         </span>
@@ -204,7 +204,7 @@ const ToolsModal: React.FC<ToolsModalProps> = ({ isOpen, onClose, activeTool, on
             <div className="pt-4 flex-shrink-0">
               <button
                 onClick={onClose}
-                className="w-full py-4 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-2xl text-white font-semibold text-base transition-all active:scale-98 border border-white/10"
+                className="w-full py-4 bg-transparent hover:bg-white/[0.03] active:bg-white/[0.05] rounded-2xl text-white font-semibold text-base transition-all active:scale-98 border border-white/[0.08]"
               >
                 Fechar
               </button>

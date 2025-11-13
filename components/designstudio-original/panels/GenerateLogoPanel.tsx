@@ -6,7 +6,7 @@ import Textarea from '../ui/Textarea';
 import Select from '../ui/Select';
 import Input from '../ui/Input';
 import PremiumPanelHeader from '../ui/PremiumPanelHeader';
-import { Sparkles } from 'lucide-react';
+import { Wand2 } from 'lucide-react';
 
 interface GenerateLogoPanelProps {
   onContentUpdate: (content: CanvasContent) => void;
@@ -52,7 +52,7 @@ const GenerateLogoPanel: React.FC<GenerateLogoPanelProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <PremiumPanelHeader
-        icon={Sparkles}
+        icon={Wand2}
         title="Gerar Logótipo"
         description="Crie um logótipo profissional e único para a sua marca em segundos."
         gradient="from-purple-500/20 to-pink-500/20"

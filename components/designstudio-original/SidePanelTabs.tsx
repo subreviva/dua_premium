@@ -7,7 +7,7 @@ import SessionGallery from './SessionGallery';
 import TemplateGallery, { Template } from './TemplateGallery';
 import StylePresets, { useStylePresets, StylePreset } from './StylePresets';
 import { ToolId, CanvasContent, ApiFunctions, ImageObject } from '@/types/designstudio';
-import { Wrench, History, Sparkles, Palette } from 'lucide-react';
+import { Wrench, History, Layers, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SidePanelTabsProps {
@@ -77,14 +77,14 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
               'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'tools'
-                ? 'bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 text-white border-blue-400/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
+                ? 'bg-orange-500/10 text-orange-500 border-orange-500/30'
+                : 'text-white/60 hover:text-white bg-transparent backdrop-blur-xl border-white/[0.08] hover:bg-white/[0.03] hover:border-white/[0.15]'
             )}
           >
             <Wrench className={cn(
               "w-4 h-4 transition-transform duration-200",
               activeTab === 'tools' ? "scale-110" : "scale-100"
-            )} />
+            )} strokeWidth={0.75} />
             <span className="whitespace-nowrap">Ferramentas</span>
           </button>
           
@@ -94,14 +94,14 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
               'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'templates'
-                ? 'bg-gradient-to-br from-purple-500/30 via-purple-600/20 to-pink-500/30 text-white border-purple-400/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
+                ? 'bg-orange-500/10 text-orange-500 border-orange-500/30'
+                : 'text-white/60 hover:text-white bg-transparent backdrop-blur-xl border-white/[0.08] hover:bg-white/[0.03] hover:border-white/[0.15]'
             )}
           >
-            <Sparkles className={cn(
+            <Layers className={cn(
               "w-4 h-4 transition-transform duration-200",
               activeTab === 'templates' ? "scale-110" : "scale-100"
-            )} />
+            )} strokeWidth={0.75} />
             <span className="whitespace-nowrap">Templates</span>
           </button>
           
@@ -111,14 +111,14 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
               'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'styles'
-                ? 'bg-gradient-to-br from-pink-500/30 via-pink-600/20 to-purple-500/30 text-white border-pink-400/30 shadow-[0_0_15px_rgba(236,72,153,0.3)]'
-                : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
+                ? 'bg-orange-500/10 text-orange-500 border-orange-500/30'
+                : 'text-white/60 hover:text-white bg-transparent backdrop-blur-xl border-white/[0.08] hover:bg-white/[0.03] hover:border-white/[0.15]'
             )}
           >
             <Palette className={cn(
               "w-4 h-4 transition-transform duration-200",
               activeTab === 'styles' ? "scale-110" : "scale-100"
-            )} />
+            )} strokeWidth={0.75} />
             <span className="whitespace-nowrap">Estilos</span>
             {selectedStyles.length > 0 && (
               <span className="bg-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
@@ -133,14 +133,14 @@ const SidePanelTabs: React.FC<SidePanelTabsProps> = (props) => {
               'flex items-center gap-2 px-4 md:px-4 py-2.5 md:py-2.5 rounded-xl font-medium text-sm transition-all duration-300 flex-shrink-0 border',
               'active:scale-95 active:transition-transform active:duration-100 touch-manipulation',
               activeTab === 'history'
-                ? 'bg-gradient-to-br from-blue-500/30 via-blue-600/20 to-purple-500/30 text-white border-blue-400/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                : 'text-white/60 hover:text-white bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20'
+                ? 'bg-orange-500/10 text-orange-500 border-orange-500/30'
+                : 'text-white/60 hover:text-white bg-transparent backdrop-blur-xl border-white/[0.08] hover:bg-white/[0.03] hover:border-white/[0.15]'
             )}
           >
             <History className={cn(
               "w-4 h-4 transition-transform duration-200",
               activeTab === 'history' ? "scale-110" : "scale-100"
-            )} />
+            )} strokeWidth={0.75} />
             <span className="whitespace-nowrap">Histórico</span>
           </button>
         </nav>

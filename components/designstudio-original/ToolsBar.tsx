@@ -5,7 +5,6 @@ import { ToolId } from '@/types/designstudio';
 import { 
   ImagePlus, 
   Wand2, 
-  Sparkles, 
   Boxes, 
   Code2, 
   Grid3x3, 
@@ -26,21 +25,22 @@ interface ToolsBarProps {
 }
 
 const TOOL_ICONS: Record<ToolId, React.ReactNode> = {
-  'generate-image': <ImagePlus className="w-5 h-5" />,
-  'edit-image': <Wand2 className="w-5 h-5" />,
-  'generate-logo': <Sparkles className="w-5 h-5" />,
-  'generate-icon': <Boxes className="w-5 h-5" />,
-  'generate-svg': <Code2 className="w-5 h-5" />,
-  'generate-pattern': <Grid3x3 className="w-5 h-5" />,
-  'product-mockup': <Package className="w-5 h-5" />,
-  'color-palette': <Palette className="w-5 h-5" />,
-  'generate-variations': <Copy className="w-5 h-5" />,
-  'analyze-image': <ScanEye className="w-5 h-5" />,
-  'design-trends': <TrendingUp className="w-5 h-5" />,
-  'design-assistant': <Bot className="w-5 h-5" />,
-  'export-project': <ImagePlus className="w-5 h-5" />,
-  'remove-background': <Layers className="w-5 h-5" />,
-  'upscale-image': <Maximize2 className="w-5 h-5" />,
+  'generate-image': <ImagePlus className="w-5 h-5" strokeWidth={0.75} />,
+  'edit-image': <Wand2 className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-logo': <Wand2 className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-icon': <Boxes className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-svg': <Code2 className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-pattern': <Grid3x3 className="w-5 h-5" strokeWidth={0.75} />,
+  'product-mockup': <Package className="w-5 h-5" strokeWidth={0.75} />,
+  'color-palette': <Palette className="w-5 h-5" strokeWidth={0.75} />,
+  'generate-variations': <Copy className="w-5 h-5" strokeWidth={0.75} />,
+  'analyze-image': <ScanEye className="w-5 h-5" strokeWidth={0.75} />,
+  'design-trends': <TrendingUp className="w-5 h-5" strokeWidth={0.75} />,
+  'design-assistant': <Bot className="w-5 h-5" strokeWidth={0.75} />,
+  'export-project': <ImagePlus className="w-5 h-5" strokeWidth={0.75} />,
+  'remove-background': <Layers className="w-5 h-5" strokeWidth={0.75} />,
+  'upscale-image': <Maximize2 className="w-5 h-5" strokeWidth={0.75} />,
+  'gemini-flash-image': <Wand2 className="w-5 h-5 text-orange-500" strokeWidth={0.75} />,
 };
 
 const TOOL_NAMES: Record<ToolId, string> = {
@@ -59,9 +59,11 @@ const TOOL_NAMES: Record<ToolId, string> = {
   'export-project': 'Export',
   'remove-background': 'Remover BG',
   'upscale-image': 'Upscale',
+  'gemini-flash-image': 'Gerar',
 };
 
 const ALL_TOOLS: ToolId[] = [
+  'gemini-flash-image',
   'generate-image',
   'generate-logo',
   'generate-icon',
@@ -93,7 +95,7 @@ const ToolsBar: React.FC<ToolsBarProps> = ({ activeTool, onToolSelect }) => {
   }, [activeTool]);
   
   return (
-    <div className="w-full bg-black/98 backdrop-blur-3xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.6)]">
+    <div className="w-full bg-black/80 backdrop-blur-2xl border-t border-white/[0.08]">
       <div 
         ref={scrollContainerRef}
         className="flex gap-2 px-3 py-2.5 overflow-x-auto scrollbar-hide scroll-smooth"
@@ -111,21 +113,21 @@ const ToolsBar: React.FC<ToolsBarProps> = ({ activeTool, onToolSelect }) => {
                 "flex flex-col items-center justify-center gap-1.5 min-w-[72px] px-3 py-2.5 rounded-2xl transition-all flex-shrink-0",
                 "active:scale-95 touch-manipulation",
                 isActive
-                  ? "bg-gradient-to-br from-blue-500/35 via-blue-600/25 to-purple-500/35 border-2 border-blue-400/60 shadow-lg shadow-blue-500/30"
-                  : "bg-white/8 hover:bg-white/12 border-2 border-white/10 hover:border-white/20"
+                  ? "bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20"
+                  : "bg-transparent border border-white/[0.06] hover:bg-white/[0.03] hover:border-white/[0.1]"
               )}
             >
               <div className={cn(
                 "w-9 h-9 rounded-xl flex items-center justify-center transition-all",
                 isActive 
-                  ? "bg-gradient-to-br from-blue-500/50 to-purple-500/50 text-white scale-110 shadow-lg" 
-                  : "bg-white/10 text-white/70"
+                  ? "bg-transparent text-orange-500" 
+                  : "bg-transparent text-white/70"
               )}>
                 {TOOL_ICONS[toolId]}
               </div>
               <span className={cn(
-                "text-[10px] font-bold leading-tight text-center tracking-tight whitespace-nowrap",
-                isActive ? "text-white" : "text-white/70"
+                "text-[10px] font-medium leading-tight text-center tracking-tight whitespace-nowrap",
+                isActive ? "text-orange-500" : "text-white/70"
               )}>
                 {TOOL_NAMES[toolId]}
               </span>

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Film, ImagePlay, Wand2, Sparkles, ArrowUpCircle, Home } from "lucide-react"
+import { Film, ImagePlay, Wand2, Sparkles, ArrowUpCircle, Home, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function CinemaSidebar() {
@@ -32,11 +32,17 @@ export function CinemaSidebar() {
       href: "/videostudio/qualidade",
       icon: ArrowUpCircle,
       description: "Melhore a resolução até 4K"
+    },
+    {
+      name: "Performance (Act-Two)",
+      href: "/videostudio/performance",
+      icon: Users,
+      description: "Anime personagens com performance"
     }
   ]
 
   return (
-    <div className="flex h-screen w-64 flex-col border-r border-white/10 bg-black/40 backdrop-blur-2xl pt-14">
+    <div className="flex h-screen w-64 flex-col border-r border-white/10 bg-black/40 backdrop-blur-2xl pt-16">
       {/* Header */}
       <div className="border-b border-white/5 p-6">
         <div className="flex items-center gap-3">

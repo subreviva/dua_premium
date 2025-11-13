@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, Image as ImageIcon, Package, Grid3x3, Share2, Zap, Coffee, Dumbbell, Rocket, Heart, Gamepad2, Music, Camera, ShoppingBag } from 'lucide-react';
+import { Wand2, Image as ImageIcon, Package, Grid3x3, Share2, Zap, Coffee, Dumbbell, Rocket, Heart, Gamepad2, Music, Camera, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface Template {
@@ -163,7 +163,7 @@ export const PREMIUM_TEMPLATES: Template[] = [
 ];
 
 const CATEGORY_CONFIG = {
-  logo: { label: 'Logos', icon: <Sparkles className="w-5 h-5" />, color: 'from-purple-500 to-pink-500' },
+  logo: { label: 'Logos', icon: <Wand2 className="w-5 h-5" strokeWidth={0.75} />, color: 'from-orange-500 to-orange-600' },
   social: { label: 'Social Media', icon: <Share2 className="w-5 h-5" />, color: 'from-blue-500 to-cyan-500' },
   pattern: { label: 'Padrões', icon: <Grid3x3 className="w-5 h-5" />, color: 'from-green-500 to-emerald-500' },
   icon: { label: 'Ícones', icon: <Package className="w-5 h-5" />, color: 'from-orange-500 to-red-500' },
@@ -193,7 +193,7 @@ export default function TemplateGallery({ onSelectTemplate, currentCategory }: T
       {/* Header com Search */}
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-5 h-5 text-purple-400" />
+          <Wand2 className="w-5 h-5 text-orange-400" strokeWidth={0.75} />
           <h3 className="text-white font-semibold">Templates Premium</h3>
         </div>
         
@@ -234,7 +234,7 @@ export default function TemplateGallery({ onSelectTemplate, currentCategory }: T
       <div className="flex-1 overflow-y-auto p-4">
         {filteredTemplates.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-white/40">
-            <Sparkles className="w-12 h-12 mb-3 opacity-20" />
+            <Wand2 className="w-12 h-12 mb-3 opacity-20" strokeWidth={0.75} />
             <p className="text-sm">Nenhum template encontrado</p>
           </div>
         ) : (

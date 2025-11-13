@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, Maximize2, Loader2, Sparkles } from 'lucide-react';
+import { Upload, Maximize2, Loader2, Wand2 } from 'lucide-react';
 import { CanvasContent, ApiFunctions } from '@/types/designstudio';
 
 interface UpscaleImagePanelProps {
@@ -166,7 +166,7 @@ const UpscaleImagePanel: React.FC<UpscaleImagePanelProps> = ({
               </>
             ) : (
               <>
-                <Sparkles className="w-5 h-5" />
+                <Wand2 className="w-5 h-5" strokeWidth={0.75} />
                 Aumentar Resolução {upscaleFactor}x (6 créditos)
               </>
             )}

@@ -4,7 +4,7 @@ import Button from '../ui/Button';
 import Textarea from '../ui/Textarea';
 import Select from '../ui/Select';
 import Input from '../ui/Input';
-import { Sparkles, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
+import { Wand2, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
 
 interface GenerateImagePanelProps {
   onContentUpdate: (content: CanvasContent) => void;
@@ -80,9 +80,9 @@ const GenerateImagePanel: React.FC<GenerateImagePanelProps> = ({
             type="button" 
             onClick={handleEnhancePrompt} 
             disabled={isLoading || !prompt.trim()} 
-            className="group flex items-center gap-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="group flex items-center gap-1.5 text-xs font-medium text-orange-500 hover:text-orange-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           >
-            <Sparkles className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
+            <Wand2 className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" strokeWidth={0.75} />
             <span>Melhorar Prompt</span>
           </button>
         </div>

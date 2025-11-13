@@ -308,7 +308,7 @@ export default function StemsPage({ params }: { params: { id: string } }) {
   const gainNodesRef = useRef<Map<string, GainNode>>(new Map())
   const analyserNodesRef = useRef<Map<string, AnalyserNode>>(new Map())
   const masterGainRef = useRef<GainNode | null>(null)
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef = useRef<number>(0)
   const audioInitialized = useRef(false)
 
   const eqNodesRef = useRef<Map<string, { low: BiquadFilterNode; mid: BiquadFilterNode; high: BiquadFilterNode }>>(
@@ -1899,7 +1899,7 @@ export default function StemsPage({ params }: { params: { id: string } }) {
               </div>
             )}
           </div>
-          <Button onClick={() => router.push("/library")} variant="outline" className="gap-2">
+          <Button onClick={() => router.push("/musicstudio/library")} variant="outline" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
@@ -1912,101 +1912,118 @@ export default function StemsPage({ params }: { params: { id: string } }) {
   // const maxDuration = Math.max(0, ...Array.from(stemDurations.values())) // Removed duplicate declaration
 
   return (
-    <div className="h-screen bg-gradient-to-br from-black via-zinc-950 to-black flex flex-col overflow-hidden">
-      {/* Top bar - Enhanced glassmorphism effect */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/50 bg-zinc-950/90 backdrop-blur-xl shadow-lg shadow-black/20">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/library")}
-            className="h-8 w-8 text-zinc-400 hover:text-white transition-all duration-200 hover:scale-110 active:scale-95"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-sm font-light text-white">{trackTitle}</h1>
+    <div className="min-h-screen relative">
+      {/* Background com gradientes premium */}
+      <div className="absolute inset-0 bg-black" />
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-pink-600/5" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-orange-900/10 via-transparent to-transparent" />
+      
+      <div className="relative z-10 h-screen flex flex-col overflow-hidden">
+        {/* Top bar premium - Glassmorphism com gradientes */}
+        <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-white/[0.08] bg-black/60 backdrop-blur-3xl shadow-2xl shadow-black/50">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/musicstudio/library")}
+              className="h-9 w-9 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all duration-300 hover:scale-110 active:scale-95"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center shadow-lg shadow-orange-500/50">
+                <Music2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-sm font-bold text-white">{trackTitle}</h1>
+                <p className="text-xs text-zinc-500">Audio Stems Editor</p>
+              </div>
+            </div>
 
-          <SessionInfoPanel bpm={bpm} duration={maxDuration} trackCount={stems.length} sampleRate={44100} />
-        </div>
+            <div className="hidden md:flex">
+              <SessionInfoPanel bpm={bpm} duration={maxDuration} trackCount={stems.length} sampleRate={44100} />
+            </div>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <ZoomControls zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onZoomFit={handleZoomFit} />
+          <div className="flex items-center gap-2">
+            <ZoomControls zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onZoomFit={handleZoomFit} />
 
-          <div className="h-4 w-px bg-zinc-800/50" />
+            <div className="h-4 w-px bg-white/[0.08]" />
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setAddTrackModalOpen(true)}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95"
-          >
-            <Plus className="h-3 w-3" />
-            <span className="hidden sm:inline">Add Track</span>
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAddTrackModalOpen(true)}
+              className="h-8 gap-2 text-xs rounded-xl hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline font-medium">Adicionar</span>
+            </Button>
 
-          <div className="h-4 w-px bg-zinc-800/50" />
+            <div className="h-4 w-px bg-white/[0.08]" />
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={undo}
-            disabled={!canUndo}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30"
-            title="Undo (Ctrl+Z)"
-          >
-            <RotateCcw className="h-3 w-3" />
-            <span className="hidden md:inline">Undo</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={redo}
-            disabled={!canRedo}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30"
-            title="Redo (Ctrl+Y)"
-          >
-            <RotateCcw className="h-3 w-3 scale-x-[-1]" />
-            <span className="hidden md:inline">Redo</span>
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={undo}
+              disabled={!canUndo}
+              className="h-8 gap-1.5 text-xs rounded-xl hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30"
+              title="Desfazer (Ctrl+Z)"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span className="hidden md:inline font-medium">Desfazer</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={redo}
+              disabled={!canRedo}
+              className="h-8 gap-1.5 text-xs rounded-xl hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30"
+              title="Refazer (Ctrl+Y)"
+            >
+              <RotateCcw className="h-3.5 w-3.5 scale-x-[-1]" />
+              <span className="hidden md:inline font-medium">Refazer</span>
+            </Button>
 
-          <div className="h-4 w-px bg-zinc-800/50" />
+            <div className="h-4 w-px bg-white/[0.08]" />
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setMasterEffectsModalOpen(true)}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95"
-          >
-            <Volume2 className="h-3 w-3" />
-            <span className="hidden lg:inline">Master FX</span>
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMasterEffectsModalOpen(true)}
+              className="h-8 gap-2 text-xs rounded-xl hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
+            >
+              <Volume2 className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline font-medium">Master FX</span>
+            </Button>
 
-          <div className="h-4 w-px bg-zinc-800/50 hidden lg:block" />
+            <div className="h-4 w-px bg-white/[0.08] hidden lg:block" />
 
-          <Button
-            variant={showMarkers ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setShowMarkers(!showMarkers)}
-            className="h-7 gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95 hidden lg:flex"
-          >
-            <Bookmark className="h-3 w-3" />
-            Markers
-          </Button>
+            <Button
+              variant={showMarkers ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setShowMarkers(!showMarkers)}
+              className="h-8 gap-2 text-xs rounded-xl hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95 hidden lg:flex"
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              Markers
+            </Button>
 
-          <div className="h-4 w-px bg-zinc-800/50" />
+            <div className="h-4 w-px bg-white/[0.08]" />
 
-          {/* Overflow menu for secondary actions */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 text-zinc-400 hover:text-white transition-all duration-200 hover:scale-105 active:scale-95"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-zinc-900/95 backdrop-blur-xl border-zinc-800">
+            {/* Overflow menu para ações secundárias */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 bg-black/95 backdrop-blur-3xl border-white/[0.08] rounded-xl">
               {/* Show Markers on smaller screens */}
               <DropdownMenuItem onClick={() => setShowMarkers(!showMarkers)} className="lg:hidden gap-2 cursor-pointer">
                 <Bookmark className="h-3.5 w-3.5" />
@@ -2065,38 +2082,38 @@ export default function StemsPage({ params }: { params: { id: string } }) {
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>Gerar com DUA</span>
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Master controls bar at top - Enhanced with better styling */}
-        <div className="h-16 border-b border-zinc-800/50 bg-gradient-to-r from-zinc-950/90 via-zinc-900/80 to-zinc-950/90 backdrop-blur-xl px-6 flex items-center gap-8 shadow-lg shadow-black/10">
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-zinc-400 font-mono tracking-wider">MASTER</span>
-            <div className="w-40">
-              <Slider
-                value={[masterVolume]}
-                onValueChange={(value) => setMasterVolume(value[0])}
-                max={100}
-                className="w-full"
-              />
-            </div>
-            <span className="text-xs text-zinc-400 tabular-nums w-12 font-mono">{masterVolume}%</span>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] text-zinc-500 font-mono tracking-wider">LIMITER</span>
-            <Button
-              variant={limiterEnabled ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setLimiterEnabled(!limiterEnabled)}
-              className="h-7 w-14 text-[10px] font-medium transition-all duration-200 hover:scale-105 active:scale-95"
-            >
-              {limiterEnabled ? "ON" : "OFF"}
-            </Button>
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Master controls bar premium */}
+          <div className="h-16 border-b border-white/[0.08] bg-black/40 backdrop-blur-xl px-6 flex items-center gap-8 shadow-lg shadow-black/20">
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-bold text-white tracking-wider">MASTER</span>
+              <div className="w-40">
+                <Slider
+                  value={[masterVolume]}
+                  onValueChange={(value) => setMasterVolume(value[0])}
+                  max={100}
+                  className="w-full"
+                />
+              </div>
+              <span className="text-xs text-orange-400 tabular-nums w-12 font-semibold">{masterVolume}%</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] text-zinc-400 font-semibold tracking-wider">LIMITER</span>
+              <Button
+                variant={limiterEnabled ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setLimiterEnabled(!limiterEnabled)}
+                className="h-7 w-14 text-[10px] font-semibold rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                {limiterEnabled ? "ON" : "OFF"}
+              </Button>
             {limiterEnabled && (
               <>
                 <div className="w-28">
@@ -2115,71 +2132,75 @@ export default function StemsPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* Timeline ruler - Enhanced with better background */}
-        <div className="h-8 border-b border-zinc-800/50 bg-gradient-to-b from-zinc-900/60 to-zinc-900/40 backdrop-blur-sm relative shadow-inner">
+        {/* Timeline ruler premium */}
+        <div className="h-8 border-b border-white/[0.08] bg-black/30 backdrop-blur-sm relative shadow-inner">
           <TimelineRuler duration={maxDuration} zoom={zoom} />
         </div>
 
-        {/* Tracks area - each track is a single row with enhanced styling */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
-          {stems.length === 0 ? (
-            /* Empty state - Studio ready for use */
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center space-y-6 max-w-md px-6">
-                <div className="space-y-3">
-                  <div className="flex justify-center">
-                    <div className="h-20 w-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                      <Music2 className="h-10 w-10 text-zinc-400" />
+        {/* Tracks area premium */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+            {stems.length === 0 ? (
+              /* Empty state premium */
+              <div className="h-full flex items-center justify-center relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-pink-600/5" />
+                <div className="text-center space-y-6 max-w-md px-6 relative z-10">
+                  <div className="space-y-3">
+                    <div className="flex justify-center">
+                      <div className="relative">
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 to-pink-600/20 blur-2xl" />
+                        <div className="relative h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/10 to-pink-600/10 border border-white/10 flex items-center justify-center backdrop-blur-xl">
+                          <Music2 className="h-12 w-12 text-orange-500" />
+                        </div>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Estúdio Pronto</h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed">
+                      Comece a criar. Grave sua voz, importe áudio, gere com IA ou adicione sons da biblioteca.
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      onClick={() => setAddTrackModalOpen(true)}
+                      className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:shadow-2xl hover:shadow-orange-500/50 text-white border-0 rounded-xl h-12 font-semibold transition-all duration-300 hover:scale-105"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Pista
+                    </Button>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        onClick={() => setDuaPanelOpen(true)}
+                        variant="ghost"
+                        className="bg-white/[0.08] hover:bg-white/[0.12] text-white border border-white/[0.12] rounded-xl h-11 font-medium transition-all duration-300 hover:scale-105"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Gerar com DUA
+                      </Button>
+                      <Button
+                        onClick={() => setSoundLibraryOpen(true)}
+                        variant="ghost"
+                        className="bg-white/[0.08] hover:bg-white/[0.12] text-white border border-white/[0.12] rounded-xl h-11 font-medium transition-all duration-300 hover:scale-105"
+                      >
+                        <Volume2 className="h-4 w-4 mr-2" />
+                        Sons
+                      </Button>
                     </div>
                   </div>
-                  <h3 className="text-xl font-light text-white">Estúdio Pronto</h3>
-                  <p className="text-sm text-zinc-400 font-light leading-relaxed">
-                    Comece a criar. Grave sua voz, importe áudio, gere com IA ou adicione sons da biblioteca.
+
+                  <p className="text-xs text-zinc-500">
+                    Todas as ferramentas profissionais disponíveis: mixer, efeitos, automação e mais
                   </p>
                 </div>
-                
-                <div className="flex flex-col gap-3">
-                  <Button
-                    onClick={() => setAddTrackModalOpen(true)}
-                    className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-lg h-12 font-light transition-all duration-300"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Pista
-                  </Button>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      onClick={() => setDuaPanelOpen(true)}
-                      variant="ghost"
-                      className="bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5 rounded-lg h-11 font-light"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Gerar com DUA
-                    </Button>
-                    <Button
-                      onClick={() => setSoundLibraryOpen(true)}
-                      variant="ghost"
-                      className="bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5 rounded-lg h-11 font-light"
-                    >
-                      <Volume2 className="h-4 w-4 mr-2" />
-                      Sons
-                    </Button>
-                  </div>
-                </div>
-
-                <p className="text-xs text-zinc-600 font-light">
-                  Todas as ferramentas profissionais disponíveis: mixer, efeitos, automação e mais
-                </p>
               </div>
-            </div>
-          ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={stems.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-              {stems.map((stem, index) => (
-                <div
-                  key={stem.id}
-                  className="h-24 border-b border-zinc-800/30 flex items-center hover:bg-zinc-900/20 hover:border-zinc-700/50 transition-all duration-300 group"
-                >
+            ) : (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={stems.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                {stems.map((stem, index) => (
+                  <div
+                    key={stem.id}
+                    className="h-24 border-b border-white/[0.05] flex items-center hover:bg-white/[0.03] hover:border-white/[0.08] transition-all duration-300 group"
+                  >
                   {/* Track controls on the left */}
                   <div className="w-56 flex-shrink-0">
                     <SortableTrackItem
@@ -2220,7 +2241,6 @@ export default function StemsPage({ params }: { params: { id: string } }) {
                     <div className="flex-1 h-16 relative rounded-lg overflow-hidden bg-zinc-900/30 backdrop-blur-sm border border-zinc-800/30 shadow-inner group-hover:border-zinc-700/50 transition-all duration-300">
                       <WaveformTimeline
                         audioUrl={stem.url}
-                        isPlaying={playingStems.has(stem.id)}
                         currentTime={stemTimes.get(stem.id) || 0}
                         duration={stemDurations.get(stem.id) || 0}
                         onSeek={(time) => handleSeek(stem.id, time)}
@@ -2413,29 +2433,24 @@ export default function StemsPage({ params }: { params: { id: string } }) {
       {/* Advanced Effects Modal */}
       {advancedEffectsModalStemId && (
         <AdvancedEffectsModal
-          isOpen={advancedEffectsModalOpen}
-          onClose={() => {
-            setAdvancedEffectsModalOpen(false)
-            setAdvancedEffectsModalStemId(null)
+          open={advancedEffectsModalOpen}
+          onOpenChange={(open) => {
+            setAdvancedEffectsModalOpen(open)
+            if (!open) setAdvancedEffectsModalStemId(null)
           }}
-          trackName={stems.find((s) => s.id === advancedEffectsModalStemId)?.name || ""}
-          trackColor={(stems.find((s) => s.id === advancedEffectsModalStemId)?.color as string) || ""}
-          effects={
-            stems.find((s) => s.id === advancedEffectsModalStemId)?.effects || {
-              reverb: 0,
-              delay: { time: 250, feedback: 30, mix: 0 },
-              eq: { low: 0, mid: 0, high: 0 },
-            }
-          }
-          effectsBypassed={
-            stems.find((s) => s.id === advancedEffectsModalStemId)?.effectsBypassed || {
-              reverb: false,
-              delay: false,
-              eq: false,
-            }
-          }
-          onEffectsChange={(effects) => updateEffects(advancedEffectsModalStemId, effects)}
-          onEffectBypassToggle={(effect) => toggleEffectBypass(advancedEffectsModalStemId, effect)}
+          stemName={stems.find((s) => s.id === advancedEffectsModalStemId)?.name || ""}
+          effects={{
+            compressor: { enabled: false, threshold: -24, ratio: 4, attack: 5, release: 50, knee: 3 },
+            gate: { enabled: false, threshold: -50, ratio: 10, attack: 1, release: 100 },
+            distortion: { enabled: false, amount: 0, mix: 50 },
+            chorus: { enabled: false, rate: 1.5, depth: 0.5, mix: 50 },
+            flanger: { enabled: false, rate: 0.5, depth: 0.5, feedback: 50, mix: 50 },
+            phaser: { enabled: false, rate: 0.5, depth: 0.5, stages: 4, mix: 50 },
+          }}
+          onEffectChange={(effect: string, param: string, value: number | boolean) => {
+            // Handle effect change
+            console.log('Effect change:', effect, param, value)
+          }}
         />
       )}
 
@@ -2457,6 +2472,7 @@ export default function StemsPage({ params }: { params: { id: string } }) {
           />
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }

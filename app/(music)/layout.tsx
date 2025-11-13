@@ -8,7 +8,6 @@ import { GenerationSidebarWrapper } from "@/components/generation-sidebar-wrappe
 import { PersistentPlayer } from "@/components/persistent-player"
 import { MobileNav } from "@/components/mobile-nav"
 import { StemsIndicator } from "@/components/stems-indicator"
-import { MusicStudioNav } from "@/components/music-studio-nav"
 import { useMusicStudioKeyboardShortcuts } from "@/hooks/use-music-studio-shortcuts"
 
 export default function MusicLayout({
@@ -22,12 +21,7 @@ export default function MusicLayout({
   return (
     <GenerationProvider>
       <StemsProvider>
-        <div className="flex flex-col min-h-screen">
-          <MusicStudioNav />
-          <div className="flex-1">
-            {children}
-          </div>
-        </div>
+        {children}
         <GenerationSidebarWrapper />
         <PersistentPlayer />
         <MobileNav />

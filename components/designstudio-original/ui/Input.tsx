@@ -10,7 +10,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const Input: React.FC<InputProps> = ({ label, id, className, ...props }) => {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-300 mb-2">
+      <label htmlFor={id} className="block text-sm font-medium text-white/90 mb-2">
         {label}
       </label>
       <input
@@ -18,10 +18,11 @@ const Input: React.FC<InputProps> = ({ label, id, className, ...props }) => {
         className={cn(
           // Base styles - altura otimizada para touch
           'w-full px-4 py-3 md:py-3',
-          'bg-gray-700 border border-gray-600 rounded-xl md:rounded-lg',
-          'text-gray-200 placeholder-gray-400',
+          'bg-transparent border border-white/[0.08] rounded-xl md:rounded-lg',
+          'text-white placeholder-white/30',
           // Focus e interaction
-          'focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+          'focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50',
+          'hover:border-white/[0.15]',
           'transition-all duration-200',
           // Touch optimization
           'touch-manipulation',

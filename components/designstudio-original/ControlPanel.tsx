@@ -32,6 +32,9 @@ const ControlPanel: React.FC<ControlPanelProps> = (props) => {
   const { activeTool, styleSuffixes = '', templatePrompt = '' } = props;
 
   switch (activeTool) {
+    case 'gemini-flash-image':
+      // Gemini 2.5 Flash Image - usa mesmo painel mas com flag
+      return <GenerateImagePanel {...props} />;
     case 'generate-image':
       return <GenerateImagePanel {...props} />;
     case 'edit-image':

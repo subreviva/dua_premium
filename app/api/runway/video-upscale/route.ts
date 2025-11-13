@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkCredits, deductCredits } from '@/lib/credits/credits-service';
+import type { CreditOperation } from '@/lib/credits/credits-config';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,12 +11,36 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: NextRequest) {
   try {
-    const { videoUri } = await request.json();
+    const { user_id, videoUri } = await request.json();
+
+    // Validar user_id
+    if (!user_id) {
+      return NextResponse.json(
+        { error: 'user_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!videoUri) {
       return NextResponse.json(
         { error: 'videoUri is required' },
         { status: 400 }
+      );
+    }
+
+    // CHECK CREDITS (25 créditos)
+    const operation: CreditOperation = 'video_upscale_10s';
+    const creditCheck = await checkCredits(user_id, operation);
+
+    if (!creditCheck.hasCredits) {
+      return NextResponse.json(
+        {
+          error: creditCheck.message,
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+        },
+        { status: 402 }
       );
     }
 
@@ -77,6 +103,12 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     console.log('✅ Upscale task created:', data.id);
+
+    // DEDUCT CREDITS após sucesso
+    await deductCredits(user_id, operation, {
+      taskId: data.id,
+      model: 'upscale_v1',
+    });
 
     return NextResponse.json({
       success: true,

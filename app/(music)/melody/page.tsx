@@ -467,7 +467,7 @@ export default function MelodyPage() {
         startTime: Date.now(),
       })
 
-      router.push("/library")
+      router.push("/musicstudio/library")
     } catch (error) {
       console.error("[v0] Generation error:", error)
       alert(error instanceof Error ? error.message : "Erro ao gerar música")
@@ -845,7 +845,7 @@ export default function MelodyPage() {
               {/* Music Library */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                onClick={() => router.push('/library')}
+                onClick={() => router.push('/musicstudio/library')}
                 className="flex flex-col items-center gap-2"
               >
                 <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center">
@@ -1185,15 +1185,22 @@ export default function MelodyPage() {
       {/* Desktop View */}
       <div className="hidden lg:flex items-center justify-center min-h-screen p-8">
         <Card className="w-full max-w-2xl bg-white/[0.06] backdrop-blur-xl border-white/[0.08] p-12 rounded-3xl">
-          <h1 className="text-4xl font-light text-white/95 mb-8 text-center">Melodia</h1>
-          <p className="text-white/60 text-center mb-8">
-            Esta funcionalidade está otimizada para dispositivos móveis. Por favor, aceda através de um smartphone ou
-            tablet.
-          </p>
-          <div className="flex justify-center">
-            <Button onClick={() => router.push("/musicstudio")} variant="outline" className="rounded-xl">
-              Voltar ao Início
-            </Button>
+          <div className="flex flex-col items-center">
+            <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-orange-500/20 to-pink-500/20 border border-white/10">
+              <Music2 className="h-16 w-16 text-white/90" />
+            </div>
+            <h1 className="text-4xl font-light text-white/95 mb-4 text-center">Melodia</h1>
+            <p className="text-white/60 text-center mb-2 text-lg">
+              Esta funcionalidade está disponível apenas em dispositivos móveis
+            </p>
+            <p className="text-white/40 text-center mb-8 text-sm max-w-md">
+              Para criar melodias com gravação de voz e todas as funcionalidades interativas, aceda através de um smartphone ou tablet.
+            </p>
+            <div className="flex gap-3">
+              <Button onClick={() => router.back()} variant="outline" className="rounded-xl">
+                Voltar
+              </Button>
+            </div>
           </div>
         </Card>
       </div>

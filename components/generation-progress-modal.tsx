@@ -149,7 +149,7 @@ export function GenerationProgressModal({ open, taskId, onComplete, onError }: G
 
           {/* View Library Button */}
           {status === "SUCCESS" && (
-            <Button onClick={() => (window.location.href = "/library")} className="w-full gap-2" size="lg">
+            <Button onClick={() => (window.location.href = "/musicstudio/library")} className="w-full gap-2" size="lg">
               <Music className="h-4 w-4" />
               View in Library
             </Button>

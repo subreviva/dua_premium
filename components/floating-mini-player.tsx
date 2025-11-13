@@ -17,7 +17,7 @@ export function FloatingMiniPlayer() {
   const isMusicStudio = pathname?.startsWith('/musicstudio') || 
                         pathname?.startsWith('/create') || 
                         pathname?.startsWith('/melody') || 
-                        pathname?.startsWith('/library')
+                        pathname?.startsWith('/musicstudio/library')
 
   // Não mostrar se estiver no Music Studio OU se não tiver música OU se foi fechado
   if (isMusicStudio || !currentTrack || !isVisible) return null

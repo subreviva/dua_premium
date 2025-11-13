@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Building2, Coins } from "lucide-react"
@@ -31,8 +30,6 @@ export default function HomePage() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
-      <Navbar />
-
       {/* HERO SECTION - Ultra Premium iOS-like Mobile First */}
       <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
         <motion.div 
@@ -55,7 +52,7 @@ export default function HomePage() {
             disableRemotePlayback
             className="absolute inset-0 w-full h-full object-cover"
             style={{ 
-              filter: 'brightness(0.95) contrast(1.08) saturate(1.1)',
+              filter: 'brightness(1.15) contrast(1.08) saturate(1.1)',
               WebkitBackfaceVisibility: 'hidden',
               WebkitPerspective: 1000,
               WebkitTransform: 'translate3d(0,0,0)',
@@ -87,12 +84,7 @@ export default function HomePage() {
             }}
           >
             <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir (53).mp4"
-              type="video/mp4"
-            />
-            {/* Fallback com URL encoded */}
-            <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir%20%2853%29.mp4"
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Rcio_de_aspeto_202511130721_a6fd6.mp4"
               type="video/mp4"
             />
           </video>
@@ -176,7 +168,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="w-full sm:w-auto rounded-full px-10 sm:px-12 py-4 sm:py-5 bg-white/[0.12] hover:bg-white/[0.18] active:bg-white/[0.15] text-white font-normal text-base sm:text-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_1px_4px_rgba(255,255,255,0.1)_inset] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4),0_2px_8px_rgba(255,255,255,0.15)_inset] border-0"
-                onClick={() => router.push("/acesso")}
+                onClick={() => router.push("/waitlist")}
                 style={{
                   backdropFilter: 'blur(20px) saturate(160%)',
                   WebkitBackdropFilter: 'blur(20px) saturate(160%)',
@@ -259,13 +251,14 @@ export default function HomePage() {
             controls={false}
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
+            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
           >
             <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
               type="video/mp4"
             />
           </video>
-          <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
@@ -274,9 +267,7 @@ export default function HomePage() {
           style={{
             background: 'linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(26,26,26,0.7) 30%, rgba(26,26,26,0) 100%)'
           }}
-        />
-        
-        <div className="relative z-10">
+        />        <div className="relative z-10">
           <SectionTitle eyebrow="Explore" title="Estúdios Criativos" kicker="Cinco estúdios especializados para a tua criatividade" />
           <Gallery6 heading="" />
         </div>
@@ -302,13 +293,14 @@ export default function HomePage() {
             controls={false}
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
+            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
           >
             <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
               type="video/mp4"
             />
           </video>
-          <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
@@ -404,13 +396,14 @@ A DUA tem rosto, voz e história."
             controls={false}
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
+            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
           >
             <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
               type="video/mp4"
             />
           </video>
-          <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
@@ -471,13 +464,14 @@ A DUA tem rosto, voz e história."
             controls={false}
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
+            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
           >
             <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
               type="video/mp4"
             />
           </video>
-          <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
         </div>
         
         {/* Enhanced gradient transition superior */}
@@ -551,13 +545,14 @@ A DUA tem rosto, voz e história."
             controls={false}
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover opacity-100"
+            style={{ filter: 'blur(80px) brightness(0.4) saturate(0.8)' }}
           >
             <source
-              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-6815-ultra%204k%20-%20elegante%2C%20simples%2C%20movimento%20....mp4"
+              src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/Montanhas_da_seerra_202511130749_7eyhg.mp4"
               type="video/mp4"
             />
           </video>
-          <div className="absolute inset-0 bg-[#1a1a1a]/70 backdrop-blur-[20px]" />
+          <div className="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-[30px]" />
         </div>
         
         {/* Enhanced gradient transition superior */}

@@ -84,7 +84,7 @@ export function useMusicStudioKeyboardShortcuts() {
       // Alt + 4 : Biblioteca
       if (event.altKey && event.key === "4") {
         event.preventDefault()
-        router.push("/library")
+        router.push("/musicstudio/library")
         return
       }
     }

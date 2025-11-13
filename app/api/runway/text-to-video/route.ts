@@ -1,68 +1,62 @@
 /**
- * API: RUNWAY ML VIDEO GENERATION
+ * API: RUNWAY ML VIDEO GENERATION (Text-to-Video)
  * 
- * Modelos disponíveis:
- * - gen4_turbo: Gen-4 Turbo (mais rápido, menor custo)
- * - gen3a_turbo: Gen-3 Alpha Turbo
- * - gen4_aleph: Gen-4 Aleph (qualidade máxima)
- * 
- * Endpoints:
- * - POST /api/runway/text-to-video (Text → Video)
- * - POST /api/runway/image-to-video (Image → Video)
- * - POST /api/runway/video-to-video (Video → Video)
+ * Modelos disponíveis (Tabela oficial Runway ML):
+ * - gen4_turbo 5s: 25 créditos
+ * - gen4_turbo 10s: 50 créditos
+ * - gen4_aleph 5s: 60 créditos
+ * - gen4_aleph 10s: 120 créditos
+ * - gen3a_turbo 5s: 20 créditos
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import RunwayML from '@runwayml/sdk';
-import { consumirCreditos } from '@/lib/creditos-helper';
-import { refundCredits } from '@/lib/credits/credits-service';
-
-// Inicializar cliente Runway
-const client = new RunwayML({
-  apiKey: process.env.RUNWAY_API_KEY || '',
-});
+import { checkCredits, deductCredits } from '@/lib/credits/credits-service';
+import type { CreditOperation } from '@/lib/credits/credits-config';
 
 // Configurações do Runway ML
 const RUNWAY_CONFIG = {
   SUPPORTED_MODELS: ['gen4_turbo', 'gen3a_turbo', 'gen4_aleph'] as const,
   SUPPORTED_RATIOS: ['1280:720', '720:1280', '1920:1080', '1024:1024'] as const,
-  DURATIONS: {
-    gen4_turbo: 4, // 4 segundos
-    gen3a_turbo: 5, // 5 segundos
-    gen4_aleph: 10, // 10 segundos
-  },
+  SUPPORTED_DURATIONS: [5, 10] as const,
 } as const;
 
-// Mapear modelos Runway para operações do sistema de créditos
-const MODEL_TO_OPERATION_MAP: Record<string, string> = {
-  'gen4_turbo_5s': 'video_gen4_5s',
-  'gen4_turbo_10s': 'video_gen4_10s',
-  'gen4_aleph_5s': 'video_gen4_aleph_5s',
-  'gen3a_turbo_5s': 'gen3_alpha_5s',
-  'gen3a_turbo_10s': 'gen3_alpha_10s',
-};
+// Mapear modelo + duração para operação de créditos
+function getOperation(model: string, duration: number): CreditOperation {
+  const key = `${model}_${duration}s`;
+  const mapping: Record<string, CreditOperation> = {
+    'gen4_turbo_5s': 'video_gen4_turbo_5s',
+    'gen4_turbo_10s': 'video_gen4_turbo_10s',
+    'gen4_aleph_5s': 'video_gen4_aleph_5s',
+    'gen4_aleph_10s': 'video_gen4_aleph_10s',
+    'gen3a_turbo_5s': 'video_gen3a_turbo_5s',
+  };
+  
+  return mapping[key] || 'video_gen4_turbo_5s';
+}
 
 type RunwayModel = typeof RUNWAY_CONFIG.SUPPORTED_MODELS[number];
 type RunwayRatio = typeof RUNWAY_CONFIG.SUPPORTED_RATIOS[number];
+type RunwayDuration = typeof RUNWAY_CONFIG.SUPPORTED_DURATIONS[number];
 
 /**
  * POST /api/runway/text-to-video
- * Gera vídeo a partir de texto
+ * Gera vídeo a partir de texto usando Runway ML
  */
 export async function POST(request: NextRequest) {
   try {
     const {
-      userId,
+      user_id,
       promptText,
       model = 'gen4_turbo',
       ratio = '1280:720',
+      duration = 5,
       seed,
     } = await request.json();
 
-    // Validações
-    if (!userId) {
+    // Validar user_id
+    if (!user_id) {
       return NextResponse.json(
-        { error: 'userId é obrigatório' },
+        { error: 'user_id é obrigatório' },
         { status: 400 }
       );
     }
@@ -88,110 +82,94 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calcular custo em créditos baseado no modelo e duração
-    const duration = RUNWAY_CONFIG.DURATIONS[model as RunwayModel];
-    let creditosNecessarios = 0;
-    let operationKey = '';
-
-    if (model === 'gen4_turbo') {
-      operationKey = duration === 5 ? 'video_gen4_5s' : 'video_gen4_10s';
-      creditosNecessarios = duration === 5 ? 20 : 40;
-    } else if (model === 'gen3a_turbo') {
-      operationKey = duration === 5 ? 'gen3_alpha_5s' : 'gen3_alpha_10s';
-      creditosNecessarios = duration === 5 ? 18 : 35;
-    } else if (model === 'gen4_aleph') {
-      operationKey = 'video_gen4_aleph_5s';
-      creditosNecessarios = 60;
+    if (!RUNWAY_CONFIG.SUPPORTED_DURATIONS.includes(duration as RunwayDuration)) {
+      return NextResponse.json(
+        { error: `Duração inválida. Use: ${RUNWAY_CONFIG.SUPPORTED_DURATIONS.join(', ')}s` },
+        { status: 400 }
+      );
     }
 
-    // Consumir créditos ANTES de gerar (usando adapter que chama RPC)
-    const resultadoCreditos = await consumirCreditos(
-      userId,
-      operationKey,
-      {
-        creditos: creditosNecessarios,
+    // Validação: gen3a_turbo só suporta 5s
+    if (model === 'gen3a_turbo' && duration !== 5) {
+      return NextResponse.json(
+        { error: 'gen3a_turbo só suporta duração de 5 segundos' },
+        { status: 400 }
+      );
+    }
+
+    // CHECK CREDITS (25-120 créditos dependendo do modelo/duração)
+    const operation = getOperation(model, duration);
+    const creditCheck = await checkCredits(user_id, operation);
+
+    if (!creditCheck.hasCredits) {
+      return NextResponse.json(
+        {
+          error: creditCheck.message,
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+        },
+        { status: 402 }
+      );
+    }    const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
+
+    if (!RUNWAY_API_KEY) {
+      return NextResponse.json(
+        { error: 'Runway API key not configured' },
+        { status: 503 }
+      );
+    }
+
+    console.log(`🎬 Runway Text-to-Video: model=${model}, duration=${duration}s`);
+
+    // Call Runway ML API
+    const response = await fetch('https://api.dev.runwayml.com/v1/text_to_video', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RUNWAY_API_KEY}`,
+        'Content-Type': 'application/json',
+        'X-Runway-Version': '2024-11-06',
+      },
+      body: JSON.stringify({
         model,
-        promptText: promptText.substring(0, 100),
+        promptText,
         ratio,
         duration,
-      }
-    );
-
-    if (!resultadoCreditos.success) {
-      return NextResponse.json(
-        {
-          error: 'Créditos insuficientes',
-          details: resultadoCreditos.error || resultadoCreditos.details,
-          redirect: '/comprar',
-        },
-        { status: 402 } // Payment Required
-      );
-    }
-
-    // Gerar vídeo com Runway ML - Text to Video mode
-    console.log(`[Runway] Gerando vídeo: model=${model}, duration=${duration}s`);
-
-    // Para text-to-video, vamos usar gen3a_turbo conforme documentação
-    const taskResponse = await client.imageToVideo.create({
-      model: 'gen3a_turbo',
-      promptImage: 'https://via.placeholder.com/1280x720', // Imagem placeholder
-      promptText,
+        seed: seed || Math.floor(Math.random() * 4294967295),
+      }),
     });
 
-    // Aguardar conclusão (polling manual)
-    let attempts = 0;
-    const maxAttempts = 120; // 2 minutos
-    let currentTask: any = taskResponse;
-
-    while (!['SUCCEEDED', 'FAILED'].includes(currentTask.status || '') && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      currentTask = await client.tasks.retrieve(taskResponse.id);
-      attempts++;
-      
-      console.log(`[Runway] Tentativa ${attempts}: Status = ${currentTask.status || 'UNKNOWN'}`);
-    }
-
-    const finalStatus = currentTask.status || 'UNKNOWN';
-
-    if (finalStatus === 'FAILED') {
-      // Reembolsar créditos em caso de falha
-      console.log('🔄 Falha na geração - reembolsando créditos');
-      await refundCredits(userId, operationKey as any, 'Runway task failed');
-      
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Runway API error:', errorData);
       return NextResponse.json(
-        {
-          error: 'Falha na geração do vídeo',
-          taskId: taskResponse.id,
-          details: currentTask,
-          refunded: true,
+        { 
+          error: 'Failed to start text-to-video task',
+          details: errorData,
         },
-        { status: 500 }
+        { status: response.status }
       );
     }
 
-    if (attempts >= maxAttempts) {
-      return NextResponse.json(
-        {
-          error: 'Timeout: vídeo ainda processando',
-          taskId: taskResponse.id,
-          message: 'Use /api/runway/status para verificar o status',
-        },
-        { status: 202 }
-      );
-    }
+    const data = await response.json();
+    console.log('✅ Runway task created:', data.id);
 
-    // Sucesso!
-    const videoUrl = currentTask.output?.[0] || currentTask.artifacts?.[0]?.url || null;
+    // DEDUCT CREDITS após sucesso
+    await deductCredits(user_id, operation, {
+      taskId: data.id,
+      model,
+      duration,
+      promptText: promptText.substring(0, 100),
+      ratio,
+    });
 
     return NextResponse.json({
       success: true,
-      taskId: taskResponse.id,
-      videoUrl,
-      creditosRestantes: resultadoCreditos.creditos_restantes,
-      creditosGastos: creditosNecessarios,
+      taskId: data.id,
       model,
       duration,
-      status: finalStatus,
+      ratio,
+      message: 'Text-to-video task started successfully'
     });
 
   } catch (error: any) {
@@ -214,11 +192,13 @@ export async function GET() {
   return NextResponse.json({
     models: RUNWAY_CONFIG.SUPPORTED_MODELS,
     ratios: RUNWAY_CONFIG.SUPPORTED_RATIOS,
-    durations: RUNWAY_CONFIG.DURATIONS,
+    durations: RUNWAY_CONFIG.SUPPORTED_DURATIONS,
     pricing: {
-      gen4_turbo_4s: { creditos: 30, preco_eur: 0.90 },
-      gen3a_turbo_5s: { creditos: 35, preco_eur: 1.05 },
-      gen4_aleph_10s: { creditos: 100, preco_eur: 3.00 },
+      gen4_turbo_5s: 25,
+      gen4_turbo_10s: 50,
+      gen4_aleph_5s: 60,
+      gen4_aleph_10s: 120,
+      gen3a_turbo_5s: 20,
     },
   });
 }

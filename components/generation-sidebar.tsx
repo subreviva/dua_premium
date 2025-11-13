@@ -225,7 +225,7 @@ export function GenerationSidebar({ tasks, onRemoveTask, onViewTrack }: Generati
                               variant="ghost"
                               size="sm"
                               className="h-7 gap-1 text-xs rounded-full hover:bg-secondary/80"
-                              onClick={() => router.push("/library")}
+                              onClick={() => router.push("/musicstudio/library")}
                             >
                               View in Library
                               <ChevronRight className="h-3 w-3" />
@@ -292,7 +292,7 @@ export function GenerationSidebar({ tasks, onRemoveTask, onViewTrack }: Generati
                               variant="outline"
                               size="sm"
                               className="w-full gap-2 rounded-lg border-border/50 bg-secondary/30 text-xs hover:bg-secondary/60"
-                              onClick={() => router.push("/library")}
+                              onClick={() => router.push("/musicstudio/library")}
                             >
                               View {task.tracks.length - 2} more{" "}
                               {task.tracks.length - 2 === 1 ? "variation" : "variations"}

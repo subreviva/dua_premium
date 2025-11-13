@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkCredits, deductCredits } from '@/lib/credits/credits-service';
+import type { CreditOperation } from '@/lib/credits/credits-config';
 
 /**
- * API Endpoint: Generate Image
+ * API Endpoint: Generate Image (5 créditos)
  * 
  * IMPORTANTE: Este é um endpoint MOCK para demonstração.
  * 
@@ -13,7 +15,49 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, aspectRatio, config } = await request.json();
+    const { user_id, prompt, aspectRatio, config } = await request.json();
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔥 PASSO 1: VALIDAR E VERIFICAR CRÉDITOS
+    // ═══════════════════════════════════════════════════════════════
+    
+    if (!user_id) {
+      return NextResponse.json(
+        { error: 'user_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    if (!prompt || prompt.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'prompt é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    const operation: CreditOperation = 'design_generate_image';
+    console.log(`🎨 [Generate Image] Verificando créditos para ${user_id}...`);
+
+    const creditCheck = await checkCredits(user_id, operation);
+
+    if (!creditCheck.hasCredits) {
+      console.log(`❌ [Generate Image] Créditos insuficientes: ${creditCheck.message}`);
+      return NextResponse.json(
+        {
+          error: creditCheck.message,
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+        },
+        { status: 402 } // Payment Required
+      );
+    }
+
+    console.log(`✅ [Generate Image] Créditos OK (saldo: ${creditCheck.currentBalance}, necessário: ${creditCheck.required})`);
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔥 PASSO 2: GERAR IMAGEM
+    // ═══════════════════════════════════════════════════════════════
 
     // ========== MOCK VERSION (REMOVER EM PRODUÇÃO) ==========
     // Simula delay de API
@@ -22,7 +66,25 @@ export async function POST(request: NextRequest) {
     // Retorna imagem placeholder
     const mockImage = `https://picsum.photos/seed/${Date.now()}/1024/1024`;
     
+    // ═══════════════════════════════════════════════════════════════
+    // 🔥 PASSO 3: DEDUZIR CRÉDITOS APÓS SUCESSO
+    // ═══════════════════════════════════════════════════════════════
+
+    console.log(`💰 [Generate Image] Deduzindo ${creditCheck.required} créditos...`);
+    const deduction = await deductCredits(user_id, operation, {
+      prompt: prompt.substring(0, 100),
+      aspectRatio: aspectRatio || '1:1',
+      model: 'mock',
+    });
+
+    if (!deduction.success) {
+      console.error(`❌ [Generate Image] Falha ao deduzir créditos: ${deduction.error}`);
+    } else {
+      console.log(`✅ [Generate Image] Créditos deduzidos! Novo saldo: ${deduction.newBalance}`);
+    }
+
     return NextResponse.json({
+      success: true,
       src: mockImage,
       mimeType: 'image/jpeg'
     });
@@ -35,7 +97,7 @@ export async function POST(request: NextRequest) {
     if (!API_KEY) {
       return NextResponse.json(
         { error: 'API_KEY não configurada' },
-        { status: 500 }
+        { status: 503 }
       );
     }
 
@@ -61,17 +123,36 @@ export async function POST(request: NextRequest) {
     const base64ImageBytes = response.generatedImages[0].image.imageBytes;
     const src = `data:image/png;base64,${base64ImageBytes}`;
 
+    // ═══════════════════════════════════════════════════════════════
+    // 🔥 PASSO 3: DEDUZIR CRÉDITOS APÓS SUCESSO
+    // ═══════════════════════════════════════════════════════════════
+
+    console.log(`💰 [Generate Image] Deduzindo ${creditCheck.required} créditos...`);
+    const deduction = await deductCredits(user_id, operation, {
+      prompt: prompt.substring(0, 100),
+      aspectRatio: aspectRatio || '1:1',
+      model: 'imagen-4.0-generate-001',
+    });
+
+    if (!deduction.success) {
+      console.error(`❌ [Generate Image] Falha ao deduzir créditos: ${deduction.error}`);
+    } else {
+      console.log(`✅ [Generate Image] Créditos deduzidos! Novo saldo: ${deduction.newBalance}`);
+    }
+
     return NextResponse.json({
+      success: true,
       src,
       mimeType: 'image/png'
     });
     */
 
   } catch (error) {
-    // console.error('Error generating image:', error);
+    console.error('❌ [Generate Image] Erro:', error);
     return NextResponse.json(
       { error: 'Falha ao gerar imagem' },
       { status: 500 }
     );
   }
 }
+

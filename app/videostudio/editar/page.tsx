@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CinemaSidebar } from "@/components/cinema-sidebar"
 import { VideoStudioNavbar } from "@/components/video-studio-navbar"
-import { Upload, Sparkles, Check, Wand2, FileVideo, Loader2, Ratio } from "lucide-react"
+import { Upload, X, ChevronDown, Download } from "lucide-react"
 
 const ASPECT_RATIOS = [
   { label: "16:9 Landscape", value: "1280:720" },
@@ -17,28 +17,63 @@ const ASPECT_RATIOS = [
   { label: "4:3 VGA", value: "640:480" },
 ]
 
+// Example showcase
+const EXAMPLE_SHOWCASE = {
+  input: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/v2v-gen4_aleph-input.mp4",
+  output: "https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/v2v-gen4_aleph-output%20%281%29.mp4"
+}
+
 export default function EditorPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [videoPreview, setVideoPreview] = useState<string | null>(null)
   const [prompt, setPrompt] = useState("")
   const [selectedRatio, setSelectedRatio] = useState("1280:720")
+  const [showRatioDropdown, setShowRatioDropdown] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [processedVideo, setProcessedVideo] = useState<string | null>(null)
+  const resultVideoRef = useRef<HTMLVideoElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       setSelectedFile(file)
       setProcessedVideo(null)
+      
+      // Create preview
+      const url = URL.createObjectURL(file)
+      setVideoPreview(url)
     }
+  }
+
+  const handleRemoveVideo = () => {
+    if (videoPreview) {
+      URL.revokeObjectURL(videoPreview)
+    }
+    setSelectedFile(null)
+    setVideoPreview(null)
+    setProcessedVideo(null)
   }
 
   const handleEdit = async () => {
     if (!selectedFile || !prompt.trim()) return
 
     setIsProcessing(true)
+    setProgress(0)
 
     try {
-      // Converter vídeo para base64 (data URI)
+      // Simular progresso
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval)
+            return prev
+          }
+          return prev + 1
+        })
+      }, 1000)
+
+      // Converter vídeo para base64
       const reader = new FileReader()
       const videoBase64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve(reader.result as string)
@@ -46,16 +81,16 @@ export default function EditorPage() {
         reader.readAsDataURL(selectedFile)
       })
 
-      // Chamar API com JSON (não FormData)
+      // Chamar API
       const response = await fetch("/api/runway/video-to-video", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          videoUri: videoBase64, // Data URI ou HTTPS URL
+          videoUri: videoBase64,
           promptText: prompt.trim(),
-          model: 'gen4_aleph', // Fixo para video-to-video
+          model: 'gen4_aleph',
           ratio: selectedRatio,
           contentModeration: {
             publicFigureThreshold: 'auto'
@@ -78,18 +113,18 @@ export default function EditorPage() {
       let taskId = data.taskId
       let completed = false
       let attempts = 0
-      const maxAttempts = 120 // 10 minutos (5s * 120)
+      const maxAttempts = 120
 
       while (!completed && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 5000)) // 5 segundos
+        await new Promise(resolve => setTimeout(resolve, 5000))
 
         const statusResponse = await fetch(`/api/runway/task-status?taskId=${taskId}`)
         const statusData = await statusResponse.json()
 
-        console.log('Task status:', statusData.status, 'Progress:', statusData.progress)
-
         if (statusData.status === "SUCCEEDED") {
           setProcessedVideo(statusData.output)
+          setProgress(100)
+          clearInterval(progressInterval)
           completed = true
         } else if (statusData.status === "FAILED") {
           throw new Error(statusData.error || "Falha ao processar vídeo")
@@ -99,273 +134,308 @@ export default function EditorPage() {
       }
 
       if (!completed) {
-        throw new Error("Tempo limite excedido. O processamento pode estar demorando mais que o esperado.")
+        throw new Error("Tempo limite excedido")
       }
     } catch (error) {
       console.error("Erro:", error)
-      alert(error instanceof Error ? error.message : "Erro ao processar vídeo. Tente novamente.")
+      alert(error instanceof Error ? error.message : "Erro ao processar vídeo")
     } finally {
       setIsProcessing(false)
+      setProgress(0)
     }
   }
+
+  const handleReset = () => {
+    handleRemoveVideo()
+    setPrompt("")
+    setProgress(0)
+  }
+
+  const selectedRatioLabel = ASPECT_RATIOS.find(r => r.value === selectedRatio)?.label || "Select Ratio"
 
   return (
     <div className="flex h-screen bg-black overflow-hidden">
       <VideoStudioNavbar />
       <CinemaSidebar />
 
-      <main className="flex-1 overflow-y-auto pt-14">
-        <div className="container mx-auto px-4 py-12 max-w-7xl">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
-          >
-            <div className="inline-flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20 backdrop-blur-xl">
-                <Wand2 className="w-8 h-8 text-purple-400" />
+      <main className="flex-1 overflow-hidden pt-14">
+        <div className="h-full">
+          <div className="grid grid-cols-2 h-full divide-x divide-white/5">
+            
+            {/* Left Panel - Controls */}
+            <div className="overflow-y-auto p-6 space-y-6">
+              
+              {/* Header */}
+              <div className="mb-8">
+                <h1 className="text-2xl font-bold text-white mb-2">Video Editor</h1>
+                <p className="text-sm text-zinc-500">Transform videos with AI - Gen4 Aleph</p>
+                <div className="mt-3 flex items-center gap-2 text-xs">
+                  <span className="px-2 py-1 rounded bg-white/5 border border-white/10 text-zinc-400">
+                    50 credits per edit
+                  </span>
+                </div>
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
-                Editor Criativo
-              </h1>
-            </div>
-            <p className="text-xl text-white/60 max-w-2xl mx-auto">
-              Edite vídeos com IA - ajuste câmera, objetos, iluminação, cenários e muito mais
-            </p>
-          </motion.div>
 
-          {/* Vídeo Exemplo */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-16 max-w-4xl mx-auto"
-          >
-            <div className="flex items-center gap-3 mb-8">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              <h2 className="text-2xl font-bold text-white">
-                Veja o Que é Possível
-              </h2>
-            </div>
-
-            <div className="rounded-3xl overflow-hidden border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl">
-              <video
-                className="w-full aspect-video object-cover"
-                src="https://d3phaj0sisr2ct.cloudfront.net/app/aleph/aleph-empty-dash-web.webm"
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-              <div className="p-6 border-t border-purple-500/20">
-                <p className="text-white/80 text-center">
-                  Transformações criativas com simples comandos de texto
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Editor Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="max-w-3xl mx-auto"
-          >
-            <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">
-                Edite Seu Vídeo
-              </h2>
-
-              {/* Upload Area */}
-              <div className="mb-6">
-                <label
-                  htmlFor="video-upload"
-                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer bg-white/5 hover:bg-white/10 transition-all group"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    {selectedFile ? (
-                      <>
-                        <FileVideo className="w-16 h-16 text-purple-400 mb-4" />
-                        <p className="text-lg font-medium text-white mb-1">
-                          {selectedFile.name}
-                        </p>
-                        <p className="text-sm text-white/60">
-                          Clique para alterar
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-16 h-16 text-white/40 mb-4 group-hover:text-white/60 transition-colors" />
-                        <p className="mb-2 text-lg font-medium text-white/80">
-                          Arraste seu vídeo ou clique para selecionar
-                        </p>
-                        <p className="text-sm text-white/40">
-                          Vídeo base para edição criativa
-                        </p>
-                      </>
-                    )}
-                  </div>
-                  <input
-                    id="video-upload"
-                    type="file"
-                    className="hidden"
-                    accept="video/*"
-                    onChange={handleFileChange}
-                    disabled={isProcessing}
-                  />
+              {/* Video Upload */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-3">
+                  Source Video
                 </label>
+                {videoPreview ? (
+                  <div className="relative rounded-lg overflow-hidden border border-white/10 bg-black group">
+                    <video
+                      src={videoPreview}
+                      className="w-full aspect-video object-cover"
+                      controls
+                      playsInline
+                    />
+                    <button
+                      onClick={handleRemoveVideo}
+                      className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/80 hover:bg-black text-white/80 hover:text-white transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="block cursor-pointer">
+                    <div className="border-2 border-dashed border-white/10 rounded-lg p-12 text-center hover:border-white/20 hover:bg-white/5 transition-all">
+                      <Upload className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+                      <p className="text-sm text-zinc-400 mb-1">Click to upload video</p>
+                      <p className="text-xs text-zinc-600">MP4, MOV, WebM</p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="video/*"
+                      onChange={handleFileChange}
+                      disabled={isProcessing}
+                    />
+                  </label>
+                )}
               </div>
 
-              {/* Prompt Textarea */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  Descreva Como Quer Editar o Vídeo
+              {/* Prompt */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-3">
+                  Transformation Prompt
                 </label>
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Ex: Transforme em cena noturna com luzes neon, adicione chuva, mude o ângulo da câmera para visão aérea..."
-                  className="w-full h-32 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all resize-none"
+                  placeholder="Describe how to transform the video... (camera angles, lighting, objects, scenery)"
+                  className="w-full h-32 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all resize-none"
                   disabled={isProcessing}
                 />
-                <p className="mt-2 text-xs text-white/40">
-                  Seja específico sobre câmera, iluminação, objetos ou cenários que deseja modificar
+                <p className="mt-2 text-xs text-zinc-600">
+                  Be specific about camera, lighting, objects or scenery changes
                 </p>
               </div>
 
-              {/* Aspect Ratio Selector */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-white/80 mb-3">
-                  <Ratio className="w-4 h-4 inline mr-2" />
-                  Proporção do Vídeo
+              {/* Aspect Ratio Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-3">
+                  Aspect Ratio
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {ASPECT_RATIOS.map((ratio) => (
-                    <button
-                      key={ratio.value}
-                      onClick={() => setSelectedRatio(ratio.value)}
-                      disabled={isProcessing}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        selectedRatio === ratio.value
-                          ? "bg-purple-500/20 border-purple-500/50 text-purple-300"
-                          : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
-                      } border disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      {ratio.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Features Grid */}
-              <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span className="text-sm font-medium text-white">Controle de Câmera</span>
-                  </div>
-                  <p className="text-xs text-white/60">Ajuste ângulos e movimentos</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span className="text-sm font-medium text-white">Iluminação</span>
-                  </div>
-                  <p className="text-xs text-white/60">Modifique luz e atmosfera</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span className="text-sm font-medium text-white">Objetos</span>
-                  </div>
-                  <p className="text-xs text-white/60">Adicione ou remova elementos</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span className="text-sm font-medium text-white">Cenários</span>
-                  </div>
-                  <p className="text-xs text-white/60">Transforme o ambiente</p>
-                </div>
-              </div>
-
-              {/* Process Button */}
-              <button
-                onClick={handleEdit}
-                disabled={!selectedFile || !prompt.trim() || isProcessing}
-                className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium text-lg hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Editando com IA...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                    Aplicar Edições
-                  </>
-                )}
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Processed Video Result */}
-          <AnimatePresence>
-            {processedVideo && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="mt-12 max-w-3xl mx-auto"
-              >
-                <div className="rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl p-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 rounded-lg bg-purple-500/20">
-                      <Check className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white">
-                      Vídeo Editado Pronto!
-                    </h3>
-                  </div>
-
-                  <div className="rounded-2xl overflow-hidden border border-purple-500/20 mb-6">
-                    <video
-                      className="w-full aspect-video"
-                      src={processedVideo}
-                      controls
-                      playsInline
-                    />
-                  </div>
-
-                  <a
-                    href={processedVideo}
-                    download
-                    className="w-full py-3 px-6 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-center block transition-all border border-white/20"
+                <div className="relative">
+                  <button
+                    onClick={() => setShowRatioDropdown(!showRatioDropdown)}
+                    disabled={isProcessing}
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white text-left hover:bg-white/[0.07] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between"
                   >
-                    Baixar Vídeo Editado
-                  </a>
+                    <span className="text-sm">{selectedRatioLabel}</span>
+                    <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${showRatioDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  <AnimatePresence>
+                    {showRatioDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 w-full mt-2 rounded-lg bg-zinc-900 border border-white/10 shadow-xl overflow-hidden"
+                      >
+                        <div className="max-h-64 overflow-y-auto">
+                          {ASPECT_RATIOS.map((ratio) => (
+                            <button
+                              key={ratio.value}
+                              onClick={() => {
+                                setSelectedRatio(ratio.value)
+                                setShowRatioDropdown(false)
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                                selectedRatio === ratio.value
+                                  ? 'bg-white/10 text-white'
+                                  : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                              }`}
+                            >
+                              {ratio.label}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
 
-          {/* Footer Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-16 text-center"
-          >
-            <p className="text-sm text-white/40">
-              Edição criativa com inteligência artificial de última geração
-            </p>
-          </motion.div>
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleReset}
+                  disabled={isProcessing}
+                  className="px-6 py-3 rounded-lg bg-transparent hover:bg-white/5 text-white font-medium transition-all border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={handleEdit}
+                  disabled={!selectedFile || !prompt.trim() || isProcessing}
+                  className="flex-1 px-6 py-3 rounded-lg bg-white text-black font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/90 flex items-center justify-center gap-2"
+                >
+                  {isProcessing ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full"
+                      />
+                      Editing...
+                    </>
+                  ) : (
+                    'Transform Video'
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Right Panel - Result Area */}
+            <div className="h-full flex items-center justify-center p-6">
+              <AnimatePresence mode="wait">
+                {isProcessing ? (
+                  <motion.div
+                    key="processing"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-center space-y-8 max-w-md"
+                  >
+                    <div className="relative w-20 h-20 mx-auto">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 rounded-full border-2 border-white/10 border-t-white"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white mb-3">Transforming</h3>
+                      <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
+                        <motion.div
+                          className="h-full bg-white"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ duration: 0.5 }}
+                        />
+                      </div>
+                      <div className="flex justify-between mt-3">
+                        <p className="text-xs text-zinc-500">{Math.round(progress)}%</p>
+                        <p className="text-xs text-zinc-500">{Math.ceil((100 - progress) / 2)} min</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : processedVideo ? (
+                  <motion.div
+                    key="result"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="w-full max-w-4xl"
+                  >
+                    <div className="rounded-lg overflow-hidden border border-white/10 bg-black">
+                      <video
+                        ref={resultVideoRef}
+                        src={processedVideo || ''}
+                        className="w-full aspect-video"
+                        controls
+                        playsInline
+                        autoPlay
+                        loop
+                        preload="metadata"
+                      />
+                    </div>
+                    
+                    <div className="mt-6 flex gap-3">
+                      <motion.a
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        href={processedVideo || ''}
+                        download="duaia-edited-video.mp4"
+                        className="flex-1 px-6 py-3 rounded-lg bg-white text-black font-semibold text-center hover:bg-white/90 transition-all"
+                      >
+                        Download Video
+                      </motion.a>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleReset}
+                        className="px-6 py-3 rounded-lg bg-transparent hover:bg-white/5 text-white font-medium transition-all border border-white/10"
+                      >
+                        New
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="example"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="w-full max-w-4xl space-y-6"
+                  >
+                    <div className="text-center mb-8">
+                      <h3 className="text-lg font-semibold text-white mb-2">Example Transformation</h3>
+                      <p className="text-sm text-zinc-500">See what AI can do</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-3">Input Video</p>
+                        <div className="rounded-lg overflow-hidden border border-white/10 bg-black">
+                          <video
+                            src={EXAMPLE_SHOWCASE.input}
+                            className="w-full aspect-video object-cover"
+                            controls
+                            playsInline
+                            loop
+                            muted
+                            preload="metadata"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-3">Transformed Video</p>
+                        <div className="rounded-lg overflow-hidden border border-white/10 bg-black">
+                          <video
+                            src={EXAMPLE_SHOWCASE.output}
+                            className="w-full aspect-video object-cover"
+                            controls
+                            playsInline
+                            loop
+                            muted
+                            preload="metadata"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center mt-8">
+                      <p className="text-xs text-zinc-600">Upload a video to get started</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </main>
     </div>

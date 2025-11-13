@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
+import { checkCredits, deductCredits } from '@/lib/credits/credits-service';
+import type { CreditOperation } from '@/lib/credits/credits-config';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const { 
+      user_id,
       promptImage, 
       promptText, 
       model = 'gen4_turbo', // gen4_turbo ou gen3a_turbo
@@ -11,22 +14,30 @@ export async function POST(request: NextRequest) {
       duration = 5, // 2-10 segundos
       seed,
       contentModeration 
-    } = body
+    } = body;
+
+    // Validar user_id
+    if (!user_id) {
+      return NextResponse.json(
+        { error: 'user_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!promptImage) {
       return NextResponse.json(
         { error: 'promptImage is required' },
         { status: 400 }
-      )
+      );
     }
 
     // Validar ratio aceito
-    const validRatios = ['1280:720', '720:1280', '1104:832', '832:1104', '960:960', '1584:672']
+    const validRatios = ['1280:720', '720:1280', '1104:832', '832:1104', '960:960', '1584:672'];
     if (!validRatios.includes(ratio)) {
       return NextResponse.json(
         { error: `Invalid ratio. Must be one of: ${validRatios.join(', ')}` },
         { status: 400 }
-      )
+      );
     }
 
     // Validar duration (2-10 segundos)
@@ -34,16 +45,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Duration must be between 2 and 10 seconds' },
         { status: 400 }
-      )
+      );
     }
 
     // Validar modelo
-    const validModels = ['gen4_turbo', 'gen3a_turbo']
+    const validModels = ['gen4_turbo', 'gen3a_turbo'];
     if (!validModels.includes(model)) {
       return NextResponse.json(
         { error: `Invalid model. Must be one of: ${validModels.join(', ')}` },
         { status: 400 }
-      )
+      );
+    }
+
+    // CHECK CREDITS (25 créditos - image to video)
+    const operation: CreditOperation = 'video_image_to_video';
+    const creditCheck = await checkCredits(user_id, operation);
+
+    if (!creditCheck.hasCredits) {
+      return NextResponse.json(
+        {
+          error: creditCheck.message,
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+        },
+        { status: 402 } // Payment Required
+      );
     }
 
     const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY
@@ -124,9 +151,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const data = JSON.parse(responseText)
+    const data = JSON.parse(responseText);
 
-    console.log('✅ Runway task created:', data.id)
+    console.log('✅ Runway task created:', data.id);
+
+    // DEDUCT CREDITS após sucesso
+    await deductCredits(user_id, operation, {
+      taskId: data.id,
+      model,
+      ratio,
+      duration,
+    });
 
     return NextResponse.json({
       success: true,
@@ -135,16 +170,16 @@ export async function POST(request: NextRequest) {
       ratio,
       duration,
       message: 'Image-to-video task started successfully'
-    })
+    });
   } catch (error) {
-    console.error('❌ Error creating image-to-video:', error)
+    console.error('❌ Error creating image-to-video:', error);
     return NextResponse.json(
       { 
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
-    )
+    );
   }
 }
 

@@ -1,22 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
+import { checkCredits, deductCredits } from '@/lib/credits/credits-service';
+import type { CreditOperation } from '@/lib/credits/credits-config';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const { 
+      user_id,
       characterType, 
       characterUri, 
       performanceUri, 
       bodyControl = true,
       facialExpressiveness = 3,
       seed 
-    } = body
+    } = body;
+
+    // Validar user_id
+    if (!user_id) {
+      return NextResponse.json(
+        { error: 'user_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!characterUri || !performanceUri) {
       return NextResponse.json(
         { error: 'Character URI and performance URI are required' },
         { status: 400 }
-      )
+      );
+    }
+
+    // CHECK CREDITS (30 créditos - Act-Two)
+    const operation: CreditOperation = 'video_act_two';
+    const creditCheck = await checkCredits(user_id, operation);
+
+    if (!creditCheck.hasCredits) {
+      return NextResponse.json(
+        {
+          error: creditCheck.message,
+          required: creditCheck.required,
+          current: creditCheck.currentBalance,
+          deficit: creditCheck.deficit,
+        },
+        { status: 402 }
+      );
     }
 
     const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY
@@ -53,25 +80,32 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      console.error('Runway API error:', errorData)
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Runway API error:', errorData);
       return NextResponse.json(
         { error: 'Failed to start character performance', details: errorData },
         { status: response.status }
-      )
+      );
     }
 
-    const data = await response.json()
+    const data = await response.json();
+
+    // DEDUCT CREDITS após sucesso
+    await deductCredits(user_id, operation, {
+      taskId: data.id,
+      model: 'act_two',
+      characterType,
+    });
 
     return NextResponse.json({
       taskId: data.id,
       status: data.status,
-    })
+    });
   } catch (error) {
-    console.error('Error creating character performance:', error)
+    console.error('Error creating character performance:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }

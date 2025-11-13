@@ -58,29 +58,39 @@ export const IMAGE_CREDITS = {
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎬 VÍDEO - Geração e processamento
 // ═══════════════════════════════════════════════════════════════════════════
+// 🎬 VIDEO - Geração de vídeos com IA (Runway ML)
+// ═══════════════════════════════════════════════════════════════════════════
 export const VIDEO_CREDITS = {
-  // Gen-4 (Runway)
-  video_gen4_5s: 20,               // Gen-4 Turbo 5 segundos
-  video_gen4_10s: 40,              // Gen-4 Turbo 10 segundos
-  video_gen4_aleph_5s: 60,         // Gen-4 Aleph 5s (premium)
+  // Gen-4 Turbo (Runway ML)
+  video_gen4_turbo_5s: 25,         // Gen-4 Turbo 5 segundos
+  video_gen4_turbo_10s: 50,        // Gen-4 Turbo 10 segundos
   
-  // Image to Video
-  image_to_video_5s: 18,           // Transformar imagem em vídeo 5s
-  image_to_video_10s: 35,          // Transformar imagem em vídeo 10s
+  // Gen-4 Aleph (Premium - Runway ML)
+  video_gen4_aleph_5s: 60,         // Gen-4 Aleph 5s (premium) - também usado para Video to Video
+  video_gen4_aleph_10s: 120,       // Gen-4 Aleph 10s (premium máxima)
   
-  // Video Editing
-  video_to_video: 50,              // Editar vídeos com IA (Gen-4 Aleph)
+  // Gen-3 Alpha Turbo (Econômico - Runway ML)
+  video_gen3a_turbo_5s: 20,        // Gen-3 Alpha Turbo 5s (econômico)
   
-  // Character Animation
-  act_two: 35,                     // Animar personagens com áudio
+  // Image to Video (Runway ML)
+  video_image_to_video: 25,        // Transformar imagem em vídeo
   
-  // Gen-3 Alpha (opção econômica)
-  gen3_alpha_5s: 18,               // Geração econômica 5s
-  gen3_alpha_10s: 35,              // Geração econômica 10s
+  // Video Enhancement (Runway ML)
+  video_upscale_10s: 25,           // Upscale para HD/4K (10s)
   
-  // Video Enhancement
-  video_upscale_5s: 10,            // Upscale 5 segundos
-  video_upscale_10s: 20,           // Upscale para HD/4K (10s)
+  // Character Animation (Act-Two - Runway ML)
+  video_act_two: 30,               // Animar personagens com áudio (5s)
+  
+  // DEPRECATED: Old naming (manter para compatibilidade)
+  video_gen4_5s: 20,               // DEPRECATED: use video_gen4_turbo_5s
+  video_gen4_10s: 40,              // DEPRECATED: use video_gen4_turbo_10s
+  image_to_video_5s: 18,           // DEPRECATED: use video_image_to_video
+  image_to_video_10s: 35,          // DEPRECATED
+  video_to_video: 50,              // DEPRECATED: use video_gen4_aleph_5s
+  act_two: 35,                     // DEPRECATED: use video_act_two
+  gen3_alpha_5s: 18,               // DEPRECATED: use video_gen3a_turbo_5s
+  gen3_alpha_10s: 35,              // DEPRECATED
+  video_upscale_5s: 10,            // DEPRECATED: use video_upscale_10s
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -103,26 +113,29 @@ export const LIVE_AUDIO_CREDITS = {
 // 🎨 DESIGN STUDIO - Ferramentas criativas
 // ═══════════════════════════════════════════════════════════════════════════
 export const DESIGN_STUDIO_CREDITS = {
+  // 🚀 Gemini 2.5 Flash Image (Novo! Novembro 2025)
+  design_gemini_flash_image: 5,    // Gemini 2.5 Flash Image (texto → imagem e edição)
+  
   // Geração
-  design_generate_image: 4,        // Gerar imagem genérica
+  design_generate_image: 5,        // Gerar imagem genérica
   design_generate_logo: 6,         // Gerar logo (alta qualidade)
   design_generate_icon: 4,         // Gerar ícone
   design_generate_pattern: 4,      // Gerar padrão
-  design_generate_svg: 6,          // Gerar SVG (vetorial)
+  design_generate_svg: 5,          // Gerar SVG (vetorial)
   
   // Edição
   design_edit_image: 5,            // Editar imagem com IA
   design_remove_background: 5,     // Remover fundo
   design_upscale_image: 6,         // Upscale HD/4K
-  design_generate_variations: 8,   // 3 variações (3x custo)
+  design_generate_variations: 15,  // 3 variações
   
   // Análise
-  design_analyze_image: 2,         // Analisar imagem
+  design_analyze_image: 1,         // Analisar imagem
   design_extract_colors: 2,        // Extrair paleta de cores
-  design_trends: 3,                // Pesquisar tendências
+  design_trends: 2,                // Pesquisar tendências
   
   // Assistente
-  design_assistant: 1,             // Chat assistente design
+  design_assistant: 0,             // Chat assistente design (GRÁTIS)
   
   // Export (GRÁTIS)
   design_export_png: 0,            // Exportar PNG
@@ -208,17 +221,25 @@ export const OPERATION_NAMES: Record<CreditOperation, string> = {
   image_gemini: 'Imagem Gemini (Legacy)',
   
   // Vídeo
-  video_gen4_5s: 'Vídeo Gen-4 (5s)',
-  video_gen4_10s: 'Vídeo Gen-4 (10s)',
+  video_gen4_turbo_5s: 'Vídeo Gen-4 Turbo (5s)',
+  video_gen4_turbo_10s: 'Vídeo Gen-4 Turbo (10s)',
   video_gen4_aleph_5s: 'Vídeo Gen-4 Aleph (5s)',
-  image_to_video_5s: 'Imagem para Vídeo (5s)',
-  image_to_video_10s: 'Imagem para Vídeo (10s)',
-  video_to_video: 'Editar Vídeo com IA',
-  act_two: 'Animar Personagem com Áudio',
-  gen3_alpha_5s: 'Gen-3 Alpha Econômico (5s)',
-  gen3_alpha_10s: 'Gen-3 Alpha Econômico (10s)',
-  video_upscale_5s: 'Upscale Vídeo (5s)',
+  video_gen4_aleph_10s: 'Vídeo Gen-4 Aleph (10s)',
+  video_gen3a_turbo_5s: 'Vídeo Gen-3 Alpha Turbo (5s)',
+  video_image_to_video: 'Imagem para Vídeo',
   video_upscale_10s: 'Upscale Vídeo HD/4K (10s)',
+  video_act_two: 'Animar Personagem (Act-Two)',
+  
+  // DEPRECATED: Manter para compatibilidade
+  video_gen4_5s: 'Vídeo Gen-4 (5s) [DEPRECATED]',
+  video_gen4_10s: 'Vídeo Gen-4 (10s) [DEPRECATED]',
+  image_to_video_5s: 'Imagem para Vídeo (5s) [DEPRECATED]',
+  image_to_video_10s: 'Imagem para Vídeo (10s) [DEPRECATED]',
+  video_to_video: 'Editar Vídeo com IA [DEPRECATED]',
+  act_two: 'Animar Personagem [DEPRECATED]',
+  gen3_alpha_5s: 'Gen-3 Alpha (5s) [DEPRECATED]',
+  gen3_alpha_10s: 'Gen-3 Alpha (10s) [DEPRECATED]',
+  video_upscale_5s: 'Upscale Vídeo (5s) [DEPRECATED]',
   
   // Chat
   chat_basic: 'Chat Básico (Grátis)',
@@ -229,6 +250,7 @@ export const OPERATION_NAMES: Record<CreditOperation, string> = {
   live_audio_5min: 'Áudio ao Vivo (5 min)',
   
   // Design Studio
+  design_gemini_flash_image: 'Design: Gemini 2.5 Flash Image (5 créditos)',
   design_generate_image: 'Design: Gerar Imagem',
   design_generate_logo: 'Design: Gerar Logo',
   design_generate_icon: 'Design: Gerar Ícone',

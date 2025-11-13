@@ -30,7 +30,7 @@ export function MobileNav() {
       icon: Mic,
     },
     {
-      href: "/library",
+      href: "/musicstudio/library",
       label: "Biblioteca",
       icon: Library,
     },

@@ -15,7 +15,7 @@ export function GlobalMusicPlayer() {
   const isMusicStudio = pathname?.startsWith('/musicstudio') || 
                         pathname?.startsWith('/create') || 
                         pathname?.startsWith('/melody') || 
-                        pathname?.startsWith('/library')
+                        pathname?.startsWith('/musicstudio/library')
 
   if (!currentTrack || !isMusicStudio) return null
 

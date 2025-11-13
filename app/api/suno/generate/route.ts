@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { SunoAPI } from "@/lib/suno-api"
 import { checkCredits, deductCredits, refundCredits } from "@/lib/credits/credits-service"
 import { createClient } from "@supabase/supabase-js"
+import type { CreditOperation } from "@/lib/credits/credits-config"
 
 // Cliente Supabase seguro (server-only)
 const supabase = createClient(
@@ -52,15 +53,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 🔥 PASSO 1: VERIFICAR CRÉDITOS ANTES DE GERAR
-    // Mapear modelo para service_name correto
-    const modelToService: Record<string, string> = {
+    // Mapear modelo para service_name correto (usar chaves do credits-config)
+    const modelToService: Record<string, CreditOperation> = {
+      'V3': 'music_generate_v3',
       'V3_5': 'music_generate_v3_5',
       'V4': 'music_generate_v4',
       'V4_5': 'music_generate_v4_5',
-      'V4_5PLUS': 'music_generate_v4_5_plus',
+      'V4_5PLUS': 'music_generate_v4_5plus',
       'V5': 'music_generate_v5',
     }
-    const serviceName = modelToService[model] || 'music_generate_v5'
+    const serviceName = modelToService[String(model)?.toUpperCase()] || 'music_generate_v5'
 
     console.log(`🎵 [Suno] Verificando créditos para usuário ${userId} (modelo: ${model})...`)
     const creditCheck = await checkCredits(userId, serviceName)

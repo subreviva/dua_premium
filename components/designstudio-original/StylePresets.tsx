@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { 
-  Palette, Sparkles, Zap, Paintbrush, Frame, Pen, Droplet, Flower,
+  Palette, Circle as CircleFilled, Zap, Paintbrush, Frame, Pen, Droplet, Flower,
   Zap as Lightning, Box, Grid3x3, Gamepad2, Diamond, Camera, Film,
   Focus, User, Mountain, Rainbow, Circle, Moon, Star, Radio, Crown
 } from 'lucide-react';
@@ -133,8 +133,8 @@ export default function StylePresets({
               >
                 {/* Selected Badge */}
                 {isSelected && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                    <Sparkles className="w-3 h-3 text-white" />
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                    <CircleFilled className="w-3 h-3 text-white" strokeWidth={0.75} fill="currentColor" fillOpacity={0.3} />
                   </div>
                 )}
 

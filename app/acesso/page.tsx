@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -58,6 +58,9 @@ async function retryWithBackoff<T>(
 
 export default function AcessoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/';
+  
   const [step, setStep] = useState("code");
   const [code, setCode] = useState("");
   const [isValidatingCode, setIsValidatingCode] = useState(false);
@@ -199,7 +202,7 @@ export default function AcessoPage() {
             toast.success("Login bem-sucedido!", {
               description: "Redirecionando...",
             });
-            setTimeout(() => router.push("/"), 1500);
+            setTimeout(() => router.push(redirectPath), 1500);
             return;
           }
         }
@@ -295,7 +298,7 @@ export default function AcessoPage() {
             duration: 3000,
           });
           
-          setTimeout(() => router.push("/"), 1500);
+          setTimeout(() => router.push(redirectPath), 1500);
           return;
         }
         
@@ -444,9 +447,9 @@ export default function AcessoPage() {
 
       console.log('[REGISTER] Registo completo! Redirecionando...');
       
-      // Redirecionar para página de boas-vindas
+      // Redirecionar para página original ou home
       setTimeout(() => {
-        router.push("/welcome");
+        router.push(redirectPath);
       }, 1500);
       
     } catch (error: any) {

@@ -10,12 +10,12 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 const Select: React.FC<SelectProps> = ({ label, id, children, ...props }) => {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-300 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-white/90 mb-1">
         {label}
       </label>
       <select
         id={id}
-        className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 focus:ring-blue-500 focus:border-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full p-3 bg-transparent border border-white/[0.08] rounded-lg text-white focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50 hover:border-white/[0.15] transition disabled:opacity-50 disabled:cursor-not-allowed"
         {...props}
       >
         {children}

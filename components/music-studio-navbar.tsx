@@ -27,7 +27,7 @@ export function MusicStudioNavbar() {
   const getTitle = () => {
     if (pathname === "/musicstudio") return null
     if (pathname.includes("/create")) return "Criar Música"
-    if (pathname.includes("/library")) return "Biblioteca"
+    if (pathname.includes("/musicstudio/library")) return "Biblioteca"
     if (pathname.includes("/melody")) return "Melodia"
     return "Music Studio"
   }
