@@ -31,7 +31,7 @@ export default function HomePage() {
   return (
     <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
       {/* HERO SECTION - Ultra Premium iOS-like Mobile First */}
-      <section className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
+      <section className="relative min-h-screen sm:h-screen w-full overflow-hidden flex items-center justify-center">
         <motion.div 
           style={{ 
             scale: heroScale, 
