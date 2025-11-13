@@ -158,6 +158,11 @@ export async function middleware(req: NextRequest) {
     '/favicon.ico',          // Favicon
     '/images',               // Imagens públicas
     '/comunidade',           // Comunidade welcome
+    '/chat',                 // Chat welcome (público, mas features requerem auth)
+    '/designstudio',         // Design Studio welcome (público)
+    '/musicstudio',          // Music Studio welcome (público)
+    '/videostudio',          // Video Studio welcome (público)
+    '/imagestudio',          // Image Studio welcome (público)
   ];
 
   // Verificar se a rota é pública
@@ -165,38 +170,7 @@ export async function middleware(req: NextRequest) {
     path.startsWith(publicPath)
   );
 
-  // 🔒 ROTAS DE CRIAÇÃO DOS ESTÚDIOS - SEMPRE PROTEGIDAS
-  const STUDIO_ROUTES = [
-    '/chat',                 // Chat (welcome page se não autenticado, dashboard se autenticado)
-    '/designstudio',         // Design Studio (welcome se não autenticado, home se autenticado)
-    '/musicstudio',          // Music Studio (welcome se não autenticado, home se autenticado)
-    '/videostudio',          // Video Studio (welcome se não autenticado, home se autenticado)
-    '/imagestudio',          // Image Studio (welcome se não autenticado, home se autenticado)
-    '/chat/c/',              // Chat com conversa específica
-    '/designstudio/create',  // Design Studio criação
-    '/musicstudio/home',     // Music Studio home (criação)
-    '/musicstudio/create',   // Music Studio criação
-    '/musicstudio/library',  // Music Studio biblioteca
-    '/videostudio/criar',    // Video Studio criação
-    '/videostudio/library',  // Video Studio biblioteca
-    '/imagestudio/create',   // Image Studio criação
-    '/imagestudio/library',  // Image Studio biblioteca
-  ];
-
-  // Verificar se está tentando acessar rota de estúdio
-  const isStudioRoute = STUDIO_ROUTES.some((route) => 
-    path === route || path.startsWith(route)
-  );
-
-  // Se tentar acessar rota de estúdio sem estar autenticado, redirecionar para /acesso
-  if (isStudioRoute && !req.cookies.get('sb-access-token')?.value) {
-    console.log(`🚫 Acesso negado a estúdio sem autenticação: ${path}`);
-    const redirectUrl = new URL('/acesso', req.url);
-    redirectUrl.searchParams.set('redirect', path);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // Se for rota pública (welcome pages), permitir acesso (com rate limiting já aplicado)
+  // Se for rota pública, permitir acesso (com rate limiting já aplicado)
   if (isPublicPath) {
     return NextResponse.next();
   }
@@ -302,8 +276,6 @@ export async function middleware(req: NextRequest) {
       const redirectUrl = new URL('/acesso?reason=no_access', req.url);
       return NextResponse.redirect(redirectUrl);
     }
-    
-    // DUA IA routes: /chat, /dashboard, /api/chat, /api/conversations
     const DUAIA_ROUTES = ['/chat', '/dashboard', '/api/chat', '/api/conversations'];
     const isDuaIARoute = DUAIA_ROUTES.some(route => path.startsWith(route));
 
