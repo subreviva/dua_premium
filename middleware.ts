@@ -139,47 +139,65 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Rotas que NÃO precisam de proteção (autenticação)
-  const publicPaths = [
-    '/',                      // Home page pública
-    '/acesso',               // Página de código de acesso
-    '/login',                // Login para users registados
-    '/registo',              // Página de registo/waitlist
-    '/sobre',                // Sobre
-    '/termos',               // Termos de serviço
-    '/privacidade',          // Política de privacidade
-    '/esqueci-password',     // Reset de password
-    '/reset-password',       // Reset de password
-    '/auth/callback',        // OAuth callback
-    '/api/validate-code',    // API de validação
-    '/api/auth',             // APIs de autenticação
-    '/api/early-access',     // API de waitlist
-    '/_next',                // Next.js internals
-    '/favicon.ico',          // Favicon
-    '/images',               // Imagens públicas
-    '/comunidade',           // Comunidade welcome
-    '/chat',                 // Chat welcome (público, mas features requerem auth)
-    '/designstudio',         // Design Studio welcome (público)
-    '/musicstudio',          // Music Studio welcome (público)
-    '/videostudio',          // Video Studio welcome (público)
-    '/imagestudio',          // Image Studio welcome (público)
+  // ⚡ ULTRA RIGOR: Apenas welcome pages EXATAS são públicas
+  // Qualquer subrota (/chat/c/, /musicstudio/home, etc) REQUER AUTENTICAÇÃO
+  
+  // Rotas EXATAS públicas (welcome pages)
+  const PUBLIC_EXACT_PATHS = [
+    '/',
+    '/acesso',
+    '/login',
+    '/registo',
+    '/sobre',
+    '/termos',
+    '/privacidade',
+    '/esqueci-password',
+    '/reset-password',
+    '/auth/callback',
+    '/comunidade',
+    '/chat',           // ⚡ APENAS /chat (welcome), /chat/c/ BLOQUEADO
+    '/designstudio',   // ⚡ APENAS /designstudio (welcome), /designstudio/create BLOQUEADO
+    '/musicstudio',    // ⚡ APENAS /musicstudio (welcome), /musicstudio/home BLOQUEADO
+    '/videostudio',    // ⚡ APENAS /videostudio (welcome), /videostudio/criar BLOQUEADO
+    '/imagestudio',    // ⚡ APENAS /imagestudio (welcome), /imagestudio/create BLOQUEADO
   ];
 
-  // Verificar se a rota é pública
-  const isPublicPath = publicPaths.some((publicPath) => 
-    path.startsWith(publicPath)
+  // Rotas com startsWith (para assets e APIs públicas)
+  const PUBLIC_PREFIX_PATHS = [
+    '/api/validate-code',
+    '/api/auth',
+    '/api/early-access',
+    '/_next',
+    '/favicon.ico',
+    '/images',
+  ];
+
+  // Verificar se é rota pública EXATA
+  const isExactPublicPath = PUBLIC_EXACT_PATHS.includes(path);
+  
+  // Verificar se é rota pública com PREFIX
+  const isPrefixPublicPath = PUBLIC_PREFIX_PATHS.some((prefix) => 
+    path.startsWith(prefix)
   );
 
-  // Se for rota pública, permitir acesso (com rate limiting já aplicado)
-  if (isPublicPath) {
+  // ⚡ ULTRA RIGOR: Log detalhado de bloqueio
+  if (!isExactPublicPath && !isPrefixPublicPath) {
+    console.log(`[ULTRA RIGOR] 🔒 Rota protegida detectada: ${path}`);
+  }
+
+  // Se for rota pública, permitir acesso
+  if (isExactPublicPath || isPrefixPublicPath) {
+    console.log(`[ULTRA RIGOR] ✅ Rota pública permitida: ${path}`);
     return NextResponse.next();
   }
 
   // Obter token de autenticação dos cookies
   const token = req.cookies.get('sb-access-token')?.value;
 
-  // Se não tem token, redirecionar para /acesso
+  // ⚡ ULTRA RIGOR: Se não tem token, BLOQUEAR e redirecionar para /acesso
   if (!token) {
+    console.warn(`[ULTRA RIGOR] ❌ BLOQUEADO: Sem token de autenticação → ${path}`);
+    console.warn(`[ULTRA RIGOR] ❌ Redirecionando para /acesso`);
     const redirectUrl = new URL('/acesso', req.url);
     return NextResponse.redirect(redirectUrl);
   }
@@ -194,111 +212,45 @@ export async function middleware(req: NextRequest) {
     // Obter sessão do user com o token
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-    // Se não conseguiu autenticar, redirecionar
+    // ⚡ ULTRA RIGOR: Se não conseguiu autenticar, BLOQUEAR
     if (authError || !user) {
+      console.warn(`[ULTRA RIGOR] ❌ BLOQUEADO: Falha na autenticação → ${path}`);
+      console.warn(`[ULTRA RIGOR] ❌ Auth Error:`, authError?.message || 'User não encontrado');
       const redirectUrl = new URL('/acesso', req.url);
       return NextResponse.redirect(redirectUrl);
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // 🛡️ PROTEÇÃO ADMIN: Rotas /admin/* (VERIFICAÇÃO RIGOROSA)
-    // ────────────────────────────────────────────────────────────────────────
+    console.log(`[ULTRA RIGOR] ✅ Usuário autenticado: ${user.email} (ID: ${user.id.substring(0, 8)}...)`);
+
+    // ════════════════════════════════════════════════════════════════════════
+    // 🛡️ ULTRA RIGOR: PROTEÇÃO ADMIN EXCLUSIVA
+    // ════════════════════════════════════════════════════════════════════════
     if (path.startsWith('/admin')) {
-      // Verificar se é admin via admin_accounts
-      const { data: adminAccount } = await supabase
+      console.log(`[ADMIN CHECK] 🔒 Verificando acesso admin para ${user.email} → ${path}`);
+      
+      // Verificar se é admin via admin_accounts (TABELA EXCLUSIVA)
+      const { data: adminAccount, error: adminError } = await supabase
         .from('admin_accounts')
-        .select('id, role')
+        .select('id, role, permissions')
         .eq('id', user.id)
         .single();
       
-      if (!adminAccount) {
-        console.warn(`[MIDDLEWARE] ❌ User ${user.email} tentou /admin sem admin_accounts`);
-        return NextResponse.redirect(new URL('/acesso-negado', req.url));
+      if (adminError || !adminAccount) {
+        console.warn(`[ADMIN CHECK] ❌ ACESSO NEGADO: ${user.email} tentou /admin sem registro em admin_accounts`);
+        console.warn(`[ADMIN CHECK] ❌ Error:`, adminError?.message || 'Sem registro');
+        return NextResponse.redirect(new URL('/', req.url));
       }
       
-      console.log(`[MIDDLEWARE] ✅ Admin ${user.email} (${adminAccount.role}) acessou ${path}`);
+      console.log(`[ADMIN CHECK] ✅ ADMIN AUTORIZADO: ${user.email} (role: ${adminAccount.role})`);
       return NextResponse.next();
     }
 
-    // 🔓 BYPASS PARA DESENVOLVEDORES - Acesso total sem verificações
-    const DEV_EMAILS = ['dev@dua.com', 'admin@dua.com', 'developer@dua.com'];
-    if (DEV_EMAILS.includes(user.email || '')) {
-      console.log('🔓 Acesso de desenvolvedor detectado:', user.email);
-      return NextResponse.next();
-    }
-
-    // Verificar se user tem acesso (has_access = true)
-    const { data: userData, error } = await supabase
-      .from('users')
-      .select('has_access, duaia_enabled, duacoin_enabled')
-      .eq('id', user.id)
-      .single();
-
-    // Se não conseguiu buscar dados ou não tem acesso, redirecionar
-    if (error || !userData || !userData.has_access) {
-      const redirectUrl = new URL('/acesso', req.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // 🎯 VERIFICAÇÃO UNIFIED ARCHITECTURE: Acesso por produto
-    // 🔒 ROTAS PROTEGIDAS - Requerem autenticação + has_access = true
-    const PROTECTED_ROUTES = [
-      '/chat/c/',           // Chat com conversas (criar/acessar)
-      '/designstudio/create', // Design Studio criação
-      '/musicstudio/home',  // Music Studio home
-      '/musicstudio/create',// Music Studio criação
-      '/musicstudio/library',// Music Studio biblioteca
-      '/videostudio/criar', // Video Studio criação
-      '/videostudio/library',// Video Studio biblioteca
-      '/imagestudio/create',// Image Studio criação
-      '/imagestudio/library',// Image Studio biblioteca
-      '/dashboard',         // Dashboard
-      '/perfil',            // Perfil do usuário
-      '/admin',             // Painel admin
-      '/mercado',           // Mercado
-      '/loja',              // Loja
-      '/api/chat',          // API de chat
-      '/api/conversations', // API de conversas
-      '/api/comprar-item',  // API de compra
-      '/api/community',     // API de community
-      '/api/music',         // API de música
-      '/api/video',         // API de vídeo
-      '/api/image',         // API de imagem
-      '/api/design',        // API de design
-    ];
-    
-    // Verificar se rota é protegida
-    const isProtectedRoute = PROTECTED_ROUTES.some(route => path.startsWith(route));
-    
-    // Se é rota protegida e não tem has_access, bloquear
-    if (isProtectedRoute && !userData.has_access) {
-      console.log(`🚫 ACESSO NEGADO: ${user.email} tentou acessar ${path} sem has_access`);
-      const redirectUrl = new URL('/acesso?reason=no_access', req.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-    const DUAIA_ROUTES = ['/chat', '/dashboard', '/api/chat', '/api/conversations'];
-    const isDuaIARoute = DUAIA_ROUTES.some(route => path.startsWith(route));
-
-    // DUA COIN routes: /wallet, /coin, /api/wallet, /api/transactions
-    const DUACOIN_ROUTES = ['/wallet', '/coin', '/api/wallet', '/api/transactions', '/api/staking'];
-    const isDuaCoinRoute = DUACOIN_ROUTES.some(route => path.startsWith(route));
-
-    // Se rota do DUA IA e user não tem acesso, redirecionar
-    if (isDuaIARoute && !userData.duaia_enabled) {
-      console.log(`🚫 User ${user.email} tentou acessar DUA IA sem permissão`);
-      const redirectUrl = new URL('/acesso?product=duaia&reason=disabled', req.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // Se rota do DUA COIN e user não tem acesso, redirecionar
-    if (isDuaCoinRoute && !userData.duacoin_enabled) {
-      console.log(`🚫 User ${user.email} tentou acessar DUA COIN sem permissão`);
-      const redirectUrl = new URL('/acesso?product=duacoin&reason=disabled', req.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // ✅ User autenticado e com acesso, permitir
-    console.log(`✅ ACESSO PERMITIDO: ${user.email} → ${path}`);
+    // ════════════════════════════════════════════════════════════════════════
+    // ✅ COM LOGIN = ACESSO LIVRE TOTAL (EXCETO ADMIN)
+    // ════════════════════════════════════════════════════════════════════════
+    // Usuário autenticado tem acesso a TODO o site (studios, chat, features)
+    // APENAS /admin requer verificação especial (feita acima)
+    console.log(`✅ ACESSO LIVRE: ${user.email} → ${path}`);
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);
