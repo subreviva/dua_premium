@@ -137,8 +137,8 @@ export function FeatureShowcase({
               
               return (
                 <CarouselItem key={step.id} className="pl-3 basis-[85%] sm:basis-[80%]">
-                  {/* Card Premium Apple Style */}
-                  <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-2xl h-[540px] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.5)] hover:border-white/[0.12]">
+                  {/* Card Premium Apple Style - Mais Quadrado */}
+                  <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-2xl h-[540px] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.5)] hover:border-white/[0.12]">
                     
                     {/* Imagem Full com Gradient Premium */}
                     <div className="relative h-[280px] w-full overflow-hidden">
