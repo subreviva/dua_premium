@@ -68,7 +68,26 @@ const nextConfig = {
         source: '/manifest.webmanifest',
         headers: [
           { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type' },
           { key: 'Content-Type', value: 'application/manifest+json' },
+          { key: 'Cache-Control', value: 'public, max-age=3600' },
+        ],
+      },
+      {
+        source: '/sw.js',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Content-Type', value: 'application/javascript' },
+          { key: 'Service-Worker-Allowed', value: '/' },
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      {
+        source: '/icons/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
       {

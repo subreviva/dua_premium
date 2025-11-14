@@ -170,17 +170,30 @@ export default function LoginPage() {
         .update({ last_login_at: new Date().toISOString() })
         .eq('id', data.user.id);
 
-            // Login bem-sucedido!
+      // Login bem-sucedido!
       const userName = (userData && userData.name) || email.split('@')[0];
+      
+      console.log('✅ Login bem-sucedido:', {
+        userId: data.user.id,
+        email: data.user.email,
+        redirectPath,
+        session: data.session ? 'exists' : 'missing'
+      });
+      
       toast.success(`Bem-vindo, ${userName}`, {
         description: "Redirecionando...",
         duration: 2000,
       });
 
-      setTimeout(() => {
-        router.push(redirectPath);
-        router.refresh();
-      }, 1000);
+      // Aguardar para garantir que o cookie do Supabase foi setado
+      // O Supabase precisa de tempo para persistir a sessão nos cookies
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      console.log('🔄 Executando redirecionamento para:', redirectPath);
+      console.log('🍪 Cookies atuais:', document.cookie);
+      
+      router.push(redirectPath);
+      router.refresh();
 
     } catch (error) {
       toast.error("Erro de conexão", {

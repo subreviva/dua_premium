@@ -99,7 +99,7 @@ export async function withCredits(
           required: creditCheck.required,
           current: creditCheck.currentBalance,
           deficit: creditCheck.deficit,
-          redirect: '/loja-creditos',
+          redirect: '/comprar',
         },
         { status: 402 } // Payment Required
       );
@@ -186,7 +186,7 @@ export async function validateCredits(
           required: creditCheck.required,
           current: creditCheck.currentBalance,
           deficit: creditCheck.deficit,
-          redirect: '/loja-creditos',
+          redirect: '/comprar',
         },
         { status: 402 }
       ),

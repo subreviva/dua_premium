@@ -16,7 +16,7 @@ const STATIC_ASSETS = [
   '/login',
   '/chat',
   '/offline',
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/_next/static/css/app/globals.css',
   // Adicionar mais assets conforme necessário
 ];

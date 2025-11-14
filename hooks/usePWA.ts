@@ -50,6 +50,12 @@ export function usePWA(): PWAHookReturn {
   }, []);
 
   const registerServiceWorker = async () => {
+    // 🔧 Não registrar Service Worker em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[DEV] Service Worker registration skipped in development mode');
+      return;
+    }
+    
     if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');

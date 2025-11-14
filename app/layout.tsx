@@ -256,17 +256,38 @@ export default function RootLayout({
         {/* iOS Splash Screens - Placeholder */}
         <link rel="apple-touch-startup-image" href="/splash/default.png" />
         
+        {/* 🔧 Desabilitar Service Worker e Manifest em desenvolvimento */}
+        {process.env.NODE_ENV === 'development' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                // Desabilitar Service Worker em desenvolvimento
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    registrations.forEach(function(registration) {
+                      registration.unregister();
+                      console.log('[DEV] Service Worker unregistered');
+                    });
+                  });
+                  
+                  // Limpar todos os caches
+                  if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                      names.forEach(function(name) {
+                        caches.delete(name);
+                      });
+                    });
+                  }
+                  console.log('[DEV] Service Worker disabled for development');
+                }
+              `,
+            }}
+          />
+        )}
+        
         {/* Manifest Link - Apenas em produção */}
         {process.env.NODE_ENV === 'production' && (
           <link rel="manifest" href="/manifest.webmanifest" />
-        )}
-        
-        {/* 🔧 Desabilitar Service Worker em desenvolvimento */}
-        {process.env.NODE_ENV === 'development' && (
-          <>
-            <script src="/clear-all-sw.js" defer />
-            <script src="/disable-sw.js" defer />
-          </>
         )}
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${playfair.variable} font-sans antialiased`}>

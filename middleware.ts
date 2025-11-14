@@ -17,7 +17,6 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 // Rate Limiting Storage (em produção usar Redis)
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
@@ -91,6 +90,32 @@ function getClientIP(req: NextRequest): string {
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const clientIP = getClientIP(req);
+  
+  // 🔧 Permitir requisições de GitHub Codespaces tunnel e recursos estáticos
+  const referer = req.headers.get('referer') || '';
+  const origin = req.headers.get('origin') || '';
+  const isGitHubTunnel = referer.includes('github.dev') || referer.includes('app.github.dev') || origin.includes('github.dev') || origin.includes('app.github.dev');
+  
+  // Recursos que precisam de CORS permissivo
+  const staticResources = ['/manifest.webmanifest', '/sw.js', '/offline', '/disable-sw.js', '/clear-all-sw.js'];
+  const isStaticResource = staticResources.includes(path);
+  
+  if (isGitHubTunnel && (isStaticResource || path.startsWith('/auth/postback'))) {
+    const response = NextResponse.next();
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    return response;
+  }
+  
+  // Se for recurso estático (mesmo sem tunnel), adicionar CORS
+  if (isStaticResource) {
+    const response = NextResponse.next();
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    return response;
+  }
 
   // ⚡ ROTAS ISENTAS DE RATE LIMITING (páginas públicas críticas)
   const RATE_LIMIT_EXEMPT = [
@@ -155,21 +180,39 @@ export async function middleware(req: NextRequest) {
     '/reset-password',
     '/auth/callback',
     '/comunidade',
-    '/chat',           // ⚡ APENAS /chat (welcome), /chat/c/ BLOQUEADO
-    '/designstudio',   // ⚡ APENAS /designstudio (welcome), /designstudio/create BLOQUEADO
-    '/musicstudio',    // ⚡ APENAS /musicstudio (welcome), /musicstudio/home BLOQUEADO
-    '/videostudio',    // ⚡ APENAS /videostudio (welcome), /videostudio/criar BLOQUEADO
-    '/imagestudio',    // ⚡ APENAS /imagestudio (welcome), /imagestudio/create BLOQUEADO
+    '/chat',           // ✅ Chat é público - proteção no client-side
+    '/perfil',         // ✅ Perfil - proteção no client-side
+    '/settings',       // ✅ Settings - proteção no client-side
+    '/comprar',        // ✅ Comprar créditos - proteção no client-side
+    '/admin',          // ✅ Admin - proteção no client-side
+    '/designstudio',   // ✅ Design Studio - proteção no client-side
+    '/musicstudio',    // ✅ Music Studio - proteção no client-side
+    '/videostudio',    // ✅ Video Studio - proteção no client-side
+    '/imagestudio',    // ✅ Image Studio - proteção no client-side
   ];
 
-  // Rotas com startsWith (para assets e APIs públicas)
+  // Rotas com startsWith (para assets e APIs públicas + studios)
   const PUBLIC_PREFIX_PATHS = [
     '/api/validate-code',
     '/api/auth',
+    '/api/chat',             // ✅ Chat API
     '/api/early-access',
+    '/api/manifest',         // ✅ Manifest API
+    '/manifest.webmanifest', // ✅ PWA manifest
+    '/auth/postback',        // ✅ GitHub Codespaces tunnel auth
     '/_next',
     '/favicon.ico',
     '/images',
+    '/icons',                // ✅ PWA icons
+    '/sw.js',                // ✅ Service Worker
+    '/offline',              // ✅ Offline page
+    '/disable-sw.js',        // ✅ Disable SW script
+    '/clear-all-sw.js',      // ✅ Clear SW script
+    '/chat/',                // ✅ Chat sub-rotas (/chat/c/xxx)
+    '/designstudio/',        // ✅ Design Studio sub-rotas
+    '/musicstudio/',         // ✅ Music Studio sub-rotas
+    '/videostudio/',         // ✅ Video Studio sub-rotas
+    '/imagestudio/',         // ✅ Image Studio sub-rotas
   ];
 
   // Verificar se é rota pública EXATA
@@ -188,83 +231,22 @@ export async function middleware(req: NextRequest) {
   // Se for rota pública, permitir acesso
   if (isExactPublicPath || isPrefixPublicPath) {
     console.log(`[ULTRA RIGOR] ✅ Rota pública permitida: ${path}`);
+    
+    // ⚡ PROTEÇÃO: Se usuário já está logado e tenta acessar /acesso, redirecionar para home
+    // COMENTADO - Deixar client-side fazer essa proteção via useEffect
+    // if (path === '/acesso') {
+    //   // Verificar cookies SSR...
+    // }
+    
     return NextResponse.next();
   }
 
-  // Obter token de autenticação dos cookies
-  const token = req.cookies.get('sb-access-token')?.value;
-
-  // ⚡ ULTRA RIGOR: Se não tem token, BLOQUEAR e redirecionar para /acesso
-  if (!token) {
-    console.warn(`[ULTRA RIGOR] ❌ BLOQUEADO: Sem token de autenticação → ${path}`);
-    console.warn(`[ULTRA RIGOR] ❌ Redirecionando para /acesso`);
-    const redirectUrl = new URL('/acesso', req.url);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  try {
-    // Criar cliente Supabase
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-
-    // Obter sessão do user com o token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    // ⚡ ULTRA RIGOR: Se não conseguiu autenticar, BLOQUEAR
-    if (authError || !user) {
-      console.warn(`[ULTRA RIGOR] ❌ BLOQUEADO: Falha na autenticação → ${path}`);
-      console.warn(`[ULTRA RIGOR] ❌ Auth Error:`, authError?.message || 'User não encontrado');
-      const redirectUrl = new URL('/acesso', req.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    console.log(`[ULTRA RIGOR] ✅ Usuário autenticado: ${user.email} (ID: ${user.id.substring(0, 8)}...)`);
-
-    // ════════════════════════════════════════════════════════════════════════
-    // 🛡️ ULTRA RIGOR: PROTEÇÃO ADMIN EXCLUSIVA
-    // ════════════════════════════════════════════════════════════════════════
-    if (path.startsWith('/admin')) {
-      console.log(`[ADMIN CHECK] 🔒 Verificando acesso admin para ${user.email} → ${path}`);
-      
-      // Verificar se é admin via admin_accounts (TABELA EXCLUSIVA)
-      const { data: adminAccount, error: adminError } = await supabase
-        .from('admin_accounts')
-        .select('id, role, permissions')
-        .eq('id', user.id)
-        .single();
-      
-      if (adminError || !adminAccount) {
-        console.warn(`[ADMIN CHECK] ❌ ACESSO NEGADO: ${user.email} tentou /admin sem registro em admin_accounts`);
-        console.warn(`[ADMIN CHECK] ❌ Error:`, adminError?.message || 'Sem registro');
-        return NextResponse.redirect(new URL('/', req.url));
-      }
-      
-      console.log(`[ADMIN CHECK] ✅ ADMIN AUTORIZADO: ${user.email} (role: ${adminAccount.role})`);
-      return NextResponse.next();
-    }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // ✅ COM LOGIN = ACESSO LIVRE TOTAL (EXCETO ADMIN)
-    // ════════════════════════════════════════════════════════════════════════
-    // Usuário autenticado tem acesso a TODO o site (studios, chat, features)
-    // APENAS /admin requer verificação especial (feita acima)
-    console.log(`✅ ACESSO LIVRE: ${user.email} → ${path}`);
-    return NextResponse.next();
-  } catch (error) {
-    console.error('Middleware error:', error);
-    // Em caso de erro, redirecionar para segurança
-    const redirectUrl = new URL('/acesso', req.url);
-    return NextResponse.redirect(redirectUrl);
-  }
+  // ⚡ Se chegou aqui, rota NÃO está na whitelist - BLOQUEAR
+  console.warn(`[ULTRA RIGOR] ❌ BLOQUEADO: Rota não autorizada → ${path}`);
+  return NextResponse.redirect(new URL('/acesso', req.url));
 }
 
-/**
- * Config: Rotas onde o middleware será executado
- * 
- * Protege todas as rotas, exceto as especificadas no matcher
- */
+// Configuração: Aplicar middleware em todas as rotas exceto assets estáticos
 export const config = {
   matcher: [
     /*
@@ -272,8 +254,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public (public files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

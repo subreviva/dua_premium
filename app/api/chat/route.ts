@@ -10,8 +10,44 @@ const genAI = new GoogleGenerativeAI(
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  // Wrapper de segurança para NUNCA retornar HTML
+  const sendFriendlyError = () => {
+    const encoder = new TextEncoder();
+    const errorStream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode('0:""\n'));
+        controller.enqueue(encoder.encode('0:"Hmm, parece que tive um pequeno soluço. Que tal tentar de novo?"\n'));
+        controller.close();
+      }
+    });
+    
+    return new Response(errorStream, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Vercel-AI-Data-Stream': 'v1',
+      },
+    });
+  };
+
   try {
-    const { messages } = await req.json();
+    console.log('[CHAT API] Requisição recebida');
+    
+    // Validação básica
+    if (!process.env.GOOGLE_API_KEY) {
+      console.error('[CHAT API] ❌ GOOGLE_API_KEY não configurada');
+      return sendFriendlyError();
+    }
+
+    const body = await req.json();
+    console.log('[CHAT API] Body parseado:', { messagesCount: body?.messages?.length });
+    
+    const { messages } = body;
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      console.error('[CHAT API] ❌ Mensagens inválidas recebidas');
+      return sendFriendlyError();
+    }
 
     // Converter messages para o formato do Gemini
     const geminiMessages = messages
@@ -20,6 +56,8 @@ export async function POST(req: Request) {
         role: m.role === 'user' ? 'user' : 'model',
         parts: [{ text: m.content }],
       }));
+    
+    console.log('[CHAT API] ✅ Mensagens convertidas:', geminiMessages.length);
 
     // Se a última mensagem tiver links, buscar metadados e inserir um contexto auxiliar
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user');
@@ -67,36 +105,54 @@ export async function POST(req: Request) {
         : DUA_SYSTEM_INSTRUCTION,
     });
 
+    console.log('[CHAT API] ✅ Modelo criado');
+
     // Iniciar chat com histórico
     const chat = model.startChat({
       history: geminiMessages.slice(0, -1),
     });
 
+    console.log('[CHAT API] ✅ Chat iniciado com histórico');
+
     // Enviar última mensagem e fazer stream
     const lastMessage = geminiMessages[geminiMessages.length - 1];
+    console.log('[CHAT API] 📤 Enviando mensagem:', lastMessage.parts[0].text.substring(0, 50));
+    
     const result = await chat.sendMessageStream(lastMessage.parts[0].text);
+    
+    console.log('[CHAT API] ✅ Stream iniciado');
 
     // Criar ReadableStream compatível com useChat (Data Stream Protocol)
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          console.log('[CHAT API] 🌊 Iniciando stream...');
+          
           // Enviar prefixo do data stream
           controller.enqueue(encoder.encode('0:""\n'));
           
           let fullText = '';
+          let chunkCount = 0;
+          
           for await (const chunk of result.stream) {
             const text = chunk.text();
             fullText += text;
+            chunkCount++;
             
             // Formato do Data Stream Protocol: 0:"text content"
             const payload = `0:${JSON.stringify(text)}\n`;
             controller.enqueue(encoder.encode(payload));
           }
           
+          console.log(`[CHAT API] ✅ Stream completo: ${chunkCount} chunks, ${fullText.length} caracteres`);
           controller.close();
-        } catch (error) {
-          controller.error(error);
+        } catch (streamError) {
+          console.error('[CHAT API] ❌ Stream error:', streamError);
+          // Enviar mensagem de erro amigável no formato correto
+          const errorMsg = '0:"Ops! Tive um pequeno problema. Tenta novamente, por favor?"\n';
+          controller.enqueue(encoder.encode(errorMsg));
+          controller.close();
         }
       },
     });
@@ -108,13 +164,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    // console.error('Error in chat API:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to process chat request' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    console.error('[CHAT API] ❌ Error in chat API (catch global):', error);
+    return sendFriendlyError();
   }
 }

@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
           current: creditCheck.currentBalance,
           deficit: creditCheck.deficit,
           message: creditCheck.message,
-          redirect: '/loja-creditos',
+          redirect: '/comprar',
         },
         { status: 402 } // 402 Payment Required
       );

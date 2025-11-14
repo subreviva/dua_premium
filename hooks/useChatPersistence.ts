@@ -45,9 +45,31 @@ export function useChatPersistence() {
         // ✅ Carregar mensagens específicas deste usuário
         const saved = localStorage.getItem(storageKey);
         if (saved) {
-          const parsed = JSON.parse(saved);
-          setInitialMessages(parsed);
-          console.log(`[CHAT] Carregadas ${parsed.length} mensagens do usuário ${user.id.slice(0, 8)}`);
+          try {
+            const parsed = JSON.parse(saved);
+            // 🔧 FILTRAR mensagens inválidas ou de sistema
+            const validMessages = parsed.filter((msg: any) => {
+              // Remover qualquer mensagem que não seja do user ou assistant
+              if (msg.role !== 'user' && msg.role !== 'assistant') return false;
+              // Remover mensagens vazias
+              if (!msg.content || msg.content.trim() === '') return false;
+              // Remover mensagens de boas-vindas automáticas
+              if (msg.content.includes('Tava a sonhar') || msg.content.includes('beat perfeito')) return false;
+              return true;
+            });
+            
+            setInitialMessages(validMessages);
+            console.log(`[CHAT] Carregadas ${validMessages.length} mensagens válidas do usuário ${user.id.slice(0, 8)}`);
+            
+            // Se filtramos mensagens, atualizar o storage
+            if (validMessages.length !== parsed.length) {
+              localStorage.setItem(storageKey, JSON.stringify(validMessages));
+              console.log(`[CHAT] Removidas ${parsed.length - validMessages.length} mensagens inválidas`);
+            }
+          } catch (error) {
+            console.error('[CHAT] Erro ao parsear mensagens, limpando:', error);
+            localStorage.removeItem(storageKey);
+          }
         }
       } catch (error) {
         console.error('[CHAT] Erro ao carregar histórico:', error);
@@ -63,10 +85,21 @@ export function useChatPersistence() {
   const saveMessages = (messages: ChatMessage[]) => {
     if (messages.length > 0 && currentUserId) {
       try {
+        // 🔧 FILTRAR mensagens inválidas antes de salvar
+        const validMessages = messages.filter((msg: any) => {
+          // Remover qualquer mensagem que não seja do user ou assistant
+          if (msg.role !== 'user' && msg.role !== 'assistant') return false;
+          // Remover mensagens vazias
+          if (!msg.content || msg.content.trim() === '') return false;
+          // Remover mensagens de boas-vindas automáticas
+          if (msg.content.includes('Tava a sonhar') || msg.content.includes('beat perfeito')) return false;
+          return true;
+        });
+        
         const storageKey = getStorageKey(currentUserId);
-        if (storageKey) {
-          localStorage.setItem(storageKey, JSON.stringify(messages));
-          console.log(`[CHAT] Salvadas ${messages.length} mensagens do usuário ${currentUserId.slice(0, 8)}`);
+        if (storageKey && validMessages.length > 0) {
+          localStorage.setItem(storageKey, JSON.stringify(validMessages));
+          console.log(`[CHAT] Salvadas ${validMessages.length} mensagens válidas do usuário ${currentUserId.slice(0, 8)}`);
         }
       } catch (error) {
         console.error('[CHAT] Erro ao salvar histórico:', error);

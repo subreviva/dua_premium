@@ -218,7 +218,7 @@ export function SmartNavbar() {
                   <Button
                     onClick={context.newAction}
                     size="sm"
-                    className="hidden md:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white border-0"
+                    className="hidden md:flex items-center gap-2 bg-transparent hover:bg-white/5 text-white/70 hover:text-white border border-white/10 hover:border-white/20 transition-all"
                   >
                     <Plus className="w-4 h-4" />
                     {context.newLabel}

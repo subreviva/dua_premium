@@ -155,7 +155,7 @@ export default function DashboardCreditos() {
           </div>
           
           <Link
-            href="/loja-creditos"
+            href="/comprar"
             className="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-center"
           >
             Comprar Créditos
@@ -178,7 +178,7 @@ export default function DashboardCreditos() {
                 Você tem apenas {balance.creditos_servicos} créditos restantes. Recarregue para continuar usando os serviços.
               </p>
               <Link
-                href="/loja-creditos"
+                href="/comprar"
                 className="text-sm text-yellow-800 underline font-medium mt-2 inline-block"
               >
                 → Comprar créditos agora

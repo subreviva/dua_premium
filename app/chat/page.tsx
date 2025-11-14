@@ -5,11 +5,10 @@ import type React from "react"
 import { useChat } from "ai/react";
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import { ChatSidebar } from "@/components/ui/chat-sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft, StopCircle } from "lucide-react"
+import { ArrowUpIcon, Paperclip, Mic, User, Bot, PanelLeftClose, PanelLeft, StopCircle, MessageSquarePlus } from "lucide-react"
 import AuroraWaves from "@/components/ui/aurora-waves"
 import { useIsMobile } from "@/lib/hooks"
 import GeminiLiveVoiceChat from '@/components/GeminiLiveVoiceChat';
@@ -19,12 +18,14 @@ import { MessageActions } from "@/components/ui/message-actions";
 import { toast } from "sonner";
 import { useChatPersistence } from "@/hooks/useChatPersistence";
 import { useConversations } from "@/hooks/useConversations";
+import { ChatSidebar } from "@/components/ui/chat-sidebar";
 import { useHotkeys, commonHotkeys } from "@/hooks/useHotkeys";
 import ConversationHistory from "@/components/ConversationHistory";
 import { supabaseClient } from "@/lib/supabase";
 import Image from "next/image";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { ChatImage } from "@/components/chat/ChatImage";
+import { ChatCleaner } from "@/components/chat-cleaner";
 
 const supabase = supabaseClient;
 
@@ -73,33 +74,58 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: AutoResizeProps) {
 }
 
 export default function ChatPage() {
-  // Persistência de conversas
-  const { initialMessages, isLoaded, saveMessages, clearHistory } = useChatPersistence();
-
   // Integração real com Gemini via Vercel AI SDK
   const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages, reload, stop } = useChat({
     api: '/api/chat',
-    initialMessages: isLoaded ? initialMessages : undefined,
     onError: (error: Error) => {
-      // console.error('Chat error:', error);
-      toast.error("Erro ao enviar mensagem", {
-        description: error.message || "Não foi possível processar sua mensagem. Tente novamente.",
+      // Nunca mostrar erros técnicos, sempre mensagens simpáticas
+      const friendlyMessages = [
+        "Hmm, parece que tive um pequeno soluço. Que tal tentar de novo?",
+        "Ops! Perdi o fio à meada. Vamos tentar novamente?",
+        "Ai, tropecei nas palavras! Tenta outra vez, por favor?",
+        "Desculpa, estava a sonhar acordada. Podes repetir?",
+        "Ups! Tive um momento de distração. Volta a tentar?"
+      ];
+      const randomMessage = friendlyMessages[Math.floor(Math.random() * friendlyMessages.length)];
+      
+      // Não mostrar o erro técnico ao usuário
+      console.error('Chat error (oculto do usuário):', error);
+      
+      toast.error("Oops!", {
+        description: randomMessage,
       });
     },
   });
 
-  // Auto-save mensagens
-  // Persistir somente mensagens com papel suportado pelo sistema de histórico (user/assistant)
+  // Persistência de mensagens (localStorage)
+  const { saveMessages, clearHistory } = useChatPersistence();
+
+  // Gerenciamento de conversas
+  const { 
+    conversations, 
+    createNewConversation, 
+    deleteConversation, 
+    selectConversation, 
+    currentConversationId,
+    getCurrentConversation 
+  } = useConversations();
+
+  const currentConversation = getCurrentConversation();
+
+  // Auto-save no localStorage
   useEffect(() => {
-    if (isLoaded && messages.length > 0) {
-      const filtered = messages.filter((m: any) => m.role === 'user' || m.role === 'assistant');
-      // Evitar salvar se não houver mensagens elegíveis
-      if (filtered.length > 0) {
-        // mapear para shape esperado se necessário (remove campos extras)
-        saveMessages(filtered as any);
-      }
+    if (messages.length > 0) {
+      const chatMessages = messages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({
+          id: m.id,
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          createdAt: m.createdAt || new Date()
+        }));
+      saveMessages(chatMessages);
     }
-  }, [messages, isLoaded, saveMessages]);
+  }, [messages, saveMessages]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -229,14 +255,17 @@ export default function ChatPage() {
     }
   }, [soundEnabled]);
 
-  // Sistema de múltiplas conversas (Sprint 2)
-  const {
-    conversations,
-    currentConversationId,
-    groupConversationsByDate,
-    selectConversation,
-    deleteConversation,
-  } = useConversations();
+  // Handler para trocar de conversa (localStorage)
+  const handleSelectConversation = useCallback((conversationId: string) => {
+    const conversation = conversations.find(c => c.id === conversationId);
+    if (conversation) {
+      selectConversation(conversationId);
+      setMessages(conversation.messages);
+      if (isMobile) {
+        setTimeout(() => setIsSidebarOpen(false), 250);
+      }
+    }
+  }, [conversations, selectConversation, setMessages, isMobile]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -340,13 +369,28 @@ export default function ChatPage() {
     }
   }, [isMobile, playSound]);
 
+  // Evita scroll do body quando a sidebar estiver aberta no mobile para um efeito de drawer
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+
+    if (isMobile && isSidebarOpen) {
+      const previousOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = previousOverflow || ''
+      }
+    }
+
+    document.body.style.overflow = ''
+  }, [isMobile, isSidebarOpen])
+
   const handleNewChat = () => {
-    clearHistory();
+    createNewConversation();
     setMessages([]);
     setSelectedImage(null);
-    toast.success("Nova conversa iniciada", {
-      description: "Histórico limpo com sucesso",
-    });
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
   };
 
   // Hotkeys globais (Sprint 2)
@@ -575,18 +619,34 @@ export default function ChatPage() {
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 flex flex-col bg-black overflow-hidden">
-        {/* Premium Background - Ultra Elegant */}
-        <div className="absolute inset-0 z-0">
-          <div 
-            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-60"
-            style={{
-              backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
-            }}
-          />
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-[60px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
+      <div className="fixed inset-0 flex flex-col overflow-hidden bg-gradient-to-br from-black/95 via-black/90 to-black/95">
+        {/* Componente de limpeza de mensagens inválidas */}
+        <ChatCleaner />
+        
+        {/* Premium Background Effects - Matching Sidebar */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="absolute top-20 right-0 w-60 h-60 bg-purple-500/10 blur-3xl" aria-hidden="true" />
+          <div className="absolute bottom-20 left-0 w-60 h-60 bg-blue-500/10 blur-3xl" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.02] via-transparent to-transparent" />
         </div>
+
+        {/* Botão Menu Mobile - Ultra Elegante (FORA de qualquer container) */}
+        <AnimatePresence>
+          {!isSidebarOpen && (
+            <motion.button
+              type="button"
+              aria-label="Abrir menu"
+              onClick={() => setIsSidebarOpen(true)}
+              className="fixed top-20 left-4 z-[100] w-12 h-12 rounded-2xl border-2 border-white/20 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl flex items-center justify-center shadow-[0_10px_40px_rgba(0,0,0,0.6)] active:scale-95 transition-all duration-200 hover:border-white/30 hover:shadow-[0_10px_50px_rgba(255,255,255,0.1)]"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <PanelLeft className="w-6 h-6 text-white" />
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         {/* Sidebar Overlay */}
         <AnimatePresence>
@@ -596,38 +656,36 @@ export default function ChatPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-0 bg-black/70 backdrop-blur-xl z-50"
+              className="fixed inset-0 bg-black/70 backdrop-blur-xl z-[90]"
               onClick={() => setIsSidebarOpen(false)}
             />
           )}
         </AnimatePresence>
 
         <ChatSidebar
-          isOpen={isSidebarOpen}
-          isCollapsed={isSidebarCollapsed}
-          onToggleOpen={setIsSidebarOpen}
-          onToggleCollapsed={setIsSidebarCollapsed}
           conversations={conversations}
           currentConversationId={currentConversationId}
-          onSelectConversation={selectConversation}
-          onDeleteConversation={deleteConversation}
+          onSelectConversation={handleSelectConversation}
           onNewConversation={handleNewChat}
-          groupConversationsByDate={groupConversationsByDate}
+          onDeleteConversation={deleteConversation}
+          isOpen={isSidebarOpen}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapsed={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
 
         {/* Main Chat Container - Premium */}
         <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-hidden">
           {/* Top Fade Gradient - ChatGPT Style */}
-          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black via-black/60 to-transparent pointer-events-none z-10" />
+          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black via-black/60 to-transparent pointer-events-none z-[5]" />
 
           {/* Messages Container */}
           <div 
             ref={scrollContainerRef}
-            className="flex-1 overflow-y-auto overscroll-none px-4 pt-4 min-h-0"
+            className="flex-1 overflow-y-auto overscroll-none px-4 pt-24 min-h-0"
             style={{
               WebkitOverflowScrolling: 'touch',
               overscrollBehavior: 'contain',
-              paddingBottom: 'max(160px, calc(env(safe-area-inset-bottom) + 160px))',
+              paddingBottom: 'max(100px, calc(env(safe-area-inset-bottom) + 100px))',
             }}
           >
             <style jsx>{`
@@ -641,16 +699,34 @@ export default function ChatPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="flex items-center justify-center h-full px-6"
+                className="flex flex-col items-center justify-center h-full px-6"
               >
+                {/* Ultra Premium DUA Logo - Mobile */}
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/[0.12] to-white/[0.06] backdrop-blur-xl border border-white/[0.12] flex items-center justify-center shadow-2xl"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <Bot className="w-8 h-8 text-white/90" />
+                  <h1 
+                    className="text-[64px] sm:text-[72px] font-extralight text-white tracking-[-0.04em] leading-none"
+                    style={{ 
+                      fontFamily: 'var(--font-geist-sans)',
+                      textShadow: '0 20px 60px rgba(0,0,0,0.5)'
+                    }}
+                  >
+                    DUA
+                  </h1>
                 </motion.div>
+                
+                {/* Subtitle - Ultra Refined Mobile */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-white/60 text-sm sm:text-base max-w-xs mx-auto font-light tracking-tight leading-relaxed text-center mt-4"
+                >
+                  Construa algo incrível, comece a digitar abaixo.
+                </motion.p>
               </motion.div>
             ) : (
                 <div className="space-y-4 pb-2">
@@ -676,12 +752,17 @@ export default function ChatPage() {
                       >
                         {msg.role === "assistant" && (
                           <motion.div 
-                            className="w-8 h-8 rounded-xl bg-gradient-to-br from-white/[0.12] to-white/[0.06] border border-white/[0.12] flex items-center justify-center flex-shrink-0 mt-0.5 backdrop-blur-xl shadow-lg"
+                            className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 mt-0.5 shadow-lg ring-1 ring-white/10"
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: 0.08, type: "spring", stiffness: 500, damping: 25 }}
                           >
-                            <Bot className="w-4 h-4 text-white/80" />
+                            <img 
+                              src="https://tpe28vcfmqg3hkqe.public.blob.vercel-storage.com/9f4d7ae5-58d3-456e-a3d5-73105bec4bd6.jpeg"
+                              alt="DUA"
+                              className="w-full h-full object-cover"
+                              style={{ objectPosition: 'center 20%' }}
+                            />
                           </motion.div>
                         )}
                         
@@ -821,7 +902,7 @@ export default function ChatPage() {
                   {!isLoading && messages.length > 0 && <div className="h-2" />}
                 </div>
               )}
-            <div ref={messagesEndRef} className="h-20" />
+            <div ref={messagesEndRef} className="h-4" />
           </div>
 
           {/* Bottom Fade Gradient - Premium */}
@@ -829,9 +910,9 @@ export default function ChatPage() {
 
           {/* Input Bar - ChatGPT/Gemini Premium Style */}
           <div 
-            className="relative z-20 flex-shrink-0 px-4 py-4 bg-black/95 backdrop-blur-2xl"
+            className="relative z-20 flex-shrink-0 px-4 py-3 bg-black/95 backdrop-blur-2xl"
             style={{ 
-              paddingBottom: 'max(env(safe-area-inset-bottom), 16px)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
             }}
           >
             {/* Efeito visual de envio */}
@@ -1040,18 +1121,16 @@ export default function ChatPage() {
 
   // --- DESKTOP VIEW ---
   return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-[#0a0a0a]">
-      {/* Image Background - Super Elegant & Blurred */}
-      <div className="fixed inset-0 z-0">
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center opacity-80"
-          style={{
-            backgroundImage: 'url(https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/dreamina-2025-10-27-1290-fundo%20com%20estas%20cores%20-%20para%20hero%20de%20web....jpeg)'
-          }}
-        />
-        <div className="absolute inset-0 bg-[#0a0a0a]/50 backdrop-blur-[40px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-gradient-to-br from-black/95 via-black/90 to-black/95">
+      {/* Premium Background Effects - Matching Mobile & Sidebar */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-20 right-0 w-60 h-60 bg-purple-500/10 blur-3xl" aria-hidden="true" />
+        <div className="absolute bottom-20 left-0 w-60 h-60 bg-blue-500/10 blur-3xl" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.02] via-transparent to-transparent" />
       </div>
+
+      {/* Componente de limpeza de mensagens inválidas */}
+      <ChatCleaner />
 
       {/* Gradient Fade Overlay - Efeito de conversa subindo (Desktop) */}
       <div className="fixed top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent z-40 pointer-events-none" />
@@ -1064,16 +1143,14 @@ export default function ChatPage() {
       )}
 
       <ChatSidebar
-        isOpen={isSidebarOpen}
-        isCollapsed={isSidebarCollapsed}
-        onToggleOpen={setIsSidebarOpen}
-        onToggleCollapsed={setIsSidebarCollapsed}
         conversations={conversations}
         currentConversationId={currentConversationId}
-        onSelectConversation={selectConversation}
-        onDeleteConversation={deleteConversation}
+        onSelectConversation={handleSelectConversation}
         onNewConversation={handleNewChat}
-        groupConversationsByDate={groupConversationsByDate}
+        onDeleteConversation={deleteConversation}
+        isOpen={isSidebarOpen}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapsed={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
       <Button
@@ -1099,7 +1176,7 @@ export default function ChatPage() {
       >
         <div 
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 premium-scrollbar-chat min-h-0"
+          className="flex-1 overflow-y-auto px-3 sm:px-4 pt-24 pb-4 sm:pb-6 premium-scrollbar-chat min-h-0"
         >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-4">
@@ -1142,8 +1219,13 @@ export default function ChatPage() {
                   )}
                 >
                   {msg.role === "assistant" && (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 mt-0.5 ring-1 ring-white/10">
+                      <img 
+                        src="https://tpe28vcfmqg3hkqe.public.blob.vercel-storage.com/9f4d7ae5-58d3-456e-a3d5-73105bec4bd6.jpeg"
+                        alt="DUA"
+                        className="w-full h-full object-cover"
+                        style={{ objectPosition: 'center 20%' }}
+                      />
                     </div>
                   )}
                   <div className="relative max-w-[85%] sm:max-w-[80%]">

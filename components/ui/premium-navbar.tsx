@@ -116,7 +116,7 @@ export function PremiumNavbar({
               onClick={onNewChat}
               variant="ghost"
               size="sm"
-              className="hidden md:flex text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-3 h-9"
+              className="hidden md:flex text-white/60 hover:text-white/90 hover:bg-transparent transition-all duration-300 rounded-xl px-3 h-9"
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               Nova Conversa

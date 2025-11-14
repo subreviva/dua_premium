@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PremiumNavbar } from "@/components/ui/premium-navbar"
 import { Check, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
@@ -151,8 +150,6 @@ export default function ComprarPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <PremiumNavbar />
-      
       <div className="pt-20 pb-24 px-4">
         {/* Header */}
         <motion.div 

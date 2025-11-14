@@ -15,6 +15,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseStorageAdapter } from './supabase-storage';
 
 // URLs e Keys do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -42,13 +43,21 @@ let _adminInstance: SupabaseClient | null = null;
  */
 function getSupabaseClient(): SupabaseClient {
   if (!_clientInstance) {
+    // Criar custom storage adapter para desenvolvimento
+    const customStorage = typeof window !== 'undefined' 
+      ? new SupabaseStorageAdapter('supabase.auth.token')
+      : undefined;
+
     _clientInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce',
-        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        storage: customStorage as any,
+        // Em desenvolvimento, forçar storage mesmo se cookies falharem
+        storageKey: 'supabase.auth.token',
+        debug: process.env.NODE_ENV === 'development',
       },
     });
 
@@ -58,6 +67,32 @@ function getSupabaseClient(): SupabaseClient {
         // Log apenas em desenvolvimento
         if (process.env.NODE_ENV === 'development') {
           console.log('🔐 Auth event:', event);
+          if (session) {
+            // expires_at está em segundos, não milissegundos
+            const expiresAt = session.expires_at ? session.expires_at * 1000 : 0;
+            const expiryDate = new Date(expiresAt);
+            const now = new Date();
+            const isExpired = expiryDate < now;
+            
+            console.log('📝 Session exists:', {
+              userId: session.user?.id,
+              email: session.user?.email,
+              expiresAt: expiryDate.toLocaleString(),
+              isExpired,
+              timeUntilExpiry: isExpired ? 'EXPIRED' : `${Math.round((expiresAt - now.getTime()) / 1000 / 60)} minutes`
+            });
+          } else {
+            console.log('❌ No session');
+          }
+        }
+
+        // Após SIGNED_IN, verificar se cookies foram setados
+        if (event === 'SIGNED_IN' && session) {
+          console.log('✅ SIGNED_IN event - Session:', {
+            user: session.user?.email,
+            hasAccessToken: !!session.access_token,
+            hasRefreshToken: !!session.refresh_token,
+          });
         }
 
         // Se houve erro de refresh token, fazer logout automático

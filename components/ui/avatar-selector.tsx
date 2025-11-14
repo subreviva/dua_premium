@@ -5,43 +5,59 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Camera, Check, User as UserIcon, Loader2, Image as ImageIcon } from "lucide-react";
+import { Upload, Camera, Check, User as UserIcon, Loader2, Image as ImageIcon, Sparkles, Zap, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { supabaseClient } from "@/lib/supabase";
 
 const supabase = supabaseClient;
 
-// Galeria de avatares predefinidos premium - Estilos 3D modernos
-const PRESET_AVATARS = [
-  // Avataaars 3D - Personagens realistas
-  "https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=Felix&backgroundColor=b6e3f4,c0aede,d1d4f9&radius=50",
-  "https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=Aneka&backgroundColor=ffdfbf,ffd5dc,c0aede&radius=50",
-  "https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=Princess&backgroundColor=d1d4f9,ffd5dc,ffdfbf&radius=50",
-  
-  // Lorelei - Estilo 3D elegante
-  "https://api.dicebear.com/9.x/lorelei/svg?seed=Luna&backgroundColor=b6e3f4&radius=50&backgroundType=gradientLinear",
-  "https://api.dicebear.com/9.x/lorelei/svg?seed=Nova&backgroundColor=ffd5dc&radius=50&backgroundType=gradientLinear",
-  "https://api.dicebear.com/9.x/lorelei/svg?seed=Aurora&backgroundColor=c0aede&radius=50&backgroundType=gradientLinear",
-  
-  // Notionists - Estilo minimalista 3D
-  "https://api.dicebear.com/9.x/notionists/svg?seed=Max&backgroundColor=ffdfbf&radius=50",
-  "https://api.dicebear.com/9.x/notionists/svg?seed=Charlie&backgroundColor=d1d4f9&radius=50",
-  "https://api.dicebear.com/9.x/notionists/svg?seed=Bella&backgroundColor=b6e3f4&radius=50",
-  
-  // Adventurer - Personagens de aventura 3D
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Star&backgroundColor=ffd5dc&radius=50",
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Cosmic&backgroundColor=c0aede&radius=50",
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Galaxy&backgroundColor=ffdfbf&radius=50",
-  
-  // Big Smile - Avatares felizes e coloridos
-  "https://api.dicebear.com/9.x/big-smile/svg?seed=Happy&backgroundColor=b6e3f4&radius=50",
-  "https://api.dicebear.com/9.x/big-smile/svg?seed=Joy&backgroundColor=ffd5dc&radius=50",
-  "https://api.dicebear.com/9.x/big-smile/svg?seed=Smile&backgroundColor=d1d4f9&radius=50",
-  
-  // Fun Emoji - Emojis 3D divertidos
-  "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Cool&backgroundColor=c0aede&radius=50",
-  "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Party&backgroundColor=ffdfbf&radius=50",
-  "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Vibe&backgroundColor=b6e3f4&radius=50",
+// Coleções premium de avatares com personagens ultra elegantes
+const CHARACTER_ICON_PACKS = [
+  {
+    id: "neon-legends",
+    name: "Neon Legends",
+    description: "Personagens futuristas com brilho cyberpunk",
+    accent: "from-cyan-400 to-purple-600",
+    icon: Zap,
+    avatars: [
+      "https://api.dicebear.com/9.x/adventurer/svg?seed=NeonPulse&backgroundColor=020617,0f172a&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=ByteQueen&backgroundColor=0f172a,1e1b4b&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/adventurer/svg?seed=CyberNova&backgroundColor=0b1120,1d4ed8&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=PixelKnight&backgroundColor=111827,0ea5e9&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/adventurer/svg?seed=VoidRunner&backgroundColor=1e1b4b,581c87&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=ElectricSoul&backgroundColor=0f172a,1d4ed8&backgroundType=gradientLinear&radius=50",
+    ],
+  },
+  {
+    id: "lunar-royalty",
+    name: "Lunar Royalty",
+    description: "Avatares com joias e traços de luxo espacial",
+    accent: "from-amber-300 to-pink-500",
+    icon: Crown,
+    avatars: [
+      "https://api.dicebear.com/9.x/lorelei/svg?seed=Celestia&backgroundColor=0f172a,312e81&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/lorelei/svg?seed=Empress&backgroundColor=1f2937,581c87&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/lorelei/svg?seed=Seraphine&backgroundColor=0f172a,831843&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/lorelei/svg?seed=Lunara&backgroundColor=111827,db2777&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/lorelei/svg?seed=Aurora&backgroundColor=312e81,7c3aed&backgroundType=gradientLinear&radius=50",
+      "https://api.dicebear.com/9.x/lorelei/svg?seed=Stellar&backgroundColor=581c87,c026d3&backgroundType=gradientLinear&radius=50",
+    ],
+  },
+  {
+    id: "pastel-aura",
+    name: "Pastel Aura",
+    description: "Personagens suaves com estética editorial",
+    accent: "from-rose-300 to-indigo-300",
+    icon: Sparkles,
+    avatars: [
+      "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Muse&backgroundColor=fce7f3,ede9fe&radius=50",
+      "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Bloom&backgroundColor=ede9fe,c7d2fe&radius=50",
+      "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Iris&backgroundColor=e0e7ff,faf5ff&radius=50",
+      "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Halo&backgroundColor=fdf2f8,e0e7ff&radius=50",
+      "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Pearl&backgroundColor=fce7f3,fae8ff&radius=50",
+      "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Dream&backgroundColor=ede9fe,ddd6fe&radius=50",
+    ],
+  },
 ];
 
 interface AvatarSelectorProps {
@@ -51,7 +67,8 @@ interface AvatarSelectorProps {
 }
 
 export function AvatarSelector({ currentAvatar, userId, onAvatarUpdate }: AvatarSelectorProps) {
-  const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar || PRESET_AVATARS[0]);
+  const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar || CHARACTER_ICON_PACKS[0].avatars[0]);
+  const [activeTab, setActiveTab] = useState(CHARACTER_ICON_PACKS[0].id);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -212,6 +229,7 @@ export function AvatarSelector({ currentAvatar, userId, onAvatarUpdate }: Avatar
       </div>
 
       {/* Upload Button */}
+            {/* Upload Button */}
       <div className="space-y-3">
         <input
           ref={fileInputRef}
@@ -245,69 +263,140 @@ export function AvatarSelector({ currentAvatar, userId, onAvatarUpdate }: Avatar
             <div className="w-full border-t border-white/10" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-neutral-900 px-2 text-neutral-500">ou escolha um avatar</span>
+            <span className="bg-neutral-900 px-2 text-neutral-500">ou escolha uma coleção premium</span>
           </div>
         </div>
       </div>
 
-      {/* Preset Avatars Grid - 3D Gallery */}
-      <div className="grid grid-cols-6 gap-3">
-        {PRESET_AVATARS.map((avatarUrl, index) => (
-          <motion.button
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            whileHover={{ scale: 1.15, rotate: 5 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handlePresetSelect(avatarUrl)}
-            className={`relative rounded-2xl overflow-hidden transition-all group ${
-              selectedAvatar === avatarUrl
-                ? "ring-4 ring-purple-500 shadow-xl shadow-purple-500/50 scale-105"
-                : "ring-2 ring-white/10 hover:ring-purple-400/50 hover:shadow-lg hover:shadow-purple-400/30"
-            }`}
-          >
-            {/* 3D Glow Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* Premium Character Packs - Tab Navigation */}
+      <div className="space-y-5">
+        {/* Tab Buttons */}
+        <div className="flex gap-2 p-2 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xl">
+          {CHARACTER_ICON_PACKS.map((pack) => {
+            const Icon = pack.icon;
+            const isActive = activeTab === pack.id;
             
-            <Avatar className="w-full h-full aspect-square">
-              <AvatarImage 
-                src={avatarUrl} 
-                alt={`Avatar ${index + 1}`}
-                className="object-cover transform group-hover:scale-110 transition-transform duration-300"
-              />
-              <AvatarFallback className="bg-gradient-to-br from-neutral-800 to-neutral-900">
-                <UserIcon className="w-6 h-6 text-neutral-600" />
-              </AvatarFallback>
-            </Avatar>
-            
-            {/* Selected Badge with 3D effect */}
-            <AnimatePresence>
-              {selectedAvatar === avatarUrl && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  className="absolute inset-0 bg-gradient-to-br from-purple-600/90 via-pink-600/90 to-purple-600/90 backdrop-blur-sm flex items-center justify-center"
-                >
+            return (
+              <motion.button
+                key={pack.id}
+                onClick={() => setActiveTab(pack.id)}
+                className={`flex-1 relative px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                  isActive
+                    ? "text-white shadow-lg"
+                    : "text-white/60 hover:text-white/80 hover:bg-white/5"
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {isActive && (
                   <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <Check className="w-10 h-10 text-white drop-shadow-lg" strokeWidth={3} />
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    layoutId="activeTab"
+                    className={`absolute inset-0 bg-gradient-to-r ${pack.accent} rounded-xl`}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{pack.name}</span>
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* Active Tab Content */}
+        <AnimatePresence mode="wait">
+          {CHARACTER_ICON_PACKS.map((pack) => {
+            if (pack.id !== activeTab) return null;
             
-            {/* Hover shimmer effect */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            </div>
-```
-          </motion.button>
-        ))}
+            return (
+              <motion.div
+                key={pack.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="p-6 rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 via-white/[0.03] to-transparent backdrop-blur-xl"
+              >
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/50">Coleção premium</p>
+                    <h4 className="text-xl font-bold text-white mt-1 flex items-center gap-2">
+                      <span className={`inline-flex h-2 w-2 rounded-full bg-gradient-to-r ${pack.accent} animate-pulse`} />
+                      {pack.name}
+                    </h4>
+                    <p className="text-sm text-white/60 mt-1">{pack.description}</p>
+                  </div>
+                  <span className="px-4 py-2 rounded-full text-xs font-bold text-black bg-gradient-to-r from-white to-white/90 shadow-lg shadow-black/20 self-start md:self-auto">
+                    Exclusivo DUA
+                  </span>
+                </div>
+
+                {/* Avatar Grid */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                  {pack.avatars.map((avatarUrl, index) => (
+                    <motion.button
+                      key={`${pack.id}-${index}`}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.05 * index }}
+                      whileHover={{ scale: 1.1, rotate: 3 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handlePresetSelect(avatarUrl)}
+                      className={`relative rounded-2xl overflow-hidden transition-all group ${
+                        selectedAvatar === avatarUrl
+                          ? "ring-4 ring-white shadow-2xl shadow-white/40 scale-105"
+                          : "ring-2 ring-white/10 hover:ring-white/40 hover:shadow-lg hover:shadow-white/20"
+                      }`}
+                    >
+                      {/* Hover Gradient Effect */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${pack.accent} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
+
+                      <Avatar className="w-full h-full aspect-square">
+                        <AvatarImage
+                          src={avatarUrl}
+                          alt={`${pack.name} ${index + 1}`}
+                          className="object-cover transform group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-neutral-900 to-neutral-800">
+                          <UserIcon className="w-6 h-6 text-neutral-500" />
+                        </AvatarFallback>
+                      </Avatar>
+
+                      {/* Selection Indicator */}
+                      <AnimatePresence>
+                        {selectedAvatar === avatarUrl && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.5 }}
+                            className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center"
+                          >
+                            <motion.div
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              className="flex flex-col items-center gap-1"
+                            >
+                              <Check className="w-10 h-10 text-white" strokeWidth={3} />
+                              <span className="text-[10px] uppercase tracking-[0.2em] text-white/90 font-bold">Ativo</span>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Shimmer Effect */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
 
       <div className="flex items-start gap-2 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">

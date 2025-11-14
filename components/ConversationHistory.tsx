@@ -275,18 +275,7 @@ export default function ConversationHistory({
         }}
         className="fixed top-0 left-0 h-full w-[280px] sm:w-[320px] bg-gradient-to-b from-zinc-950 via-zinc-900 to-black border-r border-zinc-800/50 z-50 md:relative md:opacity-100 flex flex-col"
       >
-        {/* Header */}
-        <div className="flex-shrink-0 p-4 border-b border-zinc-800/50">
-          <motion.button
-            onClick={handleNewChat}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full h-11 sm:h-12 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white font-medium flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
-          >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base">Nova Conversa</span>
-          </motion.button>
-        </div>
+
 
         {/* Lista de conversas agrupadas por data */}
         <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">

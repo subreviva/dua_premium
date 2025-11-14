@@ -9,6 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AvatarSelector } from "@/components/ui/avatar-selector";
+import { UserCreditsCard } from "@/components/profile/UserCreditsCard";
+import { UserPlanCard } from "@/components/profile/UserPlanCard";
+import { UserInvoicesCard } from "@/components/profile/UserInvoicesCard";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { 
@@ -21,7 +24,6 @@ import {
   ArrowLeft,
   Shield
 } from "lucide-react";
-import { PremiumNavbar } from "@/components/ui/premium-navbar";
 
 const supabase = supabaseClient;
 
@@ -40,20 +42,8 @@ export default function PerfilPage() {
 
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout;
     
     const init = async () => {
-      // Timeout de segurança
-      timeoutId = setTimeout(() => {
-        if (mounted && loading) {
-          console.error('⏱️ Timeout: carregamento demorou muito');
-          setLoading(false);
-          toast.error("Timeout ao carregar perfil", {
-            description: "A página demorou muito. Tente recarregar."
-          });
-        }
-      }, 10000);
-
       await loadUserProfile();
     };
 
@@ -61,7 +51,6 @@ export default function PerfilPage() {
 
     return () => {
       mounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 
@@ -278,13 +267,8 @@ export default function PerfilPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50" />
       </div>
 
-      {/* Navbar - Responsivo */}
-      <div className="relative z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
-        <PremiumNavbar variant="solid" />
-      </div>
-
       {/* Content - Mobile Optimized */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-12 space-y-3 sm:space-y-4 md:space-y-8 pb-24 sm:pb-8">
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-12 space-y-3 sm:space-y-4 md:space-y-8 pb-24 sm:pb-8 mt-16 sm:mt-20">
         
         {/* Page Header - Compacto Mobile */}
         <motion.div
@@ -426,6 +410,18 @@ export default function PerfilPage() {
               </div>
             </div>
           </div>
+        </motion.div>
+
+        {/* Financial Overview - 3 Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
+        >
+          <UserPlanCard />
+          <UserCreditsCard />
+          <UserInvoicesCard />
         </motion.div>
 
         {/* Community Section - iOS Card Style */}

@@ -1,0 +1,29 @@
+[debug] [2025-11-14T00:22:29.089Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-11-14T00:22:29.489Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-11-14T00:22:29.490Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-14T00:22:29.513Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[error] [Firebase Plugin] requireAuth error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.17.0) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-2.17.0... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-2.17.0..."}}
+[debug] [2025-11-14T00:22:30.047Z] 'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators' {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators'"}}
+[warn] ⚠  Setup required, please run: firebase setup:emulators:dataconnect 
+[debug] [2025-11-14T00:33:13.322Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-11-14T00:33:22.898Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-11-14T00:33:22.900Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-14T00:33:22.916Z] [Firebase Plugin] VSCode notification server listening on port 40002
+[error] [Firebase Plugin] requireAuth error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.17.0) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-2.17.0... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-2.17.0..."}}
+[debug] [2025-11-14T00:33:24.392Z] 'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators' {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators'"}}
+[warn] ⚠  Setup required, please run: firebase setup:emulators:dataconnect 
+[info] [Firebase Plugin] Stopping Data Connect toolkit
+[debug] [2025-11-14T02:43:05.174Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-11-14T02:43:07.024Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-11-14T02:43:07.027Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-14T02:43:07.045Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[error] [Firebase Plugin] requireAuth error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.17.0) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-2.17.0... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-2.17.0..."}}
+[debug] [2025-11-14T02:43:08.805Z] 'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators' {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators'"}}
+[warn] ⚠  Setup required, please run: firebase setup:emulators:dataconnect 
+[info] [Firebase Plugin] Stopping Data Connect toolkit

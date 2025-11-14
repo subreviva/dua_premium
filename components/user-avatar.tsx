@@ -46,7 +46,44 @@ export function UserAvatar() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // ✅ Listener para mudanças em tempo real na tabela users
+    let realtimeSubscription: any = null;
+    
+    const setupRealtimeListener = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (authUser) {
+        // Subscribir mudanças na tabela users para este usuário específico
+        realtimeSubscription = supabase
+          .channel('user-avatar-updates')
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'users',
+              filter: `id=eq.${authUser.id}`
+            },
+            (payload) => {
+              // Atualizar avatar em tempo real quando mudar
+              if (payload.new) {
+                setAvatarUrl(payload.new.avatar_url || '');
+                setUserName(payload.new.name || '');
+              }
+            }
+          )
+          .subscribe();
+      }
+    };
+
+    setupRealtimeListener();
+
+    return () => {
+      subscription.unsubscribe();
+      if (realtimeSubscription) {
+        supabase.removeChannel(realtimeSubscription);
+      }
+    };
   }, []);
 
   const checkAdminStatus = async (userId: string) => {
