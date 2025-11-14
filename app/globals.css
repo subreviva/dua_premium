@@ -144,10 +144,6 @@ html {
   video::-ms-media-controls {
     display: none !important;
   }
-  
-  video::media-controls {
-    display: none !important;
-  }
 }
 
 :root {
