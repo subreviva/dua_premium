@@ -32,6 +32,9 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════
 // 🔒 CLIENTE SUPABASE SEGURO (SERVER-ONLY)
 // ═══════════════════════════════════════════════════════════════════════════
+// IMPORTANTE: Todas as funções RPC (deduct_servicos_credits, add_servicos_credits)
+// usam SECURITY DEFINER no PostgreSQL, garantindo execução com privilégios
+// elevados independente do usuário que chama
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,

@@ -5,19 +5,25 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { 
-  Sparkles, 
-  Image as ImageIcon, 
+  Sparkles,
   Wand2,
   ArrowRight,
   Download,
   Share2,
-  Heart,
-  X,
   Settings2,
-  Maximize2,
   Library,
   ChevronDown,
-  Zap
+  ImagePlay,
+  PanelsLeftRight,
+  BadgeCheck,
+  Palette,
+  Frame,
+  Cpu,
+  Gauge,
+  ListChecks,
+  Maximize2,
+  Heart,
+  X
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -102,34 +108,79 @@ export default function ImageStudioCreatePage() {
     if (!prompt.trim()) return
     
     setIsGenerating(true)
-    // Simulação - substituir com API real
-    setTimeout(() => {
-      const imageUrl = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1024&h=1024&fit=crop"
-      setGeneratedImage(imageUrl)
-      
-      // Salvar imagem no localStorage
-      const newImage = {
-        id: `img-${Date.now()}`,
-        url: imageUrl,
-        prompt: prompt,
-        style: selectedStyle,
-        aspectRatio: aspectRatio,
-        timestamp: new Date().toISOString(),
-        liked: false
+    
+    try {
+      console.log('Gerando imagem com Imagen 4.0:', {
+        model: selectedModel,
+        prompt: prompt.substring(0, 50) + '...',
+        aspectRatio,
+      })
+
+      // Chamar API de geração de imagem (Imagen 4.0)
+      const response = await fetch('/api/imagen/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          model: selectedModel,
+          aspectRatio: aspectRatio,
+          style: selectedStyle,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('❌ Erro na API:', errorData)
+        
+        if (response.status === 402) {
+          alert('Créditos insuficientes. Por favor, compre mais créditos.')
+          return
+        }
+        
+        throw new Error(errorData.error || `Erro ${response.status}`)
       }
+
+      const data = await response.json()
       
-      try {
-        const savedImages = localStorage.getItem("generated-images")
-        const images = savedImages ? JSON.parse(savedImages) : []
-        images.unshift(newImage) // Adicionar no início
-        localStorage.setItem("generated-images", JSON.stringify(images))
-        console.log("✅ Imagem salva na biblioteca:", newImage.id)
-      } catch (error) {
-        console.error("❌ Erro ao salvar imagem:", error)
+      if (data.success && data.image?.url) {
+        const imageUrl = data.image.url
+        setGeneratedImage(imageUrl)
+        
+        // Salvar imagem no localStorage
+        const newImage = {
+          id: `img-${Date.now()}`,
+          url: imageUrl,
+          prompt: prompt,
+          model: selectedModel,
+          style: selectedStyle,
+          aspectRatio: aspectRatio,
+          creditsUsed: data.image.creditsUsed || 0,
+          timestamp: new Date().toISOString(),
+          liked: false
+        }
+        
+        try {
+          const savedImages = localStorage.getItem("generated-images")
+          const images = savedImages ? JSON.parse(savedImages) : []
+          images.unshift(newImage)
+          localStorage.setItem("generated-images", JSON.stringify(images))
+          console.log("✅ Imagem salva na biblioteca:", newImage.id)
+        } catch (error) {
+          console.error("❌ Erro ao salvar imagem:", error)
+        }
+        
+        console.log('✅ Imagem gerada com sucesso!')
+      } else {
+        throw new Error('Nenhuma imagem foi gerada')
       }
-      
+    } catch (error: any) {
+      console.error('❌ Erro ao gerar imagem:', error)
+      alert(`Erro ao gerar imagem: ${error.message}`)
+    } finally {
       setIsGenerating(false)
-    }, 3000)
+    }
   }
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -140,7 +191,7 @@ export default function ImageStudioCreatePage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-black">
+    <div className="flex h-screen overflow-hidden bg-[#050506]">
       {/* Sidebar */}
       <div className="hidden md:block">
         <ImageSidebar />
@@ -149,7 +200,7 @@ export default function ImageStudioCreatePage() {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         
-        {/* 🎨 MOBILE & DESKTOP: Layout Premium */}
+        {/* MOBILE & DESKTOP: Layout Premium */}
         <div className="flex-1 overflow-y-auto pb-[120px] md:pb-0">
           
           {/* Hero Section com Imagem de Fundo */}
@@ -165,8 +216,8 @@ export default function ImageStudioCreatePage() {
                 priority
               />
               {/* Overlay sutil sem gradiente forte */}
-              <div className="absolute inset-0 bg-black/30" />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
+              <div className="absolute inset-0 bg-black/40" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/60 to-black/95" />
             </div>
             
             {/* Content */}
@@ -177,21 +228,29 @@ export default function ImageStudioCreatePage() {
                 transition={{ duration: 0.8 }}
               >
                 {/* Título */}
-                <h1 className="text-[32px] md:text-[56px] leading-[1.1] font-semibold tracking-tight text-white mb-3 md:mb-4 drop-shadow-2xl">
-                  Cria Imagens
+                <div className="inline-flex items-center gap-3 rounded-full bg-black/40 px-3 py-1 mb-3 border border-white/10 backdrop-blur">
+                  <ImagePlay className="w-4 h-4 text-white/80" />
+                  <span className="text-[11px] uppercase tracking-[0.18em] text-white/60">Image Studio</span>
+                </div>
+
+                <h1 className="text-[32px] md:text-[52px] leading-[1.05] font-semibold tracking-tight text-white mb-3 md:mb-4 drop-shadow-2xl">
+                  Imagens de nível
                   <br />
-                  Profissionais
+                  <span className="bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
+                    editorial & campanha
+                  </span>
                 </h1>
                 
-                <p className="text-[14px] md:text-[17px] text-white/80 font-light leading-relaxed mb-5 md:mb-7 max-w-[600px] drop-shadow-lg">
-                  Transforma as tuas ideias em imagens deslumbrantes com inteligência artificial de última geração.
+                <p className="text-[14px] md:text-[16px] text-white/78 font-light leading-relaxed mb-5 md:mb-7 max-w-[580px] drop-shadow-lg">
+                  Descreve a cena e deixa a DUA combinar modelos de última geração para criar visuais prontos para campanhas,
+                  capas e layouts profissionais.
                 </p>
               </motion.div>
             </div>
           </div>
 
           {/* Main Creation Area */}
-          <div className="relative bg-gradient-to-b from-black via-zinc-950 to-black">
+          <div className="relative bg-[radial-gradient(circle_at_top,_rgba(139,115,85,0.18),_transparent_55%),_linear-gradient(to_bottom,_#020202,_#050505)]">
             <div className="max-w-7xl mx-auto px-4 md:px-12 py-8 md:py-12">
               
               {/* Grid Layout: Prompt & Preview */}
@@ -204,33 +263,43 @@ export default function ImageStudioCreatePage() {
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.05] p-4 md:p-8"
+                    className="bg-white/[0.018] backdrop-blur-2xl rounded-2xl border border-white/[0.06] p-4 md:p-8 shadow-[0_18px_60px_rgba(0,0,0,0.65)]"
                   >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-[#8B7355] flex items-center justify-center">
-                        <Wand2 className="w-5 h-5 text-white" strokeWidth={0.75} />
+                    <div className="flex items-center justify-between gap-3 mb-3 md:mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-zinc-100/10 via-zinc-50/5 to-zinc-100/5 flex items-center justify-center border border-white/10">
+                          <PanelsLeftRight className="w-5 h-5 text-white" strokeWidth={0.8} />
+                        </div>
+                        <div className="flex flex-col">
+                          <h2 className="text-[15px] md:text-base font-medium text-white/90">Brief criativo</h2>
+                          <span className="text-[11px] text-white/45 uppercase tracking-[0.18em]">Conteúdo & enquadramento</span>
+                        </div>
                       </div>
-                      <h2 className="text-xl font-semibold text-white">Descreve a tua visão</h2>
+
+                      <div className="hidden md:flex items-center gap-2 text-[11px] text-white/50">
+                        <BadgeCheck className="w-3.5 h-3.5" />
+                        <span>Prepared for Imagen 4 · VQ · DALL·E</span>
+                      </div>
                     </div>
 
                     <Textarea
                       ref={textareaRef}
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="Ex: Um pôr do sol vibrante sobre montanhas, fotografia profissional em alta resolução..."
-                      className="min-h-[180px] bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 resize-none focus:border-[#8B7355]/50 transition-all text-[15px]"
+                      placeholder="Descreve a cena, luz, enquadramento, tipo de lente e mood geral da imagem que queres criar..."
+                      className="min-h-[190px] rounded-2xl bg-gradient-to-b from-white/[0.018] via-white/[0.012] to-black/40 border border-white/[0.08] text-white placeholder:text-white/30 resize-none focus:border-white/40 focus:ring-0 focus-visible:ring-0 transition-all text-[14px] md:text-[15px] leading-relaxed shadow-inner"
                     />
 
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xs text-white/40">
-                        {prompt.length} caracteres
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <span className="text-[11px] text-white/45">
+                        {prompt.length} caracteres · pensa em enquadramento, luz e contexto
                       </span>
                       <button
                         onClick={() => setShowAdvanced(!showAdvanced)}
-                        className="text-xs text-white/60 hover:text-white/90 flex items-center gap-1 transition-colors"
+                        className="text-[11px] text-white/60 hover:text-white flex items-center gap-1.5 transition-colors px-2 py-1 rounded-full border border-white/10 bg-white/0 hover:bg-white/05"
                       >
                         <Settings2 className="w-3.5 h-3.5" />
-                        Opções avançadas
+                        Controlo fino
                       </button>
                     </div>
                   </motion.div>
@@ -243,7 +312,7 @@ export default function ImageStudioCreatePage() {
                     className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.05] p-4 md:p-8"
                   >
                     <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-[#8B7355]" strokeWidth={0.75} />
+                      <Palette className="w-5 h-5 text-[#8B7355]" strokeWidth={0.9} />
                       Estilo
                     </h3>
                     
@@ -331,7 +400,7 @@ export default function ImageStudioCreatePage() {
                     className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.05] p-4 md:p-8"
                   >
                     <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-                      <Maximize2 className="w-5 h-5 text-[#8B7355]" strokeWidth={0.75} />
+                      <Frame className="w-5 h-5 text-[#8B7355]" strokeWidth={0.9} />
                       Proporção
                     </h3>
                     
@@ -422,7 +491,7 @@ export default function ImageStudioCreatePage() {
                     className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.05] p-4 md:p-8"
                   >
                     <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-                      <Zap className="w-5 h-5 text-[#8B7355]" strokeWidth={0.75} />
+                      <Cpu className="w-5 h-5 text-[#8B7355]" strokeWidth={0.9} />
                       Modelo de IA
                     </h3>
                     
@@ -504,7 +573,9 @@ export default function ImageStudioCreatePage() {
                               {model.name}
                             </span>
                             {model.recommended && (
-                              <span className="px-2 py-0.5 bg-yellow-500/20 border border-yellow-500/30 rounded text-xs text-yellow-400">⭐</span>
+                              <span className="px-2 py-0.5 rounded text-[10px] tracking-[0.14em] uppercase bg-yellow-500/12 border border-yellow-500/30 text-yellow-300">
+                                Recomendado
+                              </span>
                             )}
                           </div>
                           <p className="text-xs text-white/50 mb-2">{model.description}</p>
@@ -553,10 +624,10 @@ export default function ImageStudioCreatePage() {
                       </>
                     ) : (
                       <>
-                        <Wand2 className="w-5 h-5" strokeWidth={0.75} />
+                        <Wand2 className="w-5 h-5" strokeWidth={0.85} />
                         Gerar Imagem
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/20 rounded-lg">
-                          <Zap className="w-3.5 h-3.5" strokeWidth={0.75} />
+                          <Gauge className="w-3.5 h-3.5" strokeWidth={0.9} />
                           <span className="text-sm font-bold">{imageModels.find(m => m.id === selectedModel)?.credits}</span>
                         </div>
                         <ArrowRight className="w-5 h-5" strokeWidth={0.75} />
@@ -572,7 +643,7 @@ export default function ImageStudioCreatePage() {
                   className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.05] p-4 md:p-8"
                 >
                   <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-                    <ImageIcon className="w-5 h-5 text-[#8B7355]" strokeWidth={0.75} />
+                    <PanelsLeftRight className="w-5 h-5 text-[#8B7355]" strokeWidth={0.85} />
                     Pré-visualização
                   </h3>
 
@@ -678,7 +749,7 @@ export default function ImageStudioCreatePage() {
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center">
                         <div className="w-16 h-16 rounded-2xl bg-[#8B7355]/10 border border-white/10 flex items-center justify-center">
-                          <ImageIcon className="w-8 h-8 text-white/30" strokeWidth={0.75} />
+                          <ImagePlay className="w-8 h-8 text-white/30" strokeWidth={0.85} />
                         </div>
                         <div>
                           <p className="text-white/60 font-medium mb-2">
@@ -702,7 +773,7 @@ export default function ImageStudioCreatePage() {
                 className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.05] p-4 md:p-8"
               >
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#8B7355]" strokeWidth={0.75} />
+                  <ListChecks className="w-5 h-5 text-[#8B7355]" strokeWidth={0.9} />
                   Sugestões de Prompt
                 </h3>
                 
@@ -736,7 +807,7 @@ export default function ImageStudioCreatePage() {
                 whileTap={{ scale: 0.95 }}
                 className="w-full py-3.5 rounded-xl bg-[#8B7355]/10 border border-[#8B7355]/30 hover:bg-[#8B7355]/20 transition-all duration-300 flex flex-col items-center gap-1.5"
               >
-                <Sparkles className="w-5 h-5 text-[#8B7355]" strokeWidth={0.75} />
+                <Wand2 className="w-5 h-5 text-[#8B7355]" strokeWidth={0.9} />
                 <span className="text-xs font-medium text-[#8B7355]">Criar</span>
               </motion.button>
             </Link>

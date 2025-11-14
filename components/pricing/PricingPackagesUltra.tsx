@@ -158,7 +158,9 @@ const recommendations = [
   },
 ];
 
-export default function PricingPackagesUltra() {
+import { safeParse } from '@/lib/fetch-utils';
+
+export function PricingPackagesUltra() {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const router = useRouter();
 
@@ -186,7 +188,11 @@ export default function PricingPackagesUltra() {
 
       if (!response.ok) throw new Error('Erro ao criar sessão de checkout');
 
-      const { url } = await response.json();
+      const data = await safeParse<{ url?: string }>(response);
+      if (!data) {
+        throw new Error('Invalid response from checkout API');
+      }
+      const { url } = data;
       if (url) {
         window.location.href = url;
       } else {

@@ -92,9 +92,22 @@ export default function ImageToVideo() {
 
       setProgress(40)
 
+      })
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Erro ao enviar imagem')
+        const contentType = response.headers.get('content-type')
+        let errorMessage = `Erro ${response.status}`
+        
+        if (contentType?.includes('application/json')) {
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } catch (e) {
+            // Ignore parse error
+          }
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -200,7 +213,7 @@ export default function ImageToVideo() {
         </div>
 
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 py-6 sm:py-12 lg:py-16">
           
           {/* Upload Area */}
           {!imagePreview && !isComplete && (
@@ -210,15 +223,15 @@ export default function ImageToVideo() {
               className="min-h-[calc(100vh-12rem)] flex items-center justify-center"
             >
               <div className="w-full max-w-2xl">
-                <div className="text-center mb-8 sm:mb-12">
-                  <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extralight text-white mb-4 sm:mb-6 tracking-tight">
+                <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+                  <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight text-white mb-4 sm:mb-6 tracking-tight">
                     Transform Images
                     <br />
                     <span className="bg-gradient-to-r from-white/90 to-white/50 bg-clip-text text-transparent">
                       Into Motion
                     </span>
                   </h2>
-                  <p className="text-sm sm:text-base text-white/40 font-light max-w-lg mx-auto">
+                  <p className="text-sm sm:text-base md:text-lg text-white/40 font-light max-w-lg mx-auto">
                     AI-powered video generation with cinematic quality
                   </p>
                 </div>
@@ -405,13 +418,18 @@ export default function ImageToVideo() {
                     exit={{ opacity: 0 }}
                     className="space-y-4"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full"
+                      />
                       <span className="text-sm font-light text-white/60">
                         {isUploading ? 'Uploading...' : 'Generating...'}
                       </span>
-                      <span className="text-sm font-light text-white/40">{Math.round(progress)}%</span>
+                      <span className="text-sm font-light text-white/40 ml-auto">{Math.round(progress)}%</span>
                     </div>
-                    <div className="h-px bg-white/10 rounded-full overflow-hidden">
+                    <div className="bg-white/10 rounded-full h-1 overflow-hidden">
                       <motion.div
                         className="h-full bg-white/40"
                         initial={{ width: 0 }}
@@ -475,43 +493,27 @@ export default function ImageToVideo() {
                     ref={resultVideoRef}
                     src={resultUrl}
                     className="w-full h-full object-contain"
+                    controls
+                    playsInline
+                    autoPlay
                     loop
-                    onPlay={() => setIsPlayingResult(true)}
-                    onPause={() => setIsPlayingResult(false)}
+                    preload="metadata"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <button
-                      onClick={() => {
-                        if (resultVideoRef.current) {
-                          isPlayingResult ? resultVideoRef.current.pause() : resultVideoRef.current.play()
-                        }
-                      }}
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition-all duration-300 pointer-events-auto"
-                    >
-                      {isPlayingResult ? (
-                        <Pause className="w-8 h-8 text-white" />
-                      ) : (
-                        <Play className="w-8 h-8 text-white ml-1" />
-                      )}
-                    </button>
-                  </div>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <button
-                  onClick={() => {
-                    const a = document.createElement('a')
-                    a.href = resultUrl
-                    a.download = 'generated-video.mp4'
-                    a.click()
-                  }}
-                  className="flex-1 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/[0.15] transition-all duration-300 text-white font-light text-sm sm:text-base backdrop-blur-xl group"
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href={resultUrl}
+                  download="duaia-generated-video.mp4"
+                  className="flex-1 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/[0.15] transition-all duration-300 text-white font-light text-sm sm:text-base backdrop-blur-xl group text-center"
                 >
                   <Download className="w-5 h-5 inline mr-3 group-hover:translate-y-0.5 transition-transform" />
                   Download Video
-                </button>
+                </motion.a>
                 
                 <button
                   onClick={handleReset}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ExternalLink, Play } from 'lucide-react';
+import { safeParse } from '@/lib/fetch-utils';
 
 export function SimpleLinkPreview({ url }: { url: string }) {
   const [metadata, setMetadata] = useState<any>(null);
@@ -16,7 +17,11 @@ export function SimpleLinkPreview({ url }: { url: string }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url })
         });
-        const data = await res.json();
+        const data = await safeParse(res);
+        if (!data) {
+          console.error('Failed to parse link preview response');
+          return;
+        }
         console.log('✅ Data:', data);
         setMetadata(data);
       } catch (error) {

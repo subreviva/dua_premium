@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { safeParse } from "@/lib/fetch-utils"
 
 export function AIMusicGenerator({ onGenerate }: { onGenerate: (url: string, name: string) => void }) {
   const [prompt, setPrompt] = useState("")
@@ -25,10 +26,17 @@ export function AIMusicGenerator({ onGenerate }: { onGenerate: (url: string, nam
         }),
       })
 
-      const data = await response.json()
+      const data = await safeParse<{ success: boolean; data?: any[]; error?: string }>(response)
+      if (!data) {
+        throw new Error("Invalid response from generate API")
+      }
 
       if (!data.success) {
         throw new Error(data.error || "Failed to generate music")
+      }
+
+      if (!data.data || !data.data[0]) {
+        throw new Error("No task data received")
       }
 
       // Poll for completion
@@ -39,9 +47,12 @@ export function AIMusicGenerator({ onGenerate }: { onGenerate: (url: string, nam
         await new Promise((resolve) => setTimeout(resolve, 3000))
 
         const statusResponse = await fetch(`/api/suno/status?ids=${taskId}`)
-        const statusData = await statusResponse.json()
+        const statusData = await safeParse<{ success: boolean; data?: any[] }>(statusResponse)
+        if (!statusData || !statusData.data || !statusData.data[0]) {
+          continue
+        }
 
-        if (statusData.success && statusData.data[0]) {
+        if (statusData.success) {
           const track = statusData.data[0]
           setProgress(Math.min(95, progress + 10))
 

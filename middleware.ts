@@ -196,6 +196,7 @@ export async function middleware(req: NextRequest) {
     '/api/validate-code',
     '/api/auth',
     '/api/chat',             // ✅ Chat API
+    '/api/imagen',           // ✅ Imagen generation API
     '/api/early-access',
     '/api/manifest',         // ✅ Manifest API
     '/manifest.webmanifest', // ✅ PWA manifest
@@ -243,7 +244,7 @@ export async function middleware(req: NextRequest) {
 
   // ⚡ Se chegou aqui, rota NÃO está na whitelist - BLOQUEAR
   console.warn(`[ULTRA RIGOR] ❌ BLOQUEADO: Rota não autorizada → ${path}`);
-  return NextResponse.redirect(new URL('/acesso', req.url));
+  return NextResponse.redirect(new URL('/login', req.url));
 }
 
 // Configuração: Aplicar middleware em todas as rotas exceto assets estáticos

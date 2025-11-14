@@ -5,6 +5,7 @@ import { X, Play, ThumbsUp, MessageSquare, Share2, ChevronRight } from "lucide-r
 import { Button } from "@/components/ui/button"
 import { ExtendModal } from "@/components/extend-modal"
 import { AudioEditor } from "@/components/audio-editor" // Import AudioEditor component
+import { safeParse } from "@/lib/fetch-utils"
 
 interface Song {
   id: string
@@ -44,7 +45,11 @@ export function SongDetailPanel({ song, onClose }: SongDetailPanelProps) {
           title: `${song.title} (Cover)`,
         }),
       })
-      const result = await response.json()
+      const result = await safeParse(response)
+      if (!result) {
+        console.error("Failed to parse cover response")
+        return
+      }
       // console.log("[v0] Cover creation started:", result)
     } catch (error) {
       // console.error("[v0] Error creating cover:", error)
@@ -80,7 +85,11 @@ export function SongDetailPanel({ song, onClose }: SongDetailPanelProps) {
           negativeTags: "",
         }),
       })
-      const result = await response.json()
+      const result = await safeParse(response)
+      if (!result) {
+        console.error("Failed to parse vocals response")
+        return
+      }
       // console.log("[v0] Add vocals started:", result)
     } catch (error) {
       // console.error("[v0] Error adding vocals:", error)

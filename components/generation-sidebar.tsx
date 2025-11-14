@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Music, CheckCircle2, AlertCircle, X, Play, Download, ChevronRight } from "lucide-react"
+import { Music, CheckCircle2, AlertCircle, X, Play, Download, ChevronRight, Clock, AudioWaveform, Wand2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -60,21 +60,21 @@ export function GenerationSidebar({ tasks, onRemoveTask, onViewTrack }: Generati
       case "PENDING":
         return (
           <Badge variant="secondary" className="gap-1 text-xs">
-            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
+            <Clock className="h-3 w-3" />
             Queued
           </Badge>
         )
       case "TEXT_SUCCESS":
         return (
           <Badge className="gap-1 bg-blue-500 text-xs">
-            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+            <AudioWaveform className="h-3 w-3" />
             Generating Audio
           </Badge>
         )
       case "FIRST_SUCCESS":
         return (
           <Badge className="gap-1 bg-purple-500 text-xs">
-            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+            <Wand2 className="h-3 w-3" />
             Creating Variations
           </Badge>
         )

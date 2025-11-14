@@ -7,6 +7,15 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 
+import { safeParse } from '@/lib/fetch-utils';
+
+interface Persona {
+  id: string
+  name: string
+  description: string
+  liked: boolean
+}
+
 interface PersonasModalProps {
   onClose: () => void
   songContext?: {
@@ -75,7 +84,10 @@ export function PersonasModal({ onClose, songContext }: PersonasModalProps) {
           }),
         })
 
-        const data = await response.json()
+        const data = await safeParse<{ code: number; data?: { personaId: string; name: string; description: string }; msg?: string }>(response)
+        if (!data) {
+          throw new Error('Invalid response from persona API');
+        }
         // console.log("[v0] Persona created:", data)
 
         if (data.code === 200 && data.data?.personaId) {

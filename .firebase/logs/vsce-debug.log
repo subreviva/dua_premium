@@ -27,3 +27,22 @@
 [debug] [2025-11-14T02:43:08.805Z] 'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators' {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators'"}}
 [warn] ⚠  Setup required, please run: firebase setup:emulators:dataconnect 
 [info] [Firebase Plugin] Stopping Data Connect toolkit
+[debug] [2025-11-14T10:36:55.336Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-11-14T10:37:02.318Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-11-14T10:37:02.319Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-14T10:37:02.331Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[error] [Firebase Plugin] requireAuth error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.17.0) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-2.17.0... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-2.17.0..."}}
+[debug] [2025-11-14T10:37:03.094Z] 'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators' {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators'"}}
+[warn] ⚠  Setup required, please run: firebase setup:emulators:dataconnect 
+[debug] [2025-11-14T12:41:37.717Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-11-14T12:41:47.623Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-11-14T12:41:47.624Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-14T12:41:47.642Z] [Firebase Plugin] VSCode notification server listening on port 40002
+[error] [Firebase Plugin] requireAuth error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.17.0) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-2.17.0... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-2.17.0..."}}
+[debug] [2025-11-14T12:41:48.919Z] 'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators' {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: EACCES: permission denied, mkdir '/home/codespace/.cache/firebase/emulators'"}}
+[warn] ⚠  Setup required, please run: firebase setup:emulators:dataconnect 
+[info] [Firebase Plugin] Stopping Data Connect toolkit

@@ -343,7 +343,7 @@ export default function VideoEditorPage() {
               {/* Prompt Input */}
               <div className="rounded-3xl bg-zinc-900 border border-white/10 p-6">
                 <label className="block text-sm font-semibold text-white mb-3">
-                  ✨ Descreva a transformação desejada
+                  Descreva a transformação desejada
                 </label>
                 <Textarea
                   value={promptText}
@@ -376,14 +376,14 @@ export default function VideoEditorPage() {
                 <label className="block text-sm font-semibold text-white mb-3">Proporção</label>
                 <div className="grid grid-cols-4 gap-3">
                   {[
-                    { value: '1280:720', label: '16:9 HD', icon: '�' },
-                    { value: '720:1280', label: '9:16 Vertical', icon: '�' },
-                    { value: '1104:832', label: '4:3 HD', icon: '🖥️' },
-                    { value: '832:1104', label: '3:4 Vertical', icon: '📲' },
-                    { value: '960:960', label: '1:1 Quadrado', icon: '⬜' },
-                    { value: '1584:672', label: '21:9 Cinema', icon: '🎬' },
-                    { value: '848:480', label: '16:9 SD', icon: '📼' },
-                    { value: '640:480', label: '4:3 SD', icon: '💾' },
+                    { value: '1280:720', label: '16:9 HD' },
+                    { value: '720:1280', label: '9:16 Vertical' },
+                    { value: '1104:832', label: '4:3 HD' },
+                    { value: '832:1104', label: '3:4 Vertical' },
+                    { value: '960:960', label: '1:1 Quadrado' },
+                    { value: '1584:672', label: '21:9 Cinema' },
+                    { value: '848:480', label: '16:9 SD' },
+                    { value: '640:480', label: '4:3 SD' },
                   ].map((ratio) => (
                     <button
                       key={ratio.value}
@@ -395,7 +395,6 @@ export default function VideoEditorPage() {
                       }`}
                       disabled={isUploading || isProcessing}
                     >
-                      <div className="text-2xl mb-1">{ratio.icon}</div>
                       <div className="text-xs text-white font-medium">{ratio.label}</div>
                     </button>
                   ))}
@@ -543,7 +542,7 @@ export default function VideoEditorPage() {
                         <p className="text-xs text-purple-400">Editado por IA</p>
                       </div>
                       <div className="px-3 py-1 rounded-full bg-purple-500/20 text-xs text-purple-400 font-medium">
-                        Depois ✨
+                        Depois
                       </div>
                     </div>
                   </div>

@@ -17,7 +17,7 @@ export default function WelcomePage() {
     const getUser = async () => {
       const { data: { user } } = await supabaseClient.auth.getUser()
       if (!user) {
-        router.push('/acesso')
+        router.push('/login?redirect=/welcome')
         return
       }
       setUser(user)

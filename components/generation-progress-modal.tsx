@@ -29,6 +29,24 @@ export function GenerationProgressModal({ open, taskId, onComplete, onError }: G
     const poll = async () => {
       try {
         const response = await fetch(`/api/suno/status?taskId=${taskId}`)
+        
+        if (!response.ok) {
+          attempts++
+          if (attempts < maxAttempts) {
+            setTimeout(poll, 10000)
+          }
+          return
+        }
+
+        const contentType = response.headers.get('content-type')
+        if (!contentType?.includes('application/json')) {
+          attempts++
+          if (attempts < maxAttempts) {
+            setTimeout(poll, 10000)
+          }
+          return
+        }
+        
         const data = await response.json()
 
         console.log("[v0] Task status:", data.status)

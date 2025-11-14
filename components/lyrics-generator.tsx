@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Sparkles, Copy, Check } from "lucide-react"
 
+import { safeParse } from '@/lib/fetch-utils';
+
 interface LyricsGeneratorProps {
   onGenerate?: (lyrics: string) => void
 }
@@ -32,7 +34,11 @@ export function LyricsGenerator({ onGenerate }: LyricsGeneratorProps) {
         body: JSON.stringify({ prompt }),
       })
 
-      const result = await response.json()
+      const result = await safeParse<{ data?: { taskId: string } }>(response)
+      if (!result) {
+        console.error('Failed to parse lyrics generate response');
+        return;
+      }
       // console.log("[v0] Lyrics generation started:", result)
 
       if (result.data?.taskId) {
@@ -54,7 +60,10 @@ export function LyricsGenerator({ onGenerate }: LyricsGeneratorProps) {
       attempts++
       try {
         const response = await fetch(`/api/suno/details/lyrics/${taskId}`)
-        const result = await response.json()
+        const result = await safeParse<{ data?: { lyrics: string } }>(response)
+        if (!result) {
+          return;
+        }
 
         if (result.data?.lyrics) {
           clearInterval(poll)

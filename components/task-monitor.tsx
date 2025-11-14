@@ -24,6 +24,12 @@ export function TaskMonitor() {
         if (task.status === "pending" || task.status === "processing") {
           try {
             const response = await fetch(`/api/suno/details/${task.taskId}`)
+            
+            if (!response.ok) continue
+            
+            const contentType = response.headers.get('content-type')
+            if (!contentType?.includes('application/json')) continue
+            
             const data = await response.json()
 
             if (data.code === 200) {

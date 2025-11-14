@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Library, Search, Music, MoreVertical, Play, Download, Trash2, ThumbsUp, Sparkles } from "lucide-react"
+import { Library, Search, Music, MoreVertical, Play, Download, Trash2, Plus } from "lucide-react"
 import { useState } from "react"
 import { TrackDetailModal } from "@/components/track-detail-modal"
 import { useGeneration } from "@/contexts/generation-context"
@@ -215,15 +215,10 @@ export default function LibraryPage() {
                         </p>
 
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5">
-                              <Play className="h-3.5 w-3.5 text-zinc-600" />
-                              <span className="text-xs text-zinc-400 font-medium">0</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <ThumbsUp className="h-3.5 w-3.5 text-zinc-600" />
-                              <span className="text-xs text-zinc-400 font-medium">0</span>
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-zinc-500 font-medium">
+                              {new Date(track.createTime).toLocaleDateString('pt-PT')}
+                            </span>
                           </div>
 
                           <DropdownMenu>
@@ -285,7 +280,7 @@ export default function LibraryPage() {
                   >
                     <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-600 via-red-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <span className="relative flex items-center justify-center gap-2">
-                      <Sparkles className="h-5 w-5" />
+                      <Plus className="h-5 w-5" />
                       Criar Primeira Música
                     </span>
                   </Button>

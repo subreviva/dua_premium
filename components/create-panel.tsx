@@ -22,6 +22,7 @@ import {
   Loader2,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { safeParse } from "@/lib/fetch-utils"
 
 // Helper function to save songs to localStorage
 function saveSongToLocalStorage(songData: any) {
@@ -73,8 +74,8 @@ export function CreatePanel() {
   const fetchCredits = async () => {
     try {
       const response = await fetch("/api/music/credits")
-      const result = await response.json()
-      if (result.success && result.data?.credits !== undefined) {
+      const result = await safeParse<{ success: boolean; data?: { credits: number } }>(response)
+      if (result?.success && result.data?.credits !== undefined) {
         setCredits(result.data.credits)
       }
     } catch (error) {
@@ -222,7 +223,10 @@ export function CreatePanel() {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const result = await response.json()
+      const result = await safeParse<{ success: boolean; data?: { task_id: string }; error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from music generation")
+      }
       // console.log("[v0] Music generation started:", result)
 
       if (result.success && result.data?.task_id) {
@@ -256,7 +260,11 @@ export function CreatePanel() {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
 
-        const result = await response.json()
+        const result = await safeParse<{ success: boolean; data?: any[]; error?: string }>(response)
+        if (!result) {
+          console.error("Invalid polling response, retrying...")
+          return
+        }
 
         // console.log("[v0] Polling attempt", attempts, "result:", result)
 

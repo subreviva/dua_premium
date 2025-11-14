@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
           registration_completed: true,
           subscription_tier: 'premium', // Acesso exclusivo = premium
           creditos_servicos: 150, // 150 créditos iniciais
-          saldo_dua: 50, // 50 DUA coins iniciais
+          saldo_dua: 0, // Sem DUA coins iniciais
           account_type: 'normal',
           total_tokens: 5000, // 5000 tokens iniciais
           tokens_used: 0,

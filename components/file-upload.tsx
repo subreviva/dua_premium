@@ -6,6 +6,7 @@ import { Upload, LinkIcon, Loader2, AlertCircle, CheckCircle2 } from "lucide-rea
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { safeParse } from "@/lib/fetch-utils"
 
 interface FileUploadProps {
   onUploadComplete: (uploadUrl: string) => void
@@ -50,7 +51,10 @@ export function FileUpload({ onUploadComplete, accept = "audio/*" }: FileUploadP
             throw new Error(`Upload failed: ${response.status}`)
           }
 
-          const data = await response.json()
+          const data = await safeParse<{ code: number; data?: { uploadUrl: string }; msg?: string }>(response)
+          if (!data) {
+            throw new Error("Invalid response from upload API")
+          }
           if (data.code === 200 && data.data?.uploadUrl) {
             setSuccess(true)
             onUploadComplete(data.data.uploadUrl)
@@ -100,7 +104,10 @@ export function FileUpload({ onUploadComplete, accept = "audio/*" }: FileUploadP
         throw new Error(`Upload failed: ${response.status}`)
       }
 
-      const data = await response.json()
+      const data = await safeParse<{ code: number; data?: { uploadUrl: string }; msg?: string }>(response)
+      if (!data) {
+        throw new Error("Invalid response from upload API")
+      }
       if (data.code === 200 && data.data?.uploadUrl) {
         setSuccess(true)
         onUploadComplete(data.data.uploadUrl)

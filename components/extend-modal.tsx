@@ -4,6 +4,7 @@ import { useState } from "react"
 import { X, Play, ChevronDown, ChevronUp, Plus, Music } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { safeParse } from "@/lib/fetch-utils"
 
 interface ExtendModalProps {
   onClose: () => void
@@ -36,13 +37,20 @@ export function ExtendModal({ onClose, song }: ExtendModalProps) {
         }),
       })
 
-      const data = await response.json()
+      const data = await safeParse<{ taskId?: string }>(response)
+      if (!data) {
+        console.error("Failed to parse extend response")
+        return
+      }
       // console.log("[v0] Extend response:", data)
 
       if (data.taskId) {
         const pollInterval = setInterval(async () => {
           const detailsResponse = await fetch(`/api/suno/details/${data.taskId}`)
-          const details = await detailsResponse.json()
+          const details = await safeParse<{ status: string }>(detailsResponse)
+          if (!details) {
+            return
+          }
 
           if (details.status === "completed") {
             clearInterval(pollInterval)

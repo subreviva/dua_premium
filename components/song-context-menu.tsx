@@ -30,6 +30,7 @@ import {
   Disc,
   Loader2,
 } from "lucide-react"
+import { safeParse } from "@/lib/fetch-utils"
 
 interface SongContextMenuProps {
   song: {
@@ -61,7 +62,10 @@ export function SongContextMenu({ song, onClose, onEdit, position = "right" }: S
         body: JSON.stringify({ clip_id: song.id }),
       })
       
-      const result = await response.json()
+      const result = await safeParse<{ success: boolean; data?: { wav_url: string }; error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from WAV API")
+      }
       
       if (result.success && result.data?.wav_url) {
         setStatusMessage("✓ Opening WAV...")
@@ -95,7 +99,10 @@ export function SongContextMenu({ song, onClose, onEdit, position = "right" }: S
         body: JSON.stringify({ clip_id: song.id }),
       })
       
-      const result = await response.json()
+      const result = await safeParse<{ success: boolean; data?: { midi_url: string; instruments?: any[] }; error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from MIDI API")
+      }
       
       if (result.success && result.data?.midi_url) {
         setStatusMessage("✓ Opening MIDI...")
@@ -130,7 +137,10 @@ export function SongContextMenu({ song, onClose, onEdit, position = "right" }: S
         body: JSON.stringify({ clip_id: song.id }),
       })
       
-      const result = await response.json()
+      const result = await safeParse<{ success: boolean; data?: { task_id: string }; error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from stems API")
+      }
       
       if (result.success && result.data?.task_id) {
         setStatusMessage(`✓ Task started: ${result.data.task_id.slice(0, 8)}...`)
@@ -164,7 +174,10 @@ export function SongContextMenu({ song, onClose, onEdit, position = "right" }: S
         body: JSON.stringify({ clip_id: song.id }),
       })
       
-      const result = await response.json()
+      const result = await safeParse<{ success: boolean; data?: { task_id: string }; error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from full stems API")
+      }
       
       if (result.success && result.data?.task_id) {
         setStatusMessage(`✓ Task started: ${result.data.task_id.slice(0, 8)}...`)
@@ -212,7 +225,10 @@ export function SongContextMenu({ song, onClose, onEdit, position = "right" }: S
         }),
       })
       
-      const result = await response.json()
+      const result = await safeParse<{ success: boolean; data?: { persona_id: string }; error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from persona API")
+      }
       
       if (result.success && result.data?.persona_id) {
         setStatusMessage(`✓ Persona created: ${result.data.persona_id.slice(0, 8)}...`)
@@ -263,7 +279,10 @@ export function SongContextMenu({ song, onClose, onEdit, position = "right" }: S
         }),
       })
       
-      const result = await response.json()
+      const result = await safeParse<{ success: boolean; data?: { task_id: string }; error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from persona music API")
+      }
       
       if (result.success && result.data?.task_id) {
         setStatusMessage(`✓ Task started: ${result.data.task_id.slice(0, 8)}...`)

@@ -189,6 +189,9 @@ export default function CreatePage() {
         throw new Error(data.error || "Geração falhou")
       }
 
+      // 🎵 ABRIR BIBLIOTECA SIDEBAR AUTOMATICAMENTE
+      window.dispatchEvent(new Event('toggle-music-library'))
+      
       addTask({
         taskId: data.taskId,
         status: "PENDING",

@@ -152,8 +152,19 @@ export default function PerformancePage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Error processing performance")
+        const contentType = response.headers.get('content-type')
+        let errorMessage = `Erro ${response.status}`
+        
+        if (contentType?.includes('application/json')) {
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } catch (e) {
+            // Ignore parse error
+          }
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -176,6 +187,12 @@ export default function PerformancePage() {
 
         if (!statusResponse.ok) {
           console.error('Error checking status')
+          continue
+        }
+
+        const contentType = statusResponse.headers.get('content-type')
+        if (!contentType?.includes('application/json')) {
+          console.error('Status response is not JSON')
           continue
         }
 
@@ -223,17 +240,17 @@ export default function PerformancePage() {
     <div className="flex h-screen bg-black overflow-hidden">
       <CinemaSidebar />
 
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden pt-14">
         <div className="h-full">
-          <div className="grid grid-cols-2 h-full divide-x divide-white/5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 h-full md:divide-x divide-white/5">
             
             {/* Left Panel - Controls */}
-            <div className="overflow-y-auto p-6 space-y-6">
+            <div className="overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
               
               {/* Header */}
-              <div className="mb-8">
-                <h1 className="text-2xl font-bold text-white mb-2">Character Performance</h1>
-                <p className="text-sm text-zinc-500">Control expressions and movements - Act-Two</p>
+              <div className="mb-6 sm:mb-8 lg:mb-10">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">Character Performance</h1>
+                <p className="text-sm sm:text-base md:text-lg text-zinc-500">Control expressions and movements - Act-Two</p>
                 <div className="mt-3 flex items-center gap-2 text-xs">
                   <span className="px-2 py-1 rounded bg-white/5 border border-white/10 text-zinc-400">
                     30 credits per video
@@ -243,8 +260,8 @@ export default function PerformancePage() {
 
               {/* Character Upload */}
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-3">
-                  Character (Image or Video)
+                <label className="block text-sm sm:text-base md:text-lg font-medium text-zinc-400 mb-3">
+                  Character (Image/Video)
                 </label>
                 {characterPreview ? (
                   <div className="relative rounded-lg overflow-hidden border border-white/10 bg-black group">
@@ -271,10 +288,10 @@ export default function PerformancePage() {
                   </div>
                 ) : (
                   <label className="block cursor-pointer">
-                    <div className="border-2 border-dashed border-white/10 rounded-lg p-12 text-center hover:border-white/20 hover:bg-white/5 transition-all">
-                      <Upload className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-                      <p className="text-sm text-zinc-400 mb-1">Click to upload character</p>
-                      <p className="text-xs text-zinc-600">Image or Video with visible face</p>
+                    <div className="border-2 border-dashed border-white/10 rounded-lg p-8 sm:p-10 lg:p-12 text-center hover:border-white/20 hover:bg-white/5 transition-all">
+                      <Upload className="w-10 sm:w-12 lg:w-14 h-10 sm:h-12 lg:h-14 text-zinc-600 mx-auto mb-3" />
+                      <p className="text-sm sm:text-base md:text-lg text-zinc-400 mb-1">Click to upload character</p>
+                      <p className="text-xs sm:text-sm md:text-base text-zinc-600">Image or Video with visible face</p>
                     </div>
                     <input
                       type="file"
@@ -289,7 +306,7 @@ export default function PerformancePage() {
 
               {/* Reference Upload */}
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-3">
+                <label className="block text-sm sm:text-base md:text-lg font-medium text-zinc-400 mb-3">
                   Reference Performance (3-30s video)
                 </label>
                 {referencePreview ? (
@@ -309,10 +326,10 @@ export default function PerformancePage() {
                   </div>
                 ) : (
                   <label className="block cursor-pointer">
-                    <div className="border-2 border-dashed border-white/10 rounded-lg p-12 text-center hover:border-white/20 hover:bg-white/5 transition-all">
-                      <Upload className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-                      <p className="text-sm text-zinc-400 mb-1">Click to upload reference</p>
-                      <p className="text-xs text-zinc-600">Video of actor performance</p>
+                    <div className="border-2 border-dashed border-white/10 rounded-lg p-8 sm:p-10 lg:p-12 text-center hover:border-white/20 hover:bg-white/5 transition-all">
+                      <Upload className="w-10 sm:w-12 lg:w-14 h-10 sm:h-12 lg:h-14 text-zinc-600 mx-auto mb-3" />
+                      <p className="text-sm sm:text-base md:text-lg text-zinc-400 mb-1">Click to upload reference</p>
+                      <p className="text-xs sm:text-sm md:text-base text-zinc-600">Video of actor performance</p>
                     </div>
                     <input
                       type="file"
@@ -442,7 +459,7 @@ export default function PerformancePage() {
             </div>
 
             {/* Right Panel - Result Area */}
-            <div className="h-full flex items-center justify-center p-6">
+            <div className="h-full flex items-center justify-center p-4 sm:p-6">
               <AnimatePresence mode="wait">
                 {isProcessing ? (
                   <motion.div
@@ -487,7 +504,7 @@ export default function PerformancePage() {
                       <video
                         ref={resultVideoRef}
                         src={resultVideo || ''}
-                        className="w-full aspect-video"
+                        className="w-full aspect-video object-contain"
                         controls
                         playsInline
                         autoPlay

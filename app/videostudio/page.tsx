@@ -39,8 +39,8 @@ export default function VideoStudioWelcome() {
   }, [router]);
 
   const handleEnter = () => {
-    // Se não está autenticado, vai para /acesso
-    router.push('/acesso');
+    // Se não está autenticado, vai para login
+    router.push('/login?redirect=/videostudio');
   };
 
   // Não mostrar nada enquanto verifica autenticação

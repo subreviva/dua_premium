@@ -109,8 +109,11 @@ export default function AdminCreditsPanel() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (statsRes.ok) {
-        const data = await statsRes.json();
-        setStats(data.stats);
+        const contentType = statsRes.headers.get('content-type')
+        if (contentType?.includes('application/json')) {
+          const data = await statsRes.json();
+          setStats(data.stats);
+        }
       }
 
       // Carregar saldos de todos usuários
@@ -118,8 +121,11 @@ export default function AdminCreditsPanel() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (balancesRes.ok) {
-        const data = await balancesRes.json();
-        setBalances(data.balances);
+        const contentType = balancesRes.headers.get('content-type')
+        if (contentType?.includes('application/json')) {
+          const data = await balancesRes.json();
+          setBalances(data.balances);
+        }
       }
 
       // Carregar atividade recente
@@ -127,8 +133,11 @@ export default function AdminCreditsPanel() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (activityRes.ok) {
-        const data = await activityRes.json();
-        setRecentActivity(data.transactions);
+        const contentType = activityRes.headers.get('content-type')
+        if (contentType?.includes('application/json')) {
+          const data = await activityRes.json();
+          setRecentActivity(data.transactions);
+        }
       }
     } catch (error: any) {
       toast.error(`Erro ao carregar dados: ${error.message}`);
@@ -147,9 +156,12 @@ export default function AdminCreditsPanel() {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        setSelectedUserData(data);
-        setSelectedUserId(userId);
+        const contentType = res.headers.get('content-type')
+        if (contentType?.includes('application/json')) {
+          const data = await res.json();
+          setSelectedUserData(data);
+          setSelectedUserId(userId);
+        }
       }
     } catch (error: any) {
       toast.error(`Erro ao carregar usuário: ${error.message}`);

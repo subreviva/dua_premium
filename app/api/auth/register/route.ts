@@ -208,8 +208,8 @@ export async function POST(request: NextRequest) {
         avatar_set: false,
         welcome_seen: false,
         session_active: true,
-        creditos_servicos: 150, // ✅ 150 (legado - para compatibilidade)
-        saldo_dua: 50,          // ✅ 50 (legado - para compatibilidade)
+        creditos_servicos: 150, // ✅ 150 créditos iniciais
+        saldo_dua: 0,           // Sem DUA coins iniciais
         account_type: 'normal',
         registration_ip: request.headers.get('x-forwarded-for') || 'unknown',
         registration_user_agent: request.headers.get('user-agent') || 'unknown',
@@ -362,7 +362,7 @@ export async function POST(request: NextRequest) {
           email,
           name,
           creditosServicos: 150, // ✅ 150 créditos iniciais
-          saldoDua: 50,          // ✅ 50 DUA coins iniciais
+          saldoDua: 0,           // Sem DUA coins iniciais
           accountType: 'normal',
           emailVerified: true,   // ✅ Auto-confirmado
         },

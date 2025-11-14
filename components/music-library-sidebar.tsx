@@ -9,10 +9,17 @@ import { useGeneration } from "@/contexts/generation-context"
 import Image from "next/image"
 
 export function MusicLibrarySidebar() {
-  // Estado inicial: FECHADA (false) - usuário precisa clicar para abrir
+  // Estado inicial: FECHADA (false) - abre automaticamente ao gerar
   const [showSidebar, setShowSidebar] = useState(false)
   const [playingId, setPlayingId] = useState<string | null>(null)
-  const { completedTracks } = useGeneration()
+  const { completedTracks, tasks } = useGeneration()
+
+  // Auto-abrir sidebar quando há tarefas ativas
+  useEffect(() => {
+    if (tasks.length > 0 && !showSidebar) {
+      setShowSidebar(true)
+    }
+  }, [tasks.length])
 
   useEffect(() => {
     const handleToggle = () => setShowSidebar(prev => !prev)
@@ -77,9 +84,25 @@ export function MusicLibrarySidebar() {
     }
   }, [showSidebar])
 
-  const recentTracks = useMemo(() => {
-    return completedTracks.slice(-10).reverse()
-  }, [completedTracks])
+  // Combinar tasks ativas com tracks completas
+  const allItems = useMemo(() => {
+    const activeTasks = tasks.map(task => ({
+      type: 'generating' as const,
+      taskId: task.taskId,
+      status: task.status,
+      progress: task.progress,
+      prompt: task.prompt,
+      model: task.model,
+      tracks: task.tracks
+    }))
+    
+    const completedItems = completedTracks.slice(-10).reverse().map(track => ({
+      type: 'completed' as const,
+      ...track
+    }))
+    
+    return [...activeTasks, ...completedItems]
+  }, [tasks, completedTracks])
 
   const formatDuration = (seconds: number) => {
     if (!seconds) return '0:00'
@@ -108,9 +131,9 @@ export function MusicLibrarySidebar() {
       >
         <Music2 className="h-4 w-4" />
         <span className="font-semibold tracking-wide">{showSidebar ? 'Fechar' : 'Biblioteca'}</span>
-        {!showSidebar && recentTracks.length > 0 && (
+        {!showSidebar && allItems.length > 0 && (
           <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold">
-            {recentTracks.length}
+            {allItems.length}
           </span>
         )}
       </motion.button>
@@ -135,11 +158,8 @@ export function MusicLibrarySidebar() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-white tracking-tight">Biblioteca</h2>
-                    <p className="text-xs text-zinc-400 font-medium mt-0.5 flex items-center gap-1.5">
-                      {recentTracks.length > 0 && (
-                        <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                      )}
-                      {recentTracks.length} {recentTracks.length === 1 ? 'música' : 'músicas'}
+                    <p className="text-xs text-zinc-400 font-medium mt-0.5">
+                      {allItems.length} {allItems.length === 1 ? 'item' : 'itens'}
                     </p>
                   </div>
                 </div>
@@ -155,7 +175,7 @@ export function MusicLibrarySidebar() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-              {recentTracks.length === 0 ? (
+              {allItems.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -180,70 +200,138 @@ export function MusicLibrarySidebar() {
                 </motion.div>
               ) : (
                 <AnimatePresence mode="popLayout">
-                  {recentTracks.map((track, index) => (
-                    <motion.div
-                      key={track.id}
-                      layout
-                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                      transition={{ 
-                        delay: index * 0.05, 
-                        duration: 0.4,
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 25
-                      }}
-                      className="group relative rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-xl border border-white/[0.08] p-3 hover:border-orange-500/40 hover:from-orange-500/5 hover:to-pink-600/5 transition-all duration-500 cursor-pointer overflow-hidden"
-                      whileHover={{ scale: 1.02, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {/* Glow effect on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-pink-500/10 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-16 w-16 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5">
-                          {track.imageUrl ? (
-                            <Image
-                              src={track.imageUrl}
-                              alt={track.title || "Track"}
-                              fill
-                              className="object-cover"
-                              sizes="64px"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center">
-                              <Music2 className="h-6 w-6 text-zinc-600" />
+                  {allItems.map((item, index) => {
+                    // Renderizar task em geração
+                    if (item.type === 'generating') {
+                      return (
+                        <motion.div
+                          key={item.taskId}
+                          layout
+                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ 
+                            delay: index * 0.05, 
+                            duration: 0.4,
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 25
+                          }}
+                          className="relative rounded-2xl bg-gradient-to-br from-orange-500/10 to-pink-600/10 backdrop-blur-xl border border-orange-500/30 p-4 overflow-hidden"
+                        >
+                          {/* Efeito de pulso animado */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-pink-500/20 to-orange-500/20 animate-pulse" />
+                          
+                          <div className="relative flex items-center gap-3">
+                            {/* Capa Placeholder Elegante */}
+                            <div className="relative h-16 w-16 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-orange-500/20 to-pink-600/20 border border-orange-500/30">
+                              <div className="flex h-full w-full items-center justify-center">
+                                <div className="relative">
+                                  <div className="absolute inset-0 animate-spin rounded-full border-2 border-orange-500/30 border-t-orange-500" />
+                                  <Music2 className="h-6 w-6 text-orange-500" />
+                                </div>
+                              </div>
+                              {/* Loading overlay */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             </div>
-                          )}
-                          {/* Play Overlay Ultra Elegante */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                            <button
-                              onClick={() => togglePlay(track.id)}
-                              className="relative rounded-full bg-gradient-to-br from-orange-500 to-pink-600 p-2.5 hover:scale-110 transition-transform duration-300 shadow-lg shadow-orange-500/50"
-                            >
-                              <div className="absolute inset-0 rounded-full bg-white/20 animate-ping" />
-                              {playingId === track.id ? (
-                                <Pause className="relative h-4 w-4 text-white" fill="white" />
-                              ) : (
-                                <Play className="relative h-4 w-4 text-white ml-0.5" fill="white" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
 
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-bold text-white truncate mb-1 group-hover:text-orange-400 transition-colors">
-                            {track.title || "Sem Título"}
-                          </h4>
-                          <p className="text-xs text-zinc-500 truncate mb-2 leading-relaxed">
-                            {track.tags || "Sem tags"}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <Badge 
-                              variant="secondary" 
-                              className="text-[10px] px-2.5 py-1 bg-gradient-to-r from-orange-500/10 to-pink-600/10 text-orange-400 border border-orange-500/20 font-semibold rounded-full backdrop-blur-xl"
-                            >
-                              {formatDuration(track.duration)}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-white mb-1">
+                                Gerando música...
+                              </h4>
+                              <p className="text-xs text-zinc-400 truncate mb-2">
+                                {item.prompt}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <Badge 
+                                  variant="secondary" 
+                                  className="text-[10px] px-2.5 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold rounded-full"
+                                >
+                                  {item.status === 'PENDING' && 'Na fila'}
+                                  {item.status === 'TEXT_SUCCESS' && 'Gerando áudio'}
+                                  {item.status === 'FIRST_SUCCESS' && 'Finalizando'}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Barra de progresso */}
+                          <div className="mt-3 h-1 bg-black/30 rounded-full overflow-hidden">
+                            <motion.div 
+                              className="h-full bg-gradient-to-r from-orange-500 to-pink-600"
+                              initial={{ width: '0%' }}
+                              animate={{ width: `${item.progress}%` }}
+                              transition={{ duration: 0.5 }}
+                            />
+                          </div>
+                        </motion.div>
+                      )
+                    }
+                    
+                    // Renderizar track completa
+                    const track = item
+                    return (
+                      <motion.div
+                        key={track.id}
+                        layout
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                        transition={{ 
+                          delay: index * 0.05, 
+                          duration: 0.4,
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 25
+                        }}
+                        className="group relative rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-xl border border-white/[0.08] p-3 hover:border-orange-500/40 hover:from-orange-500/5 hover:to-pink-600/5 transition-all duration-500 cursor-pointer overflow-hidden"
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {/* Glow effect on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-pink-500/10 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-16 w-16 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5">
+                            {track.imageUrl ? (
+                              <Image
+                                src={track.imageUrl}
+                                alt={track.title || "Track"}
+                                fill
+                                className="object-cover"
+                                sizes="64px"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center">
+                                <Music2 className="h-6 w-6 text-zinc-600" />
+                              </div>
+                            )}
+                            {/* Play Overlay Ultra Elegante */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                              <button
+                                onClick={() => togglePlay(track.id)}
+                                className="rounded-full bg-gradient-to-br from-orange-500 to-pink-600 p-2.5 hover:scale-110 transition-transform duration-300 shadow-lg shadow-orange-500/50"
+                              >
+                                {playingId === track.id ? (
+                                  <Pause className="h-4 w-4 text-white" fill="white" />
+                                ) : (
+                                  <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-bold text-white truncate mb-1 group-hover:text-orange-400 transition-colors">
+                              {track.title || "Sem Título"}
+                            </h4>
+                            <p className="text-xs text-zinc-500 truncate mb-2 leading-relaxed">
+                              {track.tags || "Sem tags"}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant="secondary" 
+                                className="text-[10px] px-2.5 py-1 bg-gradient-to-r from-orange-500/10 to-pink-600/10 text-orange-400 border border-orange-500/20 font-semibold rounded-full backdrop-blur-xl"
+                              >
+                                {formatDuration(track.duration)}
                             </Badge>
                             <Badge 
                               variant="outline" 
@@ -255,7 +343,8 @@ export function MusicLibrarySidebar() {
                         </div>
                       </div>
                     </motion.div>
-                  ))}
+                  )
+                })}
                 </AnimatePresence>
               )}
             </div>

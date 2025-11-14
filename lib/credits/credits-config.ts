@@ -47,6 +47,14 @@ export const MUSIC_CREDITS = {
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎨 IMAGEM - Geração com Imagen (Google)
 // ═══════════════════════════════════════════════════════════════════════════
+// Constante unificada para acesso simplificado
+export const CREDIT_COSTS = {
+  MUSIC: {} as typeof MUSIC_CREDITS,
+  IMAGE: {} as typeof IMAGE_CREDITS,
+  VIDEO: {} as typeof VIDEO_CREDITS,
+  CHAT: {} as typeof CHAT_CREDITS,
+};
+
 export const IMAGE_CREDITS = {
   image_fast: 15,                  // Imagen-4 Fast - 1K Fast (~2-3s)
   image_standard: 25,              // Imagen-4 Standard - 2K (~5-8s) ⭐ RECOMENDADO
@@ -308,6 +316,12 @@ export function getOperationCategory(
 export function isFreeOperation(operation: CreditOperation): boolean {
   return ALL_CREDITS[operation] === 0;
 }
+
+// Inicializar constante unificada
+CREDIT_COSTS.MUSIC = MUSIC_CREDITS;
+CREDIT_COSTS.IMAGE = IMAGE_CREDITS;
+CREDIT_COSTS.VIDEO = VIDEO_CREDITS;
+CREDIT_COSTS.CHAT = CHAT_CREDITS;
 
 /**
  * Obter operações gratuitas

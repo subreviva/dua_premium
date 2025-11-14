@@ -9,6 +9,7 @@
 
 import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { safeParse } from '@/lib/fetch-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -180,11 +181,14 @@ export function PublishToCommunityModal({
       setProgress(80);
 
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => ({ error: 'Upload failed' }));
-        throw new Error(errorData.error || `Upload failed with status ${uploadResponse.status}`);
+        const errorData = await safeParse<{ error?: string }>(uploadResponse);
+        throw new Error(errorData?.error || `Upload failed with status ${uploadResponse.status}`);
       }
 
-      const result = await uploadResponse.json();
+      const result = await safeParse<{ error?: string }>(uploadResponse);
+      if (!result) {
+        throw new Error('Invalid response from upload API');
+      }
 
       setProgress(100);
       setUploadState('success');

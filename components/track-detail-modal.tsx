@@ -25,6 +25,7 @@ import {
 import { useState, useRef, useEffect } from "react"
 import { useStems } from "@/contexts/stems-context"
 import type { StemData as StemDataType, SavedStems } from "@/lib/types/stems"
+import { safeParse } from "@/lib/fetch-utils"
 
 interface Track {
   id: string
@@ -378,7 +379,11 @@ export function TrackDetailModal({ open, onOpenChange, track }: TrackDetailModal
       console.log(`[v0] Polling WAV status (attempt ${wavPollCountRef.current})...`)
 
       const response = await fetch(`/api/suno/wav-status?taskId=${taskId}`)
-      const result = await response.json()
+      const result = await safeParse<{ status: string; audioWavUrl?: string; error?: string }>(response)
+      if (!result) {
+        console.error("Failed to parse WAV status response")
+        return
+      }
 
       if (!response.ok) {
         throw new Error(result.error || "Failed to check WAV status")
@@ -408,9 +413,9 @@ export function TrackDetailModal({ open, onOpenChange, track }: TrackDetailModal
 
         alert("Conversão WAV concluída! O download começou automaticamente.")
       } else if (result.status === "CREATE_TASK_FAILED" || result.status === "GENERATE_AUDIO_FAILED") {
-        console.error("[v0] WAV conversion failed:", result.errorMessage)
+        console.error("[v0] WAV conversion failed:", result.error)
         setIsConvertingWav(false)
-        setSeparationError(`Falha na conversão WAV: ${result.errorMessage || "Erro desconhecido"}`)
+        setSeparationError(`Falha na conversão WAV: ${result.error || "Erro desconhecido"}`)
 
         if (wavPollIntervalRef.current) {
           clearInterval(wavPollIntervalRef.current)
@@ -512,13 +517,19 @@ export function TrackDetailModal({ open, onOpenChange, track }: TrackDetailModal
           }),
         })
 
-        const result = await response.json()
+        const result = await safeParse<{ taskId?: string; error?: string }>(response)
+        if (!result) {
+          throw new Error("Invalid response from convert-wav API")
+        }
 
         if (!response.ok) {
           throw new Error(result.error || "Falha na conversão WAV")
         }
 
         const { taskId } = result
+        if (!taskId) {
+          throw new Error("No taskId returned from convert-wav API")
+        }
         setWavConversionTaskId(taskId)
 
         console.log(`[v0] WAV conversion started with taskId: ${taskId}`)
@@ -559,7 +570,10 @@ export function TrackDetailModal({ open, onOpenChange, track }: TrackDetailModal
         }),
       })
 
-      const result = await response.json()
+      const result = await safeParse<{ error?: string }>(response)
+      if (!result) {
+        throw new Error("Invalid response from generate-midi API")
+      }
 
       if (!response.ok) {
         throw new Error(result.error || "Falha na geração de MIDI")

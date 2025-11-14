@@ -54,6 +54,12 @@ export function LinkPreview({ url, className, compact = false }: LinkPreviewProp
         throw new Error('Failed to fetch metadata');
       }
 
+      const contentType = response.headers.get('content-type')
+      if (!contentType?.includes('application/json')) {
+        console.error('❌ Response is not JSON:', contentType);
+        throw new Error('Invalid response format');
+      }
+
       const data = await response.json();
       console.log('✅ Metadata received:', data);
       console.log('🖼️ Image URL:', data.image);

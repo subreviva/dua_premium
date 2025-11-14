@@ -116,6 +116,18 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       for (const task of activeTasks) {
         try {
           const response = await fetch(`/api/suno/status?taskId=${task.taskId}`)
+          
+          if (!response.ok) {
+            console.error('[Generation] Status check failed:', response.status)
+            continue
+          }
+
+          const contentType = response.headers.get('content-type')
+          if (!contentType?.includes('application/json')) {
+            console.error('[Generation] Response is not JSON:', contentType)
+            continue
+          }
+          
           const data = await response.json()
 
           let progress = task.progress

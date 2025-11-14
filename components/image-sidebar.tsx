@@ -12,12 +12,14 @@ import {
   Sparkles, 
   Library,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Wand2,
+  LayoutDashboard
 } from "lucide-react"
 
 const navigation = [
-  { name: "Criar", href: "/imagestudio/create", icon: Sparkles },
-  { name: "Biblioteca", href: "/imagestudio/library", icon: Library },
+  { name: "Criar", href: "/imagestudio/create", icon: Wand2 },
+  { name: "Biblioteca", href: "/imagestudio/library", icon: LayoutDashboard },
 ]
 
 const exitNav = [
@@ -35,13 +37,13 @@ export function ImageSidebar() {
       initial={false}
       animate={{ width: isCollapsed ? 80 : 280 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="relative flex h-screen flex-col border-r border-white/5 bg-gradient-to-b from-black via-zinc-950 to-black backdrop-blur-2xl z-20"
+      className="relative flex h-screen flex-col border-r border-white/[0.04] bg-[radial-gradient(circle_at_top,_rgba(139,115,85,0.22),_transparent_55%),_linear-gradient(to_bottom,_#050505,_#020202)] backdrop-blur-2xl z-20"
     >
       {/* Subtle overlay */}
-      <div className="absolute inset-0 bg-[#8B7355]/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-white/[0.01] pointer-events-none" />
       
       {/* Glass effect border */}
-      <div className="absolute inset-0 border-r border-white/[0.02] pointer-events-none" />
+      <div className="absolute inset-0 border-r border-white/[0.04] pointer-events-none" />
 
       {/* Header */}
       <div className="relative flex h-24 items-center justify-between border-b border-white/5 px-6 mt-16">
@@ -55,7 +57,9 @@ export function ImageSidebar() {
               className="flex items-center gap-3"
             >
               <div className="relative">
-                <ImageIcon className="relative h-8 w-8 text-[#8B7355]" strokeWidth={0.75} />
+                <div className="h-9 w-9 rounded-2xl bg-[#8B7355]/10 border border-[#8B7355]/40 flex items-center justify-center">
+                  <ImageIcon className="h-5 w-5 text-[#8B7355]" strokeWidth={0.9} />
+                </div>
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold text-[#8B7355]">

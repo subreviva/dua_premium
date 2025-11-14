@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Mic, Square, Circle, Pause, Play } from "lucide-react"
+import { safeParse } from "@/lib/fetch-utils"
 
 interface RecordingPanelProps {
   onRecordingComplete: (audioUrl: string, duration: number) => void
@@ -135,7 +136,11 @@ function RecordingPanelComponent({ onRecordingComplete, onClose }: RecordingPane
             throw new Error("Failed to upload recording")
           }
 
-          const { url } = await response.json()
+          const data = await safeParse<{ url: string }>(response)
+          if (!data?.url) {
+            throw new Error("Invalid response from upload")
+          }
+          const { url } = data
 
           // Get duration
           const audioContext = new AudioContext()

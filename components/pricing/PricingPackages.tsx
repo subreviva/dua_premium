@@ -148,7 +148,9 @@ const pricingTiers: PricingTier[] = [
   },
 ];
 
-export default function PricingPackages() {
+import { safeParse } from '@/lib/fetch-utils';
+
+export function PricingPackages() {
   const [hoveredTier, setHoveredTier] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
@@ -184,7 +186,11 @@ export default function PricingPackages() {
         throw new Error('Erro ao criar sessão de checkout');
       }
 
-      const { url } = await response.json();
+      const data = await safeParse<{ url?: string }>(response);
+      if (!data) {
+        throw new Error('Invalid response from checkout API');
+      }
+      const { url } = data;
 
       if (url) {
         // Redirecionar para Stripe Checkout

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkCredits, deductCredits } from '@/lib/credits/credits-service'
+import type { CreditOperation } from '@/lib/credits/credits-config'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +12,8 @@ export async function POST(request: NextRequest) {
       ratio = '1280:720',
       seed,
       references, // Array de referências (imagem)
-      contentModeration
+      contentModeration,
+      userId // ID do usuário para verificar créditos
     } = body
 
     if (!videoUri || !promptText) {
@@ -18,6 +21,24 @@ export async function POST(request: NextRequest) {
         { error: 'videoUri and promptText are required' },
         { status: 400 }
       )
+    }
+
+    // ✅ VERIFICAR CRÉDITOS ANTES (50 créditos para video-to-video)
+    const operation: CreditOperation = 'video_to_video'
+    
+    if (userId) {
+      const creditCheck = await checkCredits(userId, operation)
+      
+      if (!creditCheck.hasCredits) {
+        return NextResponse.json(
+          { 
+            error: 'Créditos insuficientes',
+            required: creditCheck.required,
+            current: creditCheck.current
+          },
+          { status: 402 }
+        )
+      }
     }
 
     // Validar promptText (1-1000 caracteres)
@@ -138,11 +159,22 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Runway task created:', data.id)
 
+    // ✅ DEDUZIR CRÉDITOS APÓS SUCESSO
+    if (userId) {
+      await deductCredits(userId, operation, {
+        taskId: data.id,
+        model,
+        ratio,
+        service: 'runway_video_to_video'
+      })
+    }
+
     return NextResponse.json({
       success: true,
       taskId: data.id,
       model,
       ratio,
+      creditsUsed: userId ? 50 : undefined,
       message: 'Video-to-video task started successfully'
     })
   } catch (error) {

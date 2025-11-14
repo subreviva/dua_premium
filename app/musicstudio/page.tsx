@@ -39,8 +39,8 @@ export default function MusicStudioWelcome() {
   }, [router]);
 
   const handleEnter = () => {
-    // Se não está autenticado, vai para /acesso
-    router.push('/acesso');
+    // Se não está autenticado, vai para login
+    router.push('/login?redirect=/musicstudio');
   };
 
   // Não mostrar nada enquanto verifica autenticação

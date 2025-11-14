@@ -23,6 +23,12 @@ export function CreditsDisplay() {
         if (!response.ok) {
           throw new Error("Failed to fetch credits")
         }
+        
+        const contentType = response.headers.get('content-type')
+        if (!contentType?.includes('application/json')) {
+          throw new Error("Invalid response format")
+        }
+        
         const data = await response.json()
         setCredits(data)
       } catch (err) {

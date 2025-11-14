@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { safeParse } from "@/lib/fetch-utils"
 
 interface AudioEditorProps {
   song: any
@@ -99,7 +100,11 @@ export function AudioEditor({ song, onClose }: AudioEditorProps) {
             model: "V3_5",
           }),
         })
-        const data = await response.json()
+        const data = await safeParse(response)
+        if (!data) {
+          console.error("Failed to parse extend response")
+          return
+        }
         // console.log("[v0] Extend started:", data)
       } catch (error) {
         // console.error("[v0] Extend error:", error)
@@ -115,7 +120,11 @@ export function AudioEditor({ song, onClose }: AudioEditorProps) {
             title: `${song.title} (Cover)`,
           }),
         })
-        const data = await response.json()
+        const data = await safeParse(response)
+        if (!data) {
+          console.error("Failed to parse cover response")
+          return
+        }
         // console.log("[v0] Cover started:", data)
       } catch (error) {
         // console.error("[v0] Cover error:", error)
@@ -132,7 +141,11 @@ export function AudioEditor({ song, onClose }: AudioEditorProps) {
             style: song.genre || "",
           }),
         })
-        const data = await response.json()
+        const data = await safeParse(response)
+        if (!data) {
+          console.error("Failed to parse vocals response")
+          return
+        }
         // console.log("[v0] Add vocals started:", data)
       } catch (error) {
         // console.error("[v0] Add vocals error:", error)
@@ -149,7 +162,11 @@ export function AudioEditor({ song, onClose }: AudioEditorProps) {
             style: song.genre || "",
           }),
         })
-        const data = await response.json()
+        const data = await safeParse(response)
+        if (!data) {
+          console.error("Failed to parse instrumental response")
+          return
+        }
         // console.log("[v0] Add instrumental started:", data)
       } catch (error) {
         // console.error("[v0] Add instrumental error:", error)

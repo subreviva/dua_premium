@@ -1,0 +1,24 @@
+[dotenv@17.2.3] injecting env (43) from .env.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+
+[36m[1m╔════════════════════════════════════════════════════════════╗[0m
+[36m[1m║  🎵 TESTE COMPLETO: FLUXO DE GERAÇÃO DE MÚSICA           ║[0m
+[36m[1m╚════════════════════════════════════════════════════════════╝[0m
+[34mℹ️  Base URL: http://localhost:3000[0m
+[36m[1m
+━━━ 1️⃣ SETUP: Buscar ou criar usuário de teste ━━━[0m
+[34mℹ️  Criando novo usuário de teste...[0m
+[31m❌ 
+❌ ERRO NO TESTE: Database error creating new user[0m
+AuthApiError: Database error creating new user
+    at handleError (/workspaces/v0-remix-of-untitled-chat/node_modules/.pnpm/@supabase+auth-js@2.81.1/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:66:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async _handleRequest (/workspaces/v0-remix-of-untitled-chat/node_modules/.pnpm/@supabase+auth-js@2.81.1/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:109:9)
+    at async _request (/workspaces/v0-remix-of-untitled-chat/node_modules/.pnpm/@supabase+auth-js@2.81.1/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:91:18)
+    at async GoTrueAdminApi.createUser (/workspaces/v0-remix-of-untitled-chat/node_modules/.pnpm/@supabase+auth-js@2.81.1/node_modules/@supabase/auth-js/dist/main/GoTrueAdminApi.js:114:20)
+    at async getOrCreateTestUser (file:///workspaces/v0-remix-of-untitled-chat/test-music-flow-complete.mjs:106:36)
+    at async runFullFlowTest (file:///workspaces/v0-remix-of-untitled-chat/test-music-flow-complete.mjs:330:18) {
+  __isAuthError: true,
+  status: 500,
+  code: 'unexpected_failure'
+}

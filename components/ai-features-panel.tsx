@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Sparkles, Wand2, Music, Loader2 } from "lucide-react"
 import type { ExtendedStemData } from "@/app/stems/[id]/page"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { safeParse } from "@/lib/fetch-utils"
 
 interface AIFeaturesPanelProps {
   stems: ExtendedStemData[]
@@ -27,9 +28,13 @@ export function AIFeaturesPanel({ stems, onApplySuggestions, onMasteringComplete
         body: JSON.stringify({ stems }),
       })
 
-      const data = await response.json()
+      const data = await safeParse<{ success: boolean; suggestions?: any[]; error?: string }>(response)
+      if (!data) {
+        console.error("Failed to parse AI suggestions response")
+        return
+      }
 
-      if (data.success) {
+      if (data.success && data.suggestions) {
         setSuggestions(data.suggestions)
       } else {
         console.error("Failed to get AI suggestions:", data.error)

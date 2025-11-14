@@ -39,8 +39,8 @@ export default function DesignStudioWelcome() {
   }, [router]);
 
   const handleEnter = () => {
-    // Se não está autenticado, vai para /acesso
-    router.push('/acesso');
+    // Se não está autenticado, vai para login
+    router.push('/login?redirect=/designstudio');
   };
 
   // Não mostrar nada enquanto verifica autenticação

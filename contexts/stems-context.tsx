@@ -60,6 +60,11 @@ export function StemsProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Failed to check stem status")
       }
 
+      const contentType = response.headers.get('content-type')
+      if (!contentType?.includes('application/json')) {
+        throw new Error("Response is not JSON")
+      }
+
       const result: StemSeparationStatus = await response.json()
 
       const progressMap: Record<string, number> = {

@@ -26,7 +26,7 @@ export default function CompraSuccessPage() {
       const { data: { user } } = await supabaseClient.auth.getUser()
       
       if (!user) {
-        router.push('/acesso')
+        router.push('/login?redirect=/comprar/success')
         return
       }
 
