@@ -214,6 +214,7 @@ export async function middleware(req: NextRequest) {
     '/musicstudio/',         // ✅ Music Studio sub-rotas
     '/videostudio/',         // ✅ Video Studio sub-rotas
     '/imagestudio/',         // ✅ Image Studio sub-rotas
+    '/dua-premium/',         // ✅ DUA Premium landing pages (códigos exclusivos)
   ];
 
   // Verificar se é rota pública EXATA
