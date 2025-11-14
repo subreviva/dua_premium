@@ -5,7 +5,7 @@ import Footer from "@/components/footer"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Video, ImageIcon, Music, Palette, MessageSquare, ArrowRight, Home, Users, Building2, Coins } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { FeatureSteps } from "@/components/ui/feature-steps"
 import { Gallery6 } from "@/components/ui/gallery6"
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase"
@@ -18,6 +18,7 @@ import { HeroFounder } from "@/components/ui/hero-founder"
 export default function HomePage() {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -27,6 +28,40 @@ export default function HomePage() {
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 1.08])
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -80])
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0.8])
+
+  // Force video play on mobile browsers
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    // Attempt to play immediately
+    const playVideo = () => {
+      video.play().catch((err) => {
+        console.log('Autoplay prevented, waiting for user interaction...', err)
+      })
+    }
+
+    // Try to play on mount
+    playVideo()
+
+    // Retry on user interaction (touch/click/scroll)
+    const tryPlay = () => {
+      if (video.paused) {
+        playVideo()
+      }
+    }
+
+    // Listen for user interactions
+    document.addEventListener('touchstart', tryPlay, { once: true, passive: true })
+    document.addEventListener('click', tryPlay, { once: true })
+    window.addEventListener('scroll', tryPlay, { once: true, passive: true })
+
+    return () => {
+      document.removeEventListener('touchstart', tryPlay)
+      document.removeEventListener('click', tryPlay)
+      window.removeEventListener('scroll', tryPlay)
+    }
+  }, [])
 
   return (
     <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] antialiased overflow-x-hidden touch-pan-y">
@@ -42,6 +77,7 @@ export default function HomePage() {
         >
           {/* Video Background - ULTRA OPTIMIZADO Desktop + Mobile Loop Perfeito */}
           <video 
+            ref={videoRef}
             autoPlay 
             loop 
             muted 
