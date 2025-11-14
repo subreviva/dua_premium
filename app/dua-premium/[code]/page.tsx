@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useParams } from "next/navigation"
 
 const gradientByPrefix: Record<string, string> = {
@@ -21,9 +21,19 @@ export default function DuaPremiumCodePage() {
   const gradient = getGradient(code)
 
   const [mounted, setMounted] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     setMounted(true)
+    
+    // Force video play
+    const video = videoRef.current
+    if (video) {
+      video.play().catch(err => {
+        console.log('Video autoplay prevented, retrying...', err)
+        setTimeout(() => video.play(), 100)
+      })
+    }
   }, [])
 
   return (
@@ -31,6 +41,7 @@ export default function DuaPremiumCodePage() {
       {/* Vídeo de fundo */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <video
+          ref={videoRef}
           className="h-full w-full object-cover opacity-60"
           autoPlay
           muted
@@ -54,7 +65,7 @@ export default function DuaPremiumCodePage() {
         >
           <source src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir%20%2865%29.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/75 to-black/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>
 
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-8 py-12 sm:py-16 flex flex-col items-center text-center gap-12 sm:gap-16">
