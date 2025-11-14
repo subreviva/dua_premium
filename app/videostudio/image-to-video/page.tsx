@@ -92,8 +92,6 @@ export default function ImageToVideo() {
 
       setProgress(40)
 
-      })
-
       if (!response.ok) {
         const contentType = response.headers.get('content-type')
         let errorMessage = `Erro ${response.status}`
