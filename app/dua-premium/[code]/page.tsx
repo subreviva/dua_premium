@@ -42,7 +42,7 @@ export default function DuaPremiumCodePage() {
       <div className="pointer-events-none fixed inset-0 -z-10">
         <video
           ref={videoRef}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover opacity-70"
           autoPlay
           muted
           loop
@@ -65,6 +65,8 @@ export default function DuaPremiumCodePage() {
         >
           <source src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir%20%2865%29.mp4" type="video/mp4" />
         </video>
+        {/* Overlay suave apenas para legibilidade do texto */}
+        <div className="absolute inset-0 bg-black/30" />
       </div>
 
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-8 py-12 sm:py-16 flex flex-col items-center text-center gap-12 sm:gap-16">
@@ -82,21 +84,21 @@ export default function DuaPremiumCodePage() {
 
         {/* Código exclusivo */}
         <div className="w-full max-w-md">
-          <div className="relative rounded-3xl border border-white/15 bg-black/60 backdrop-blur-2xl px-8 py-6 sm:px-10 sm:py-8 shadow-[0_20px_100px_rgba(0,0,0,0.9)]">
+          <div className="relative rounded-3xl border border-white/20 bg-white/5 backdrop-blur-xl px-8 py-6 sm:px-10 sm:py-8 shadow-[0_20px_100px_rgba(0,0,0,0.5)]">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br ${gradient} opacity-5" />
             
             <div className="relative space-y-5">
               <div className="space-y-2">
-                <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-zinc-400">
+                <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-zinc-300">
                   Código de acesso
                 </p>
-                <p className="font-mono text-2xl sm:text-3xl tracking-[0.15em] text-zinc-50 font-medium">
+                <p className="font-mono text-2xl sm:text-3xl tracking-[0.15em] text-white font-medium">
                   {code ? code.toUpperCase() : "PENDENTE"}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-white/10">
-                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <div className="pt-4 border-t border-white/15">
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
                   Este código é pessoal e intransmissível. Não partilhes.
                 </p>
               </div>
