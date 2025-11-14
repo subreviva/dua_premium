@@ -86,14 +86,19 @@ export default function HomePage() {
             controls={false}
             disablePictureInPicture
             disableRemotePlayback
+            webkit-playsinline="true"
+            x-webkit-airplay="deny"
+            controlsList="nodownload nofullscreen noremoteplayback"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ 
               filter: 'brightness(1.35) contrast(1.12) saturate(1.15)',
+              pointerEvents: 'none',
               WebkitBackfaceVisibility: 'hidden',
               WebkitPerspective: 1000,
               WebkitTransform: 'translate3d(0,0,0)',
               transform: 'translate3d(0,0,0)'
             }}
+            onContextMenu={(e) => e.preventDefault()}
             onLoadedData={(e) => {
               const video = e.currentTarget
               console.log('✅ Video loaded successfully')
