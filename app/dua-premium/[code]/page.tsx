@@ -37,12 +37,12 @@ export default function DuaPremiumCodePage() {
   }, [])
 
   return (
-    <main className="min-h-screen w-full bg-black text-zinc-50 flex items-center justify-center overflow-hidden">
+    <main className="min-h-screen w-full bg-black text-zinc-50 flex items-center justify-center pt-20">
       {/* Vídeo de fundo */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <video
           ref={videoRef}
-          className="h-full w-full object-cover opacity-70"
+          className="min-h-screen min-w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover opacity-70"
           autoPlay
           muted
           loop
@@ -59,7 +59,9 @@ export default function DuaPremiumCodePage() {
             WebkitBackfaceVisibility: 'hidden',
             WebkitPerspective: 1000,
             WebkitTransform: 'translate3d(0,0,0)',
-            transform: 'translate3d(0,0,0)'
+            transform: 'translate3d(0,0,0)',
+            width: '100vw',
+            height: '100vh'
           }}
           onContextMenu={(e) => e.preventDefault()}
         >
