@@ -37,7 +37,7 @@ export default function DuaPremiumCodePage() {
   }, [])
 
   return (
-    <main className="min-h-screen w-full bg-black text-zinc-50 flex items-center justify-center pt-20">
+    <main className="min-h-screen w-full bg-transparent text-zinc-50 flex items-center justify-center pt-20">
       {/* Vídeo de fundo */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <video
