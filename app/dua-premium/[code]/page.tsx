@@ -42,7 +42,7 @@ export default function DuaPremiumCodePage() {
       <div className="pointer-events-none fixed inset-0 -z-10">
         <video
           ref={videoRef}
-          className="min-h-screen min-w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover opacity-70"
+          className="min-h-screen min-w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover opacity-100"
           autoPlay
           muted
           loop
@@ -67,8 +67,6 @@ export default function DuaPremiumCodePage() {
         >
           <source src="https://4j8t2e2ihcbtrish.public.blob.vercel-storage.com/transferir%20%2865%29.mp4" type="video/mp4" />
         </video>
-        {/* Overlay suave apenas para legibilidade do texto */}
-        <div className="absolute inset-0 bg-black/30" />
       </div>
 
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-8 py-12 sm:py-16 flex flex-col items-center text-center gap-12 sm:gap-16">
